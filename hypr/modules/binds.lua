@@ -13,6 +13,9 @@ hl.bind(mainMod .. " + right",                hl.dsp.focus({ direction = "right"
 hl.bind(mainMod .. " + up",                   hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",                 hl.dsp.focus({ direction = "down" }))
 
+-- 3-Way Layout Switcher
+hl.bind("ALT + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/changeLayout3.sh"))
+
 -- Workspaces
 for i = 1, 10 do
     local key = i % 10
@@ -58,7 +61,7 @@ hl.bind("ALT + F4",                         hl.dsp.window.close())
 --- QuickShell ---
 
 -- Workspaces Switcer
-hl.bind("SUPER + TAB",                      hl.dsp.exec_cmd("qs ipc call workspaces toggle"))
+hl.bind(mainMod .. " + TAB ",               hl.dsp.exec_cmd("qs ipc call workspaces toggle"))
 
 -- App Launcher
 hl.bind(mainMod .. " + Space ",             hl.dsp.exec_cmd("qs ipc call launcher toggle"), { locked = true })
@@ -70,19 +73,19 @@ hl.bind( mainMod .. " + V ",                hl.dsp.exec_cmd("qs ipc call clipboa
 hl.bind( mainMod .. " + A ",                hl.dsp.exec_cmd("qs ipc call controlcenter toggle"))
 
 -- Notification Center
-hl.bind(mainMod .. " + N",                  hl.dsp.exec_cmd("qs ipc call notificationcenter toggle"))
+hl.bind(mainMod .. " + N ",                 hl.dsp.exec_cmd("qs ipc call notificationcenter toggle"))
 
 -- Power Menu
-hl.bind(mainMod .. " + Escape",             hl.dsp.exec_cmd("qs ipc call power toggle"))
+hl.bind(mainMod .. " + Escape ",            hl.dsp.exec_cmd("qs ipc call power toggle"))
 
 -- Lock
-hl.bind(mainMod .. " + ALT + L",             hl.dsp.exec_cmd("quickshell ipc call lock open"))
+hl.bind(mainMod .. " + L ",                 hl.dsp.exec_cmd("quickshell ipc call lock open"))
 
 -- Theme Switcher
-hl.bind(mainMod .. " + T",                  hl.dsp.exec_cmd("qs ipc call themeswitcher toggle"))
+hl.bind(mainMod .. " + T ",                 hl.dsp.exec_cmd("qs ipc call themeswitcher toggle"))
 
 -- Wallpaper Switcher
-hl.bind(mainMod .. " + W",                  hl.dsp.exec_cmd("qs ipc call wallpaper toggle"))
+hl.bind(mainMod .. " + W ",                 hl.dsp.exec_cmd("qs ipc call wallpaper toggle"))
 
 -- Brightness Control
 hl.bind("XF86MonBrightnessUp",              hl.dsp.exec_cmd("qs ipc call brightness increase"), { locked = true, repeating = true })
@@ -106,8 +109,8 @@ hl.bind(mainMod .. " + ALT + F",            hl.dsp.exec_cmd("thunar"))
 
 --Browser
 hl.bind(mainMod .. " + B",                  hl.dsp.exec_cmd("zen-browser"))
-hl.bind(mainMod .. " + ALT + B",          hl.dsp.exec_cmd("helium-browser"))
---hl.bind(mainMod .. " + ALT + SHIFT + B",  hl.dsp.exec_cmd("brave"))
+hl.bind(mainMod .. " + ALT + B",            hl.dsp.exec_cmd("helium-browser"))
+--hl.bind(mainMod .. " + ALT + SHIFT + B",      hl.dsp.exec_cmd("brave"))
 
 --Editor
 hl.bind(mainMod .. " + E",                  hl.dsp.exec_cmd("code"))
@@ -119,26 +122,9 @@ hl.bind(mainMod .. " + O",                  hl.dsp.exec_cmd("obsidian"))
 --Music Streaming
 hl.bind(mainMod .. " + S",                  hl.dsp.exec_cmd("spotify"))
 
--- Reload Apps Scripts
---hl.bind(mainMod .. " + CTRL + R",         hl.dsp.exec_cmd("$HOME/.config/waybar/scripts/reload.sh"))
---hl.bind(mainMod .. " + CTRL + A",         hl.dsp.exec_cmd("$HOME/.config/swaync/scripts/reload_nc.sh"))
-
--- Notification Center
---hl.bind(mainMod .. " + A",                hl.dsp.exec_cmd("swaync-client -t"))
-
--- Rofi applaunch & meun
-hl.bind("ALT + SPACE",                      hl.dsp.exec_cmd("pkill rofi || rofi -show drun -theme $HOME/.config/rofi/applauncher.rasi"))
-hl.bind(mainMod .. " + CTRL + SPACE",       hl.dsp.exec_cmd("pkill rofi || $HOME/.config/HyprDF/scripts/menu.sh"))
-
--- Theme Switcher
---hl.bind(mainMod .. " + SHIFT + T",        hl.dsp.exec_cmd("$HOME/.config/HyprDF/scripts/theme-switcher.sh"))
-
 -- Look & Powermenu
 hl.bind(mainMod .. " + F4",                 hl.dsp.exec_cmd("$HOME/.config/wlogout/scripts/wlogout.sh")) --For powermenu
 hl.bind(mainMod .. " + L",                  hl.dsp.exec_cmd("hyprlock -c $HOME/.config/hypr/hyprlock/hyprlock.conf")) --To lock
-
---Night Light
---hl.bind(mainMod .. " + F5",               hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/nightlight.sh"))
 
 -- Clipboard 
 --hl.bind(mainMod .. " + V",                  hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/clipboard-toggle.sh"))
@@ -150,7 +136,3 @@ hl.bind(mainMod .. " + SHIFT + Print",      hl.dsp.exec_cmd("hyprshot -m region 
 
 -- Color Picker
 hl.bind(mainMod .. " + P",                  hl.dsp.exec_cmd("hyprpicker -a -f hex"))
-
--- Alt + Tab
---hl.bind("ALT + TAB",                      hl.dsp.exec_cmd("snappy-switcher next"))
-

@@ -1,1 +1,1 @@
-# My_Hypr_Island_shell
+# My Custom Hyprland + Quickshell Island setup.
