@@ -1,1 +1,45 @@
+# Directories
+ags/
+autostart/
+Code/
+dconf/
+fish/
+gh/
+go/
+gtk-3.0/
+gtk-4.0/
+htop/
+HyprDF/
+kdeconnect/
+matugen/
+mozilla/
+nautilus/
+net.imput.helium/
+nvim/
+nwg-look/
+pcloud/
+pulse/
+rofi/
+snappy-switcher/
+spicetify/
+spotify/
+swaync/
+Thunar/
+waybar/
+wlogout/
+xfce4/
+xsettingsd/
+yay/
+zen/
+
+# Files
+dolphinrc
+gtkrc-2.0
+mimeapps.list
+user-dirs.dirs
+user-dirs.locale
+
+#zsh
+zsh/ohmyzsh
+zsh/plugins
 
