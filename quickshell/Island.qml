@@ -6,7 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import "modules"
 import "styles"
-import "adapters"
+import "styles/adapters"
 import "services"
 import "components/bar"
 import "components/common"
@@ -49,9 +49,9 @@ PanelWindow {
         VolumeService.percent
         NotificationService.trackedNotifications
         PolkitService.isActive
-        HyprlandColorsTemp
-        KittyColorsTemp
-        VSCodeColorsTemp
+        Hyprland
+        Kitty
+        VSCode
     }
 
     function brightnessTier(percent) {

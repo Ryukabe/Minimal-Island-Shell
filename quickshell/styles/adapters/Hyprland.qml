@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick
 import Quickshell.Io
-import "../styles"
+import ".."
 
 Item {
     id: root
