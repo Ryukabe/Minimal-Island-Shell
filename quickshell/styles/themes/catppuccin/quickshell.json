@@ -1,0 +1,34 @@
+{
+  "dark": {
+    "vscodeTheme": "Catppuccin Mocha",
+    "isLight": false,
+    "background": "#1E1D2D",
+    "foreground": "#bfc6d4",
+    "fgMuted": "#605f6f",
+    "surface": "#2d2c3c",
+    "border": "#383747",
+    "accent": "#89B4FA",
+    "red": "#F38BA8",
+    "green": "#ABE9B3",
+    "yellow": "#FAE3B0",
+    "blue": "#89B4FA",
+    "purple": "#CBA6F7",
+    "cyan": "#89DCEB"
+  },
+  "light": {
+    "vscodeTheme": "Catppuccin Latte",
+    "isLight": true,
+    "background": "#EFF1F5",
+    "foreground": "#4C4F69",
+    "fgMuted": "#8b97b9",
+    "surface": "#d1d6e3",
+    "border": "#d4d6dc",
+    "accent": "#1E66F5",
+    "red": "#E64553",
+    "green": "#40A02B",
+    "yellow": "#DF8E1D",
+    "blue": "#04A5E5",
+    "purple": "#8839EF",
+    "cyan": "#209FB5"
+  }
+}

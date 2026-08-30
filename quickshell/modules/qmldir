@@ -1,0 +1,12 @@
+module modules
+
+AppLauncher 1.0 AppLauncher.qml
+Clipboard 1.0 Clipboard.qml
+ControlCenter 1.0 ControlCenter.qml
+LockScreen 1.0 LockScreen.qml
+NotificationCenter 1.0 NotificationCenter.qml
+PolkitAgent 1.0 PolkitAgent.qml
+PowerMenu 1.0 PowerMenu.qml
+ThemeSwitcher 1.0 ThemeSwitcher.qml
+WallpaperSwitcher 1.0 WallpaperSwitcher.qml
+StatusPanel 1.0 StatusPanel.qml

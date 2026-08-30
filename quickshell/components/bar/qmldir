@@ -1,0 +1,7 @@
+module components.bar
+Clock 1.0 Clock.qml
+MediaExpanded 1.0 MediaExpanded.qml
+NotificationToast 1.0 NotificationToast.qml
+RecordingIndicator 1.0 RecordingIndicator.qml
+TimerModule 1.0 TimerModule.qml
+TimerToast 1.0 TimerToast.qml

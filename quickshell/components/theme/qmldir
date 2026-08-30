@@ -1,0 +1,3 @@
+module components.theme
+ThemeCard 1.0 ThemeCard.qml
+WallpaperCard 1.0 WallpaperCard.qml

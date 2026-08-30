@@ -1,0 +1,4 @@
+module adapters
+singleton HyprlandColorsTemp 1.0 HyprlandColorsTemp.qml
+singleton KittyColorsTemp 1.0 KittyColorsTemp.qml
+singleton VSCodeColorsTemp 1.0 VSCodeColorsTemp.qml

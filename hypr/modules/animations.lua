@@ -1,0 +1,1 @@
+require("modules.animations.anime")
