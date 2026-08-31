@@ -1,4 +1,0 @@
-module components.powermenu
-IconButton 1.0 IconButton.qml
-PowerExpanded 1.0 PowerExpanded.qml
-PowerRow 1.0 PowerRow.qml
