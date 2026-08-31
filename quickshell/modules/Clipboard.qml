@@ -9,13 +9,19 @@ import "../styles"
 Item {
     id: root
 
-    // EXPLICIT DIMENSIONS REQUIRED FOR DYNAMIC ISLAND MORPHING
-    implicitWidth: 420
-    implicitHeight: 320
-
-    readonly property int rowHeight: 44
+    readonly property int rowHeight: 42
     readonly property int maxVisibleRows: 6
+    readonly property int chromeHeight: 76
+    readonly property int maxWidth: 420
+
+    property var historyItems: ClipboardService.filteredHistory
     property int selectedIndex: 0
+
+    implicitWidth: maxWidth
+    implicitHeight: Math.min(
+        chromeHeight + Math.max(historyItems.length, 1) * rowHeight,
+        chromeHeight + maxVisibleRows * rowHeight
+    )
 
     Timer {
         id: focusTimer
@@ -101,6 +107,9 @@ Item {
                                     root.selectedIndex--
                                     clipList.positionViewAtIndex(root.selectedIndex, ListView.Contain)
                                 }
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Escape) {
+                                ShellState.showPage("clock")
                                 event.accepted = true
                             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                                 if (ClipboardService.filteredHistory.length > 0) {

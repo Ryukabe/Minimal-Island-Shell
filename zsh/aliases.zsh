@@ -3,7 +3,7 @@ alias c='clear'
 alias e='nvim'
 alias ..='cd ..'
 
-# Privilege Escalation (Polkit / Quickshell)
+# Privilege Escalation (Polkit)
 alias sudo='pkexec'
 
 # Package Manager Shortcuts
@@ -11,7 +11,7 @@ alias i='yay --sudo pkexec -S'
 alias s='yay -Ss'
 alias u='yay --sudo pkexec -Rsn'
 
-# Privilege Escalation (Polkit / Quickshell)
+# Privilege Escalation (Polkit)
 #alias sudo='pkexec'
 
 # Package Manager (yay)
@@ -39,3 +39,10 @@ alias ls='eza -l --icons'
 #alias ll='eza -lh --icons --git'
 alias la='eza -lah --icons --git'
 #alias tree='eza --tree --icons'
+
+# Clear forword and bacword words
+bindkey '^H' backward-kill-word # Ctrl + backspace
+bindkey '^[[3;5~' kill-word # Ctrl + delete
+
+# Cut, Copy & Paste
+

@@ -1,3 +1,4 @@
+// services/ClipboardService.qml
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -18,33 +19,27 @@ Singleton {
         filterHistory()
     }
 
-    // Fetch history asynchronously and parse when process completes
+    // Fetch history asynchronously using SplitParser for reliable stdout streaming
     Process {
         id: fetchProc
         command: ["cliphist", "list"]
-        stdout: Process.Text
-        
-        onExited: (exitCode) => {
-            if (exitCode !== 0) return
-            
-            var lines = stdout.trim().split("\n")
-            var items = []
-            
-            for (var i = 0; i < lines.length; i++) {
-                var line = lines[i]
-                if (!line) continue
-                
-                var tabIdx = line.indexOf("\t")
-                if (tabIdx !== -1) {
-                    items.push({
-                        id: line.substring(0, tabIdx),
-                        text: line.substring(tabIdx + 1)
-                    })
+        stdout: SplitParser {
+            onRead: (data) => {
+                var lines = data.trim().split("\n").filter(line => line.length > 0)
+                var items = []
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i]
+                    var tabIdx = line.indexOf("\t")
+                    if (tabIdx !== -1) {
+                        items.push({
+                            id: line.substring(0, tabIdx),
+                            text: line.substring(tabIdx + 1)
+                        })
+                    }
                 }
+                root.history = items
+                root.filterHistory()
             }
-            
-            root.history = items
-            root.filterHistory()
         }
     }
 

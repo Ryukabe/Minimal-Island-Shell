@@ -58,5 +58,5 @@ QtObject {
     readonly property int fontSizeDisplay: 64
 
     // Island radius    
-    readonly property int islandRadius: 10
+    readonly property int islandRadius: 12
 }

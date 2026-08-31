@@ -7,7 +7,7 @@ ToggleTile {
     title: "Recording"
     active: RecordingService.enabled
     subtitle: RecordingService.enabled ? "Recording" : "Off"
-    iconGlyph: "videocam"
+    iconGlyph: "screen_record"
     iconColor: Colors.red
     external: false
     onToggled: RecordingService.toggle()

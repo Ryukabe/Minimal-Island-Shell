@@ -22,6 +22,8 @@ QtObject {
         onTriggered: {
             if (root.previousPage === "timer") {
                 root.activePage = "timer"
+            } else if (root.previousPage && root.previousPage !== "timertoast") {
+                root.activePage = root.previousPage
             } else {
                 root.activePage = "clock"
             }
@@ -33,7 +35,7 @@ QtObject {
         if (page !== "notification") {
             root.previousPage = page
         }
-        if (page === "clock") {
+        if (page === "clock" || page === "timertoast") {
             root.ignoreHover = true
             hoverResetTimer.restart()
         }

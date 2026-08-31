@@ -20,7 +20,7 @@ Item {
 
     Process {
         id: readCurrentThemeProc
-        command: ["cat", root.currentThemeFile]
+        command: ["catAA", root.currentThemeFile]
         stdout: SplitParser {
             onRead: data => {
                 if (data.trim().length > 0) root.currentTheme = data.trim();

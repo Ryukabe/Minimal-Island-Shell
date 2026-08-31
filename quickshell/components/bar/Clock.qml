@@ -7,7 +7,7 @@ import "../../services"
 Item {
     id: root
 
-    implicitWidth: Math.max(140, layout.implicitWidth + 24)
+    implicitWidth: Math.max(140, layout.implicitWidth + 32)
     implicitHeight: Math.max(36, layout.implicitHeight + 8)
 
     SystemClock {
@@ -18,7 +18,7 @@ Item {
     RowLayout {
         id: layout
         anchors.centerIn: parent
-        spacing: 10
+        spacing: 14 // Increased overall spacing between items
 
         // 1. Music Visualizer (Left)
         RowLayout {
@@ -65,25 +65,25 @@ Item {
             font {
                 family: Fonts.display
                 pixelSize: 13
-                weight: 600
+                weight: 700
             }
         }
 
         // 3. Timer Quick Icon (Right Side - Click toggles global timer page)
         Text {
-            text: "󱎫"
-            font.family: Fonts.icon || "JetBrainsMono Nerd Font"
+            text: "timer"
+            font.family: Fonts.icon
             font.pixelSize: 14
             color: TimerService.running || TimerService.secondsRemaining > 0 ? Colors.accent : Colors.fgMuted
             Layout.alignment: Qt.AlignVCenter
-            visible: TimerService.secondsRemaining > 0 || TimerService.running
+            visible: TimerService.secondsRemaining > 0 || TimerService.running 
 
             MouseArea {
                 anchors.fill: parent
                 anchors.margins: -4
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    ShellState.togglePage("timer")
+                    ShellState.togglePage("timertoast")
                 }
             }
         }

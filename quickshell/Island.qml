@@ -16,6 +16,8 @@ PanelWindow {
 
     readonly property string iconDir: "file://" + Quickshell.shellDir + "/assets/icons/"
 
+    // Restrict exclusive keyboard focus strictly to interactive overlay pages (excluding clock and timertoast)
+    // so that normal screen clicks/focus pass through to underlying windows.
     WlrLayershell.namespace: "quickshell:island"
     WlrLayershell.keyboardFocus: (
         ShellState.activePage === "launcher" ||
@@ -38,10 +40,14 @@ PanelWindow {
     exclusionMode: ExclusionMode.Normal
     exclusiveZone: island.compactHeight + island.anchors.topMargin
 
+    function getDefaultPage() {
+        return (TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock"
+    }
+
     Shortcut {
         sequence: "Escape"
-        enabled: ShellState.activePage !== "clock"
-        onActivated: ShellState.showPage("clock")
+        enabled: ShellState.activePage !== getDefaultPage()
+        onActivated: ShellState.showPage(getDefaultPage())
     }
 
     Component.onCompleted: {
@@ -61,46 +67,46 @@ PanelWindow {
 
     IpcHandler {
         target: "launcher"
-        function toggle() { ShellState.activePage = ShellState.activePage === "launcher" ? "clock" : "launcher" }
+        function toggle() { ShellState.activePage = ShellState.activePage === "launcher" ? getDefaultPage() : "launcher" }
         function open() { ShellState.showPage("launcher") }
-        function close() { ShellState.showPage("clock") }
+        function close() { ShellState.showPage(getDefaultPage()) }
     }
 
     IpcHandler {
         target: "clipboard"
         function toggle(): void {
-            ShellState.activePage === "clipboard" ? ShellState.showPage("clock") : ShellState.showPage("clipboard")
+            ShellState.activePage === "clipboard" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("clipboard")
         }
         function open(): void { ShellState.showPage("clipboard") }
-        function close(): void { ShellState.showPage("clock") }
+        function close() { ShellState.showPage(getDefaultPage()) }
     }
 
     IpcHandler {
         target: "power"
-        function toggle() { ShellState.activePage = ShellState.activePage === "power" ? "clock" : "power" }
+        function toggle() { ShellState.activePage === "power" ? getDefaultPage() : "power" }
         function open() { ShellState.showPage("power") }
-        function close() { ShellState.showPage("clock") }
+        function close() { ShellState.showPage(getDefaultPage()) }
     }
 
     IpcHandler {
         target: "controlcenter"
-        function toggle(): void { ShellState.activePage === "control" ? ShellState.showPage("clock") : ShellState.showPage("control") }
+        function toggle(): void { ShellState.activePage === "control" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("control") }
         function open(): void { ShellState.showPage("control") }
-        function close() { ShellState.showPage("clock") }
+        function close() { ShellState.showPage(getDefaultPage()) }
     }
 
     IpcHandler {
         target: "notificationcenter"
-        function toggle(): void { ShellState.activePage === "notificationcenter" ? ShellState.showPage("clock") : ShellState.showPage("notificationcenter") }
+        function toggle(): void { ShellState.activePage === "notificationcenter" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("notificationcenter") }
         function open(): void { ShellState.showPage("notificationcenter") }
-        function close() { ShellState.showPage("clock") }
+        function close() { ShellState.showPage(getDefaultPage()) }
     }
 
     IpcHandler {
         target: "themeswitcher"
-        function toggle() { ShellState.activePage = ShellState.activePage === "theme" ? "clock" : "theme" }
+        function toggle() { ShellState.activePage === "theme" ? getDefaultPage() : "theme" }
         function open() { ShellState.showPage("theme") }
-        function close() { ShellState.showPage("clock") }
+        function close() { ShellState.showPage(getDefaultPage()) }
     }
 
     IpcHandler {
@@ -110,18 +116,20 @@ PanelWindow {
             if (WallpaperService.isOpen) {
                 ShellState.showPage("wallpaper")
             } else {
-                ShellState.showPage("clock")
+                ShellState.showPage(getDefaultPage())
             }
         }
     }
 
     IpcHandler {
         target: "timer"
-        function toggle() { ShellState.activePage = ShellState.activePage === "timer" ? "clock" : "timer" }
+        function toggle() { ShellState.activePage === "timer" ? getDefaultPage() : "timer" }
         function open() { ShellState.showPage("timer") }
-        function close() { ShellState.showPage("clock") }
+        function close() { ShellState.showPage(getDefaultPage()) }
     }
 
+    // Input mask restricts click interactions to just the island element when showing 
+    // compact states ("clock" or "timertoast"), allowing clicks to pass through everywhere else.
     mask: Region {
         item: (island.expanded && ShellState.activePage !== "notification") ? clickCatcher : island
     }
@@ -134,7 +142,7 @@ PanelWindow {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: ShellState.showPage("clock")
+            onClicked: ShellState.showPage(getDefaultPage())
         }
     }
 
@@ -145,7 +153,8 @@ PanelWindow {
         anchors.topMargin: 5
         clip: true
 
-        readonly property bool expanded: ShellState.activePage !== "clock"
+        // Both "clock" and "timertoast" should be treated as compact unexpanded components
+        readonly property bool expanded: ShellState.activePage !== "clock" && ShellState.activePage !== "timertoast"
         readonly property int compactHeight: 36
         readonly property int compactWidth: 160
         property int targetWidth: pageLoader.item ? pageLoader.item.implicitWidth : compactWidth
@@ -183,10 +192,15 @@ PanelWindow {
         MouseArea {
             id: islandTapArea
             anchors.fill: parent
-            enabled: ShellState.activePage === "clock"
-            hoverEnabled: enabled
+            enabled: ShellState.activePage === "clock" || ShellState.activePage === "timertoast"
             cursorShape: Qt.PointingHandCursor
-            onClicked: ShellState.togglePage("status")
+            onClicked: {
+                if (ShellState.activePage === "timertoast") {
+                    ShellState.togglePage("timer")
+                } else {
+                    ShellState.togglePage("status")
+                }
+            }
         }
 
         MouseArea {
