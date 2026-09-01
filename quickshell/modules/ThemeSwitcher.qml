@@ -83,6 +83,11 @@ FocusScope {
             // [feature: apply selected theme]
             if (selectedIndex >= 0 && filteredThemes[selectedIndex]) {
                 ThemeService.applyTheme(filteredThemes[selectedIndex].name);
+                
+                // Fix: Close the switcher when applying via keyboard
+                if (typeof ShellState !== "undefined") {
+                    ShellState.showPage("clock");
+                }
             }
             event.accepted = true;
         } else if (event.key === Qt.Key_Escape) {
@@ -258,6 +263,11 @@ FocusScope {
                     switcherRoot.selectedIndex = index;
                     listView.currentIndex = index;
                     ThemeService.applyTheme(modelData.name);
+                    
+                    // Fix: Close the switcher when applying via mouse click
+                    if (typeof ShellState !== "undefined") {
+                        ShellState.showPage("clock");
+                    }
                 }
             }
         }

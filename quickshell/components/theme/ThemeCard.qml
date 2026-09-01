@@ -24,21 +24,36 @@ Item {
 
         onLoaded: {
             try {
-                card.palette = JSON.parse(text());
+                // Call text() as a function to fetch the file contents string
+                let rawContent = cardThemeFile.text();
+                card.palette = JSON.parse(rawContent);
                 card.loaded = true;
             } catch (e) {
+                console.warn("ThemeCard: Failed to parse JSON for", card.themeName, e);
                 card.palette = ({});
                 card.loaded = false;
             }
         }
         onLoadFailed: error => {
+            console.error("ThemeCard: Failed to load file for", card.themeName, error);
             card.palette = ({});
             card.loaded = false;
         }
     }
 
     function pick(key, fallback) {
-        return (card.loaded && card.palette[key] !== undefined) ? card.palette[key] : fallback;
+        if (!card.loaded) return fallback;
+
+        // Check inside the "dark" scheme object first to match your quickshell.json structure
+        if (card.palette.dark && card.palette.dark[key] !== undefined) {
+            return card.palette.dark[key];
+        }
+        // Fallback check for flat JSON structures
+        if (card.palette[key] !== undefined) {
+            return card.palette[key];
+        }
+
+        return fallback;
     }
 
     readonly property color previewBg: pick("background", Colors.bgSurface)

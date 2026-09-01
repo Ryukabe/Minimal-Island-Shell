@@ -16,11 +16,16 @@ Item {
 
     readonly property string currentThemeJsonPath: root.themesPath + "/" + root.currentTheme + "/quickshell.json"
 
+    // Fix: Added the missing function that ThemeCard.qml is trying to call
+    function themeJsonPath(themeName) {
+        return root.themesPath + "/" + themeName + "/quickshell.json";
+    }
+
     Component.onCompleted: loadCurrentTheme()
 
     Process {
         id: readCurrentThemeProc
-        command: ["catAA", root.currentThemeFile]
+        command: ["cat", root.currentThemeFile]
         stdout: SplitParser {
             onRead: data => {
                 if (data.trim().length > 0) root.currentTheme = data.trim();

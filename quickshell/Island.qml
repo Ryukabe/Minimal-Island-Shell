@@ -32,7 +32,7 @@ PanelWindow {
         ShellState.activePage === "timer"
     ) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    anchors { top: true; left: true; right: true }
+    anchors { top: true }
     implicitHeight: 600
     implicitWidth: 1200
     color: "transparent"
@@ -83,7 +83,7 @@ PanelWindow {
 
     IpcHandler {
         target: "power"
-        function toggle() { ShellState.activePage === "power" ? getDefaultPage() : "power" }
+        function toggle() { ShellState.activePage === "power" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("power") }
         function open() { ShellState.showPage("power") }
         function close() { ShellState.showPage(getDefaultPage()) }
     }
@@ -104,10 +104,11 @@ PanelWindow {
 
     IpcHandler {
         target: "themeswitcher"
-        function toggle() { ShellState.activePage === "theme" ? getDefaultPage() : "theme" }
+        function toggle() { ShellState.activePage === "theme" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("theme") }
         function open() { ShellState.showPage("theme") }
         function close() { ShellState.showPage(getDefaultPage()) }
     }
+    
 
     IpcHandler {
         target: "wallpaper"
@@ -123,7 +124,7 @@ PanelWindow {
 
     IpcHandler {
         target: "timer"
-        function toggle() { ShellState.activePage === "timer" ? getDefaultPage() : "timer" }
+        function toggle() { ShellState.activePage === "timer" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("timer") }
         function open() { ShellState.showPage("timer") }
         function close() { ShellState.showPage(getDefaultPage()) }
     }

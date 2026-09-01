@@ -83,6 +83,12 @@ FocusScope {
             // [feature: apply selected wallpaper]
             if (selectedIndex >= 0 && filteredWallpapers[selectedIndex]) {
                 WallpaperService.applyWallpaper(filteredWallpapers[selectedIndex].path);
+                
+                // Close the switcher and sync state with Island
+                WallpaperService.isOpen = false;
+                if (typeof ShellState !== "undefined") {
+                    ShellState.showPage("clock");
+                }
             }
             event.accepted = true;
         } else if (event.key === Qt.Key_Escape) {
@@ -93,6 +99,7 @@ FocusScope {
                 searchInput.text = "";
                 switcherRoot.forceActiveFocus();
             } else if (typeof ShellState !== "undefined") {
+                WallpaperService.isOpen = false;
                 ShellState.showPage("clock");
             }
             event.accepted = true;
@@ -258,6 +265,12 @@ FocusScope {
                     switcherRoot.selectedIndex = index;
                     listView.currentIndex = index;
                     WallpaperService.applyWallpaper(modelData.path);
+                    
+                    // Close the switcher and sync state with Island
+                    WallpaperService.isOpen = false;
+                    if (typeof ShellState !== "undefined") {
+                        ShellState.showPage("clock");
+                    }
                 }
             }
         }
