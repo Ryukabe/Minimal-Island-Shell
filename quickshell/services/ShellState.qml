@@ -1,3 +1,4 @@
+// services/ShellState.qml
 pragma Singleton
 import QtQuick
 import Quickshell.Io
@@ -20,12 +21,10 @@ QtObject {
     property Timer flashTimer: Timer {
         interval: 1500
         onTriggered: {
-            if (root.previousPage === "timer") {
-                root.activePage = "timer"
-            } else if (root.previousPage && root.previousPage !== "timertoast") {
+            if (root.previousPage === "control" || root.previousPage === "clock" || root.previousPage === "timertoast") {
                 root.activePage = root.previousPage
             } else {
-                root.activePage = "clock"
+                root.activePage = (TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock"
             }
         }
     }
@@ -62,7 +61,7 @@ QtObject {
 
     function togglePage(page) {
         if (root.activePage === page) {
-            showPage("clock")
+            showPage((TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock")
         } else {
             showPage(page)
         }

@@ -165,8 +165,8 @@ PanelWindow {
         height: targetHeight
 
         radius: Math.min(height / 2, Dimens.islandRadius)
-        color: Colors.bgMica
-        border.color: Colors.border
+        color: Colors.islandMica
+        border.color: Colors.islandMica
         border.width: 0
 
         Behavior on width {

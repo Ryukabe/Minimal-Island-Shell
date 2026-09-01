@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../../modules"
 import "../../styles"
 import "../../services"
 
@@ -41,7 +42,8 @@ Item {
             Rectangle {
                 width: 24
                 height: 24
-                color: Colors.bg
+                color: Colors.bgMica
+                radius: Dimens.islandRadius // Added radius
 
                 Text {
                     anchors.centerIn: parent
@@ -70,7 +72,8 @@ Item {
             Rectangle {
                 width: 24
                 height: 24
-                color: Colors.bg
+                color: Colors.bgMica
+                radius: Dimens.islandRadius // Added radius
 
                 Text {
                     anchors.centerIn: parent

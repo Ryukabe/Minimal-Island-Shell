@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import "../../styles"
-import "../../services"
+import "../styles"
+import "../services"
+import "../components/bar"
 
 Item {
     id: root

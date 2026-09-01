@@ -57,7 +57,7 @@ Item {
             width: parent.width
             height: 48
             radius: height / 2
-            color: Colors.bgSurface
+            color: Colors.bgSurfaceMica
             border.width: 1
             border.color: Colors.border
 
@@ -118,7 +118,7 @@ Item {
             width: parent.width
             height: 48
             radius: height / 2
-            color: Colors.bgSurface
+            color: Colors.bgSurfaceMica
             border.width: 1
             border.color: Colors.border
 

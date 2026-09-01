@@ -128,7 +128,7 @@ hl.bind(mainMod .. " + L",                  hl.dsp.exec_cmd("hyprlock -c $HOME/.
 
 -- Clipboard 
 --hl.bind(mainMod .. " + V",                  hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/clipboard-toggle.sh"))
---hl.bind(mainMod .. " + SHIFT + V",          hl.dsp.exec_cmd("cliphist wipe")) -- to clear clipboard
+hl.bind(mainMod .. " + SHIFT + V",          hl.dsp.exec_cmd("cliphist wipe")) -- to clear clipboard
 
 -- Screenshots
 hl.bind(mainMod .. " + Print",              hl.dsp.exec_cmd("hyprshot -m output -m eDP-1 -o $HOME/Pictures/Screenshot"))

@@ -107,9 +107,17 @@ Item {
     readonly property color brightCyan: cyan
     readonly property color brightWhite: white
 
-    readonly property real micaAlpha: 1.0
-    readonly property color bgMica: Qt.rgba(bg.r, bg.g, bg.b, micaAlpha)
-    readonly property color bgSurfaceMica: Qt.rgba(bgSurface.r, bgSurface.g, bgSurface.b, micaAlpha)
+    // Mica Effect 
+    readonly property real micaAlpha: 0.70
+    readonly property real micaBeta: 0.80
+    
+    // Background Colors 
+    readonly property color bgMica: Qt.rgba(bg.r, bg.g, bg.b, micaBeta)
+    readonly property color bgSurfaceMica: Qt.rgba(bgSurface.r, bgSurface.g, bgSurface.b, micaBeta)
+
+    // Island Color
+    readonly property color islandbg: "#101010"
+    readonly property color islandMica: Qt.rgba(islandbg.r, islandbg.g, islandbg.b, micaAlpha)
 
     // Shared by adapters/* — kept public since color→hex is generic.
     function toHex(c) {
