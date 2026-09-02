@@ -108,7 +108,7 @@ Item {
     readonly property color brightWhite: white
 
     // Mica Effect 
-    readonly property real micaAlpha: 0.70
+    readonly property real micaAlpha: 1.0
     readonly property real micaBeta: 0.80
     
     // Background Colors 
@@ -116,7 +116,7 @@ Item {
     readonly property color bgSurfaceMica: Qt.rgba(bgSurface.r, bgSurface.g, bgSurface.b, micaBeta)
 
     // Island Color
-    readonly property color islandbg: "#101010"
+    readonly property color islandbg: "#131413"
     readonly property color islandMica: Qt.rgba(islandbg.r, islandbg.g, islandbg.b, micaAlpha)
 
     // Shared by adapters/* — kept public since color→hex is generic.

@@ -1,5 +1,5 @@
 local mainMod = "SUPER"
-
+local subMod = "CTRL + ALT"
 
 --- System ---
 
@@ -14,7 +14,7 @@ hl.bind(mainMod .. " + up",                   hl.dsp.focus({ direction = "up" })
 hl.bind(mainMod .. " + down",                 hl.dsp.focus({ direction = "down" }))
 
 -- 3-Way Layout Switcher
-hl.bind("ALT + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/changeLayout3.sh"))
+hl.bind(subMod .. " + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/changeLayout3.sh"))
 
 -- Workspaces
 for i = 1, 10 do
