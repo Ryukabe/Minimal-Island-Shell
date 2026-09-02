@@ -1,12 +1,9 @@
 // shell.qml
 import QtQuick
 import Quickshell
+import "settings"
 
 ShellRoot {
-    Component.onCompleted: {
-        Qt.application.name = "quickshell"
-        Qt.application.organization = "quickshell"
-    }
-
     Island {}
+    SettingsApp {}
 }

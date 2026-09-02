@@ -91,7 +91,7 @@ PanelWindow {
     IpcHandler {
         target: "controlcenter"
         function toggle(): void { ShellState.activePage === "control" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("control") }
-        function open(): void { ShellState.showPage("control") }
+        function open() { ShellState.showPage("control") }
         function close() { ShellState.showPage(getDefaultPage()) }
     }
 
@@ -108,7 +108,6 @@ PanelWindow {
         function open() { ShellState.showPage("theme") }
         function close() { ShellState.showPage(getDefaultPage()) }
     }
-    
 
     IpcHandler {
         target: "wallpaper"
