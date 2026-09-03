@@ -13,19 +13,15 @@ Scope {
         target: "settings"
 
         function open() {
-            ShellState.showPage("settings")
+            ShellState.openSettings()
         }
 
         function close() {
-            ShellState.showPage("clock")
+            ShellState.closeSettings()
         }
 
         function toggle() {
-            if (ShellState.activePage === "settings") {
-                ShellState.showPage("clock")
-            } else {
-                ShellState.showPage("settings")
-            }
+            ShellState.toggleSettings()
         }
 
         function onMessageReceived(message: string) {
@@ -36,7 +32,7 @@ Scope {
             else if (cmd === "toggle") toggle()
             else if (cmd.startsWith("section ")) {
                 let targetSection = cmd.substring(8).trim()
-                ShellState.showPage("settings")
+                ShellState.openSettings()
 
                 for (let i = 0; i < allSections.count; i++) {
                     let name = allSections.get(i).sectionName.toLowerCase()
@@ -53,7 +49,7 @@ Scope {
         id: window
 
         title: "Settings"
-        visible: ShellState.activePage === "settings"
+        visible: ShellState.settingsOpen
         color: Colors.islandMica
 
         implicitWidth: 600
@@ -75,7 +71,7 @@ Scope {
 
             Keys.onPressed: (event) => {
                 if (event.key === Qt.Key_Escape) {
-                    ShellState.showPage("clock")
+                    ShellState.closeSettings()
                     event.accepted = true
                 }
             }
@@ -194,7 +190,7 @@ Scope {
                                 id: closeMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                onClicked: ShellState.showPage("clock")
+                                onClicked: ShellState.closeSettings()
                             }
                         }
                     }

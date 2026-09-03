@@ -12,6 +12,11 @@ QtObject {
     property string activeFocusMode: "Do Not Disturb"
     property bool ignoreHover: false
 
+    // Settings lives in its own FloatingWindow now, fully independent of the
+    // island's activePage router — a separate module opening (control, power,
+    // launcher, etc.) must never close it.
+    property bool settingsOpen: false
+
     property Timer hoverResetTimer: Timer {
         interval: 300
         repeat: false
@@ -65,6 +70,18 @@ QtObject {
         } else {
             showPage(page)
         }
+    }
+
+    function openSettings() {
+        root.settingsOpen = true
+    }
+
+    function closeSettings() {
+        root.settingsOpen = false
+    }
+
+    function toggleSettings() {
+        root.settingsOpen = !root.settingsOpen
     }
 
     function _applyBackendForMode(mode, enabled) {

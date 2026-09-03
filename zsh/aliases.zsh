@@ -2,6 +2,14 @@
 alias c='clear'
 alias e='nvim'
 alias ..='cd ..'
+alias .2='cd ../..'
+alias .3='cd ../../..'
+
+# Safety & Utility Overrides
+alias mkdir='mkdir -pv'
+alias path='echo -e ${PATH//:/\\n}'
+alias cp='cp -i'
+alias mv='mv -i'
 
 # Privilege Escalation (Polkit)
 alias sudo='pkexec'
@@ -10,14 +18,6 @@ alias sudo='pkexec'
 alias i='yay --sudo pkexec -S'
 alias s='yay -Ss'
 alias u='yay --sudo pkexec -Rsn'
-
-# Privilege Escalation (Polkit)
-#alias sudo='pkexec'
-
-# Package Manager (yay)
-#alias i='yay -S'
-#alias s='yay -Ss'
-#alias u='yay -Rsn'
 
 # Git Aliases
 alias gs="git status"
@@ -32,17 +32,17 @@ alias gsp="git stash; git pull"
 alias gfo="git fetch origin"
 alias gcheck="git checkout"
 alias gcredential="git config credential.helper store"
+alias gcan="git commit --amend --no-edit"
 
-# Eza Overrides (Uncomment to enable)
+# Eza Overrides
 alias ls='eza -l --icons'
-#alias ls='eza --icons'
-#alias ll='eza -lh --icons --git'
 alias la='eza -lah --icons --git'
-#alias tree='eza --tree --icons'
 
-# Clear forword and bacword words
+# Clear forward and backward words
 bindkey '^H' backward-kill-word # Ctrl + backspace
-bindkey '^[[3;5~' kill-word # Ctrl + delete
+bindkey '^[[3;5~' kill-word     # Ctrl + delete
 
-# Cut, Copy & Paste
-
+# History Search Bindings
+bindkey '^R' history-incremental-search-backward # Ctrl + R (Reverse search)
+bindkey '^[[A' up-line-or-search                  # Up Arrow (Search history matching prefix)
+bindkey '^[[B' down-line-or-search                # Down Arrow (Search history matching prefix)

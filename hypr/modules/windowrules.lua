@@ -97,7 +97,7 @@ hl.window_rule({
 
 -- Browser
 hl.window_rule({
-    match     = { class = "^(zen|firefox|brave|helium-browser|chromium|chromium%-browser|chrome%-browser|microsoft%-edge)$" },
+    match     = { class = "^(zen|firefox|brave|helium-browser|chromium|chromium-browser|chrome-browser|microsoft-edge)$" },
 --    workspaces= 1,
 --    silent    = true,
 })
@@ -116,11 +116,11 @@ hl.window_rule({
 -- File managers
 hl.window_rule({
     name        = "file-explorer",
-    match       = { class = "^(org%.gnome%.Nautilus|thunar|dolphin)$" },
---    workspace   = 3,
-    float       = true,
-    center      = true,
-    size        = "1100 600",
+    match       = { class = "^(org.gnome.Nautilus|thunar|dolphin)$" },
+    workspace   = 3,
+    --float       = true,
+    --center      = true,
+    --size        = "1000 575",
     border_size = 0,
 })
 
@@ -138,7 +138,7 @@ hl.window_rule({
 -- Terminal emulators
 hl.window_rule({
     name        = "terminal-emulators",
-    match       = { class = "^(kitty|ghoty|arlacity)$" },
+    match       = { class = "^(kitty|ghoty|arlacity|foot)$" },
 --    workspace   = 4,
 --    float       = true,
 --    center      = true,

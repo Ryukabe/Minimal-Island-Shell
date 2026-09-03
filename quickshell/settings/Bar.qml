@@ -2,59 +2,74 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../styles"
-import "../components/common"
+import "../components/settings"
 
 Item {
     id: root
-    property int barHeight: 38
-    property bool showIsland: true
+
+    property bool notchMode: true
+    property real notchFlare: 14
+    property real barHeight: 34
+    property real collapsedWidth: 150
+    property real expandedHeight: 135
+    property real minExpandedWidth: 619
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Dimens.paddingLarge
-        spacing: Dimens.spacingLarge
+        spacing: 0
 
-        Text { text: "Bar & Island Geometry"; color: Colors.fg; font.pixelSize: Dimens.fontSizeXl; font.bold: true }
-
-        Rectangle {
-            Layout.fillWidth: true
-            height: 64
-            color: Colors.islandMica
-            radius: Dimens.radiusLarge
-            border.color: Colors.border
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: Dimens.paddingLarge
-                Text { text: "Enable Dynamic Island"; color: Colors.fg; Layout.fillWidth: true }
-                ToggleSwitch { checked: root.showIsland; onToggled: (val) => root.showIsland = val }
-            }
+        SettingsHeader {
+            icon: "dock_to_bottom"
+            title: "Bar & Island"
+            subtitle: "Shape and size of the island, the notch, and the Game Mode bar."
         }
 
-        Rectangle {
-            Layout.fillWidth: true
-            height: 72
-            color: Colors.islandMica
-            radius: Dimens.radiusLarge
-            border.color: Colors.border
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Dimens.paddingMedium
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text { text: "Bar Height"; color: Colors.fg }
-                    Item { Layout.fillWidth: true }
-                    Text { text: root.barHeight + "px"; color: Colors.accent; font.bold: true }
-                }
-                SliderControl {
-                    Layout.fillWidth: true
-                    from: 28; to: 56; stepSize: 1
-                    value: root.barHeight
-                    onMoved: (val) => root.barHeight = val
-                }
-            }
+        SettingsToggleRow {
+            label: "Notch mode"
+            checked: root.notchMode
+            onToggled: (val) => root.notchMode = val
         }
+
+        SettingsSliderRow {
+            label: "Notch flare"
+            from: 0; to: 40; stepSize: 1
+            value: root.notchFlare
+            unit: " px"
+            onMoved: (val) => root.notchFlare = val
+        }
+
+        SettingsSliderRow {
+            label: "Bar height"
+            from: 24; to: 60; stepSize: 1
+            value: root.barHeight
+            unit: " px"
+            onMoved: (val) => root.barHeight = val
+        }
+
+        SettingsSliderRow {
+            label: "Collapsed width"
+            from: 80; to: 300; stepSize: 1
+            value: root.collapsedWidth
+            unit: " px"
+            onMoved: (val) => root.collapsedWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Expanded height"
+            from: 60; to: 400; stepSize: 1
+            value: root.expandedHeight
+            unit: " px"
+            onMoved: (val) => root.expandedHeight = val
+        }
+
+        SettingsSliderRow {
+            label: "Minimum expanded width"
+            from: 300; to: 900; stepSize: 1
+            value: root.minExpandedWidth
+            unit: " px"
+            onMoved: (val) => root.minExpandedWidth = val
+        }
+
         Item { Layout.fillHeight: true }
     }
 }

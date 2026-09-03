@@ -2,44 +2,73 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../styles"
-import "../components/common"
+import "../components/settings"
 
 Item {
     id: root
-    property real stiffness: 120
-    property real damping: 0.85
+
+    property bool reduceMotion: false
+    property real movementMs: 400
+    property real fadeMs: 200
+    property real hoverMs: 150
+    property real bouncePercent: 40
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Dimens.paddingLarge
-        spacing: Dimens.spacingLarge
+        spacing: 0
 
-        Text { text: "Motion & Physics Curves"; color: Colors.fg; font.pixelSize: Dimens.fontSizeXl; font.bold: true }
-
-        Rectangle {
-            Layout.fillWidth: true
-            height: 72
-            color: Colors.islandMica
-            radius: Dimens.radiusLarge
-            border.color: Colors.border
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Dimens.paddingMedium
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text { text: "Spring Stiffness"; color: Colors.fg }
-                    Item { Layout.fillWidth: true }
-                    Text { text: Math.round(root.stiffness).toString(); color: Colors.accent; font.bold: true }
-                }
-                SliderControl {
-                    Layout.fillWidth: true
-                    from: 20; to: 300
-                    value: root.stiffness
-                    onMoved: (val) => root.stiffness = val
-                }
-            }
+        SettingsHeader {
+            icon: "speed"
+            title: "Motion"
+            subtitle: "How fast the shell animates, or whether it animates at all."
         }
+
+        SettingsToggleRow {
+            label: "Reduce motion"
+            checked: root.reduceMotion
+            onToggled: (val) => root.reduceMotion = val
+        }
+
+        SettingsSliderRow {
+            label: "Movement (size / position)"
+            from: 100; to: 800; stepSize: 10
+            value: root.movementMs
+            unit: " ms"
+            enabled: !root.reduceMotion
+            opacity: root.reduceMotion ? 0.4 : 1.0
+            onMoved: (val) => root.movementMs = val
+        }
+
+        SettingsSliderRow {
+            label: "Fades & colour"
+            from: 50; to: 500; stepSize: 10
+            value: root.fadeMs
+            unit: " ms"
+            enabled: !root.reduceMotion
+            opacity: root.reduceMotion ? 0.4 : 1.0
+            onMoved: (val) => root.fadeMs = val
+        }
+
+        SettingsSliderRow {
+            label: "Hover response"
+            from: 50; to: 400; stepSize: 10
+            value: root.hoverMs
+            unit: " ms"
+            enabled: !root.reduceMotion
+            opacity: root.reduceMotion ? 0.4 : 1.0
+            onMoved: (val) => root.hoverMs = val
+        }
+
+        SettingsSliderRow {
+            label: "Bounce"
+            from: 0; to: 100; stepSize: 1
+            value: root.bouncePercent
+            unit: " %"
+            enabled: !root.reduceMotion
+            opacity: root.reduceMotion ? 0.4 : 1.0
+            onMoved: (val) => root.bouncePercent = val
+        }
+
         Item { Layout.fillHeight: true }
     }
 }
