@@ -61,7 +61,7 @@ hl.bind("ALT + F4",                         hl.dsp.window.close())
 --- QuickShell ---
 
 -- Settings
-hl.bind(mainMod .. " + COMMA ",             hl.dsp.exec_cmd("qs ipc call settings toggle"))
+hl.bind(mainMod .. " + COMMA ",             hl.dsp.exec_cmd("qs ipc call settings toggle"))--, { locked = true })
 
 -- Workspaces Switcer
 hl.bind(mainMod .. " + TAB ",               hl.dsp.exec_cmd("qs ipc call workspaces toggle"))

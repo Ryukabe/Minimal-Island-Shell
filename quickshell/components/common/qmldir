@@ -1,3 +1,5 @@
 module components.common
 
 LevelIndicator 1.0 LevelIndicator.qml
+ToggleSwitch 1.0 ToggleSwitch.qml
+SliderControl 1.0 SliderControl.qml

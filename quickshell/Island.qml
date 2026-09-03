@@ -16,8 +16,6 @@ PanelWindow {
 
     readonly property string iconDir: "file://" + Quickshell.shellDir + "/assets/icons/"
 
-    // Restrict exclusive keyboard focus strictly to interactive overlay pages (excluding clock and timertoast)
-    // so that normal screen clicks/focus pass through to underlying windows.
     WlrLayershell.namespace: "quickshell:island"
     WlrLayershell.keyboardFocus: (
         ShellState.activePage === "launcher" ||
@@ -128,7 +126,7 @@ PanelWindow {
         function close() { ShellState.showPage(getDefaultPage()) }
     }
 
-    // Input mask restricts click interactions to just the island element when showing 
+    // Input mask restricts click interactions to just the island element when showing
     // compact states ("clock" or "timertoast"), allowing clicks to pass through everywhere else.
     mask: Region {
         item: (island.expanded && ShellState.activePage !== "notification") ? clickCatcher : island
@@ -153,8 +151,10 @@ PanelWindow {
         anchors.topMargin: 5
         clip: true
 
-        // Both "clock" and "timertoast" should be treated as compact unexpanded components
-        readonly property bool expanded: ShellState.activePage !== "clock" && ShellState.activePage !== "timertoast"
+        // "clock", "timertoast", and "settings" are all treated as compact/inert here —
+        // Settings is a fully independent FloatingWindow now, so the island should stay
+        // in its default state and never claim the full-screen click-catcher mask for it.
+        readonly property bool expanded: ShellState.activePage !== "clock" && ShellState.activePage !== "timertoast" && ShellState.activePage !== "settings"
         readonly property int compactHeight: 36
         readonly property int compactWidth: 160
         property int targetWidth: pageLoader.item ? pageLoader.item.implicitWidth : compactWidth
@@ -170,21 +170,21 @@ PanelWindow {
 
         Behavior on width {
             NumberAnimation {
-                duration: 380
+                duration: 480
                 easing.type: Easing.OutExpo
             }
         }
 
         Behavior on height {
             NumberAnimation {
-                duration: 380
+                duration: 480
                 easing.type: Easing.OutExpo
             }
         }
 
         Behavior on radius {
             NumberAnimation {
-                duration: 350
+                duration: 450
                 easing.type: Easing.OutCubic
             }
         }

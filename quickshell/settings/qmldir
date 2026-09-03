@@ -1,7 +1,15 @@
 module settings
 
 SettingsApp 1.0 SettingsApp.qml
-SettingsMainView 1.0 SettingsMainView.qml
-BarSettingsView 1.0 BarSettingsView.qml
-AppearanceSettingsView 1.0 AppearanceSettingsView.qml
-SystemSettingsView 1.0 SystemSettingsView.qml
+Bar 1.0 Bar.qml
+Media 1.0 Media.qml
+Clock 1.0 Clock.qml
+Appearance 1.0 Appearance.qml
+Motion 1.0 Motion.qml
+Launcher 1.0 Launcher.qml
+Notifications 1.0 Notifications.qml
+ControlCenter 1.0 ControlCenter.qml
+LockScreen 1.0 LockScreen.qml
+Display 1.0 Display.qml
+Mouse 1.0 Mouse.qml
+System 1.0 System.qml

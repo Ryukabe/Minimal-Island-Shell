@@ -86,6 +86,15 @@ hl.window_rule({
     size   = "200 300",
 })
 
+-- Quickshell Settings App
+hl.window_rule({
+    name   = "quickshell-settings",
+    match  = { title = "^(Settings)$" },
+    float  = true,
+    center = true,
+   size   = "900 600",
+})
+
 -- Browser
 hl.window_rule({
     match     = { class = "^(zen|firefox|brave|helium-browser|chromium|chromium%-browser|chrome%-browser|microsoft%-edge)$" },

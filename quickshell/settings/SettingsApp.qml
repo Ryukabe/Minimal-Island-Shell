@@ -1,200 +1,369 @@
-// modules/settings/SettingsApp.qml
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
 import Quickshell.Io
 import "../styles"
+import "../services"
 
 Scope {
     id: root
 
-    property bool isOpen: false
-
     IpcHandler {
         target: "settings"
-        function toggle(): void { root.isOpen = !root.isOpen }
-        function open(): void { root.isOpen = true }
-        function close(): void { root.isOpen = false }
-    }
 
-    PanelWindow {
-        id: window
+        function open() {
+            ShellState.showPage("settings")
+        }
 
-        WlrLayershell.namespace: "quickshell:settings"
-        WlrLayershell.layer: WlrLayer.Top
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+        function close() {
+            ShellState.showPage("clock")
+        }
 
-        color: "transparent"
-        visible: root.isOpen
-
-        anchors.top: true
-        anchors.left: true
-        anchors.right: true
-        anchors.bottom: true
-
-        Item {
-            id: windowContainer
-            anchors.fill: parent
-
-            Shortcut {
-                sequence: "Escape"
-                enabled: root.isOpen
-                onActivated: root.isOpen = false
+        function toggle() {
+            if (ShellState.activePage === "settings") {
+                ShellState.showPage("clock")
+            } else {
+                ShellState.showPage("settings")
             }
+        }
 
-            Rectangle {
-                id: appWindow
-                anchors.centerIn: parent
-                width: 860
-                height: 600
-                color: Colors.bg
-                border.color: Colors.border
-                border.width: 1
-                radius: 16
+        function onMessageReceived(message: string) {
+            let cmd = message.trim().toLowerCase()
 
-                // Top Header / Titlebar
-                Item {
-                    id: titleBar
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.topMargin: 20
-                    anchors.leftMargin: 20
-                    anchors.rightMargin: 20
-                    height: 40
+            if (cmd === "open" || cmd === "show") open()
+            else if (cmd === "close" || cmd === "hide") close()
+            else if (cmd === "toggle") toggle()
+            else if (cmd.startsWith("section ")) {
+                let targetSection = cmd.substring(8).trim()
+                ShellState.showPage("settings")
 
-                    RowLayout {
-                        anchors.fill: parent
-                        spacing: 12
-
-                        Text {
-                            text: "󰒓"
-                            color: Colors.accent
-                            font.family: "monospace"
-                            font.pixelSize: 18
-                        }
-
-                        Text {
-                            text: "Settings"
-                            color: Colors.fg
-                            font.pixelSize: 16
-                            font.weight: Font.Bold
-                            Layout.fillWidth: true
-                        }
-                    }
-
-                    Rectangle {
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 32
-                        height: 32
-                        radius: 8
-                        color: closeMouse.containsMouse ? Colors.surface : "transparent"
-                        border.color: closeMouse.containsMouse ? Colors.border : "transparent"
-                        border.width: 1
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "✕"
-                            color: Colors.fg
-                            font.pixelSize: 14
-                        }
-
-                        MouseArea {
-                            id: closeMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.isOpen = false
-                        }
+                for (let i = 0; i < allSections.count; i++) {
+                    let name = allSections.get(i).sectionName.toLowerCase()
+                    if (name.includes(targetSection)) {
+                        sectionList.currentIndex = i
+                        break
                     }
                 }
+            }
+        }
+    }
 
-                // Main Content Area (Sidebar + Stack)
+    FloatingWindow {
+        id: window
+
+        title: "Settings"
+        visible: ShellState.activePage === "settings"
+        color: Colors.islandMica
+
+        implicitWidth: 600
+        implicitHeight: 800
+        minimumSize: Qt.size(420, 380)
+
+        onVisibleChanged: if (visible) focusDelay.start()
+
+        Timer {
+            id: focusDelay
+            interval: 50
+            onTriggered: contentRoot.forceActiveFocus()
+        }
+
+        Item {
+            id: contentRoot
+            anchors.fill: parent
+            focus: true
+
+            Keys.onPressed: (event) => {
+                if (event.key === Qt.Key_Escape) {
+                    ShellState.showPage("clock")
+                    event.accepted = true
+                }
+            }
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: Dimens.paddingLarge
+                spacing: Dimens.spacingLarge
+
+                // Header / drag-to-move region
                 Item {
-                    anchors.top: titleBar.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.margins: 20
-                    anchors.topMargin: 10
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 38
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton
+                        onPressed: window.startSystemMove()
+                    }
 
                     RowLayout {
                         anchors.fill: parent
-                        spacing: 20
+                        spacing: Dimens.spacingMedium
 
-                        ListView {
-                            id: sectionList
-                            Layout.preferredWidth: 220
-                            Layout.fillHeight: true
-                            clip: true
-                            spacing: 6
-
-                            model: ListModel {
-                                ListElement { sectionName: "Bar & Island"; icon: "󱂬" }
-                                ListElement { sectionName: "Appearance"; icon: "󰏘" }
-                                ListElement { sectionName: "System"; icon: "󰒓" }
+                        RowLayout {
+                            spacing: Dimens.spacingSmall
+                            Text {
+                                text: "settings"
+                                color: Colors.accent
+                                font.family: Fonts.icon
+                                font.variableAxes: Fonts.iconAxes
+                                font.pixelSize: Dimens.fontSizeXl
                             }
+                            Text {
+                                text: "Settings"
+                                color: Colors.fg
+                                font.family: Fonts.display
+                                font.pixelSize: Dimens.fontSizeLg
+                                font.weight: Font.Bold
+                            }
+                        }
 
-                            delegate: Item {
-                                width: sectionList.width
-                                height: 42
-                                property bool isSelected: ListView.isCurrentItem
+                        Item { Layout.fillWidth: true }
 
-                                Rectangle {
-                                    anchors.fill: parent
-                                    color: isSelected ? Colors.accent : "transparent"
-                                    opacity: isSelected ? 0.15 : 1.0
-                                    radius: 8
+                        Rectangle {
+                            Layout.preferredWidth: 280
+                            Layout.preferredHeight: 34
+                            color: Colors.islandMica
+                            radius: Dimens.radiusMedium
+                            border.color: searchInput.activeFocus ? Colors.accent : Colors.border
+                            border.width: 0
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: Dimens.paddingSmall
+                                anchors.rightMargin: Dimens.paddingSmall
+                                spacing: Dimens.spacingSmall
+
+                                Text {
+                                    text: "search"
+                                    color: Colors.subtext
+                                    font.family: Fonts.icon
+                                    font.variableAxes: Fonts.iconAxes
+                                    font.pixelSize: Dimens.fontSizeMd
                                 }
 
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 14
-                                    anchors.rightMargin: 14
-                                    spacing: 12
+                                TextInput {
+                                    id: searchInput
+                                    Layout.fillWidth: true
+                                    verticalAlignment: TextInput.AlignVCenter
+                                    color: Colors.fg
+                                    font.family: Fonts.text
+                                    font.pixelSize: Dimens.fontSizeBase
+                                    selectByMouse: true
 
                                     Text {
-                                        text: model.icon
-                                        color: isSelected ? Colors.accent : Colors.fg
-                                        font.family: "monospace"
-                                        font.pixelSize: 15
-                                    }
-
-                                    Text {
-                                        text: model.sectionName
-                                        color: isSelected ? Colors.accent : Colors.fg
-                                        font.pixelSize: 14
-                                        font.weight: isSelected ? Font.Bold : Font.Normal
-                                        Layout.fillWidth: true
+                                        text: "Search 12 sections..."
+                                        color: Colors.subtext
+                                        font: searchInput.font
+                                        visible: searchInput.text.length === 0
+                                        anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
 
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: sectionList.currentIndex = index
+                                Text {
+                                    text: "close"
+                                    color: Colors.subtext
+                                    font.family: Fonts.icon
+                                    font.variableAxes: Fonts.iconAxes
+                                    font.pixelSize: Dimens.fontSizeSm
+                                    visible: searchInput.text.length > 0
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: searchInput.text = ""
+                                    }
                                 }
                             }
                         }
 
                         Rectangle {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            color: "transparent"
+                            Layout.preferredWidth: 34
+                            Layout.preferredHeight: 34
+                            color: closeMouse.containsMouse ? Colors.red : Colors.islandMica
+                            radius: Dimens.radiusMedium
 
-                            StackLayout {
+                            Text {
+                                anchors.centerIn: parent
+                                text: "close"
+                                color: closeMouse.containsMouse ? Colors.bg : Colors.fg
+                                font.family: Fonts.icon
+                                font.variableAxes: Fonts.iconAxes
+                                font.pixelSize: Dimens.fontSizeMd
+                            }
+
+                            MouseArea {
+                                id: closeMouse
                                 anchors.fill: parent
-                                currentIndex: sectionList.currentIndex
-
-                                BarSettingsView {}
-                                AppearanceSettingsView {}
-                                SystemSettingsView {}
+                                hoverEnabled: true
+                                onClicked: ShellState.showPage("clock")
                             }
                         }
                     }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: Dimens.spacingLarge
+
+                    ListView {
+                        id: sectionList
+                        Layout.preferredWidth: 220
+                        Layout.fillHeight: true
+                        clip: true
+                        spacing: Dimens.spacingSmall
+
+                        model: ListModel {
+                            id: allSections
+                            ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "island bar layout geometry" }
+                            ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "time calendar date" }
+                            ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "player mpris volume audio" }
+                            ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color palette" }
+                            ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
+                            ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
+                            ListElement { sectionName: "Notifications"; icon: "notifications"; tag: "mako toasts daemon" }
+                            ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles" }
+                            ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password macos" }
+                            ListElement { sectionName: "Display"; icon: "desktop_windows"; tag: "resolution scale hyprland vrr" }
+                            ListElement { sectionName: "Mouse"; icon: "mouse"; tag: "cursor sensitivity acceleration" }
+                            ListElement { sectionName: "System"; icon: "settings"; tag: "hardware power info" }
+                        }
+
+                        delegate: Item {
+                            id: delegateItem
+                            width: sectionList.width
+                            height: matchesSearch ? 38 : 0
+                            visible: matchesSearch
+
+                            property bool isSelected: sectionList.currentIndex === index
+                            property bool matchesSearch: {
+                                let query = searchInput.text.toLowerCase().trim()
+                                if (query === "") return true
+                                return model.sectionName.toLowerCase().includes(query) || model.tag.toLowerCase().includes(query)
+                            }
+
+                            Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 2
+                                color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.islandMica : "transparent")
+                                opacity: isSelected ? 0.2 : 0.6
+                                radius: Dimens.radiusMedium
+                            }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: Dimens.paddingMedium
+                                spacing: Dimens.spacingMedium
+
+                                Text {
+                                    text: model.icon
+                                    color: isSelected ? Colors.accent : Colors.fg
+                                    font.family: Fonts.icon
+                                    font.variableAxes: Fonts.iconAxes
+                                    font.pixelSize: Dimens.fontSize15
+                                }
+
+                                Text {
+                                    text: model.sectionName
+                                    color: isSelected ? Colors.accent : Colors.fg
+                                    font.family: Fonts.text
+                                    font.pixelSize: Dimens.fontSizeBase
+                                    font.weight: isSelected ? Font.Bold : Font.Normal
+                                }
+                            }
+
+                            MouseArea {
+                                id: itemMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: sectionList.currentIndex = index
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: Colors.islandMica
+                        radius: Dimens.radiusLarge
+                        border.color: Colors.border
+                        border.width: 0
+
+                        StackLayout {
+                            anchors.fill: parent
+                            anchors.margins: Dimens.paddingLarge
+                            currentIndex: sectionList.currentIndex
+
+                            Bar {}
+                            Clock {}
+                            Media {}
+                            Appearance {}
+                            Motion {}
+                            Launcher {}
+                            Notifications {}
+                            ControlCenter {}
+                            LockScreen {}
+                            Display {}
+                            Mouse {}
+                            System {}
+                        }
+                    }
+                }
+            }
+
+            // Resize handles — edges + corners, native OS resize
+            Item {
+                anchors.fill: parent
+                z: 100
+
+                MouseArea {
+                    width: 6
+                    anchors { left: parent.left; top: parent.top; bottom: parent.bottom; topMargin: 12; bottomMargin: 12 }
+                    cursorShape: Qt.SizeHorCursor
+                    onPressed: window.startSystemResize(Edges.Left)
+                }
+                MouseArea {
+                    width: 6
+                    anchors { right: parent.right; top: parent.top; bottom: parent.bottom; topMargin: 12; bottomMargin: 12 }
+                    cursorShape: Qt.SizeHorCursor
+                    onPressed: window.startSystemResize(Edges.Right)
+                }
+                MouseArea {
+                    height: 6
+                    anchors { top: parent.top; left: parent.left; right: parent.right; leftMargin: 12; rightMargin: 12 }
+                    cursorShape: Qt.SizeVerCursor
+                    onPressed: window.startSystemResize(Edges.Top)
+                }
+                MouseArea {
+                    height: 6
+                    anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 12; rightMargin: 12 }
+                    cursorShape: Qt.SizeVerCursor
+                    onPressed: window.startSystemResize(Edges.Bottom)
+                }
+                MouseArea {
+                    width: 12; height: 12
+                    anchors { left: parent.left; top: parent.top }
+                    cursorShape: Qt.SizeFDiagCursor
+                    onPressed: window.startSystemResize(Edges.Left | Edges.Top)
+                }
+                MouseArea {
+                    width: 12; height: 12
+                    anchors { right: parent.right; top: parent.top }
+                    cursorShape: Qt.SizeBDiagCursor
+                    onPressed: window.startSystemResize(Edges.Right | Edges.Top)
+                }
+                MouseArea {
+                    width: 12; height: 12
+                    anchors { left: parent.left; bottom: parent.bottom }
+                    cursorShape: Qt.SizeBDiagCursor
+                    onPressed: window.startSystemResize(Edges.Left | Edges.Bottom)
+                }
+                MouseArea {
+                    width: 12; height: 12
+                    anchors { right: parent.right; bottom: parent.bottom }
+                    cursorShape: Qt.SizeFDiagCursor
+                    onPressed: window.startSystemResize(Edges.Right | Edges.Bottom)
                 }
             }
         }
