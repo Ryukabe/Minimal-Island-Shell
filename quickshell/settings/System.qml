@@ -2,37 +2,48 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../styles"
+import "../components/settings"
 
 Item {
     id: root
     property string powerProfile: "balanced"
 
-    ColumnLayout {
+    ScrollView {
+        id: scrollView
         anchors.fill: parent
-        anchors.margins: Dimens.paddingLarge
-        spacing: Dimens.spacingLarge
+        anchors.rightMargin: 6
+        clip: true
+        contentWidth: availableWidth
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-        Text { text: "System & Power Maintenance"; color: Colors.fg; font.pixelSize: Dimens.fontSizeXl; font.bold: true }
+        Item {
+            width: scrollView.availableWidth
+            implicitHeight: contentCol.implicitHeight + Dimens.paddingLarge
 
-        Rectangle {
-            Layout.fillWidth: true
-            height: 64
-            color: Colors.islandMica
-            radius: Dimens.radiusLarge
-            border.color: Colors.border
+            ColumnLayout {
+                id: contentCol
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Math.min(parent.width - Dimens.paddingMedium * 2, 640)
+                spacing: 0
 
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: Dimens.paddingLarge
-                Text { text: "Active Power Profile"; color: Colors.fg; Layout.fillWidth: true }
-                Text { text: root.powerProfile.toUpperCase(); color: Colors.accent; font.bold: true }
+                SettingsHeader {
+                    icon: "settings"
+                    title: "System"
+                    subtitle: "Hardware status and power management."
+                }
+
+                SettingsRow {
+                    label: "Active Power Profile"
+                    value: root.powerProfile.toUpperCase()
+                    showChevron: false
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Dimens.spacingLarge
+                    text: "Reload Shell State"
+                }
             }
         }
-
-        Button {
-            text: "Reload Shell State"
-            Layout.fillWidth: true
-        }
-        Item { Layout.fillHeight: true }
     }
 }

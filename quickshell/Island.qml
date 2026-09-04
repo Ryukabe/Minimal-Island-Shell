@@ -42,6 +42,14 @@ PanelWindow {
         return (TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock"
     }
 
+    function motionDuration(ms) {
+        return ShellState.motionReduced ? 0 : ms
+    }
+
+    function motionOvershoot() {
+        return ShellState.motionReduced ? 1.0 : (1.0 + ShellState.motionBouncePercent / 100)
+    }
+
     Shortcut {
         sequence: "Escape"
         enabled: ShellState.activePage !== getDefaultPage()
@@ -126,17 +134,15 @@ PanelWindow {
         function close() { ShellState.showPage(getDefaultPage()) }
     }
 
-    // Input mask restricts click interactions to just the island element when showing
-    // compact states ("clock" or "timertoast"), allowing clicks to pass through everywhere else.
     mask: Region {
-        item: (island.expanded && ShellState.activePage !== "notification") ? clickCatcher : island
+        item: (island.expanded && ShellState.activePage !== "notification" && ShellState.islandClickOutsideDismiss) ? clickCatcher : island
     }
 
     Rectangle {
         id: clickCatcher
         anchors.fill: parent
         color: "transparent"
-        visible: island.expanded
+        visible: island.expanded && ShellState.islandClickOutsideDismiss
 
         MouseArea {
             anchors.fill: parent
@@ -148,12 +154,9 @@ PanelWindow {
         id: island
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 5
+        anchors.topMargin: ShellState.islandTopMargin
         clip: true
 
-        // "clock", "timertoast", and "settings" are all treated as compact/inert here —
-        // Settings is a fully independent FloatingWindow now, so the island should stay
-        // in its default state and never claim the full-screen click-catcher mask for it.
         readonly property bool expanded: ShellState.activePage !== "clock" && ShellState.activePage !== "timertoast" && ShellState.activePage !== "settings"
         readonly property int compactHeight: 36
         readonly property int compactWidth: 160
@@ -163,28 +166,42 @@ PanelWindow {
         width: targetWidth
         height: targetHeight
 
-        radius: Math.min(height / 2, Dimens.islandRadius)
+        radius: Math.min(height / 2, ShellState.islandCornerRadius)
         color: Colors.islandMica
-        border.color: Colors.islandMica
-        border.width: 0
+        border.color: Colors.border
+        border.width: ShellState.islandBorderWidth
 
         Behavior on width {
             NumberAnimation {
-                duration: 480
+                duration: window.motionDuration(ShellState.motionMovementMs)
                 easing.type: Easing.OutExpo
             }
         }
 
         Behavior on height {
             NumberAnimation {
-                duration: 480
+                duration: window.motionDuration(ShellState.motionMovementMs)
                 easing.type: Easing.OutExpo
             }
         }
 
         Behavior on radius {
             NumberAnimation {
-                duration: 450
+                duration: window.motionDuration(ShellState.motionMovementMs)
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on anchors.topMargin {
+            NumberAnimation {
+                duration: window.motionDuration(ShellState.motionMovementMs)
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on border.width {
+            NumberAnimation {
+                duration: window.motionDuration(ShellState.motionFadeMs)
                 easing.type: Easing.OutCubic
             }
         }
@@ -219,9 +236,9 @@ PanelWindow {
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: 250
+                    duration: window.motionDuration(ShellState.motionHoverMs)
                     easing.type: Easing.OutBack
-                    easing.overshoot: 1.2
+                    easing.overshoot: window.motionOvershoot()
                 }
             }
 
@@ -241,7 +258,7 @@ PanelWindow {
                     property: "opacity"
                     from: 0
                     to: 1
-                    duration: 220
+                    duration: window.motionDuration(ShellState.motionFadeMs)
                     easing.type: Easing.OutCubic
                 }
                 NumberAnimation {
@@ -249,9 +266,9 @@ PanelWindow {
                     property: "scale"
                     from: 0.94
                     to: 1.0
-                    duration: 280
+                    duration: window.motionDuration(ShellState.motionMovementMs)
                     easing.type: Easing.OutBack
-                    easing.overshoot: 1.1
+                    easing.overshoot: window.motionOvershoot()
                 }
             }
 

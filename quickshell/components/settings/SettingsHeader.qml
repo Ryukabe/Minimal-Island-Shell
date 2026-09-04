@@ -41,8 +41,7 @@ ColumnLayout {
     }
 
     Text {
-        Layout.alignment: Qt.AlignHCenter
-        Layout.maximumWidth: 340
+        Layout.fillWidth: true
         text: root.subtitle
         color: Colors.subtext
         font.family: Fonts.text

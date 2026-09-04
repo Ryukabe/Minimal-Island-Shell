@@ -92,7 +92,7 @@ hl.window_rule({
     match  = { title = "^(Settings)$" },
     float  = true,
     center = true,
-   size   = "900 600",
+   size   = "800 600",
 })
 
 -- Browser

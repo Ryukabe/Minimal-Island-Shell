@@ -54,7 +54,6 @@ Scope {
 
         implicitWidth: 600
         implicitHeight: 800
-        minimumSize: Qt.size(420, 380)
 
         onVisibleChanged: if (visible) focusDelay.start()
 
@@ -78,13 +77,23 @@ Scope {
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Dimens.paddingLarge
-                spacing: Dimens.spacingLarge
+                spacing: 0
 
-                // Header / drag-to-move region
-                Item {
+                // Toolbar strip — distinct background + bottom divider so the
+                // title/search/close row reads as a real macOS-style toolbar
+                // instead of text floating with no separation from the body.
+                Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 38
+                    Layout.preferredHeight: 54
+                    color: Colors.islandMica
+
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: 1
+                        color: Colors.islandMica
+                        opacity: 0.5
+                    }
 
                     MouseArea {
                         anchors.fill: parent
@@ -94,6 +103,8 @@ Scope {
 
                     RowLayout {
                         anchors.fill: parent
+                        anchors.leftMargin: Dimens.paddingLarge
+                        anchors.rightMargin: Dimens.paddingLarge
                         spacing: Dimens.spacingMedium
 
                         RowLayout {
@@ -122,7 +133,7 @@ Scope {
                             color: Colors.islandMica
                             radius: Dimens.radiusMedium
                             border.color: searchInput.activeFocus ? Colors.accent : Colors.border
-                            border.width: 0
+                            border.width: 1
 
                             RowLayout {
                                 anchors.fill: parent
@@ -156,7 +167,7 @@ Scope {
                                     }
                                 }
 
-                                Text {
+                                /*Text {
                                     text: "close"
                                     color: Colors.subtext
                                     font.family: Fonts.icon
@@ -167,11 +178,11 @@ Scope {
                                         anchors.fill: parent
                                         onClicked: searchInput.text = ""
                                     }
-                                }
+                                }*/
                             }
                         }
 
-                        Rectangle {
+                        /*Rectangle {
                             Layout.preferredWidth: 34
                             Layout.preferredHeight: 34
                             color: closeMouse.containsMouse ? Colors.red : Colors.islandMica
@@ -192,13 +203,14 @@ Scope {
                                 hoverEnabled: true
                                 onClicked: ShellState.closeSettings()
                             }
-                        }
+                        }*/
                     }
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.margins: Dimens.paddingLarge
                     spacing: Dimens.spacingLarge
 
                     ListView {
@@ -308,55 +320,55 @@ Scope {
                 }
             }
 
-            // Resize handles — edges + corners, native OS resize
+            // Resize handles — edges + corners, native OS resize.
             Item {
                 anchors.fill: parent
                 z: 100
 
                 MouseArea {
-                    width: 6
-                    anchors { left: parent.left; top: parent.top; bottom: parent.bottom; topMargin: 12; bottomMargin: 12 }
+                    width: 5
+                    anchors { left: parent.left; top: parent.top; bottom: parent.bottom; topMargin: 10; bottomMargin: 10 }
                     cursorShape: Qt.SizeHorCursor
                     onPressed: window.startSystemResize(Edges.Left)
                 }
                 MouseArea {
-                    width: 6
-                    anchors { right: parent.right; top: parent.top; bottom: parent.bottom; topMargin: 12; bottomMargin: 12 }
+                    width: 5
+                    anchors { right: parent.right; top: parent.top; bottom: parent.bottom; topMargin: 10; bottomMargin: 10 }
                     cursorShape: Qt.SizeHorCursor
                     onPressed: window.startSystemResize(Edges.Right)
                 }
                 MouseArea {
-                    height: 6
-                    anchors { top: parent.top; left: parent.left; right: parent.right; leftMargin: 12; rightMargin: 12 }
+                    height: 5
+                    anchors { top: parent.top; left: parent.left; right: parent.right; leftMargin: 10; rightMargin: 10 }
                     cursorShape: Qt.SizeVerCursor
                     onPressed: window.startSystemResize(Edges.Top)
                 }
                 MouseArea {
-                    height: 6
-                    anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 12; rightMargin: 12 }
+                    height: 5
+                    anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 10; rightMargin: 10 }
                     cursorShape: Qt.SizeVerCursor
                     onPressed: window.startSystemResize(Edges.Bottom)
                 }
                 MouseArea {
-                    width: 12; height: 12
+                    width: 10; height: 10
                     anchors { left: parent.left; top: parent.top }
                     cursorShape: Qt.SizeFDiagCursor
                     onPressed: window.startSystemResize(Edges.Left | Edges.Top)
                 }
                 MouseArea {
-                    width: 12; height: 12
+                    width: 10; height: 10
                     anchors { right: parent.right; top: parent.top }
                     cursorShape: Qt.SizeBDiagCursor
                     onPressed: window.startSystemResize(Edges.Right | Edges.Top)
                 }
                 MouseArea {
-                    width: 12; height: 12
+                    width: 10; height: 10
                     anchors { left: parent.left; bottom: parent.bottom }
                     cursorShape: Qt.SizeBDiagCursor
                     onPressed: window.startSystemResize(Edges.Left | Edges.Bottom)
                 }
                 MouseArea {
-                    width: 12; height: 12
+                    width: 10; height: 10
                     anchors { right: parent.right; bottom: parent.bottom }
                     cursorShape: Qt.SizeFDiagCursor
                     onPressed: window.startSystemResize(Edges.Right | Edges.Bottom)

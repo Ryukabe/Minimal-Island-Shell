@@ -11,11 +11,22 @@ QtObject {
     property bool focusModeEnabled: false
     property string activeFocusMode: "Do Not Disturb"
     property bool ignoreHover: false
-
-    // Settings lives in its own FloatingWindow now, fully independent of the
-    // island's activePage router — a separate module opening (control, power,
-    // launcher, etc.) must never close it.
     property bool settingsOpen: false
+
+    property real islandTopMargin: 5
+    property real islandCornerRadius: 12
+    property real islandBorderWidth: 0
+    property bool islandClickOutsideDismiss: true
+
+    // Motion — read live by Island.qml's Behavior blocks, written by the
+    // Motion settings page. When motionReduced is true, Island.qml collapses
+    // every duration below to 0 and overshoot to 1.0 rather than checking
+    // this flag in a dozen separate places.
+    property bool motionReduced: false
+    property real motionMovementMs: 480
+    property real motionFadeMs: 220
+    property real motionHoverMs: 250
+    property real motionBouncePercent: 20
 
     property Timer hoverResetTimer: Timer {
         interval: 300
