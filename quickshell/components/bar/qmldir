@@ -4,3 +4,4 @@ MediaExpanded 1.0 MediaExpanded.qml
 NotificationToast 1.0 NotificationToast.qml
 RecordingIndicator 1.0 RecordingIndicator.qml
 TimerToast 1.0 TimerToast.qml
+NotchShape 1.0 NotchShape.qml

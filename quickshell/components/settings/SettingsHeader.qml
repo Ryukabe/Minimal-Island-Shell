@@ -17,7 +17,7 @@ ColumnLayout {
         width: 56
         height: 56
         radius: 28
-        color: Colors.islandMica
+        color: Colors.mainBgMica
         border.color: Colors.border
         border.width: 1
 

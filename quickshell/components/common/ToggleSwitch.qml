@@ -13,9 +13,8 @@ Item {
         id: track
         anchors.fill: parent
         radius: Dimens.radiusFull
-        color: root.checked ? Colors.accent : Colors.surface
-        border.width: root.checked ? 0 : 1
-        border.color: Colors.border
+        color: root.checked ? Colors.accent : Colors.subBg
+        border.width: 0
 
         Behavior on color { ColorAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
@@ -24,7 +23,7 @@ Item {
             width: parent.height - 4
             height: parent.height - 4
             radius: Dimens.radiusFull
-            color: Colors.white
+            color: Colors.mainBg
             anchors.verticalCenter: parent.verticalCenter
             x: root.checked ? parent.width - width - 2 : 2
 

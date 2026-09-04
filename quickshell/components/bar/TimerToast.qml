@@ -42,7 +42,7 @@ Item {
             Rectangle {
                 width: 24
                 height: 24
-                color: Colors.bgMica
+                color: Colors.subBgMica
                 radius: Dimens.islandRadius // Added radius
 
                 Text {
@@ -72,7 +72,7 @@ Item {
             Rectangle {
                 width: 24
                 height: 24
-                color: Colors.bgMica
+                color: Colors.subBgMica
                 radius: Dimens.islandRadius // Added radius
 
                 Text {

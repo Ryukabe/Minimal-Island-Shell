@@ -8,8 +8,6 @@ import "../components/settings"
 Item {
     id: root
 
-    property bool notchMode: true
-    property real notchFlare: 14
     property real barHeight: 34
     property real collapsedWidth: 150
     property real expandedHeight: 135
@@ -46,6 +44,8 @@ Item {
                     from: 0; to: 40; stepSize: 1
                     value: ShellState.islandTopMargin
                     unit: " px"
+                    enabled: !ShellState.islandNotchMode
+                    opacity: ShellState.islandNotchMode ? 0.4 : 1.0
                     onMoved: (val) => ShellState.islandTopMargin = val
                 }
 
@@ -62,6 +62,8 @@ Item {
                     from: 0; to: 4; stepSize: 1
                     value: ShellState.islandBorderWidth
                     unit: " px"
+                    enabled: !ShellState.islandNotchMode
+                    opacity: ShellState.islandNotchMode ? 0.4 : 1.0
                     onMoved: (val) => ShellState.islandBorderWidth = val
                 }
 
@@ -75,16 +77,17 @@ Item {
 
                 SettingsToggleRow {
                     label: "Notch mode"
-                    checked: root.notchMode
-                    onToggled: (val) => root.notchMode = val
+                    checked: ShellState.islandNotchMode
+                    onToggled: (val) => ShellState.islandNotchMode = val
                 }
 
                 SettingsSliderRow {
                     label: "Notch flare"
                     from: 0; to: 40; stepSize: 1
-                    value: root.notchFlare
+                    value: ShellState.islandNotchFlare
                     unit: " px"
-                    onMoved: (val) => root.notchFlare = val
+                    visible: ShellState.islandNotchMode
+                    onMoved: (val) => ShellState.islandNotchFlare = val
                 }
 
                 SettingsSliderRow {

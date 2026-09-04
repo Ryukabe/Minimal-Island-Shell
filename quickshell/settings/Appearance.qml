@@ -12,6 +12,13 @@ Item {
     property real spacingUnit: 4
     property real smallRadius: 10
 
+    readonly property var iconStyles: ["Rounded", "Outlined", "Sharp"]
+
+    function cycleIconStyle() {
+        var i = iconStyles.indexOf(Fonts.iconStyle)
+        Fonts.iconStyle = iconStyles[(i + 1) % iconStyles.length]
+    }
+
     ScrollView {
         id: scrollView
         anchors.fill: parent
@@ -90,6 +97,38 @@ Item {
                     value: root.smallRadius
                     unit: " px"
                     onMoved: (val) => root.smallRadius = val
+                }
+
+                SettingsSectionLabel { label: "Display" }
+
+                SettingsToggleRow {
+                    label: "Light Mode"
+                    checked: Colors.lightModeEnabled
+                    onToggled: (val) => {
+                        if (val !== Colors.lightModeEnabled) Colors.toggleLightMode()
+                    }
+                }
+
+                SettingsRow {
+                    label: "Icon Style"
+                    value: Fonts.iconStyle
+                    showChevron: true
+                    onClicked: root.cycleIconStyle()
+                }
+
+                SettingsSliderRow {
+                    label: "Icon Weight"
+                    from: 100; to: 700; stepSize: 50
+                    value: Fonts.iconWeight
+                    onMoved: (val) => Fonts.iconWeight = val
+                }
+
+                SettingsSliderRow {
+                    label: "Surface Opacity"
+                    from: 0.3; to: 1.0; stepSize: 0.05
+                    decimals: 2
+                    value: Colors.micaBeta
+                    onMoved: (val) => Colors.micaBeta = val
                 }
             }
         }

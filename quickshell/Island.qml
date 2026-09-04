@@ -150,11 +150,27 @@ PanelWindow {
         }
     }
 
+    // Notch silhouette — sits behind `island`, flush to the screen top,
+    // visible only when islandNotchMode is on. Matches island's live
+    // width/height so it always tracks the same size/animation.
+    NotchShape {
+        id: notchShape
+        visible: ShellState.islandNotchMode
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: 0
+        z: -1
+        notchWidth: island.width
+        notchHeight: island.height
+        bottomRadius: Math.min(island.height / 2, ShellState.islandCornerRadius)
+        flare: ShellState.islandNotchFlare
+        fillColor: Colors.mainBgMica
+    }
+
     Rectangle {
         id: island
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: ShellState.islandTopMargin
+        anchors.topMargin: ShellState.islandNotchMode ? 0 : ShellState.islandTopMargin
         clip: true
 
         readonly property bool expanded: ShellState.activePage !== "clock" && ShellState.activePage !== "timertoast" && ShellState.activePage !== "settings"
@@ -167,9 +183,11 @@ PanelWindow {
         height: targetHeight
 
         radius: Math.min(height / 2, ShellState.islandCornerRadius)
-        color: Colors.islandMica
+        // Transparent in notch mode — NotchShape behind provides the fill
+        // and flared silhouette instead of this Rectangle's own corners.
+        color: ShellState.islandNotchMode ? "transparent" : Colors.mainBgMica
         border.color: Colors.border
-        border.width: ShellState.islandBorderWidth
+        border.width: ShellState.islandNotchMode ? 0 : ShellState.islandBorderWidth
 
         Behavior on width {
             NumberAnimation {

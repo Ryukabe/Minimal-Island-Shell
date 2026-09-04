@@ -79,7 +79,7 @@ Item {
             anchors.margins: 12
             height: 44
             radius: Dimens.borderRadiusLarge
-            color: Colors.bgMica
+            color: Colors.subBgMica
 
             MouseArea {
                 anchors.fill: parent

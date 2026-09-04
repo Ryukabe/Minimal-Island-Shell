@@ -18,10 +18,12 @@ QtObject {
     property real islandBorderWidth: 0
     property bool islandClickOutsideDismiss: true
 
-    // Motion — read live by Island.qml's Behavior blocks, written by the
-    // Motion settings page. When motionReduced is true, Island.qml collapses
-    // every duration below to 0 and overshoot to 1.0 rather than checking
-    // this flag in a dozen separate places.
+    // Notch — when true, the island sits flush against the screen edge
+    // (topMargin forced to 0 by Island.qml, ignoring islandTopMargin above)
+    // with flared top corners instead of the floating rounded pill.
+    property bool islandNotchMode: false
+    property real islandNotchFlare: 14
+
     property bool motionReduced: false
     property real motionMovementMs: 480
     property real motionFadeMs: 220

@@ -55,7 +55,7 @@ Item {
             Layout.fillWidth: true
             height: 40
             radius: Dimens.borderRadiusLarge
-            color: Colors.bgMica
+            color: Colors.subBgMica
 
             RowLayout {
                 anchors.fill: parent

@@ -50,7 +50,7 @@ Scope {
 
         title: "Settings"
         visible: ShellState.settingsOpen
-        color: Colors.islandMica
+        color: Colors.mainBg
 
         implicitWidth: 600
         implicitHeight: 800
@@ -79,21 +79,12 @@ Scope {
                 anchors.fill: parent
                 spacing: 0
 
-                // Toolbar strip — distinct background + bottom divider so the
-                // title/search/close row reads as a real macOS-style toolbar
-                // instead of text floating with no separation from the body.
+                // Toolbar strip — separated from the body by a tone shift
+                // (subBg vs. mainBg below), no border/divider line at all.
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 54
-                    color: Colors.islandMica
-
-                    Rectangle {
-                        anchors.bottom: parent.bottom
-                        width: parent.width
-                        height: 1
-                        color: Colors.islandMica
-                        opacity: 0.5
-                    }
+                    color: Colors.subBg
 
                     MouseArea {
                         anchors.fill: parent
@@ -127,13 +118,15 @@ Scope {
 
                         Item { Layout.fillWidth: true }
 
+                        // Search box — elevatedBg instead of a border to read
+                        // as a raised input sitting on top of the toolbar.
                         Rectangle {
                             Layout.preferredWidth: 280
                             Layout.preferredHeight: 34
-                            color: Colors.islandMica
+                            color: searchInput.activeFocus ? Colors.elevatedBg : Colors.mainBg
                             radius: Dimens.radiusMedium
-                            border.color: searchInput.activeFocus ? Colors.accent : Colors.border
-                            border.width: 1
+
+                            Behavior on color { ColorAnimation { duration: 150 } }
 
                             RowLayout {
                                 anchors.fill: parent
@@ -166,44 +159,8 @@ Scope {
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
-
-                                /*Text {
-                                    text: "close"
-                                    color: Colors.subtext
-                                    font.family: Fonts.icon
-                                    font.variableAxes: Fonts.iconAxes
-                                    font.pixelSize: Dimens.fontSizeSm
-                                    visible: searchInput.text.length > 0
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        onClicked: searchInput.text = ""
-                                    }
-                                }*/
                             }
                         }
-
-                        /*Rectangle {
-                            Layout.preferredWidth: 34
-                            Layout.preferredHeight: 34
-                            color: closeMouse.containsMouse ? Colors.red : Colors.islandMica
-                            radius: Dimens.radiusMedium
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "close"
-                                color: closeMouse.containsMouse ? Colors.bg : Colors.fg
-                                font.family: Fonts.icon
-                                font.variableAxes: Fonts.iconAxes
-                                font.pixelSize: Dimens.fontSizeMd
-                            }
-
-                            MouseArea {
-                                id: closeMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: ShellState.closeSettings()
-                            }
-                        }*/
                     }
                 }
 
@@ -254,9 +211,11 @@ Scope {
                             Rectangle {
                                 anchors.fill: parent
                                 anchors.margins: 2
-                                color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.islandMica : "transparent")
-                                opacity: isSelected ? 0.2 : 0.6
+                                color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.elevatedBg : "transparent")
+                                opacity: isSelected ? 0.2 : 1.0
                                 radius: Dimens.radiusMedium
+
+                                Behavior on color { ColorAnimation { duration: 120 } }
                             }
 
                             RowLayout {
@@ -293,10 +252,8 @@ Scope {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: Colors.islandMica
+                        color: Colors.subBg
                         radius: Dimens.radiusLarge
-                        border.color: Colors.border
-                        border.width: 0
 
                         StackLayout {
                             anchors.fill: parent

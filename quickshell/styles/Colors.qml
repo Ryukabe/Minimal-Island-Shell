@@ -11,7 +11,9 @@ Item {
     property bool loaded: false
     property bool lightModeEnabled: false
 
-    // Default fallbacks used only when keys are missing from theme JSON
+    // Default fallbacks — still used by pick() for foreground/accent/semantic
+    // colors. Background entries here are now inert since mainBg/subBg no
+    // longer route through pick() at all.
     readonly property var _safetyPalette: ({
         isLight: false,
         background: "#040e0d",
@@ -79,11 +81,21 @@ Item {
 
     readonly property bool darkMode: !pick("isLight")
 
-    readonly property color bg: pick("background")
+        // ─────────────────────────────────────────────────────────────
+    // mainBg / subBg / elevatedBg — fixed, hardcoded pair plus one derived
+    // tone. NOT theme-driven. elevatedBg is computed from subBg (not a
+    // third hardcoded hex) so it can't drift out of sync with it — it's
+    // for anything that needs to read as "raised" above a card (search
+    // boxes, hover states, nested inputs) WITHOUT a border line, since
+    // borders are being phased out in favor of elevation.
+    // ─────────────────────────────────────────────────────────────
+    readonly property color mainBg: root.lightModeEnabled ? "#fffcf0" : "#131413"
+    readonly property color subBg: root.lightModeEnabled ? "#f5f2e7" : "#1e1e1e"
+    readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(subBg, 1.06) : Qt.lighter(subBg, 1.35)
+
+    // Foreground / accent / semantic colors — still theme-driven, unchanged.
     readonly property color fg: pick("foreground")
     readonly property color fgMuted: pick("fgMuted")
-    readonly property color bgSurface: pick("surface")
-    readonly property color surface: pick("surface")
     readonly property color subtext: pick("fgMuted")
     readonly property color border: pick("border")
     readonly property color accent: pick("accent")
@@ -95,8 +107,8 @@ Item {
     readonly property color purple: pick("purple")
     readonly property color cyan: pick("cyan")
 
-    readonly property color black: darkMode ? bgSurface : border
-    readonly property color white: darkMode ? "#ffffff" : bgSurface
+    readonly property color black: darkMode ? subBg : border
+    readonly property color white: darkMode ? "#ffffff" : subBg
 
     readonly property color brightBlack: darkMode ? fgMuted : border
     readonly property color brightRed: red
@@ -107,17 +119,14 @@ Item {
     readonly property color brightCyan: cyan
     readonly property color brightWhite: white
 
-    // Mica Effect 
-    readonly property real micaAlpha: 1.0
-    readonly property real micaBeta: 0.80
-    
-    // Background Colors 
-    readonly property color bgMica: Qt.rgba(bg.r, bg.g, bg.b, micaBeta)
-    readonly property color bgSurfaceMica: Qt.rgba(bgSurface.r, bgSurface.g, bgSurface.b, micaBeta)
+    // Mica Effect — no longer readonly, since Appearance settings now drive
+    // these live via sliders. Same default values as before.
+    property real micaAlpha: 1.0
+    property real micaBeta: 0.80
 
-    // Island Color
-    readonly property color islandbg: "#131413"
-    readonly property color islandMica: Qt.rgba(islandbg.r, islandbg.g, islandbg.b, micaAlpha)
+    // Translucent variants of the two fixed backgrounds above.
+    readonly property color mainBgMica: Qt.rgba(mainBg.r, mainBg.g, mainBg.b, micaAlpha)
+    readonly property color subBgMica: Qt.rgba(subBg.r, subBg.g, subBg.b, micaBeta)
 
     // Shared by adapters/* — kept public since color→hex is generic.
     function toHex(c) {

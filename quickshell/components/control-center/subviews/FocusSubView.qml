@@ -109,7 +109,7 @@ Item {
                     width: 40
                     height: 22
                     radius: 11
-                    color: ShellState.focusModeEnabled ? Colors.accent : Colors.bgMica
+                    color: ShellState.focusModeEnabled ? Colors.accent : Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
 
