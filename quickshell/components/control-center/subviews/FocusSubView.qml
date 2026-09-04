@@ -68,7 +68,7 @@ Item {
             width: parent.width
             height: 48
             radius: Dimens.radiusLarge
-            color: Colors.surface
+            color: Colors.subBgMica
             border.width: 1
             border.color: Colors.border
 
@@ -162,7 +162,7 @@ Item {
                     height: 52
                     radius: Dimens.radiusLarge
                     color: isSelected ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.15) 
-                         : (modeMa.containsMouse ? Colors.bgSurface : Colors.surface)
+                         : (modeMa.containsMouse ? Colors.bgSurface : Colors.subBgMica)
                     border.width: 1
                     border.color: isSelected ? Colors.accent : Colors.border
 

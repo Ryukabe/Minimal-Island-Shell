@@ -104,9 +104,9 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: 38
                 radius: Dimens.radiusMedium
-                color: Colors.surface
+                color: Colors.subBgMica
                 border.width: 1
-                border.color: passInput.activeFocus ? Colors.accent : Colors.surface
+                border.color: passInput.activeFocus ? Colors.accent : Colors.subBgMica
 
                 Behavior on border.color {
                     ColorAnimation { duration: 150 }
@@ -165,7 +165,7 @@ Item {
                     implicitWidth: 80
                     implicitHeight: 30
                     radius: Dimens.radiusTiny
-                    color: Colors.surface
+                        color: Colors.subBgMica
 
                     scale: cancelBtnMouse.pressed ? 0.95 : 1.0
                     Behavior on scale {

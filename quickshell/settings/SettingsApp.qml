@@ -3,8 +3,9 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
-import "../styles"
+import "./services"
 import "../services"
+import "../styles"
 
 Scope {
     id: root
@@ -12,17 +13,9 @@ Scope {
     IpcHandler {
         target: "settings"
 
-        function open() {
-            ShellState.openSettings()
-        }
-
-        function close() {
-            ShellState.closeSettings()
-        }
-
-        function toggle() {
-            ShellState.toggleSettings()
-        }
+        function open() { ShellState.openSettings() }
+        function close() { ShellState.closeSettings() }
+        function toggle() { ShellState.toggleSettings() }
 
         function onMessageReceived(message: string) {
             let cmd = message.trim().toLowerCase()
@@ -47,11 +40,9 @@ Scope {
 
     FloatingWindow {
         id: window
-
         title: "Settings"
         visible: ShellState.settingsOpen
-        color: Colors.mainBg
-
+        color: Colors.mainBgMica
         implicitWidth: 600
         implicitHeight: 800
 
@@ -72,6 +63,14 @@ Scope {
                 if (event.key === Qt.Key_Escape) {
                     ShellState.closeSettings()
                     event.accepted = true
+                } else if (!searchBox.activeFocusInput && event.text.length > 0 
+                           && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
+                    if (event.key !== Qt.Key_Tab && event.key !== Qt.Key_Return 
+                        && event.key !== Qt.Key_Enter && event.key !== Qt.Key_Backspace) {
+                        
+                        searchBox.appendText(event.text)
+                        event.accepted = true
+                    }
                 }
             }
 
@@ -79,12 +78,12 @@ Scope {
                 anchors.fill: parent
                 spacing: 0
 
-                // Toolbar strip — separated from the body by a tone shift
-                // (subBg vs. mainBg below), no border/divider line at all.
+                // Top Navigation Bar
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 54
-                    color: Colors.subBg
+                    color: "transparent"
+                    z: 10
 
                     MouseArea {
                         anchors.fill: parent
@@ -104,7 +103,6 @@ Scope {
                                 text: "settings"
                                 color: Colors.accent
                                 font.family: Fonts.icon
-                                font.variableAxes: Fonts.iconAxes
                                 font.pixelSize: Dimens.fontSizeXl
                             }
                             Text {
@@ -118,47 +116,11 @@ Scope {
 
                         Item { Layout.fillWidth: true }
 
-                        // Search box — elevatedBg instead of a border to read
-                        // as a raised input sitting on top of the toolbar.
-                        Rectangle {
-                            Layout.preferredWidth: 280
-                            Layout.preferredHeight: 34
-                            color: searchInput.activeFocus ? Colors.elevatedBg : Colors.mainBg
-                            radius: Dimens.radiusMedium
-
-                            Behavior on color { ColorAnimation { duration: 150 } }
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: Dimens.paddingSmall
-                                anchors.rightMargin: Dimens.paddingSmall
-                                spacing: Dimens.spacingSmall
-
-                                Text {
-                                    text: "search"
-                                    color: Colors.subtext
-                                    font.family: Fonts.icon
-                                    font.variableAxes: Fonts.iconAxes
-                                    font.pixelSize: Dimens.fontSizeMd
-                                }
-
-                                TextInput {
-                                    id: searchInput
-                                    Layout.fillWidth: true
-                                    verticalAlignment: TextInput.AlignVCenter
-                                    color: Colors.fg
-                                    font.family: Fonts.text
-                                    font.pixelSize: Dimens.fontSizeBase
-                                    selectByMouse: true
-
-                                    Text {
-                                        text: "Search 12 sections..."
-                                        color: Colors.subtext
-                                        font: searchInput.font
-                                        visible: searchInput.text.length === 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                }
+                        SearchBox {
+                            id: searchBox
+                            onOptionSelected: (idx) => {
+                                sectionList.currentIndex = idx
+                                contentRoot.forceActiveFocus()
                             }
                         }
                     }
@@ -170,89 +132,96 @@ Scope {
                     Layout.margins: Dimens.paddingLarge
                     spacing: Dimens.spacingLarge
 
+                    // Sidebar Section Navigation List
                     ListView {
                         id: sectionList
                         Layout.preferredWidth: 220
                         Layout.fillHeight: true
                         clip: true
-                        spacing: Dimens.spacingSmall
+                        spacing: 0
 
                         model: ListModel {
                             id: allSections
-                            ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "island bar layout geometry" }
-                            ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "time calendar date" }
-                            ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "player mpris volume audio" }
-                            ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color palette" }
+                            ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "top margin corner radius border notch mode height" }
+                            ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "24-hour clock seconds format" }
+                            ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "mpris volume audio output" }
+                            ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent" }
                             ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
                             ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
-                            ListElement { sectionName: "Notifications"; icon: "notifications"; tag: "mako toasts daemon" }
-                            ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles" }
-                            ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password macos" }
-                            ListElement { sectionName: "Display"; icon: "desktop_windows"; tag: "resolution scale hyprland vrr" }
-                            ListElement { sectionName: "Mouse"; icon: "mouse"; tag: "cursor sensitivity acceleration" }
-                            ListElement { sectionName: "System"; icon: "settings"; tag: "hardware power info" }
+                            ListElement { sectionName: "Notifications"; icon: "notifications"; tag: "mako toasts position timeout" }
+                            ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles network wifi" }
+                            ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
+                            ListElement { sectionName: "Display"; icon: "desktop_windows"; tag: "resolution scale vrr monitor" }
+                            ListElement { sectionName: "Mouse"; icon: "mouse"; tag: "cursor sensitivity scroll" }
+                            ListElement { sectionName: "System"; icon: "settings"; tag: "hardware power info sleep battery" }
                         }
 
                         delegate: Item {
-                            id: delegateItem
                             width: sectionList.width
-                            height: matchesSearch ? 38 : 0
-                            visible: matchesSearch
+                            height: matchesSearch ? 42 : 0
+                            visible: height > 0
+                            clip: true
 
                             property bool isSelected: sectionList.currentIndex === index
                             property bool matchesSearch: {
-                                let query = searchInput.text.toLowerCase().trim()
+                                let query = searchBox.searchText.toLowerCase().trim()
                                 if (query === "") return true
                                 return model.sectionName.toLowerCase().includes(query) || model.tag.toLowerCase().includes(query)
                             }
 
                             Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
 
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 2
-                                color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.elevatedBg : "transparent")
-                                opacity: isSelected ? 0.2 : 1.0
-                                radius: Dimens.radiusMedium
+                            Item {
+                                width: parent.width
+                                height: 38
+                                anchors.top: parent.top
 
-                                Behavior on color { ColorAnimation { duration: 120 } }
-                            }
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: 2
+                                    color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.subBg : "transparent")
+                                    opacity: isSelected ? 0.2 : 1.0
+                                    radius: Dimens.radiusMedium
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: Dimens.paddingMedium
-                                spacing: Dimens.spacingMedium
-
-                                Text {
-                                    text: model.icon
-                                    color: isSelected ? Colors.accent : Colors.fg
-                                    font.family: Fonts.icon
-                                    font.variableAxes: Fonts.iconAxes
-                                    font.pixelSize: Dimens.fontSize15
+                                    Behavior on color { ColorAnimation { duration: 120 } }
                                 }
 
-                                Text {
-                                    text: model.sectionName
-                                    color: isSelected ? Colors.accent : Colors.fg
-                                    font.family: Fonts.text
-                                    font.pixelSize: Dimens.fontSizeBase
-                                    font.weight: isSelected ? Font.Bold : Font.Normal
-                                }
-                            }
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: Dimens.paddingMedium
+                                    spacing: Dimens.spacingMedium
 
-                            MouseArea {
-                                id: itemMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: sectionList.currentIndex = index
+                                    Text {
+                                        text: model.icon
+                                        color: isSelected ? Colors.accent : Colors.fg
+                                        font.family: Fonts.icon
+                                        font.pixelSize: Dimens.fontSize15
+                                    }
+
+                                    Text {
+                                        text: model.sectionName
+                                        color: isSelected ? Colors.accent : Colors.fg
+                                        font.family: Fonts.text
+                                        font.pixelSize: Dimens.fontSizeBase
+                                        font.weight: isSelected ? Font.Bold : Font.Normal
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: itemMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: sectionList.currentIndex = index
+                                }
                             }
                         }
                     }
 
+                    // Content Section Container
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: Colors.subBg
+                        color: Colors.subBgMica
                         radius: Dimens.radiusLarge
 
                         StackLayout {
@@ -274,61 +243,6 @@ Scope {
                             System {}
                         }
                     }
-                }
-            }
-
-            // Resize handles — edges + corners, native OS resize.
-            Item {
-                anchors.fill: parent
-                z: 100
-
-                MouseArea {
-                    width: 5
-                    anchors { left: parent.left; top: parent.top; bottom: parent.bottom; topMargin: 10; bottomMargin: 10 }
-                    cursorShape: Qt.SizeHorCursor
-                    onPressed: window.startSystemResize(Edges.Left)
-                }
-                MouseArea {
-                    width: 5
-                    anchors { right: parent.right; top: parent.top; bottom: parent.bottom; topMargin: 10; bottomMargin: 10 }
-                    cursorShape: Qt.SizeHorCursor
-                    onPressed: window.startSystemResize(Edges.Right)
-                }
-                MouseArea {
-                    height: 5
-                    anchors { top: parent.top; left: parent.left; right: parent.right; leftMargin: 10; rightMargin: 10 }
-                    cursorShape: Qt.SizeVerCursor
-                    onPressed: window.startSystemResize(Edges.Top)
-                }
-                MouseArea {
-                    height: 5
-                    anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 10; rightMargin: 10 }
-                    cursorShape: Qt.SizeVerCursor
-                    onPressed: window.startSystemResize(Edges.Bottom)
-                }
-                MouseArea {
-                    width: 10; height: 10
-                    anchors { left: parent.left; top: parent.top }
-                    cursorShape: Qt.SizeFDiagCursor
-                    onPressed: window.startSystemResize(Edges.Left | Edges.Top)
-                }
-                MouseArea {
-                    width: 10; height: 10
-                    anchors { right: parent.right; top: parent.top }
-                    cursorShape: Qt.SizeBDiagCursor
-                    onPressed: window.startSystemResize(Edges.Right | Edges.Top)
-                }
-                MouseArea {
-                    width: 10; height: 10
-                    anchors { left: parent.left; bottom: parent.bottom }
-                    cursorShape: Qt.SizeBDiagCursor
-                    onPressed: window.startSystemResize(Edges.Left | Edges.Bottom)
-                }
-                MouseArea {
-                    width: 10; height: 10
-                    anchors { right: parent.right; bottom: parent.bottom }
-                    cursorShape: Qt.SizeFDiagCursor
-                    onPressed: window.startSystemResize(Edges.Right | Edges.Bottom)
                 }
             }
         }

@@ -38,9 +38,9 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 90
             radius: card.radius
-            color: Colors.bgSurface
+            color: Colors.subBg
             border.width: card.isApplied ? 2 : (card.isSelected ? 1.5 : 0)
-            border.color: card.isApplied ? Colors.accent : Qt.rgba(1, 1, 1, 0.4)
+            border.color: card.isApplied ? (Colors.accent) : Qt.rgba(1, 1, 1, 0.4)
 
             scale: card.isHovered ? 1.02 : 1.0
             Behavior on scale {

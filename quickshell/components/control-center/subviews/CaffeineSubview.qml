@@ -50,7 +50,7 @@ Item {
             Layout.fillWidth: true
             implicitHeight: 64
             radius: Dimens.radiusMediumLarge
-            color: Colors.surface
+            color: Colors.subBgMica
             border.width: 1
             border.color: Colors.border
 

@@ -8,7 +8,7 @@ Rectangle {
     width: parent ? parent.width : 340
     implicitHeight: contentColumn.implicitHeight + 20
     radius: Dimens.radiusLarge
-    color: Colors.surface
+    color: Colors.subBgMica
     border.width: 1
     border.color: Colors.border
 

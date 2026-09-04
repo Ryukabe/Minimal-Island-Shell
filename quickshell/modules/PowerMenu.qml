@@ -131,7 +131,7 @@ Item {
                     width: 52
                     height: 52
                     radius: width / 2
-                    color: index === root.selectedIndex ? Colors.accent : Colors.surface
+                    color: index === root.selectedIndex ? Colors.accent : Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
 

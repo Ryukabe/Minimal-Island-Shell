@@ -23,6 +23,12 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,  hl.dsp.window.move({ workspace = i }))
 end
 
+-- Window Switcher
+hl.bind("ALT + Tab", function()
+    hl.dispatch(hl.dsp.window.cycle_next())
+    hl.dispatch(hl.dsp.window.bring_to_top())
+end)
+
 -- Scroll through workspaces
 --hl.bind(mainMod .. " + mouse_down",    hl.dsp.focus({ workspace = "e+1" }))
 --hl.bind(mainMod .. " + mouse_up",      hl.dsp.focus({ workspace = "e-1" }))
@@ -139,3 +145,4 @@ hl.bind(mainMod .. " + SHIFT + Print",      hl.dsp.exec_cmd("hyprshot -m region 
 
 -- Color Picker
 hl.bind(mainMod .. " + P",                  hl.dsp.exec_cmd("hyprpicker -a -f hex"))
+

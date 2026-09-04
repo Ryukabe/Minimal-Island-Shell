@@ -1,22 +1,33 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
+import "../services"
+import "../components/theme"
 import "../components/settings"
+import "../styles"
 
 Item {
     id: root
 
-    property string theme: "rose-pine"
     property real fontSize: 15
     property real spacingUnit: 4
     property real smallRadius: 10
 
+    // Tracks currently open floating dropdown ("bodyFont", "displayFont", or "")
+    property string activeDropdown: ""
+
+    readonly property var bodyFontOptions: ["Inter", "Roboto", "JetBrains Mono", "Sans-Serif"]
+    readonly property var displayFontOptions: ["Cabinet Grotesk", "Inter Display", "Outfit", "SF Pro Display"]
     readonly property var iconStyles: ["Rounded", "Outlined", "Sharp"]
 
-    function cycleIconStyle() {
-        var i = iconStyles.indexOf(Fonts.iconStyle)
-        Fonts.iconStyle = iconStyles[(i + 1) % iconStyles.length]
+    // Backdrop overlay to dismiss active dropdown when clicking anywhere outside
+    MouseArea {
+        id: dropdownBackdrop
+        parent: root.Window.contentItem
+        anchors.fill: parent
+        visible: root.activeDropdown !== ""
+        z: 190
+        onClicked: root.activeDropdown = ""
     }
 
     ScrollView {
@@ -35,29 +46,90 @@ Item {
                 id: contentCol
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.min(parent.width - Dimens.paddingMedium * 2, 640)
-                spacing: 0
+                spacing: 12
 
                 SettingsHeader {
                     icon: "palette"
                     title: "Appearance"
-                    subtitle: "Theme, wallpaper, fonts, corners, and surface depth."
+                    subtitle: "Theme, wallpaper, fonts, opacities, and surface depth."
                 }
 
-                SettingsSectionLabel { label: "Type" }
+                SettingsSectionLabel { label: "Theme" }
 
-                SettingsRow {
-                    label: "Theme"
-                    value: root.theme
-                    showChevron: true
-                    onClicked: {} // TODO: wire to ThemeSwitcher module
+                // --- Live Theme Carousel ---
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 140
+
+                    ListView {
+                        id: themeList
+                        anchors.fill: parent
+                        orientation: ListView.Horizontal
+                        spacing: 12
+                        clip: true
+                        model: ThemeService.themesList
+
+                        WheelHandler {
+                            orientation: Qt.Horizontal
+                            property: "contentX"
+                            rotationScale: 15
+                        }
+
+                        delegate: ThemeCard {
+                            required property var modelData
+                            required property int index
+
+                            themeName: modelData.name
+                            isApplied: ThemeService.currentTheme === modelData.name
+                            isSelected: themeList.currentIndex === index
+
+                            onClicked: {
+                                themeList.currentIndex = index
+                                ThemeService.applyTheme(modelData.name)
+                            }
+                        }
+                    }
                 }
 
-                SettingsRow {
-                    label: "Wallpaper"
-                    value: "Choose..."
-                    showChevron: true
-                    onClicked: {} // TODO: wire to WallpaperSwitcher module
+                SettingsSectionLabel { label: "Wallpaper" }
+
+                // --- Live Wallpaper Carousel ---
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 140
+
+                    ListView {
+                        id: wallpaperList
+                        anchors.fill: parent
+                        orientation: ListView.Horizontal
+                        spacing: 12
+                        clip: true
+                        model: WallpaperService.wallpapersList
+
+                        WheelHandler {
+                            orientation: Qt.Horizontal
+                            property: "contentX"
+                            rotationScale: 15
+                        }
+
+                        delegate: WallpaperCard {
+                            required property var modelData
+                            required property int index
+
+                            wallpaperPath: modelData.path
+                            wallpaperName: modelData.name
+                            isApplied: WallpaperService.currentWallpaper === modelData.path
+                            isSelected: wallpaperList.currentIndex === index
+
+                            onClicked: {
+                                wallpaperList.currentIndex = index
+                                WallpaperService.applyWallpaper(modelData.path)
+                            }
+                        }
+                    }
                 }
+
+                SettingsSectionLabel { label: "Typography" }
 
                 SettingsSliderRow {
                     label: "Font size"
@@ -67,18 +139,210 @@ Item {
                     onMoved: (val) => root.fontSize = val
                 }
 
-                SettingsRow {
-                    label: "Body font"
-                    value: Fonts.text
-                    showChevron: true
-                    onClicked: {} // TODO: font picker
+                // --- Body Font Dropdown ---
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: bodyFontRow.implicitHeight
+                    z: root.activeDropdown === "bodyFont" ? 200 : 1
+
+                    SettingsRow {
+                        id: bodyFontRow
+                        anchors.fill: parent
+                        label: "Body font"
+                        value: Fonts.text
+                        showChevron: true
+                        onClicked: root.activeDropdown = (root.activeDropdown === "bodyFont" ? "" : "bodyFont")
+                    }
+
+                    Rectangle {
+                        visible: root.activeDropdown === "bodyFont"
+                        width: 240
+                        anchors.top: parent.bottom
+                        anchors.topMargin: 4
+                        anchors.right: parent.right
+                        color: Colors.elevatedBg
+                        radius: Dimens.radiusMedium
+                        border.color: Qt.rgba(1, 1, 1, 0.12)
+                        border.width: 1
+                        z: 210
+                        height: Math.min(bodyFontList.contentHeight + 8, 180)
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onWheel: (wheel) => {
+                                bodyFontList.contentY = Math.max(0, Math.min(bodyFontList.contentY - wheel.angleDelta.y, bodyFontList.contentHeight - bodyFontList.height))
+                                wheel.accepted = true
+                            }
+                        }
+
+                        ListView {
+                            id: bodyFontList
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            clip: true
+                            model: root.bodyFontOptions
+
+                            delegate: Item {
+                                width: bodyFontList.width
+                                height: 36
+
+                                property bool isSelected: modelData === Fonts.text
+                                property bool isHighlighted: bfMouse.containsMouse || isSelected
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: isHighlighted ? Colors.accent : "transparent"
+                                    opacity: isHighlighted ? (isSelected ? 0.3 : 0.15) : 0
+                                    radius: Dimens.radiusSmall
+                                }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 10
+                                    anchors.rightMargin: 10
+
+                                    Text {
+                                        text: modelData
+                                        color: Colors.fg
+                                        font.family: modelData
+                                        font.pixelSize: Dimens.fontSizeBase
+                                    }
+
+                                    Item { Layout.fillWidth: true }
+
+                                    Text {
+                                        visible: isSelected
+                                        text: "check"
+                                        color: Colors.accent
+                                        font.family: Fonts.icon
+                                        font.pixelSize: Dimens.fontSizeMd
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: bfMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        Fonts.text = modelData
+                                        root.activeDropdown = ""
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
-                SettingsRow {
-                    label: "Display font"
-                    value: Fonts.display
-                    showChevron: true
-                    onClicked: {} // TODO: font picker
+                // --- Display Font Dropdown ---
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: displayFontRow.implicitHeight
+                    z: root.activeDropdown === "displayFont" ? 200 : 1
+
+                    SettingsRow {
+                        id: displayFontRow
+                        anchors.fill: parent
+                        label: "Display font"
+                        value: Fonts.display
+                        showChevron: true
+                        onClicked: root.activeDropdown = (root.activeDropdown === "displayFont" ? "" : "displayFont")
+                    }
+
+                    Rectangle {
+                        visible: root.activeDropdown === "displayFont"
+                        width: 240
+                        anchors.top: parent.bottom
+                        anchors.topMargin: 4
+                        anchors.right: parent.right
+                        color: Colors.elevatedBg
+                        radius: Dimens.radiusMedium
+                        border.color: Qt.rgba(1, 1, 1, 0.12)
+                        border.width: 1
+                        z: 210
+                        height: Math.min(displayFontList.contentHeight + 8, 180)
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onWheel: (wheel) => {
+                                displayFontList.contentY = Math.max(0, Math.min(displayFontList.contentY - wheel.angleDelta.y, displayFontList.contentHeight - displayFontList.height))
+                                wheel.accepted = true
+                            }
+                        }
+
+                        ListView {
+                            id: displayFontList
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            clip: true
+                            model: root.displayFontOptions
+
+                            delegate: Item {
+                                width: displayFontList.width
+                                height: 36
+
+                                property bool isSelected: modelData === Fonts.display
+                                property bool isHighlighted: dfMouse.containsMouse || isSelected
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: isHighlighted ? Colors.accent : "transparent"
+                                    opacity: isHighlighted ? (isSelected ? 0.3 : 0.15) : 0
+                                    radius: Dimens.radiusSmall
+                                }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 10
+                                    anchors.rightMargin: 10
+
+                                    Text {
+                                        text: modelData
+                                        color: Colors.fg
+                                        font.family: modelData
+                                        font.pixelSize: Dimens.fontSizeBase
+                                    }
+
+                                    Item { Layout.fillWidth: true }
+
+                                    Text {
+                                        visible: isSelected
+                                        text: "check"
+                                        color: Colors.accent
+                                        font.family: Fonts.icon
+                                        font.pixelSize: Dimens.fontSizeMd
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: dfMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        Fonts.display = modelData
+                                        root.activeDropdown = ""
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                SettingsSectionLabel { label: "Opacity" }
+
+                SettingsSliderRow {
+                    label: "Main opacity"
+                    from: 0.0; to: 1.0; stepSize: 0.01
+                    decimals: 2
+                    value: Colors.micaAlpha
+                    onMoved: (val) => Colors.micaAlpha = val
+                }
+
+                SettingsSliderRow {
+                    label: "Secondary opacity"
+                    from: 0.0; to: 1.0; stepSize: 0.01
+                    decimals: 2
+                    value: Colors.micaBeta
+                    onMoved: (val) => Colors.micaBeta = val
                 }
 
                 SettingsSectionLabel { label: "Shape & Depth" }
@@ -109,11 +373,63 @@ Item {
                     }
                 }
 
-                SettingsRow {
-                    label: "Icon Style"
-                    value: Fonts.iconStyle
-                    showChevron: true
-                    onClicked: root.cycleIconStyle()
+                // --- Icon Style Switcher ---
+                RowLayout {
+                    Layout.fillWidth: true
+                    implicitHeight: 36
+
+                    Text {
+                        text: "Icon Style"
+                        color: Colors.fg
+                        font.family: Fonts.text
+                        font.pixelSize: Dimens.fontSizeBase
+                        Layout.fillWidth: true
+                    }
+
+                    Rectangle {
+                        implicitWidth: segmentedRow.implicitWidth + 8
+                        implicitHeight: 32
+                        color: Qt.rgba(1, 1, 1, 0.04)
+                        radius: Dimens.radiusMedium
+                        border.color: Qt.rgba(1, 1, 1, 0.12)
+
+                        RowLayout {
+                            id: segmentedRow
+                            anchors.centerIn: parent
+                            spacing: 2
+
+                            Repeater {
+                                model: root.iconStyles
+
+                                delegate: Rectangle {
+                                    required property string modelData
+                                    property bool isSelected: Fonts.iconStyle === modelData
+
+                                    implicitWidth: 72
+                                    implicitHeight: 26
+                                    radius: Dimens.radiusSmall
+                                    color: isSelected ? Colors.accent : (segMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData
+                                        color: isSelected ? Colors.fg : Colors.subtext
+                                        font.family: Fonts.text
+                                        font.pixelSize: Dimens.fontSizeSmall
+                                        font.weight: isSelected ? Font.Medium : Font.Normal
+                                    }
+
+                                    MouseArea {
+                                        id: segMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: Fonts.iconStyle = modelData
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 SettingsSliderRow {
@@ -121,14 +437,6 @@ Item {
                     from: 100; to: 700; stepSize: 50
                     value: Fonts.iconWeight
                     onMoved: (val) => Fonts.iconWeight = val
-                }
-
-                SettingsSliderRow {
-                    label: "Surface Opacity"
-                    from: 0.3; to: 1.0; stepSize: 0.05
-                    decimals: 2
-                    value: Colors.micaBeta
-                    onMoved: (val) => Colors.micaBeta = val
                 }
             }
         }

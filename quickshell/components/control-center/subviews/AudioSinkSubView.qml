@@ -52,7 +52,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: Dimens.radiusLarge
-            color: Colors.surface
+            color: Colors.subBgMica
             border.width: 1
             border.color: Colors.border
 

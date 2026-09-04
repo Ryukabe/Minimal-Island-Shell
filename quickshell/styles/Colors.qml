@@ -1,6 +1,7 @@
 // styles/Colors.qml
 pragma Singleton
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import "../services"
 
@@ -11,9 +12,12 @@ Item {
     property bool loaded: false
     property bool lightModeEnabled: false
 
-    // Default fallbacks — still used by pick() for foreground/accent/semantic
-    // colors. Background entries here are now inert since mainBg/subBg no
-    // longer route through pick() at all.
+    property real micaAlpha: 1.0
+    property real micaBeta: 0.80
+
+    readonly property string configPath: Quickshell.env("HOME") + "/.config/quickshell/appearance.json"
+
+    // --- Safety Palette ---
     readonly property var _safetyPalette: ({
         isLight: false,
         background: "#040e0d",
@@ -30,6 +34,39 @@ Item {
         cyan: "#3dd1b0"
     })
 
+    // --- Configuration Persistence ---
+    FileView {
+        id: appearanceConfigFile
+        path: root.configPath
+        watchChanges: true
+        onLoaded: {
+            try {
+                var data = JSON.parse(text());
+                if (data.micaAlpha !== undefined) root.micaAlpha = data.micaAlpha;
+                if (data.micaBeta !== undefined) root.micaBeta = data.micaBeta;
+            } catch (e) {
+                console.log("[Colors] Config parse error:", e);
+            }
+        }
+    }
+
+    Process {
+        id: saveProcess
+    }
+
+    function saveAppearanceConfig() {
+        var data = {
+            "micaAlpha": root.micaAlpha,
+            "micaBeta": root.micaBeta
+        };
+        saveProcess.command = ["sh", "-c", "mkdir -p ~/.config/quickshell && echo '" + JSON.stringify(data) + "' > " + root.configPath];
+        saveProcess.running = true;
+    }
+
+    onMicaAlphaChanged: saveAppearanceConfig()
+    onMicaBetaChanged: saveAppearanceConfig()
+
+    // --- Theme Loader ---
     FileView {
         id: themeFile
         path: ThemeService.currentThemeJsonPath
@@ -81,19 +118,10 @@ Item {
 
     readonly property bool darkMode: !pick("isLight")
 
-        // ─────────────────────────────────────────────────────────────
-    // mainBg / subBg / elevatedBg — fixed, hardcoded pair plus one derived
-    // tone. NOT theme-driven. elevatedBg is computed from subBg (not a
-    // third hardcoded hex) so it can't drift out of sync with it — it's
-    // for anything that needs to read as "raised" above a card (search
-    // boxes, hover states, nested inputs) WITHOUT a border line, since
-    // borders are being phased out in favor of elevation.
-    // ─────────────────────────────────────────────────────────────
     readonly property color mainBg: root.lightModeEnabled ? "#fffcf0" : "#131413"
     readonly property color subBg: root.lightModeEnabled ? "#f5f2e7" : "#1e1e1e"
-    readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(subBg, 1.06) : Qt.lighter(subBg, 1.35)
+    readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(subBg, 1.08) : Qt.lighter(subBg, 1.35)
 
-    // Foreground / accent / semantic colors — still theme-driven, unchanged.
     readonly property color fg: pick("foreground")
     readonly property color fgMuted: pick("fgMuted")
     readonly property color subtext: pick("fgMuted")
@@ -110,26 +138,11 @@ Item {
     readonly property color black: darkMode ? subBg : border
     readonly property color white: darkMode ? "#ffffff" : subBg
 
-    readonly property color brightBlack: darkMode ? fgMuted : border
-    readonly property color brightRed: red
-    readonly property color brightGreen: green
-    readonly property color brightYellow: yellow
-    readonly property color brightBlue: blue
-    readonly property color brightPurple: purple
-    readonly property color brightCyan: cyan
-    readonly property color brightWhite: white
-
-    // Mica Effect — no longer readonly, since Appearance settings now drive
-    // these live via sliders. Same default values as before.
-    property real micaAlpha: 1.0
-    property real micaBeta: 0.80
-
-    // Translucent variants of the two fixed backgrounds above.
     readonly property color mainBgMica: Qt.rgba(mainBg.r, mainBg.g, mainBg.b, micaAlpha)
     readonly property color subBgMica: Qt.rgba(subBg.r, subBg.g, subBg.b, micaBeta)
 
-    // Shared by adapters/* — kept public since color→hex is generic.
     function toHex(c) {
+        if (!c || c.r === undefined) return "#000000";
         function h(v) { var s = Math.round(v * 255).toString(16); return s.length < 2 ? "0" + s : s; }
         return "#" + h(c.r) + h(c.g) + h(c.b);
     }

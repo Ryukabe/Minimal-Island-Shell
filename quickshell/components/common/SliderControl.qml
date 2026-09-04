@@ -22,7 +22,7 @@ Item {
         width: parent.width
         height: 6
         radius: Dimens.radiusFull
-        color: Colors.surface
+        color: Colors.subBgMica
         border.color: Colors.border
         border.width: 1
 

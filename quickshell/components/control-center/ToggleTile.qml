@@ -21,7 +21,7 @@ Rectangle {
     implicitWidth: compact ? 76 : 160
     implicitHeight: compact ? 78 : 64
     radius: compact ? Dimens.radiusMedium : Dimens.radiusMediumLarge
-    color: Colors.surface
+    color: Colors.subBgMica
     border.width: 1
     border.color: Colors.border
 

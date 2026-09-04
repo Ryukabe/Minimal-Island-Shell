@@ -56,9 +56,9 @@ Item {
         return fallback;
     }
 
-    readonly property color previewBg: pick("background", Colors.bgSurface)
-    readonly property color previewAccent: pick("accent", Colors.accent)
-    readonly property color previewFg: pick("foreground", Colors.fg)
+readonly property color previewBg: pick("background", Colors.subBg || "#1e1e1e")
+readonly property color previewAccent: pick("accent", Colors.accent || "#007acc")
+readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
 
     implicitWidth: 145
     implicitHeight: 125

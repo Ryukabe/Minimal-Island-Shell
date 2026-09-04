@@ -63,7 +63,7 @@ Item {
                     width: 28
                     height: 28
                     radius: 14
-                    color: Colors.surface
+                    color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
 
@@ -86,7 +86,7 @@ Item {
                     width: 28
                     height: 28
                     radius: 14
-                    color: Colors.surface
+                    color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
                     visible: BluetoothService.enabled
@@ -186,7 +186,7 @@ Item {
                                 width: 84
                                 height: 28
                                 radius: 14
-                                color: Colors.surface
+                                color: Colors.subBgMica
                                 border.width: 1
                                 border.color: Colors.border
 
@@ -243,7 +243,7 @@ Item {
                                 width: availableListColumn.width
                                 height: 48
                                 radius: Dimens.radiusLarge
-                                color: Colors.surface
+                                color: Colors.subBgMica
                                 border.width: 1
                                 border.color: Colors.border
 

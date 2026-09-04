@@ -33,7 +33,7 @@ Rectangle {
             Layout.preferredHeight: 60
             Layout.alignment: Qt.AlignVCenter
             radius: Dimens.borderRadiusSmall
-            color: Colors.surface
+            color: Colors.subBgMica
             clip: true
 
             Image {

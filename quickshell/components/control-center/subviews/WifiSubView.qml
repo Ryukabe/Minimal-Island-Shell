@@ -68,7 +68,7 @@ Item {
                     width: 28
                     height: 28
                     radius: 14
-                    color: Colors.surface
+                    color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
 
@@ -91,7 +91,7 @@ Item {
                     width: 28
                     height: 28
                     radius: 14
-                    color: Colors.surface
+                    color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
                     visible: WifiService.enabled
@@ -153,7 +153,7 @@ Item {
                         width: parent.width
                         height: 52
                         radius: Dimens.radiusLarge
-                        color: Colors.bgSurface
+                        color: Colors.subBgMica
                         border.width: 1
                         border.color: Colors.border
 
@@ -215,7 +215,7 @@ Item {
                             width: listColumn.width
                             height: 48
                             radius: Dimens.radiusLarge
-                            color: Colors.surface
+                            color: Colors.subBgMica
                             border.width: 1
                             border.color: Colors.border
 
@@ -321,7 +321,7 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: 40
                 radius: Dimens.radiusMedium
-                color: Colors.surface
+                color: Colors.subBgMica
                 border.width: 1
                 border.color: Colors.border
 
@@ -346,7 +346,7 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: 38
                     radius: Dimens.radiusMedium
-                    color: Colors.surface
+                    color: Colors.subBgMica
 
                     Text {
                         anchors.centerIn: parent

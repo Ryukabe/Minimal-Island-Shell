@@ -42,7 +42,7 @@ Rectangle {
             width: 72
             height: 72
             radius: Dimens.radiusMediumLarge
-            color: Colors.surface
+                color: Colors.subBgMica
             clip: true
 
             Image {
