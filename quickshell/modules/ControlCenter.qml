@@ -11,8 +11,8 @@ Item {
     id: root
     property string activeSubview: ""
 
-    implicitWidth: pageLoader.item ? pageLoader.item.implicitWidth : 580
-    implicitHeight: pageLoader.item ? pageLoader.item.implicitHeight : 400
+    implicitWidth: ShellState.controlCenterWidth
+    implicitHeight: ShellState.controlCenterHeight
 
     focus: true
     Keys.onPressed: (event) => {

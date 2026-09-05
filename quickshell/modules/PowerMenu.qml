@@ -7,8 +7,8 @@ import "../services"
 
 Item {
     id: root
-    implicitWidth: row.implicitWidth + 48
-    implicitHeight: 76
+    implicitWidth: ShellState.powerMenuWidth
+    implicitHeight: ShellState.powerMenuHeight
     focus: true
     clip: true
 

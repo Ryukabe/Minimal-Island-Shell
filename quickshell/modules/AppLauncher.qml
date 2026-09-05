@@ -9,9 +9,10 @@ Item {
     id: root
 
     readonly property int rowHeight: 54
-    readonly property int maxVisibleRows: 7
+    readonly property int maxVisibleRows: ShellState.launcherMaxRows
+    readonly property int maxWidth: ShellState.launcherWidth
     readonly property int chromeHeight: 76 
-    readonly property int maxWidth: 420
+
 
     property string query: ""
     property var results: AppLauncherService.filteredApps(query)

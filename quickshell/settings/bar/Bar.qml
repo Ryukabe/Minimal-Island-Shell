@@ -12,7 +12,7 @@ Item {
         SettingsHeader {
             icon: "dock_to_bottom"
             title: "Bar & Island"
-            subtitle: "Shape and size of the island, the notch, and the Game Mode bar."
+            subtitle: "Shape, size, and individual module dimensions."
         }
 
         SettingsSectionLabel { label: "Behavior" }
@@ -68,7 +68,7 @@ Item {
             onMoved: (val) => ShellState.islandNotchFlare = val
         }
 
-        SettingsSectionLabel { label: "Sizing" }
+        SettingsSectionLabel { label: "Global Bar Sizing" }
 
         SettingsSliderRow {
             label: "Bar height"
@@ -87,7 +87,7 @@ Item {
         }
 
         SettingsSliderRow {
-            label: "Expanded height"
+            label: "Expanded height floor"
             from: 60; to: 400; stepSize: 1
             value: ShellState.islandExpandedHeight
             unit: " px"
@@ -100,6 +100,134 @@ Item {
             value: ShellState.islandMinExpandedWidth
             unit: " px"
             onMoved: (val) => ShellState.islandMinExpandedWidth = val
+        }
+
+        // ================= MODULE SECTIONS =================
+
+        SettingsSectionLabel { label: "App Launcher" }
+
+        SettingsSliderRow {
+            label: "Launcher width"
+            from: 300; to: 800; stepSize: 10
+            value: ShellState.launcherWidth || 420
+            unit: " px"
+            onMoved: (val) => ShellState.launcherWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Max visible rows"
+            from: 3; to: 12; stepSize: 1
+            value: ShellState.launcherMaxRows || 7
+            unit: " rows"
+            onMoved: (val) => ShellState.launcherMaxRows = val
+        }
+
+        SettingsSectionLabel { label: "Clipboard" }
+
+        SettingsSliderRow {
+            label: "Clipboard width"
+            from: 300; to: 800; stepSize: 10
+            value: ShellState.clipboardWidth || 420
+            unit: " px"
+            onMoved: (val) => ShellState.clipboardWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Max visible rows"
+            from: 3; to: 12; stepSize: 1
+            value: ShellState.clipboardMaxRows || 6
+            unit: " rows"
+            onMoved: (val) => ShellState.clipboardMaxRows = val
+        }
+
+        SettingsSectionLabel { label: "Control Center" }
+
+        SettingsSliderRow {
+            label: "Control center width"
+            from: 400; to: 900; stepSize: 10
+            value: ShellState.controlCenterWidth || 580
+            unit: " px"
+            onMoved: (val) => ShellState.controlCenterWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Control center height"
+            from: 300; to: 700; stepSize: 10
+            value: ShellState.controlCenterHeight || 400
+            unit: " px"
+            onMoved: (val) => ShellState.controlCenterHeight = val
+        }
+
+        SettingsSectionLabel { label: "Notification Center" }
+
+        SettingsSliderRow {
+            label: "Notification center width"
+            from: 280; to: 600; stepSize: 10
+            value: ShellState.notificationCenterWidth || 360
+            unit: " px"
+            onMoved: (val) => ShellState.notificationCenterWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Max height"
+            from: 250; to: 800; stepSize: 10
+            value: ShellState.notificationCenterMaxHeight || 480
+            unit: " px"
+            onMoved: (val) => ShellState.notificationCenterMaxHeight = val
+        }
+
+        SettingsSectionLabel { label: "Power Menu" }
+
+        SettingsSliderRow {
+            label: "Power menu width"
+            from: 250; to: 600; stepSize: 10
+            value: ShellState.powerMenuWidth || 320
+            unit: " px"
+            onMoved: (val) => ShellState.powerMenuWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Power menu height"
+            from: 60; to: 120; stepSize: 2
+            value: ShellState.powerMenuHeight || 76
+            unit: " px"
+            onMoved: (val) => ShellState.powerMenuHeight = val
+        }
+
+        SettingsSectionLabel { label: "Status Panel" }
+
+        SettingsSliderRow {
+            label: "Status panel width"
+            from: 400; to: 800; stepSize: 10
+            value: ShellState.statusPanelWidth || 520
+            unit: " px"
+            onMoved: (val) => ShellState.statusPanelWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Status panel height"
+            from: 140; to: 300; stepSize: 5
+            value: ShellState.statusPanelHeight || 172
+            unit: " px"
+            onMoved: (val) => ShellState.statusPanelHeight = val
+        }
+
+        SettingsSectionLabel { label: "Timer Module" }
+
+        SettingsSliderRow {
+            label: "Timer width"
+            from: 240; to: 500; stepSize: 10
+            value: ShellState.timerWidth || 320
+            unit: " px"
+            onMoved: (val) => ShellState.timerWidth = val
+        }
+
+        SettingsSliderRow {
+            label: "Timer height"
+            from: 140; to: 300; stepSize: 5
+            value: ShellState.timerHeight || 180
+            unit: " px"
+            onMoved: (val) => ShellState.timerHeight = val
         }
     }
 }

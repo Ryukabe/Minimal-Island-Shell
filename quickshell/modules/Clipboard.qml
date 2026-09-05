@@ -10,9 +10,9 @@ Item {
     id: root
 
     readonly property int rowHeight: 42
-    readonly property int maxVisibleRows: 6
     readonly property int chromeHeight: 76
-    readonly property int maxWidth: 420
+    readonly property int maxVisibleRows: ShellState.clipboardMaxRows
+    readonly property int maxWidth: ShellState.clipboardWidth
 
     property var historyItems: ClipboardService.filteredHistory
     property int selectedIndex: 0

@@ -1,3 +1,4 @@
+// settings/common/SettingsSliderRow.qml
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -30,7 +31,6 @@ ColumnLayout {
             Layout.fillWidth: true
         }
 
-        // Styled input container pill
         Rectangle {
             id: inputContainer
             implicitWidth: Math.max(56, inputRow.implicitWidth + 16)
@@ -63,12 +63,14 @@ ColumnLayout {
                     selectByMouse: true
                     text: root.decimals > 0 ? root.value.toFixed(root.decimals) : Math.round(root.value).toString()
 
+                    onAccepted: root.forceActiveFocus()
+                    Keys.onEscapePressed: root.forceActiveFocus()
+
                     onEditingFinished: {
                         let raw = text.trim()
                         let parsed = parseFloat(raw)
 
                         if (!isNaN(parsed)) {
-                            // If max value is <= 1.0 and user enters a number > 1 (e.g. "80" or "7"), auto prepend "0."
                             if (root.to <= 1.0 && parsed > 1.0) {
                                 let digitsOnly = raw.replace(/[^0-9]/g, "")
                                 let converted = parseFloat("0." + digitsOnly)
@@ -81,7 +83,6 @@ ColumnLayout {
                             root.moved(clamped)
                         }
 
-                        // Re-bind text to display properly formatted number (adds trailing zeroes for 0/1 automatically)
                         text = Qt.binding(() => root.decimals > 0 ? root.value.toFixed(root.decimals) : Math.round(root.value).toString())
                     }
                 }

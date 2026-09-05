@@ -90,9 +90,9 @@ hl.window_rule({
 hl.window_rule({
     name   = "quickshell-settings",
     match  = { title = "^(Settings)$" },
-    float  = true,
+    --float  = true,
     center = true,
-   size   = "800 600",
+    --size   = "800 600",
 })
 
 -- Browser

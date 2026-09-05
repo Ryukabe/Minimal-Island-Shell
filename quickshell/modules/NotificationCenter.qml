@@ -8,8 +8,8 @@ import "../components/notification-center"
 
 Item {
     id: root
-    implicitWidth: 360
-    implicitHeight: Math.min(contentWrapper.implicitHeight, 480)
+    implicitWidth: ShellState.notificationCenterWidth
+    implicitHeight: Math.min(contentWrapper.implicitHeight, ShellState.notificationCenterMaxHeight)
 
     focus: true
     Timer {

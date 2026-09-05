@@ -10,8 +10,8 @@ import "../components/bar"
 Item {
     id: root
 
-    implicitWidth: 320
-    implicitHeight: 180
+    implicitWidth: ShellState.timerWidth
+    implicitHeight: ShellState.timerHeight
 
     property int selectedMinutes: 5
 

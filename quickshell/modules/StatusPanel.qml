@@ -6,8 +6,8 @@ import "../services"
 
 Rectangle {
     id: root
-    implicitWidth: 520
-    implicitHeight: 172
+    implicitWidth: ShellState.statusPanelWidth
+    implicitHeight: ShellState.statusPanelHeight
     color: Colors.bg
     radius: Dimens.radiusXLarge
     focus: true
