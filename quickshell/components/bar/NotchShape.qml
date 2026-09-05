@@ -13,6 +13,9 @@ Shape {
     width: notchWidth + flare * 2
     height: notchHeight
 
+    antialiasing: true
+    preferredRendererType: Shape.CurveRenderer
+
     ShapePath {
         fillColor: root.fillColor
         strokeWidth: -1
@@ -20,31 +23,34 @@ Shape {
         startX: 0
         startY: 0
 
-        // Top-left flare — smooth outward curve from the screen edge into
-        // the notch's left vertical side, instead of a sharp 90° corner.
+        // Top-left flare.
         PathQuad { x: root.flare; y: root.flare; controlX: root.flare; controlY: 0 }
 
-        // Left vertical edge down to the bottom-left rounded corner.
+        // Left vertical edge down to the bottom-left corner.
         PathLine { x: root.flare; y: root.notchHeight - root.bottomRadius }
-        PathArc {
+
+        // Bottom-left rounded corner — control point at the sharp corner
+        // itself guarantees a tangent, correctly-curved fillet (no arc
+        // direction/large-arc ambiguity like PathArc has).
+        PathQuad {
             x: root.flare + root.bottomRadius; y: root.notchHeight
-            radiusX: root.bottomRadius; radiusY: root.bottomRadius
-            direction: PathArc.Clockwise
+            controlX: root.flare; controlY: root.notchHeight
         }
 
         // Bottom edge.
         PathLine { x: root.flare + root.notchWidth - root.bottomRadius; y: root.notchHeight }
-        PathArc {
+
+        // Bottom-right rounded corner, mirrored the same way.
+        PathQuad {
             x: root.flare + root.notchWidth; y: root.notchHeight - root.bottomRadius
-            radiusX: root.bottomRadius; radiusY: root.bottomRadius
-            direction: PathArc.Clockwise
+            controlX: root.flare + root.notchWidth; controlY: root.notchHeight
         }
 
         // Right vertical edge up, then the mirrored top-right flare.
         PathLine { x: root.flare + root.notchWidth; y: root.flare }
         PathQuad { x: root.flare * 2 + root.notchWidth; y: 0; controlX: root.flare + root.notchWidth; controlY: 0 }
 
-        // Close along the flat top edge (flush with the screen edge).
+        // Close along the flat top edge.
         PathLine { x: 0; y: 0 }
     }
 }

@@ -1,12 +1,11 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
-    property bool peaceMode: false
 
     ScrollView {
         id: scrollView
@@ -27,15 +26,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "notifications"
-                    title: "Notifications"
-                    subtitle: "Toast behavior and Do Not Disturb."
+                    icon: "desktop_windows"
+                    title: "Display"
+                    subtitle: "Resolution, scaling, and refresh rate."
                 }
 
-                SettingsToggleRow {
-                    label: "Peace Mode (Do Not Disturb)"
-                    checked: root.peaceMode
-                    onToggled: (val) => root.peaceMode = val
+                SettingsRow {
+                    label: "Display Scale Factor"
+                    value: "100%"
+                    showChevron: false
                 }
             }
         }

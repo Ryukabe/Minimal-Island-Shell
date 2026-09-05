@@ -1,4 +1,4 @@
-module control-center
+module components.controlcenter
 ToggleTile 1.0 ToggleTile.qml
 TogglePager 1.0 TogglePager.qml
 MainToggleView 1.0 MainToggleView.qml

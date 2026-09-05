@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
+    property bool naturalScrolling: true
 
     ScrollView {
         id: scrollView
@@ -26,15 +27,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "desktop_windows"
-                    title: "Display"
-                    subtitle: "Resolution, scaling, and refresh rate."
+                    icon: "mouse"
+                    title: "Mouse & Touchpad"
+                    subtitle: "Cursor behavior and scrolling direction."
                 }
 
-                SettingsRow {
-                    label: "Display Scale Factor"
-                    value: "100%"
-                    showChevron: false
+                SettingsToggleRow {
+                    label: "Natural Scrolling"
+                    checked: root.naturalScrolling
+                    onToggled: (val) => root.naturalScrolling = val
                 }
             }
         }

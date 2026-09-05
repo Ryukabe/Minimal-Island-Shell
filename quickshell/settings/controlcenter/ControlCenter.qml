@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
-    property string powerProfile: "balanced"
+    property bool compactSliders: false
 
     ScrollView {
         id: scrollView
@@ -27,21 +27,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "settings"
-                    title: "System"
-                    subtitle: "Hardware status and power management."
+                    icon: "widgets"
+                    title: "Control Center"
+                    subtitle: "Layout and appearance of quick toggle tiles."
                 }
 
-                SettingsRow {
-                    label: "Active Power Profile"
-                    value: root.powerProfile.toUpperCase()
-                    showChevron: false
-                }
-
-                Button {
-                    Layout.fillWidth: true
-                    Layout.topMargin: Dimens.spacingLarge
-                    text: "Reload Shell State"
+                SettingsToggleRow {
+                    label: "Compact Slider Layout"
+                    checked: root.compactSliders
+                    onToggled: (val) => root.compactSliders = val
                 }
             }
         }

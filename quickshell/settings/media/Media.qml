@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
-    property bool use24Hour: true
+    property bool showVisualizer: true
 
     ScrollView {
         id: scrollView
@@ -27,15 +27,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "schedule"
-                    title: "Clock & Date"
-                    subtitle: "Time format, date display, and calendar options."
+                    icon: "graphic_eq"
+                    title: "Media"
+                    subtitle: "Audio visualizer and player behavior in the island."
                 }
 
                 SettingsToggleRow {
-                    label: "Use 24-Hour Clock Format"
-                    checked: root.use24Hour
-                    onToggled: (val) => root.use24Hour = val
+                    label: "Show Audio Visualizer in Island"
+                    checked: root.showVisualizer
+                    onToggled: (val) => root.showVisualizer = val
                 }
             }
         }

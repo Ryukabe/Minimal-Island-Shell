@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
-    property bool naturalScrolling: true
+    property bool peaceMode: false
 
     ScrollView {
         id: scrollView
@@ -27,15 +27,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "mouse"
-                    title: "Mouse & Touchpad"
-                    subtitle: "Cursor behavior and scrolling direction."
+                    icon: "notifications"
+                    title: "Notifications"
+                    subtitle: "Toast behavior and Do Not Disturb."
                 }
 
                 SettingsToggleRow {
-                    label: "Natural Scrolling"
-                    checked: root.naturalScrolling
-                    onToggled: (val) => root.naturalScrolling = val
+                    label: "Peace Mode (Do Not Disturb)"
+                    checked: root.peaceMode
+                    onToggled: (val) => root.peaceMode = val
                 }
             }
         }

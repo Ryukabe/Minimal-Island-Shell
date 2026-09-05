@@ -1,0 +1,13 @@
+{
+  "islandTopMargin": 5,
+  "islandCornerRadius": 12,
+  "islandBorderWidth": 0,
+  "islandClickOutsideDismiss": true,
+  "islandNotchMode": true,
+  "islandNotchFlare": 14,
+  "motionReduced": false,
+  "motionMovementMs": 480,
+  "motionFadeMs": 220,
+  "motionHoverMs": 250,
+  "motionBouncePercent": 20
+}

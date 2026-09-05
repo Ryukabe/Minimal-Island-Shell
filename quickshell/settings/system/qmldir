@@ -1,0 +1,6 @@
+module settings.system
+
+System 1.0 System.qml
+SettingsUpdateCard 1.0 SettingsUpdateCard.qml
+singleton SystemInfoService 1.0 SystemInfoService.qml
+singleton UpdateService 1.0 UpdateService.qml

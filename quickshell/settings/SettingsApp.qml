@@ -4,6 +4,18 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import "./services"
+import "bar"
+import "clock"
+import "media"
+import "appearance"
+import "motion"
+import "launcher"
+import "notifications"
+import "controlcenter"
+import "lockscreen"
+import "display"
+import "mouse"
+import "system"
 import "../services"
 import "../styles"
 
@@ -78,7 +90,6 @@ Scope {
                 anchors.fill: parent
                 spacing: 0
 
-                // Top Navigation Bar
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 54
@@ -132,7 +143,6 @@ Scope {
                     Layout.margins: Dimens.paddingLarge
                     spacing: Dimens.spacingLarge
 
-                    // Sidebar Section Navigation List
                     ListView {
                         id: sectionList
                         Layout.preferredWidth: 220
@@ -217,7 +227,6 @@ Scope {
                         }
                     }
 
-                    // Content Section Container
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true

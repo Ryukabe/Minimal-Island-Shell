@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
-    property bool frostedBlur: true
+    property bool use24Hour: true
 
     ScrollView {
         id: scrollView
@@ -27,15 +27,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "lock"
-                    title: "Lock Screen"
-                    subtitle: "Security and background appearance while locked."
+                    icon: "schedule"
+                    title: "Clock & Date"
+                    subtitle: "Time format, date display, and calendar options."
                 }
 
                 SettingsToggleRow {
-                    label: "Frosted Glass Background Blur"
-                    checked: root.frostedBlur
-                    onToggled: (val) => root.frostedBlur = val
+                    label: "Use 24-Hour Clock Format"
+                    checked: root.use24Hour
+                    onToggled: (val) => root.use24Hour = val
                 }
             }
         }

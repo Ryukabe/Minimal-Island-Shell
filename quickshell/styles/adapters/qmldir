@@ -1,4 +1,4 @@
-module adapters
+module styles.adapters
 singleton Hyprland 1.0 Hyprland.qml
 singleton Kitty 1.0 Kitty.qml
 singleton VSCode 1.0 VSCode.qml

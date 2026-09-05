@@ -15,6 +15,11 @@ Item {
     property real micaAlpha: 1.0
     property real micaBeta: 0.80
 
+    // Guards against feedback loops and pre-load overwrites, same pattern
+    // used in SettingsStore.qml.
+    property bool _configLoaded: false
+    property bool _applyingConfig: false
+
     readonly property string configPath: Quickshell.env("HOME") + "/.config/quickshell/appearance.json"
 
     // --- Safety Palette ---
@@ -40,13 +45,22 @@ Item {
         path: root.configPath
         watchChanges: true
         onLoaded: {
+            root._applyingConfig = true
             try {
                 var data = JSON.parse(text());
                 if (data.micaAlpha !== undefined) root.micaAlpha = data.micaAlpha;
                 if (data.micaBeta !== undefined) root.micaBeta = data.micaBeta;
+                if (data.lightModeEnabled !== undefined) root.lightModeEnabled = data.lightModeEnabled;
+                if (data.iconStyle !== undefined) Fonts.iconStyle = data.iconStyle;
+                if (data.iconWeight !== undefined) Fonts.iconWeight = data.iconWeight;
             } catch (e) {
                 console.log("[Colors] Config parse error:", e);
             }
+            root._applyingConfig = false
+            root._configLoaded = true
+        }
+        onLoadFailed: error => {
+            root._configLoaded = true
         }
     }
 
@@ -55,9 +69,13 @@ Item {
     }
 
     function saveAppearanceConfig() {
+        if (!root._configLoaded || root._applyingConfig) return;
         var data = {
             "micaAlpha": root.micaAlpha,
-            "micaBeta": root.micaBeta
+            "micaBeta": root.micaBeta,
+            "lightModeEnabled": root.lightModeEnabled,
+            "iconStyle": Fonts.iconStyle,
+            "iconWeight": Fonts.iconWeight
         };
         saveProcess.command = ["sh", "-c", "mkdir -p ~/.config/quickshell && echo '" + JSON.stringify(data) + "' > " + root.configPath];
         saveProcess.running = true;
@@ -65,6 +83,13 @@ Item {
 
     onMicaAlphaChanged: saveAppearanceConfig()
     onMicaBetaChanged: saveAppearanceConfig()
+    onLightModeEnabledChanged: saveAppearanceConfig()
+
+    Connections {
+        target: Fonts
+        function onIconStyleChanged() { root.saveAppearanceConfig() }
+        function onIconWeightChanged() { root.saveAppearanceConfig() }
+    }
 
     // --- Theme Loader ---
     FileView {

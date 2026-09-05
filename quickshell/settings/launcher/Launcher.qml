@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
-    property bool showVisualizer: true
+    property bool inlineCalculator: true
 
     ScrollView {
         id: scrollView
@@ -27,15 +27,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "graphic_eq"
-                    title: "Media"
-                    subtitle: "Audio visualizer and player behavior in the island."
+                    icon: "rocket_launch"
+                    title: "App Launcher"
+                    subtitle: "Search behavior, calculator, and clipboard history."
                 }
 
                 SettingsToggleRow {
-                    label: "Show Audio Visualizer in Island"
-                    checked: root.showVisualizer
-                    onToggled: (val) => root.showVisualizer = val
+                    label: "Inline Calculator Engine"
+                    checked: root.inlineCalculator
+                    onToggled: (val) => root.inlineCalculator = val
                 }
             }
         }

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
-import "../common"
+import "../../components/common"
 
 Item {
     id: root

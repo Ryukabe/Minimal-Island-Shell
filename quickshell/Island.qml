@@ -10,6 +10,7 @@ import "styles/adapters"
 import "services"
 import "components/bar"
 import "components/common"
+import "settings/services"
 
 PanelWindow {
     id: window
@@ -64,6 +65,7 @@ PanelWindow {
         Hyprland
         Kitty
         VSCode
+        SettingsStore
     }
 
     function brightnessTier(percent) {

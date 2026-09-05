@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../styles"
-import "../components/settings"
+import "../../styles"
+import "../common"
 
 Item {
     id: root
-    property bool inlineCalculator: true
+    property bool frostedBlur: true
 
     ScrollView {
         id: scrollView
@@ -27,15 +27,15 @@ Item {
                 spacing: 0
 
                 SettingsHeader {
-                    icon: "rocket_launch"
-                    title: "App Launcher"
-                    subtitle: "Search behavior, calculator, and clipboard history."
+                    icon: "lock"
+                    title: "Lock Screen"
+                    subtitle: "Security and background appearance while locked."
                 }
 
                 SettingsToggleRow {
-                    label: "Inline Calculator Engine"
-                    checked: root.inlineCalculator
-                    onToggled: (val) => root.inlineCalculator = val
+                    label: "Frosted Glass Background Blur"
+                    checked: root.frostedBlur
+                    onToggled: (val) => root.frostedBlur = val
                 }
             }
         }

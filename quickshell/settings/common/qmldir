@@ -1,0 +1,7 @@
+module settings.common
+
+SettingsHeader 1.0 SettingsHeader.qml
+SettingsRow 1.0 SettingsRow.qml
+SettingsSectionLabel 1.0 SettingsSectionLabel.qml
+SettingsSliderRow 1.0 SettingsSliderRow.qml
+SettingsToggleRow 1.0 SettingsToggleRow.qml
