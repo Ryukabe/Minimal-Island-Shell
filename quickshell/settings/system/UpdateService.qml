@@ -1,6 +1,7 @@
 // settings/services/UpdateService.qml — real system updates (pacman/yay) and
-// real shell self-update (git fetch/pull against this repo). No checks run
-// automatically; everything is user-triggered via the Check/Update buttons.
+// real shell self-update (git fetch/pull against this repo). Checks run
+// automatically on startup and on a timer; the "Recheck" button remains for
+// an on-demand refresh.
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -11,11 +12,17 @@ Item {
 
     readonly property string repoPath: Quickshell.shellDir
 
+    function formatTime(date) {
+        return date ? Qt.formatDateTime(date, "MMM d, hh:mm AP") : ""
+    }
+
     // --- System package updates (pacman + AUR via yay) ---
     property bool systemChecking: false
     property bool systemChecked: false
     property int systemUpdateCount: 0
     property bool systemJustUpdated: false
+    property var systemLastChecked: null
+    property var systemLastUpdated: null
 
     function checkSystemUpdates() {
         root.systemChecking = true
@@ -37,6 +44,7 @@ Item {
                 root.systemUpdateCount = trimmed.length > 0 ? trimmed.split("\n").length : 0
                 root.systemChecking = false
                 root.systemChecked = true
+                root.systemLastChecked = new Date()
             }
         }
     }
@@ -46,6 +54,7 @@ Item {
         command: ["kitty", "-e", "yay", "-Syu"]
         onExited: (exitCode, exitStatus) => {
             root.systemJustUpdated = (exitCode === 0)
+            if (exitCode === 0) root.systemLastUpdated = new Date()
             root.systemChecked = false
             root.systemUpdateCount = 0
         }
@@ -58,6 +67,8 @@ Item {
     property int shellCommitsBehind: 0
     property bool shellUpdating: false
     property bool shellJustUpdated: false
+    property var shellLastChecked: null
+    property var shellLastUpdated: null
 
     function checkShellUpdate() {
         root.shellChecking = true
@@ -81,6 +92,7 @@ Item {
                 root.shellChecking = false
                 root.shellChecked = true
                 root.shellUpdateAvailable = false
+                root.shellLastChecked = new Date()
             }
         }
     }
@@ -95,6 +107,7 @@ Item {
                 root.shellUpdateAvailable = root.shellCommitsBehind > 0
                 root.shellChecking = false
                 root.shellChecked = true
+                root.shellLastChecked = new Date()
             }
         }
     }
@@ -108,7 +121,26 @@ Item {
                 root.shellUpdateAvailable = false
                 root.shellCommitsBehind = 0
                 root.shellJustUpdated = true
+                root.shellLastUpdated = new Date()
             }
+        }
+    }
+
+    // Auto-check once on shell startup instead of waiting for a click.
+    Component.onCompleted: {
+        checkSystemUpdates()
+        checkShellUpdate()
+    }
+
+    // Periodic re-check so status doesn't go stale if Settings stays open
+    // or the shell runs for a long time between manual visits to this page.
+    Timer {
+        interval: 15 * 60 * 1000 // 15 minutes
+        running: true
+        repeat: true
+        onTriggered: {
+            if (!root.systemChecking) root.checkSystemUpdates()
+            if (!root.shellChecking) root.checkShellUpdate()
         }
     }
 }

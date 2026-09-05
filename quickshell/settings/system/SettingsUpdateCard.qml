@@ -1,9 +1,9 @@
-// settings/components/SettingsUpdateCard.qml — status card with Check + action
+// settings/common/SettingsUpdateCard.qml — status card with Check + action
 // buttons, used for both system updates and shell self-update.
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import "../../styles"
+import "../common"
 
 Rectangle {
     id: root
@@ -13,6 +13,8 @@ Rectangle {
     property string statusText: "Not checked yet"
     property string actionText: "Update"
     property string noteText: ""
+    property string lastCheckedText: ""
+    property string lastUpdatedText: ""
     property bool actionEnabled: false
     property bool checking: false
     property bool busy: false
@@ -24,8 +26,8 @@ Rectangle {
     implicitHeight: contentCol.implicitHeight + Dimens.paddingMedium * 2
     radius: Dimens.radiusMedium
     color: Colors.subBgMica
-    border.color: Qt.rgba(1, 1, 1, 0.08)
-    border.width: 1
+    // Borders removed per design feedback — the mica background alone
+    // separates the card from the page without an outline.
 
     ColumnLayout {
         id: contentCol
@@ -33,7 +35,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: Dimens.paddingMedium
-        spacing: 6
+        spacing: 4
 
         RowLayout {
             Layout.fillWidth: true
@@ -48,7 +50,6 @@ Rectangle {
             }
 
             ColumnLayout {
-                Layout.fillWidth: true
                 spacing: 2
 
                 Text {
@@ -67,17 +68,40 @@ Rectangle {
                 }
             }
 
-            Button {
-                text: "Check"
-                enabled: !root.checking && !root.busy
-                onClicked: root.checkRequested()
-            }
+            // Guarantees the buttons sit flush right regardless of title/status
+            // text length — do not remove in favor of fillWidth on the column above.
+            Item { Layout.fillWidth: true }
 
-            Button {
-                text: root.busy ? "Working..." : root.actionText
-                enabled: root.actionEnabled && !root.busy && !root.checking
-                onClicked: root.actionRequested()
+            RowLayout {
+                spacing: Dimens.spacingSmall
+
+                SettingsButton {
+                    text: "Recheck"
+                    enabled: !root.checking && !root.busy
+                    onClicked: root.checkRequested()
+                }
+
+                SettingsButton {
+                    primary: true
+                    text: root.actionText
+                    busy: root.busy
+                    enabled: root.actionEnabled && !root.busy && !root.checking
+                    onClicked: root.actionRequested()
+                }
             }
+        }
+
+        Text {
+            visible: root.lastCheckedText.length > 0 || root.lastUpdatedText.length > 0
+            text: [
+                root.lastCheckedText.length > 0 ? "Last checked: " + root.lastCheckedText : "",
+                root.lastUpdatedText.length > 0 ? "Last updated: " + root.lastUpdatedText : ""
+            ].filter(s => s.length > 0).join("  •  ")
+            color: Colors.subtext
+            font.family: Fonts.text
+            font.pixelSize: Dimens.fontSizeXs
+            Layout.fillWidth: true
+            Layout.topMargin: 2
         }
 
         Text {

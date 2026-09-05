@@ -176,10 +176,22 @@ PanelWindow {
         clip: true
 
         readonly property bool expanded: ShellState.activePage !== "clock" && ShellState.activePage !== "timertoast" && ShellState.activePage !== "settings"
-        readonly property int compactHeight: 36
-        readonly property int compactWidth: 160
-        property int targetWidth: pageLoader.item ? pageLoader.item.implicitWidth : compactWidth
-        property int targetHeight: pageLoader.item ? pageLoader.item.implicitHeight : compactHeight
+        readonly property int compactHeight: ShellState.islandCompactHeight
+        readonly property int compactWidth: ShellState.islandCompactWidth
+
+        // Content still drives sizing — these floors only raise the size when
+        // a page's own implicitWidth/Height falls short, never shrink it below
+        // what the page actually needs.
+        property int targetWidth: {
+            if (!pageLoader.item) return compactWidth
+            var floor = expanded ? ShellState.islandMinExpandedWidth : compactWidth
+            return Math.max(pageLoader.item.implicitWidth, floor)
+        }
+        property int targetHeight: {
+            if (!pageLoader.item) return compactHeight
+            var floor = expanded ? ShellState.islandExpandedHeight : compactHeight
+            return Math.max(pageLoader.item.implicitHeight, floor)
+        }
 
         width: targetWidth
         height: targetHeight

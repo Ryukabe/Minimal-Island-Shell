@@ -24,6 +24,14 @@ QtObject {
     property bool islandNotchMode: false
     property real islandNotchFlare: 14
 
+    // Collapsed/expanded sizing floors — Island.qml still sizes to whatever
+    // page is actually loaded; these set minimums rather than forcing every
+    // page to exactly this size regardless of its own content.
+    property real islandCompactHeight: 36
+    property real islandCompactWidth: 160
+    property real islandExpandedHeight: 135
+    property real islandMinExpandedWidth: 619
+
     property bool motionReduced: false
     property real motionMovementMs: 480
     property real motionFadeMs: 220
