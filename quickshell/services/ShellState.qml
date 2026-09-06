@@ -2,13 +2,9 @@
 pragma Singleton
 import QtQuick
 import Quickshell.Io
-import "../settings"
 
 QtObject {
     id: root
-
-    // File Persistence Helper
-    property StatePersistence persistence: StatePersistence { id: serializer }
 
     property string activePage: "clock"
     property string previousPage: "clock"
@@ -18,46 +14,46 @@ QtObject {
     property bool settingsOpen: false
 
     // ================= BAR & ISLAND PROPERTIES =================
-    property real islandTopMargin: 5; onIslandTopMarginChanged: serializer.triggerSave()
-    property real islandCornerRadius: 12; onIslandCornerRadiusChanged: serializer.triggerSave()
-    property real islandBorderWidth: 0; onIslandBorderWidthChanged: serializer.triggerSave()
-    property bool islandClickOutsideDismiss: true; onIslandClickOutsideDismissChanged: serializer.triggerSave()
-    property bool islandNotchMode: false; onIslandNotchModeChanged: serializer.triggerSave()
-    property real islandNotchFlare: 14; onIslandNotchFlareChanged: serializer.triggerSave()
+    property real islandTopMargin: 5
+    property real islandCornerRadius: 12
+    property real islandBorderWidth: 0
+    property bool islandClickOutsideDismiss: true
+    property bool islandNotchMode: false
+    property real islandNotchFlare: 14
 
-    property real islandCompactHeight: 36; onIslandCompactHeightChanged: serializer.triggerSave()
-    property real islandCompactWidth: 160; onIslandCompactWidthChanged: serializer.triggerSave()
-    property real islandExpandedHeight: 135; onIslandExpandedHeightChanged: serializer.triggerSave()
-    property real islandMinExpandedWidth: 619; onIslandMinExpandedWidthChanged: serializer.triggerSave()
+    property real islandCompactHeight: 36
+    property real islandCompactWidth: 160
+    property real islandExpandedHeight: 135
+    property real islandMinExpandedWidth: 619
 
     // ================= MODULE SIZING PROPERTIES =================
-    property real launcherWidth: 420; onLauncherWidthChanged: serializer.triggerSave()
-    property int launcherMaxRows: 7; onLauncherMaxRowsChanged: serializer.triggerSave()
+    property real launcherWidth: 420
+    property int launcherMaxRows: 7
 
-    property real clipboardWidth: 420; onClipboardWidthChanged: serializer.triggerSave()
-    property int clipboardMaxRows: 6; onClipboardMaxRowsChanged: serializer.triggerSave()
+    property real clipboardWidth: 420
+    property int clipboardMaxRows: 6
 
-    property real controlCenterWidth: 580; onControlCenterWidthChanged: serializer.triggerSave()
-    property real controlCenterHeight: 400; onControlCenterHeightChanged: serializer.triggerSave()
+    property real controlCenterWidth: 580
+    property real controlCenterHeight: 400
 
-    property real notificationCenterWidth: 360; onNotificationCenterWidthChanged: serializer.triggerSave()
-    property real notificationCenterMaxHeight: 480; onNotificationCenterMaxHeightChanged: serializer.triggerSave()
+    property real notificationCenterWidth: 360
+    property real notificationCenterMaxHeight: 480
 
-    property real powerMenuWidth: 320; onPowerMenuWidthChanged: serializer.triggerSave()
-    property real powerMenuHeight: 76; onPowerMenuHeightChanged: serializer.triggerSave()
+    property real powerMenuWidth: 320
+    property real powerMenuHeight: 76
 
-    property real statusPanelWidth: 520; onStatusPanelWidthChanged: serializer.triggerSave()
-    property real statusPanelHeight: 172; onStatusPanelHeightChanged: serializer.triggerSave()
+    property real statusPanelWidth: 520
+    property real statusPanelHeight: 172
 
-    property real timerWidth: 320; onTimerWidthChanged: serializer.triggerSave()
-    property real timerHeight: 180; onTimerHeightChanged: serializer.triggerSave()
+    property real timerWidth: 320
+    property real timerHeight: 180
 
     // ================= MOTION & ANIMATIONS =================
-    property bool motionReduced: false; onMotionReducedChanged: serializer.triggerSave()
-    property real motionMovementMs: 480; onMotionMovementMsChanged: serializer.triggerSave()
-    property real motionFadeMs: 220; onMotionFadeMsChanged: serializer.triggerSave()
-    property real motionHoverMs: 250; onMotionHoverMsChanged: serializer.triggerSave()
-    property real motionBouncePercent: 20; onMotionBouncePercentChanged: serializer.triggerSave()
+    property bool motionReduced: false
+    property real motionMovementMs: 480
+    property real motionFadeMs: 220
+    property real motionHoverMs: 250
+    property real motionBouncePercent: 20
 
     // ================= TIMERS & HELPERS =================
     property Timer hoverResetTimer: Timer {

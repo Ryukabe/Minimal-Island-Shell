@@ -1,15 +1,4 @@
-// services/HyprlandKeybindsService.qml — parses ~/.config/hypr/modules/binds.lua
-// and lets the Settings app rebind the key-combo portion of ANY hl.bind(...)
-// call, including dispatcher-based ones, WITHOUT touching the action/options
-// that follow it. New binds can only be added as exec_cmd (app/script/qs ipc)
-// since dispatcher call syntax is too varied to safely generate from a UI.
-// Multi-line binds are never auto-rewritten in structure — only flattened to
-// one line on request, or have their key combo swapped.
-//
-// Friendly names: auto-detected for common dispatcher shapes; anything else
-// (or any auto-name you don't like) can be manually overridden. Overrides are
-// stored in a separate sidecar JSON file, written via base64 (avoids heredoc/
-// quoting fragility) — binds.lua is read-only from this feature's perspective.
+// services/HyprlandKeybindsService.qml
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -23,15 +12,14 @@ Item {
     readonly property string customMarker: "-- === Custom binds (added via Settings) ==="
 
     property string rawText: ""
-    property var binds: []       // [{ id, keyDisplay, keyRaw, actionPreview, actionFull, actionKey, isCustom, isMultiline, keyStart, keyEnd, callStart, callEnd }]
-    property var conflictCounts: ({})   // keyDisplay -> how many binds currently use it
-    property var labelOverrides: ({})   // actionKey -> custom label string
+    property var binds: []
+    property var conflictCounts: ({})
+    property var labelOverrides: ({})
     property bool loaded: false
     property bool labelsLoaded: false
     property string lastLabelSaveError: ""
 
-    property string _mainMod: "SUPER"
-    property string _subMod: "CTRL + ALT"
+    property string mainMod: "SUPER"
 
     function refresh() { readProc.running = true; readLabelsProc.running = true }
 
@@ -75,21 +63,29 @@ Item {
                 }
             }
         }
-        onExited: (exitCode, exitStatus) => {
-            if (exitCode !== 0) {
-                console.log("[HyprlandKeybindsService] label save process exited with code", exitCode)
-            }
-        }
     }
 
-    // --- Parsing: bracket/string-aware so multi-line function() ... end
-    // blocks and nested tables are treated as one statement, not split apart.
+    function setMainMod(newMod) {
+        if (root.mainMod === newMod) return
+        let t = root.rawText
+        let updatedText = t.replace(/local\s+mainMod\s*=\s*"[^"]*"/, 'local mainMod = "' + newMod + '"')
+        root._write(updatedText)
+    }
+
+    function _categorizeBind(action) {
+        if (/qs ipc call|quickshell ipc call/.test(action)) {
+            return "Quickshell"
+        }
+        if (/playerctl|XF86Audio|brightness|hyprshot|hyprpicker|cliphist|wlogout|hyprlock/.test(action)) {
+            return "Media & System"
+        }
+        return "Hyprland"
+    }
+
     function _parse() {
         let t = root.rawText
         let mm = t.match(/local\s+mainMod\s*=\s*"([^"]*)"/)
-        let sm = t.match(/local\s+subMod\s*=\s*"([^"]*)"/)
-        root._mainMod = mm ? mm[1] : "SUPER"
-        root._subMod = sm ? sm[1] : "CTRL + ALT"
+        root.mainMod = mm ? mm[1] : "SUPER"
 
         let results = []
         let i = 0, id = 0
@@ -127,6 +123,12 @@ Item {
 
             let keyStart = callStart + 8
             let keyRaw = t.substring(keyStart, keyExprEnd).trim()
+
+            if (/\bkey\b|\bi\b|mouse:/.test(keyRaw)) {
+                i = callEnd + 1
+                continue
+            }
+
             let fullCall = t.substring(callStart, callEnd + 1)
             let actionFull = t.substring(keyExprEnd + 1, callEnd).trim().replace(/\s+/g, " ")
             let actionPreview = actionFull.length > 70 ? actionFull.substring(0, 70) + "…" : actionFull
@@ -137,7 +139,8 @@ Item {
                 keyDisplay: root._resolveKeyDisplay(keyRaw),
                 actionPreview: actionPreview,
                 actionFull: actionFull,
-                actionKey: actionFull,   // stable-ish identifier for label overrides
+                actionKey: actionFull,
+                category: root._categorizeBind(actionFull),
                 isCustom: false,
                 isMultiline: fullCall.indexOf("\n") !== -1,
                 keyStart: keyStart,
@@ -159,15 +162,56 @@ Item {
     }
 
     function _resolveKeyDisplay(keyRaw) {
-        let lit = keyRaw.match(/^"([^"]*)"$/)
-        if (lit) return lit[1].trim().replace(/\s+/g, " ")
-
-        let cat = keyRaw.match(/^(mainMod|subMod)\s*\.\.\s*"([^"]*)"$/)
-        if (cat) {
-            let base = cat[1] === "mainMod" ? root._mainMod : root._subMod
-            return (base + cat[2]).trim().replace(/\s+/g, " ")
+        let parts = []
+        let cur = "", inString = false, stringChar = ""
+        for (let i = 0; i < keyRaw.length; i++) {
+            let ch = keyRaw[i]
+            if (inString) {
+                cur += ch
+                if (ch === "\\") { cur += keyRaw[++i] || ""; continue }
+                if (ch === stringChar) inString = false
+                continue
+            }
+            if (ch === '"' || ch === "'") { inString = true; stringChar = ch; cur += ch; continue }
+            if (ch === "." && keyRaw[i + 1] === ".") {
+                parts.push(cur.trim())
+                cur = ""
+                i++
+                continue
+            }
+            cur += ch
         }
-        return keyRaw
+        if (cur.trim().length > 0) parts.push(cur.trim())
+
+        const keyMap = {
+            "mouse:272": "Left Mouse",
+            "mouse:273": "Right Mouse",
+            "mouse:274": "Middle Mouse",
+            "XF86AudioMute": "F1",
+            "XF86AudioLowerVolume": "F2",
+            "XF86AudioRaiseVolume": "F3",
+            "XF86AudioMicMute": "F4",
+            "XF86MonBrightnessDown": "F5",
+            "XF86MonBrightnessUp": "F6",
+            "XF86AudioPrev": "F9",
+            "XF86AudioPlay": "F10",
+            "XF86AudioPause": "F10",
+            "XF86AudioNext": "F11"
+        }
+
+        let resolved = parts.map(part => {
+            let lit = part.match(/^"([^"]*)"$/) || part.match(/^'([^']*)'$/)
+            if (lit) {
+                let val = lit[1]
+                return keyMap[val] !== undefined ? keyMap[val] : val
+            }
+            if (part === "mainMod") return root.mainMod
+            if (part === "key" || part === "i") return "1-10"
+
+            return "[" + part + "]"
+        })
+
+        return resolved.join("").trim().replace(/\s+/g, " ")
     }
 
     function _buildConflicts() {
@@ -176,7 +220,6 @@ Item {
         root.conflictCounts = counts
     }
 
-    // --- Friendly names ---
     function friendlyName(bind) {
         if (root.labelOverrides[bind.actionKey]) return root.labelOverrides[bind.actionKey]
         return root._autoLabel(bind.actionFull)
@@ -256,11 +299,6 @@ Item {
         root._saveLabels()
     }
 
-    // Rebuilt to avoid heredoc/quoting fragility entirely: the JSON is
-    // base64-encoded in QML, then decoded straight to the target file in one
-    // single-line shell command. No embedded newlines in the command string,
-    // no quote-escaping to get wrong. stderr/exit code are now surfaced to
-    // the log (see writeLabelsProc above) instead of failing silently.
     function _saveLabels() {
         let json = JSON.stringify(root.labelOverrides, null, 2)
         let b64 = Qt.btoa(json)
@@ -269,9 +307,6 @@ Item {
         writeLabelsProc.running = true
     }
 
-    // Rebinds only the key-combo argument. Everything from the first comma
-    // onward — the dispatcher call, exec_cmd, function block, options table —
-    // is copied through unchanged, regardless of whether it spans multiple lines.
     function rebindKey(bindId, newKeyDisplay) {
         let b = root.binds.find(x => x.id === bindId)
         if (!b) return false
@@ -281,9 +316,6 @@ Item {
         return true
     }
 
-    // Collapses a multi-line hl.bind(...) call onto one line — joins wrapped
-    // lines with a single space. Does not alter key combo or action logic,
-    // purely whitespace/newline cleanup.
     function flattenBind(bindId) {
         let b = root.binds.find(x => x.id === bindId)
         if (!b) return false
@@ -294,8 +326,6 @@ Item {
         return true
     }
 
-    // Appends a new exec_cmd-only bind under a dedicated marker section,
-    // created on first use.
     function addExecBind(newKeyDisplay, command) {
         let t = root.rawText
         let keyLit = "\"" + newKeyDisplay.replace(/"/g, '\\"') + "\""
@@ -310,9 +340,6 @@ Item {
         root._write(t)
     }
 
-    // Only binds added by this service (below the marker) can be removed —
-    // original hand-written binds elsewhere in the file are never deletable
-    // through this path.
     function removeCustomBind(bindId) {
         let b = root.binds.find(x => x.id === bindId)
         if (!b || !b.isCustom) return false
@@ -323,9 +350,6 @@ Item {
         return true
     }
 
-    // Written via heredoc — separate from label-saving above, and unrelated
-    // to the bug we just fixed (binds.lua rewrites were already confirmed
-    // working correctly in earlier testing).
     function _write(newText) {
         let marker = "QS_BINDS_EOF_" + Date.now()
         writeProc.command = ["sh", "-c",

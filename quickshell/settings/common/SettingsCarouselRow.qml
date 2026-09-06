@@ -1,4 +1,4 @@
-// settings/common/SettingsCarouselRow.qml — horizontal scrollable card row.
+// settings/components/SettingsCarouselRow.qml — horizontal scrollable card row.
 // Used by Theme and Wallpaper sections; delegate is supplied per use-site since
 // ThemeCard and WallpaperCard take different properties.
 import QtQuick

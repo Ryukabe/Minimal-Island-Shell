@@ -1,6 +1,4 @@
-// settings/keybinds/Keybinds.qml — lists every hl.bind(...) in binds.lua with
-// a friendly (auto-detected or manually renamed) name, plus rebind, flatten,
-// and add/remove for custom binds.
+// settings/keybinds/Keybinds.qml
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
@@ -13,6 +11,13 @@ Item {
     property string newKeyText: ""
     property string newCommandText: ""
 
+    readonly property var modifierOptions: ["SUPER", "CTRL", "ALT"]
+    readonly property var categories: ["Hyprland", "Quickshell", "Media & System"]
+
+    function getBindsForCategory(catName) {
+        return HyprlandKeybindsService.binds.filter(b => b.category === catName)
+    }
+
     SettingsScrollView {
         SettingsHeader {
             icon: "keyboard"
@@ -20,24 +25,45 @@ Item {
             subtitle: "Rebind any Hyprland shortcut, or add a new app/command bind."
         }
 
-        SettingsSectionLabel { label: "All Binds" }
+        SettingsSectionLabel { label: "Modifier Key" }
+
+        SettingsSegmentedRow {
+            label: "Main Modifier Key"
+            options: root.modifierOptions
+            selectedValue: HyprlandKeybindsService.mainMod
+            onOptionSelected: (value) => HyprlandKeybindsService.setMainMod(value)
+        }
 
         Repeater {
-            model: HyprlandKeybindsService.binds
-            delegate: KeybindRow {
-                required property var modelData
+            model: root.categories
+            delegate: ColumnLayout {
+                required property string modelData
+                property var catBinds: root.getBindsForCategory(modelData)
+
                 Layout.fillWidth: true
-                label: HyprlandKeybindsService.friendlyName(modelData)
-                isAutoLabel: HyprlandKeybindsService.isAutoNamed(modelData)
-                actionPreview: modelData.actionPreview
-                keyDisplay: modelData.keyDisplay
-                isCustom: modelData.isCustom
-                isMultiline: modelData.isMultiline
-                hasConflict: (HyprlandKeybindsService.conflictCounts[modelData.keyDisplay] || 0) > 1
-                onRebindRequested: (newKey) => HyprlandKeybindsService.rebindKey(modelData.id, newKey)
-                onRemoveRequested: HyprlandKeybindsService.removeCustomBind(modelData.id)
-                onFlattenRequested: HyprlandKeybindsService.flattenBind(modelData.id)
-                onRenameRequested: (newLabel) => HyprlandKeybindsService.setLabel(modelData.actionKey, newLabel)
+                spacing: Dimens.spacingSmall
+                visible: catBinds.length > 0
+
+                SettingsSectionLabel { label: parent.modelData + " Binds" }
+
+                Repeater {
+                    model: parent.catBinds
+                    delegate: KeybindRow {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        label: HyprlandKeybindsService.friendlyName(modelData)
+                        isAutoLabel: HyprlandKeybindsService.isAutoNamed(modelData)
+                        actionPreview: modelData.actionPreview
+                        keyDisplay: modelData.keyDisplay
+                        isCustom: modelData.isCustom
+                        isMultiline: modelData.isMultiline
+                        hasConflict: (HyprlandKeybindsService.conflictCounts[modelData.keyDisplay] || 0) > 1
+                        onRebindRequested: (newKey) => HyprlandKeybindsService.rebindKey(modelData.id, newKey)
+                        onRemoveRequested: HyprlandKeybindsService.removeCustomBind(modelData.id)
+                        onFlattenRequested: HyprlandKeybindsService.flattenBind(modelData.id)
+                        onRenameRequested: (newLabel) => HyprlandKeybindsService.setLabel(modelData.actionKey, newLabel)
+                    }
+                }
             }
         }
 

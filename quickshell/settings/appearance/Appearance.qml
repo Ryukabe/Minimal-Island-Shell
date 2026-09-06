@@ -93,6 +93,13 @@ Item {
                     }
                 }
 
+                SettingsToggleRow {
+                    label: "Auto-switch wallpaper with theme"
+                    checked: WallpaperService.autoSwitchOnThemeChange
+                    showDivider: false
+                    onToggled: (val) => WallpaperService.setAutoSwitch(val)
+                }
+
                 SettingsSectionLabel { label: "Typography" }
 
                 SettingsSliderRow {

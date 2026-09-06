@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Qt.labs.folderlistmodel
+import "../services"
 
 Item {
     id: root
@@ -16,7 +17,6 @@ Item {
 
     readonly property string currentThemeJsonPath: root.themesPath + "/" + root.currentTheme + "/quickshell.json"
 
-    // Fix: Added the missing function that ThemeCard.qml is trying to call
     function themeJsonPath(themeName) {
         return root.themesPath + "/" + themeName + "/quickshell.json";
     }
@@ -28,7 +28,10 @@ Item {
         command: ["cat", root.currentThemeFile]
         stdout: SplitParser {
             onRead: data => {
-                if (data.trim().length > 0) root.currentTheme = data.trim();
+                if (data.trim().length > 0) {
+                    root.currentTheme = data.trim();
+                    WallpaperService.switchToThemeWallpaper(root.currentTheme);
+                }
             }
         }
     }
@@ -60,6 +63,7 @@ Item {
         currentTheme = themeName;
         persistProc.command = ["bash", "-c", "echo -n \"" + themeName + "\" > \"" + root.currentThemeFile + "\""];
         persistProc.running = true;
+        WallpaperService.switchToThemeWallpaper(themeName);
     }
 
     Process { id: persistProc }

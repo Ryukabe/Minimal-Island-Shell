@@ -1,3 +1,4 @@
+// components/bar/TimerToast.qml
 import QtQuick
 import QtQuick.Layouts
 import "../../modules"
@@ -7,8 +8,8 @@ import "../../services"
 Item {
     id: root
 
-    implicitWidth: contentRow.implicitWidth + 36
-    implicitHeight: 36
+    implicitWidth: ShellState.islandCompactWidth + 5
+    implicitHeight: ShellState.islandCompactHeight 
 
     RowLayout {
         id: contentRow
@@ -43,7 +44,7 @@ Item {
                 width: 24
                 height: 24
                 color: Colors.subBgMica
-                radius: Dimens.islandRadius // Added radius
+                radius: Dimens.islandRadius
 
                 Text {
                     anchors.centerIn: parent
@@ -73,7 +74,7 @@ Item {
                 width: 24
                 height: 24
                 color: Colors.subBgMica
-                radius: Dimens.islandRadius // Added radius
+                radius: Dimens.islandRadius
 
                 Text {
                     anchors.centerIn: parent

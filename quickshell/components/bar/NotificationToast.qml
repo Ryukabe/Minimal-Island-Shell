@@ -1,3 +1,4 @@
+// components/bar/NotificationToast.qml
 import QtQuick
 import "../../styles"
 import "../../services"
@@ -7,13 +8,11 @@ Item {
 
     readonly property var notif: NotificationService.latestNotification
 
-    readonly property int horizontalPadding: Dimens.paddingMedium
-    readonly property int verticalPadding: Dimens.paddingSmall
     readonly property int iconSpacing: 10
     readonly property int maxTextWidth: 260
 
-    implicitWidth: contentRow.implicitWidth + horizontalPadding * 2
-    implicitHeight: contentRow.implicitHeight + verticalPadding * 2
+    implicitWidth: ShellState.islandCompactWidth
+    implicitHeight: ShellState.islandCompactHeight
 
     Row {
         id: contentRow
@@ -38,7 +37,7 @@ Item {
             color: Colors.fg
             elide: Text.ElideRight
             // width caps at maxTextWidth only if the real text is longer than that —
-            // short text keeps its true implicitWidth, so the pill still shrinks to fit
+            // short text keeps its true implicitWidth, so it never overflows the pill
             width: Math.min(implicitWidth, toast.maxTextWidth)
             anchors.verticalCenter: parent.verticalCenter
         }

@@ -1,5 +1,5 @@
 local mainMod = "SUPER"
-local subMod = "CTRL + ALT"
+
 
 --- System ---
 
@@ -13,8 +13,8 @@ hl.bind(mainMod .. " + right",                hl.dsp.focus({ direction = "right"
 hl.bind(mainMod .. " + up",                   hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",                 hl.dsp.focus({ direction = "down" }))
 
--- 3-Way Layout Switcher
-hl.bind(subMod .. " + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/changeLayout3.sh"))
+-- To this (or whatever key you prefer):
+hl.bind(mainMod .. " + ALT + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/changeLayout3.sh"))
 
 -- Workspaces
 for i = 1, 10 do
@@ -24,10 +24,7 @@ for i = 1, 10 do
 end
 
 -- Window Switcher
-hl.bind("ALT + Tab", function()
-    hl.dispatch(hl.dsp.window.cycle_next())
-    hl.dispatch(hl.dsp.window.bring_to_top())
-end)
+hl.bind("ALT + Tab", function() hl.dispatch(hl.dsp.window.cycle_next()) hl.dispatch(hl.dsp.window.bring_to_top()) end)
 
 -- Scroll through workspaces
 --hl.bind(mainMod .. " + mouse_down",    hl.dsp.focus({ workspace = "e+1" }))
@@ -54,8 +51,8 @@ hl.bind(mainMod .. " + mouse:273",     hl.dsp.window.resize(), { mouse = true })
 --hl.bind("F4",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --toggle"),   { locked = true, repeating = true })
 
 -- Media
+-- Media
 hl.bind("XF86AudioNext",                    hl.dsp.exec_cmd("playerctl next"),       { locked = true })
-hl.bind("XF86AudioPause",                   hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay",                    hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev",                    hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
 
@@ -88,7 +85,7 @@ hl.bind(mainMod .. " + N ",                 hl.dsp.exec_cmd("qs ipc call notific
 hl.bind(mainMod .. " + Escape ",            hl.dsp.exec_cmd("qs ipc call power toggle"))
 
 -- Lock
-hl.bind(mainMod .. " + L ",                 hl.dsp.exec_cmd("quickshell ipc call lock open"))
+hl.bind("SHIFT + ALT + L",                 hl.dsp.exec_cmd("quickshell ipc call lock open"))
 
 -- Theme Switcher
 hl.bind(mainMod .. " + T ",                 hl.dsp.exec_cmd("qs ipc call themeswitcher toggle"))
@@ -145,4 +142,7 @@ hl.bind(mainMod .. " + SHIFT + Print",      hl.dsp.exec_cmd("hyprshot -m region 
 
 -- Color Picker
 hl.bind(mainMod .. " + P",                  hl.dsp.exec_cmd("hyprpicker -a -f hex"))
+
+
+
 
