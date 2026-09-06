@@ -1,4 +1,5 @@
-// settings/system/System.qml
+// settings/system/System.qml — consolidated Display, Notifications, and
+// Mouse & Touchpad settings under one "System" page.
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
@@ -6,73 +7,42 @@ import "../common"
 
 Item {
     id: root
-    property string powerProfile: "balanced"
+
+    property bool peaceMode: false
+    property bool naturalScrolling: true
 
     SettingsScrollView {
         SettingsHeader {
             icon: "settings"
             title: "System"
-            subtitle: "Hardware status, power management, and updates."
+            subtitle: "Display, notifications, and mouse behavior."
         }
 
-        SettingsSectionLabel { label: "About" }
-
-        SettingsRow { label: "Device Name"; value: SystemInfoService.hostname; showChevron: false }
-        SettingsRow { label: "Operating System"; value: SystemInfoService.osName; showChevron: false }
-        SettingsRow { label: "Kernel"; value: SystemInfoService.kernel; showChevron: false }
-        SettingsRow { label: "Uptime"; value: SystemInfoService.uptime; showChevron: false }
-        SettingsRow { label: "Memory"; value: SystemInfoService.memoryUsed; showChevron: false }
-        SettingsRow { label: "Storage"; value: SystemInfoService.diskUsed; showChevron: false; showDivider: false }
-
-        SettingsSectionLabel { label: "Power" }
+        SettingsSectionLabel { label: "Display" }
 
         SettingsRow {
-            label: "Active Power Profile"
-            value: root.powerProfile.toUpperCase()
+            label: "Display Scale Factor"
+            value: "100%"
             showChevron: false
             showDivider: false
         }
 
-        SettingsSectionLabel { label: "Updates" }
+        SettingsSectionLabel { label: "Notifications" }
 
-        SettingsUpdateCard {
-            icon: "system_update"
-            title: "System Packages"
-            statusText: !UpdateService.systemChecked ? "Not checked yet"
-                : UpdateService.systemUpdateCount === 0 ? "Up to date"
-                : UpdateService.systemUpdateCount + " package(s) can be updated"
-            checking: UpdateService.systemChecking
-            actionEnabled: UpdateService.systemChecked && UpdateService.systemUpdateCount > 0
-            actionText: "Update Now"
-            lastCheckedText: UpdateService.formatTime(UpdateService.systemLastChecked)
-            lastUpdatedText: UpdateService.formatTime(UpdateService.systemLastUpdated)
-            noteText: UpdateService.systemJustUpdated ? "Update ran — some packages may need a reboot to fully apply." : ""
-            onCheckRequested: UpdateService.checkSystemUpdates()
-            onActionRequested: UpdateService.runSystemUpdate()
+        SettingsToggleRow {
+            label: "Peace Mode (Do Not Disturb)"
+            checked: root.peaceMode
+            showDivider: false
+            onToggled: (val) => root.peaceMode = val
         }
 
-        SettingsUpdateCard {
-            icon: "auto_awesome"
-            title: "Minimal-Island-Shell"
-            statusText: !UpdateService.shellChecked ? "Not checked yet"
-                : !UpdateService.shellUpdateAvailable ? "Up to date"
-                : UpdateService.shellCommitsBehind + " commit(s) behind"
-            checking: UpdateService.shellChecking
-            actionEnabled: UpdateService.shellChecked && UpdateService.shellUpdateAvailable
-            actionText: "Update Shell"
-            busy: UpdateService.shellUpdating
-            lastCheckedText: UpdateService.formatTime(UpdateService.shellLastChecked)
-            lastUpdatedText: UpdateService.formatTime(UpdateService.shellLastUpdated)
-            noteText: UpdateService.shellJustUpdated ? "Updated — restart the shell (pkill qs && qs) to apply." : ""
-            onCheckRequested: UpdateService.checkShellUpdate()
-            onActionRequested: UpdateService.runShellUpdate()
-        }
+        SettingsSectionLabel { label: "Mouse & Touchpad" }
 
-        SettingsButton {
-            primary: true
-            Layout.fillWidth: true
-            Layout.topMargin: Dimens.spacingLarge
-            text: "Reload Shell State"
+        SettingsToggleRow {
+            label: "Natural Scrolling"
+            checked: root.naturalScrolling
+            showDivider: false
+            onToggled: (val) => root.naturalScrolling = val
         }
     }
 }

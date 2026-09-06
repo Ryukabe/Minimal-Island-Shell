@@ -10,12 +10,10 @@ import "media"
 import "appearance"
 import "motion"
 import "launcher"
-import "notifications"
 import "controlcenter"
 import "lockscreen"
-import "display"
-import "mouse"
 import "system"
+import "about"
 import "../services"
 import "../styles"
 
@@ -150,21 +148,19 @@ Scope {
                         clip: true
                         spacing: 0
 
-                        model: ListModel {
-                            id: allSections
-                            ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "top margin corner radius border notch mode height" }
-                            ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "24-hour clock seconds format" }
-                            ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "mpris volume audio output" }
-                            ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent" }
-                            ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
-                            ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
-                            ListElement { sectionName: "Notifications"; icon: "notifications"; tag: "mako toasts position timeout" }
-                            ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles network wifi" }
-                            ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
-                            ListElement { sectionName: "Display"; icon: "desktop_windows"; tag: "resolution scale vrr monitor" }
-                            ListElement { sectionName: "Mouse"; icon: "mouse"; tag: "cursor sensitivity scroll" }
-                            ListElement { sectionName: "System"; icon: "settings"; tag: "hardware power info sleep battery" }
-                        }
+                    model: ListModel {
+                        id: allSections
+                        ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "top margin corner radius border notch mode height" }
+                        ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "24-hour clock seconds format" }
+                        ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "mpris volume audio output" }
+                        ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent" }
+                        ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
+                        ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
+                        ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles network wifi" }
+                        ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
+                        ListElement { sectionName: "System"; icon: "settings"; tag: "display resolution scale notifications toast dnd peace mode mouse touchpad cursor scrolling natural" }
+                        ListElement { sectionName: "About"; icon: "info"; tag: "hardware power info sleep battery updates" }
+                    }
 
                         delegate: Item {
                             width: sectionList.width
@@ -247,9 +243,8 @@ Scope {
                             Notifications {}
                             ControlCenter {}
                             LockScreen {}
-                            Display {}
-                            Mouse {}
                             System {}
+                            About {}
                         }
                     }
                 }
