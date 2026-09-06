@@ -14,6 +14,7 @@ import "controlcenter"
 import "lockscreen"
 import "system"
 import "about"
+import "keybinds"
 import "../services"
 import "../styles"
 
@@ -158,6 +159,7 @@ Scope {
                         ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
                         ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles network wifi" }
                         ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
+                        ListElement { sectionName: "Keybinds"; icon: "keyboard"; tag: "hyprland shortcuts binds hotkeys rebind" }
                         ListElement { sectionName: "System"; icon: "settings"; tag: "display resolution scale notifications toast dnd peace mode mouse touchpad cursor scrolling natural" }
                         ListElement { sectionName: "About"; icon: "info"; tag: "hardware power info sleep battery updates" }
                     }
@@ -240,9 +242,9 @@ Scope {
                             Appearance {}
                             Motion {}
                             Launcher {}
-                            Notifications {}
                             ControlCenter {}
                             LockScreen {}
+                            Keybinds {}
                             System {}
                             About {}
                         }

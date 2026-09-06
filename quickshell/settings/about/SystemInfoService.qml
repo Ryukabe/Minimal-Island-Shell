@@ -25,9 +25,11 @@ Item {
 
     Component.onCompleted: refresh()
 
+    // Reads /etc/hostname directly rather than shelling out to the
+    // `hostname` binary, which isn't guaranteed to be installed.
     Process {
         id: hostnameProc
-        command: ["hostname"]
+        command: ["cat", "/etc/hostname"]
         stdout: StdioCollector { onStreamFinished: root.hostname = text.trim() }
     }
 

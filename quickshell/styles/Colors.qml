@@ -145,8 +145,10 @@ Item {
 
     readonly property color mainBg: root.lightModeEnabled ? "#fffcf0" : "#131413"
     readonly property color subBg: root.lightModeEnabled ? "#f5f2e7" : "#1e1e1e"
-    readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(subBg, 1.08) : Qt.lighter(subBg, 1.35)
+    readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(bgsur, 1.08) : Qt.lighter(bgsur, 1.35)
 
+    readonly property color bg: pick("background")
+    readonly property color bgsur: pick("surface")
     readonly property color fg: pick("foreground")
     readonly property color fgMuted: pick("fgMuted")
     readonly property color subtext: pick("fgMuted")
@@ -163,8 +165,8 @@ Item {
     readonly property color black: darkMode ? subBg : border
     readonly property color white: darkMode ? "#ffffff" : subBg
 
-    readonly property color mainBgMica: Qt.rgba(mainBg.r, mainBg.g, mainBg.b, micaAlpha)
-    readonly property color subBgMica: Qt.rgba(subBg.r, subBg.g, subBg.b, micaBeta)
+    readonly property color mainBgMica: Qt.rgba(bg.r, bg.g, bg.b, micaAlpha)
+    readonly property color subBgMica: Qt.rgba(bgsur.r, bgsur.g, bgsur.b, micaBeta)
 
     function toHex(c) {
         if (!c || c.r === undefined) return "#000000";

@@ -1,0 +1,5 @@
+module settings.keybinds
+
+Keybinds 1.0 Keybinds.qml
+KeybindRow 1.0 KeybindRow.qml
+KeyCaptureField 1.0 KeyCaptureField.qml
