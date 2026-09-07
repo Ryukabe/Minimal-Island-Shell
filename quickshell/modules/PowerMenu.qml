@@ -16,7 +16,7 @@ Item {
         {
             icon: "lock",
             label: "Lock",
-            cmd: ["sh", "-c", "hyprlock -c $HOME/.config/hypr/hyprlock/hyprlock.conf"]
+            page: "lock"
         },
         {
             icon: "bedtime",
@@ -54,8 +54,13 @@ Item {
     }
 
     function triggerSelected() {
-        if (actions[selectedIndex]) {
-            runCmd(actions[selectedIndex].cmd)
+        var action = actions[selectedIndex]
+        if (!action) return
+
+        if (action.page) {
+            ShellState.showPage(action.page)
+        } else {
+            runCmd(action.cmd)
         }
     }
 
@@ -152,7 +157,11 @@ Item {
                     onEntered: root.selectedIndex = parent.index
                     onClicked: {
                         root.selectedIndex = parent.index
-                        root.runCmd(parent.modelData.cmd)
+                        if (parent.modelData.page) {
+                            ShellState.showPage(parent.modelData.page)
+                        } else {
+                            root.runCmd(parent.modelData.cmd)
+                        }
                     }
                 }
             }

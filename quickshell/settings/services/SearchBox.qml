@@ -108,7 +108,9 @@ Rectangle {
                     "Search settings...",
                     "Search 'Notch mode'...",
                     "Search 'Border width'...",
-                    "Search 'Corner radius'..."
+                    "Search 'Corner radius'...",
+                    "Search 'Blur Strength'...",
+                    "Search 'Movement (size / position)'..."
                 ]
                 property int phraseIdx: 0
                 property int charIdx: 0
@@ -190,16 +192,84 @@ Rectangle {
 
         ListModel {
             id: globalTogglesModel
+
+            // -- Bar & Island (index 0) --
             ListElement { title: "Top margin"; sectionIndex: 0; sectionName: "Bar & Island" }
             ListElement { title: "Corner radius"; sectionIndex: 0; sectionName: "Bar & Island" }
             ListElement { title: "Border width"; sectionIndex: 0; sectionName: "Bar & Island" }
             ListElement { title: "Click outside to dismiss"; sectionIndex: 0; sectionName: "Bar & Island" }
             ListElement { title: "Notch mode"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Notch flare"; sectionIndex: 0; sectionName: "Bar & Island" }
             ListElement { title: "Bar height"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Collapsed width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Expanded height floor"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Minimum expanded width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Launcher width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Clipboard width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Control center width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Control center height"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Notification center width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Power menu width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Power menu height"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Status panel width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Status panel height"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Timer width"; sectionIndex: 0; sectionName: "Bar & Island" }
+            ListElement { title: "Timer height"; sectionIndex: 0; sectionName: "Bar & Island" }
+
+            // -- Clock & Date (index 1) — unconfirmed, left as previously entered --
             ListElement { title: "24-Hour Clock"; sectionIndex: 1; sectionName: "Clock & Date" }
             ListElement { title: "Show Seconds"; sectionIndex: 1; sectionName: "Clock & Date" }
-            ListElement { title: "Dark Theme"; sectionIndex: 3; sectionName: "Appearance" }
-            ListElement { title: "Accent Color"; sectionIndex: 3; sectionName: "Appearance" }
+
+            // -- Appearance (index 3) --
+            ListElement { title: "Auto-switch wallpaper with theme"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Font size"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Body font"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Display font"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Main opacity"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Secondary opacity"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Spacing unit"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Small radius"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Light Mode"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Icon Style"; sectionIndex: 3; sectionName: "Appearance" }
+            ListElement { title: "Icon Weight"; sectionIndex: 3; sectionName: "Appearance" }
+
+            // -- Motion (index 4) --
+            ListElement { title: "Reduce motion"; sectionIndex: 4; sectionName: "Motion" }
+            ListElement { title: "Movement (size / position)"; sectionIndex: 4; sectionName: "Motion" }
+            ListElement { title: "Fades & colour"; sectionIndex: 4; sectionName: "Motion" }
+            ListElement { title: "Hover response"; sectionIndex: 4; sectionName: "Motion" }
+            ListElement { title: "Bounce"; sectionIndex: 4; sectionName: "Motion" }
+            ListElement { title: "Spring physics for bounce"; sectionIndex: 4; sectionName: "Motion" }
+
+            // -- Lock Screen (index 7) --
+            ListElement { title: "24-Hour Clock"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Show Date"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Show Username"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Placeholder Text"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Use Accent Color for Errors"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Frosted Glass Background Blur"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Blur Strength"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Wallpaper Dim Intensity"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Show HYPRLAND Action"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Show REBOOT Action"; sectionIndex: 7; sectionName: "Lock Screen" }
+            ListElement { title: "Show POWER Action"; sectionIndex: 7; sectionName: "Lock Screen" }
+
+            // -- System (index 9) --
+            ListElement { title: "Display Scale Factor"; sectionIndex: 9; sectionName: "System" }
+            ListElement { title: "Peace Mode (Do Not Disturb)"; sectionIndex: 9; sectionName: "System" }
+            ListElement { title: "Natural Scrolling"; sectionIndex: 9; sectionName: "System" }
+
+            // -- About (index 10) --
+            ListElement { title: "Device Name"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Operating System"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Kernel"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Uptime"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Memory"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Storage"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Active Power Profile"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "System Packages"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Minimal-Island-Shell"; sectionIndex: 10; sectionName: "About" }
+            ListElement { title: "Reload Shell State"; sectionIndex: 10; sectionName: "About" }
         }
 
         ListView {

@@ -1,6 +1,9 @@
 // modules/LockScreen.qml
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Effects
+import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Pam
@@ -31,7 +34,7 @@ WlSessionLock {
                             ShellState.showPage("clock")
                         }
                     } else {
-                        errorMessage.text = "Incorrect password"
+                        errorMessage.text = "incorrect password"
                         errorMessage.visible = true
                         passwordInput.text = ""
                         passwordInput.forceActiveFocus()
@@ -40,7 +43,7 @@ WlSessionLock {
                 }
 
                 onError: (err) => {
-                    errorMessage.text = "PAM Error"
+                    errorMessage.text = "pam error"
                     errorMessage.visible = true
                     passwordInput.text = ""
                     passwordInput.forceActiveFocus()
@@ -69,167 +72,206 @@ WlSessionLock {
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         cache: true
+                        visible: !LockScreenSettings.frostedBlurEnabled
+                    }
+
+                    FastBlur {
+                        anchors.fill: wallpaper
+                        source: wallpaper
+                        radius: LockScreenSettings.frostedBlurRadius
+                        visible: LockScreenSettings.frostedBlurEnabled
                     }
 
                     Rectangle {
                         anchors.fill: parent
-                        color: Colors.darkMode ? Qt.rgba(0, 0, 0, 0.35) : Qt.rgba(255, 255, 255, 0.35)
+                        color: Colors.darkMode
+                            ? Qt.rgba(0, 0, 0, LockScreenSettings.wallpaperDimOpacity)
+                            : Qt.rgba(1, 1, 1, LockScreenSettings.wallpaperDimOpacity)
                     }
 
+                    // ---- TOP-LEFT: clock ----
                     Column {
-                        anchors.centerIn: parent
-                        spacing: Dimens.spacingLg * 1.5
+                        id: clockBlock
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.topMargin: parent.height * 0.06
+                        anchors.leftMargin: parent.width * 0.05
+                        spacing: Dimens.spacingSmall
 
-                        // Clock Header
-                        Column {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: Dimens.spacingSmall
+                        Text {
+                            text: Qt.formatDateTime(new Date(), LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
+                            font.family: Fonts.display
+                            font.pixelSize: Dimens.fontSizeDisplay
+                            font.weight: Font.Bold
+                            color: Colors.fg
+                        }
+
+                        Text {
+                            visible: LockScreenSettings.showDate
+                            text: Qt.formatDateTime(new Date(), "dddd, MMMM d").toUpperCase()
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.letterSpacing: 2
+                            color: Colors.fgMuted
+                        }
+                    }
+
+                    // ---- BOTTOM-LEFT: hyprland action ----
+                    Text {
+                        id: hyprlandBtn
+                        visible: LockScreenSettings.showHyprlandAction
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: parent.width * 0.05
+                        anchors.bottomMargin: parent.height * 0.06
+                        text: "HYPRLAND"
+                        font.family: Fonts.mono
+                        font.pixelSize: Dimens.fontSizeXs
+                        font.letterSpacing: 1.5
+                        color: hyprlandArea.containsMouse ? Colors.fg : Colors.fgMuted
+
+                        MouseArea {
+                            id: hyprlandArea
+                            anchors.fill: parent
+                            anchors.margins: -8
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: exitHyprlandProc.running = true
+                        }
+                    }
+
+                    // ---- BOTTOM-RIGHT: identity + password + actions ----
+                    ColumnLayout {
+                        id: authBlock
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: parent.width * 0.05
+                        anchors.bottomMargin: parent.height * 0.06
+                        spacing: Dimens.spacingSmall
+
+                        Text {
+                            id: usernameLabel
+                            Layout.alignment: Qt.AlignRight
+                            visible: LockScreenSettings.showUsername
+                            text: (Quickshell.env("USER") || Qt.userName || "user").toUpperCase()
+                            font.family: Fonts.display
+                            font.pixelSize: Dimens.fontSizeMd
+                            font.weight: Font.Bold
+                            font.letterSpacing: 3
+                            rightPadding: -font.letterSpacing / 2
+                            color: Colors.fg
+                        }
+
+                        Item {
+                            id: passwordField
+                            Layout.alignment: Qt.AlignRight
+                            Layout.topMargin: Dimens.spacingMedium
+                            width: 220
+                            height: 30
 
                             Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: Qt.formatDateTime(new Date(), "HH:mm")
-                                font.family: Fonts.display
-                                font.pixelSize: Dimens.fontSizeDisplay
-                                font.weight: Font.Bold
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 8
+                                visible: passwordInput.text.length === 0
+                                text: LockScreenSettings.passwordPlaceholder.toUpperCase()
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeXs
+                                font.letterSpacing: 1.5
+                                color: Colors.fgMuted
+                                opacity: 0.7
+                            }
+
+                            TextInput {
+                                id: passwordInput
+                                anchors.left: parent.left
+                                anchors.right: submitArrow.left
+                                anchors.rightMargin: Dimens.spacingSmall
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 8
+                                horizontalAlignment: TextInput.AlignRight
+                                echoMode: TextInput.Password
+                                passwordCharacter: "•"
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeSm
                                 color: Colors.fg
-                            }
+                                focus: true
 
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: Qt.formatDateTime(new Date(), "dddd, MMMM d").toLowerCase()
-                                font.family: Fonts.text
-                                font.pixelSize: Dimens.fontSizeBase
-                                color: Colors.fgMuted
-                            }
-                        }
+                                Component.onCompleted: passwordInput.forceActiveFocus()
 
-                        // Password Field & User
-                        Column {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: Dimens.spacingMedium
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: Qt.userName || "user"
-                                font.family: Fonts.text
-                                font.pixelSize: Dimens.fontSizeSm
-                                font.weight: Font.Medium
-                                color: Colors.fgMuted
-                            }
-
-                            Row {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                spacing: 8
-
-                                Rectangle {
-                                    width: 200
-                                    height: 38
-                                    radius: Dimens.radiusFull
-                                    color: Qt.rgba(Colors.bgsur.r, Colors.bgsur.g, Colors.bgsur.b, Colors.micaBeta)
-                                    border.color: errorMessage.visible ? Colors.red : Colors.border
-                                    border.width: 1
-
-                                    TextInput {
-                                        id: passwordInput
-                                        anchors.fill: parent
-                                        anchors.leftMargin: Dimens.paddingMedium
-                                        anchors.rightMargin: Dimens.paddingMedium
-                                        verticalAlignment: TextInput.AlignVCenter
-                                        echoMode: TextInput.Password
-                                        font.family: Fonts.text
-                                        font.pixelSize: Dimens.fontSizeBase
-                                        color: Colors.fg
-                                        focus: true
-
-                                        Component.onCompleted: passwordInput.forceActiveFocus()
-
-                                        onTextChanged: {
-                                            if (errorMessage.visible) errorMessage.visible = false
-                                        }
-
-                                        Keys.onReturnPressed: submitPassword()
-                                        Keys.onEnterPressed: submitPassword()
-
-                                        function submitPassword() {
-                                            if (passwordInput.text.length === 0) return
-
-                                            if (!pam.active) {
-                                                pam.start()
-                                            }
-
-                                            pam.respond(passwordInput.text)
-                                        }
-                                    }
+                                onTextChanged: {
+                                    if (errorMessage.visible) errorMessage.visible = false
                                 }
 
-                                Rectangle {
-                                    width: 38
-                                    height: 38
-                                    radius: Dimens.radiusFull
-                                    color: submitBtnArea.pressed ? Colors.accent : Qt.rgba(Colors.bgsur.r, Colors.bgsur.g, Colors.bgsur.b, Colors.micaBeta)
-                                    border.color: Colors.border
-                                    border.width: 1
+                                Keys.onReturnPressed: submitPassword()
+                                Keys.onEnterPressed: submitPassword()
 
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "➔"
-                                        font.pixelSize: Dimens.fontSizeLg
-                                        color: submitBtnArea.pressed ? Colors.bg : Colors.fg
+                                function submitPassword() {
+                                    if (passwordInput.text.length === 0) return
+
+                                    if (!pam.active) {
+                                        pam.start()
                                     }
 
-                                    MouseArea {
-                                        id: submitBtnArea
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: passwordInput.submitPassword()
-                                    }
+                                    pam.respond(passwordInput.text)
                                 }
                             }
 
                             Text {
-                                id: errorMessage
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "Incorrect password"
-                                font.family: Fonts.text
+                                id: submitArrow
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 8
+                                text: "➔"
                                 font.pixelSize: Dimens.fontSizeSm
-                                color: Colors.red
-                                visible: false
+                                color: submitArrowArea.pressed ? Colors.accent : Colors.fgMuted
+                                opacity: passwordInput.text.length > 0 ? 1.0 : 0.0
+                                Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+                                MouseArea {
+                                    id: submitArrowArea
+                                    anchors.fill: parent
+                                    anchors.margins: -6
+                                    enabled: passwordInput.text.length > 0
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: passwordInput.submitPassword()
+                                }
+                            }
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                height: 1
+                                color: errorMessage.visible
+                                    ? (LockScreenSettings.errorUsesAccent ? Colors.accent : Colors.red)
+                                    : (passwordInput.activeFocus ? Colors.accent : Colors.border)
+                                opacity: passwordInput.activeFocus || errorMessage.visible ? 0.9 : 0.4
                             }
                         }
 
-                        // Navigation Actions
+                        Text {
+                            id: errorMessage
+                            Layout.alignment: Qt.AlignRight
+                            text: "incorrect password"
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            color: LockScreenSettings.errorUsesAccent ? Colors.accent : Colors.red
+                            visible: false
+                        }
+
                         Row {
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            Layout.alignment: Qt.AlignRight
+                            Layout.topMargin: Dimens.spacingMedium
                             spacing: Dimens.spacingLg
 
                             Text {
-                                id: hyprlandBtn
-                                text: "HYPRLAND"
-                                font.family: Fonts.mono
-                                font.pixelSize: Dimens.fontSizeXs
-                                color: hyprlandArea.containsMouse ? Colors.fg : Colors.fgMuted
-
-                                MouseArea {
-                                    id: hyprlandArea
-                                    anchors.fill: parent
-                                    anchors.margins: -8
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: exitHyprlandProc.running = true
-                                }
-                            }
-
-                            Text {
-                                text: "•"
-                                font.pixelSize: Dimens.fontSizeXs
-                                color: Colors.fgMuted
-                            }
-
-                            Text {
                                 id: rebootBtn
-                                text: "REBOOT"
+                                visible: LockScreenSettings.showRebootAction
+                                text: "RESTART"
                                 font.family: Fonts.mono
                                 font.pixelSize: Dimens.fontSizeXs
+                                font.letterSpacing: 1.5
                                 color: rebootArea.containsMouse ? Colors.fg : Colors.fgMuted
 
                                 MouseArea {
@@ -243,16 +285,12 @@ WlSessionLock {
                             }
 
                             Text {
-                                text: "•"
-                                font.pixelSize: Dimens.fontSizeXs
-                                color: Colors.fgMuted
-                            }
-
-                            Text {
                                 id: powerBtn
-                                text: "POWER"
+                                visible: LockScreenSettings.showPowerAction
+                                text: "SHUT DOWN"
                                 font.family: Fonts.mono
                                 font.pixelSize: Dimens.fontSizeXs
+                                font.letterSpacing: 1.5
                                 color: powerArea.containsMouse ? Colors.red : Colors.fgMuted
 
                                 MouseArea {
