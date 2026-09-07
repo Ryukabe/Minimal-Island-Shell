@@ -78,16 +78,6 @@ Item {
 
     Component.onCompleted: {
         if (ShellState.activePage === "power") focusTimer.restart()
-        revealTimer.restart()
-    }
-
-    Timer {
-        id: revealTimer
-        interval: 30
-        onTriggered: {
-            contentWrapper.opacity = 1.0
-            contentWrapper.scale = 1.0
-        }
     }
 
     Keys.onPressed: (event) => {
@@ -103,64 +93,66 @@ Item {
         }
     }
 
-    Item {
-        id: contentWrapper
-        anchors.fill: parent
-        opacity: 0.0
-        scale: 0.94
+    RowLayout {
+        id: row
+        anchors.centerIn: parent
+        spacing: 16
 
-        Behavior on opacity {
-            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-        }
-        Behavior on scale {
-            NumberAnimation { duration: 280; easing.type: Easing.OutBack; easing.overshoot: 1.2 }
-        }
+        Repeater {
+            model: root.actions
 
-        RowLayout {
-            id: row
-            anchors.centerIn: parent
-            spacing: 16
+            Rectangle {
+                required property int index
+                required property var modelData
 
-            Repeater {
-                model: root.actions
+                width: 52
+                height: 52
+                radius: width / 2
+                color: index === root.selectedIndex ? Colors.accent : Colors.subBgMica
+                border.width: 1
+                border.color: Colors.border
 
-                Rectangle {
-                    required property int index
-                    required property var modelData
+                scale: index === root.selectedIndex ? 1.15 : 1.0
 
-                    width: 52
-                    height: 52
-                    radius: width / 2
-                    color: index === root.selectedIndex ? Colors.accent : Colors.subBgMica
-                    border.width: 1
-                    border.color: Colors.border
+                Behavior on color {
+                    ColorAnimation { duration: ShellState.motionDuration(ShellState.motionFadeMs) }
+                }
 
-                    scale: index === root.selectedIndex ? 1.15 : 1.0
+                NumberAnimation {
+                    id: scaleEaseAnim
+                    duration: ShellState.motionDuration(ShellState.motionHoverMs)
+                    easing.type: Easing.OutBack
+                    easing.overshoot: ShellState.motionOvershoot()
+                }
 
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale {
-                        NumberAnimation { duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1.25 }
-                    }
+                SpringAnimation {
+                    id: scaleSpringAnim
+                    spring: ShellState.springStiffness()
+                    damping: ShellState.springDamping()
+                }
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: parent.modelData.icon
-                        font.family: Fonts.icon
-                        font.pixelSize: Dimens.fontSizeXl
-                        font.variableAxes: Fonts.iconAxes
-                        font.features: { "liga": 1, "dlig": 1 }
-                        color: parent.index === root.selectedIndex ? Colors.fg : Colors.fgMuted
-                    }
+                Behavior on scale {
+                    animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? scaleSpringAnim : scaleEaseAnim
+                }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        hoverEnabled: true
-                        onEntered: root.selectedIndex = parent.index
-                        onClicked: {
-                            root.selectedIndex = parent.index
-                            root.runCmd(parent.modelData.cmd)
-                        }
+                Text {
+                    anchors.centerIn: parent
+                    text: parent.modelData.icon
+                    font.family: Fonts.icon
+                    font.pixelSize: Dimens.fontSizeXl
+                    font.variableAxes: Fonts.iconAxes
+                    font.features: { "liga": 1, "dlig": 1 }
+                    color: parent.index === root.selectedIndex ? Colors.fg : Colors.fgMuted
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onEntered: root.selectedIndex = parent.index
+                    onClicked: {
+                        root.selectedIndex = parent.index
+                        root.runCmd(parent.modelData.cmd)
                     }
                 }
             }

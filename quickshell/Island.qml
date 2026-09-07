@@ -43,14 +43,6 @@ PanelWindow {
         return (TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock"
     }
 
-    function motionDuration(ms) {
-        return ShellState.motionReduced ? 0 : ms
-    }
-
-    function motionOvershoot() {
-        return ShellState.motionReduced ? 1.0 : (1.0 + ShellState.motionBouncePercent / 100)
-    }
-
     Shortcut {
         sequence: "Escape"
         enabled: ShellState.activePage !== getDefaultPage()
@@ -152,9 +144,6 @@ PanelWindow {
         }
     }
 
-    // Notch silhouette — sits behind `island`, flush to the screen top,
-    // visible only when islandNotchMode is on. Matches island's live
-    // width/height so it always tracks the same size/animation.
     NotchShape {
         id: notchShape
         visible: ShellState.islandNotchMode
@@ -179,9 +168,6 @@ PanelWindow {
         readonly property int compactHeight: ShellState.islandCompactHeight
         readonly property int compactWidth: ShellState.islandCompactWidth
 
-        // Content still drives sizing — these floors only raise the size when
-        // a page's own implicitWidth/Height falls short, never shrink it below
-        // what the page actually needs.
         property int targetWidth: {
             if (!pageLoader.item) return compactWidth
             var floor = expanded ? ShellState.islandMinExpandedWidth : compactWidth
@@ -197,43 +183,41 @@ PanelWindow {
         height: targetHeight
 
         radius: Math.min(height / 2, ShellState.islandCornerRadius)
-        // Transparent in notch mode — NotchShape behind provides the fill
-        // and flared silhouette instead of this Rectangle's own corners.
         color: ShellState.islandNotchMode ? "transparent" : Colors.mainBgMica
         border.color: Colors.border
         border.width: ShellState.islandNotchMode ? 0 : ShellState.islandBorderWidth
 
         Behavior on width {
             NumberAnimation {
-                duration: window.motionDuration(ShellState.motionMovementMs)
+                duration: ShellState.motionDuration(ShellState.motionMovementMs)
                 easing.type: Easing.OutExpo
             }
         }
 
         Behavior on height {
             NumberAnimation {
-                duration: window.motionDuration(ShellState.motionMovementMs)
+                duration: ShellState.motionDuration(ShellState.motionMovementMs)
                 easing.type: Easing.OutExpo
             }
         }
 
         Behavior on radius {
             NumberAnimation {
-                duration: window.motionDuration(ShellState.motionMovementMs)
+                duration: ShellState.motionDuration(ShellState.motionMovementMs)
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on anchors.topMargin {
             NumberAnimation {
-                duration: window.motionDuration(ShellState.motionMovementMs)
+                duration: ShellState.motionDuration(ShellState.motionMovementMs)
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on border.width {
             NumberAnimation {
-                duration: window.motionDuration(ShellState.motionFadeMs)
+                duration: ShellState.motionDuration(ShellState.motionFadeMs)
                 easing.type: Easing.OutCubic
             }
         }
@@ -266,31 +250,45 @@ PanelWindow {
             scale: islandTapArea.containsMouse ? 1.02 : 1.0
             opacity: 1.0
 
+            NumberAnimation {
+                id: hoverScaleEaseAnim
+                duration: ShellState.motionDuration(ShellState.motionHoverMs)
+                easing.type: Easing.OutBack
+                easing.overshoot: ShellState.motionOvershoot()
+            }
+
+            SpringAnimation {
+                id: hoverScaleSpringAnim
+                spring: ShellState.springStiffness()
+                damping: ShellState.springDamping()
+            }
+
             Behavior on scale {
-                NumberAnimation {
-                    duration: window.motionDuration(ShellState.motionHoverMs)
-                    easing.type: Easing.OutBack
-                    easing.overshoot: window.motionOvershoot()
-                }
+                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? hoverScaleSpringAnim : hoverScaleEaseAnim
             }
 
             onItemChanged: {
                 if (item) {
-                    contentAnim.stop()
+                    contentAnimStandard.stop()
+                    contentAnimSpring.stop()
                     item.opacity = 0
                     item.scale = 0.94
-                    contentAnim.start()
+                    if (ShellState.motionSpringEnabled && !ShellState.motionReduced) {
+                        contentAnimSpring.start()
+                    } else {
+                        contentAnimStandard.start()
+                    }
                 }
             }
 
             ParallelAnimation {
-                id: contentAnim
+                id: contentAnimStandard
                 NumberAnimation {
                     target: pageLoader.item
                     property: "opacity"
                     from: 0
                     to: 1
-                    duration: window.motionDuration(ShellState.motionFadeMs)
+                    duration: ShellState.motionDuration(ShellState.motionFadeMs)
                     easing.type: Easing.OutCubic
                 }
                 NumberAnimation {
@@ -298,9 +296,29 @@ PanelWindow {
                     property: "scale"
                     from: 0.94
                     to: 1.0
-                    duration: window.motionDuration(ShellState.motionMovementMs)
+                    duration: ShellState.motionDuration(ShellState.motionMovementMs)
                     easing.type: Easing.OutBack
-                    easing.overshoot: window.motionOvershoot()
+                    easing.overshoot: ShellState.motionOvershoot()
+                }
+            }
+
+            ParallelAnimation {
+                id: contentAnimSpring
+                NumberAnimation {
+                    target: pageLoader.item
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                    duration: ShellState.motionDuration(ShellState.motionFadeMs)
+                    easing.type: Easing.OutCubic
+                }
+                SpringAnimation {
+                    target: pageLoader.item
+                    property: "scale"
+                    from: 0.94
+                    to: 1.0
+                    spring: ShellState.springStiffness()
+                    damping: ShellState.springDamping()
                 }
             }
 

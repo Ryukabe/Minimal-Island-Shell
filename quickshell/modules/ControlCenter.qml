@@ -10,6 +10,7 @@ import "../components/control-center/subviews"
 Item {
     id: root
     property string activeSubview: ""
+    property bool _subviewFirstLoad: true
 
     implicitWidth: ShellState.controlCenterWidth
     implicitHeight: ShellState.controlCenterHeight
@@ -49,23 +50,34 @@ Item {
             }
         }
 
-        onItemChanged: {
+               onItemChanged: {
             if (item) {
-                subviewAnim.stop()
-                item.opacity = 0
-                item.scale = 0.95
-                subviewAnim.start()
+                subviewAnimStandard.stop()
+                subviewAnimSpring.stop()
+                if (root._subviewFirstLoad) {
+                    item.opacity = 1
+                    item.scale = 1.0
+                    root._subviewFirstLoad = false
+                } else {
+                    item.opacity = 0
+                    item.scale = 0.95
+                    if (ShellState.motionSpringEnabled && !ShellState.motionReduced) {
+                        subviewAnimSpring.start()
+                    } else {
+                        subviewAnimStandard.start()
+                    }
+                }
             }
         }
 
         ParallelAnimation {
-            id: subviewAnim
+            id: subviewAnimStandard
             NumberAnimation {
                 target: pageLoader.item
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 220
+                duration: ShellState.motionDuration(ShellState.motionFadeMs)
                 easing.type: Easing.OutCubic
             }
             NumberAnimation {
@@ -73,9 +85,29 @@ Item {
                 property: "scale"
                 from: 0.95
                 to: 1.0
-                duration: 280
+                duration: ShellState.motionDuration(ShellState.motionMovementMs)
                 easing.type: Easing.OutBack
-                easing.overshoot: 1.15
+                easing.overshoot: ShellState.motionOvershoot()
+            }
+        }
+
+        ParallelAnimation {
+            id: subviewAnimSpring
+            NumberAnimation {
+                target: pageLoader.item
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: ShellState.motionDuration(ShellState.motionFadeMs)
+                easing.type: Easing.OutCubic
+            }
+            SpringAnimation {
+                target: pageLoader.item
+                property: "scale"
+                from: 0.95
+                to: 1.0
+                spring: ShellState.springStiffness()
+                damping: ShellState.springDamping()
             }
         }
     }

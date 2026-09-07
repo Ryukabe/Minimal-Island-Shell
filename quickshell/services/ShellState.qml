@@ -48,13 +48,33 @@ QtObject {
     property real timerWidth: 320
     property real timerHeight: 180
 
-    // ================= MOTION & ANIMATIONS =================
+        // ================= MOTION & ANIMATIONS =================
     property bool motionReduced: false
     property real motionMovementMs: 480
     property real motionFadeMs: 220
     property real motionHoverMs: 250
     property real motionBouncePercent: 20
+    property bool motionSpringEnabled: false
 
+    function motionDuration(ms) {
+        return root.motionReduced ? 0 : ms
+    }
+
+    function motionOvershoot() {
+        return root.motionReduced ? 1.0 : (1.0 + root.motionBouncePercent / 100)
+    }
+
+    function springStiffness() {
+        var t = Math.max(50, Math.min(400, root.motionHoverMs))
+        var normalized = 1 - (t - 50) / (400 - 50)
+        return 2.0 + normalized * 4.0
+    }
+
+    function springDamping() {
+        var b = Math.max(0, Math.min(100, root.motionBouncePercent))
+        return 0.5 - (b / 100) * 0.35
+    }
+    
     // ================= TIMERS & HELPERS =================
     property Timer hoverResetTimer: Timer {
         interval: 300

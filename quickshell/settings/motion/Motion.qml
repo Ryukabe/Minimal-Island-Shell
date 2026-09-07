@@ -62,6 +62,12 @@ Item {
             onMoved: (val) => ShellState.motionBouncePercent = val
         }
 
+                SettingsToggleRow {
+            label: "Spring physics for bounce (experimental)"
+            checked: ShellState.motionSpringEnabled
+            onToggled: (val) => ShellState.motionSpringEnabled = val
+        }
+
         SettingsSectionLabel { label: "Hyprland Animations" }
 
         SettingsCarouselRow {

@@ -153,7 +153,7 @@ FocusScope {
                 border.color: Colors.accent
 
                 Behavior on implicitWidth {
-                    NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: ShellState.motionDuration(ShellState.motionMovementMs); easing.type: Easing.OutCubic }
                 }
 
                 TextInput {

@@ -3,7 +3,7 @@
   "islandCornerRadius": 12,
   "islandBorderWidth": 0,
   "islandClickOutsideDismiss": true,
-  "islandNotchMode": true,
+  "islandNotchMode": false,
   "islandNotchFlare": 14,
   "islandCompactHeight": 35,
   "islandCompactWidth": 140,
@@ -26,6 +26,6 @@
   "motionReduced": false,
   "motionMovementMs": 480,
   "motionFadeMs": 220,
-  "motionHoverMs": 250,
-  "motionBouncePercent": 20
+  "motionHoverMs": 60,
+  "motionBouncePercent": 79
 }
