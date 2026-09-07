@@ -12,7 +12,6 @@ Rectangle {
     radius: Dimens.radiusXLarge
     focus: true
 
-    // Request keyboard focus immediately on reveal
     Component.onCompleted: root.forceActiveFocus()
 
     SystemClock {
@@ -26,7 +25,6 @@ Rectangle {
         return d
     }
 
-    // ================= MEDIA PLAYER (left side top) =================
     Item {
         id: mediaSection
         anchors.left: parent.left
@@ -115,7 +113,6 @@ Rectangle {
         }
     }
 
-    // ================= TIMER CARD (left side bottom) =================
     Rectangle {
         id: timerCard
         anchors.left: parent.left
@@ -125,7 +122,7 @@ Rectangle {
         width: 250
         height: 40
         radius: Dimens.borderRadiusMedium
-        color: Colors.bgSurface
+        color: Colors.subBgMica
 
         RowLayout {
             anchors.fill: parent
@@ -134,7 +131,7 @@ Rectangle {
             spacing: 12
 
             Text {
-                text: "󱎫" // Replaced hourglass with unified Nerd Font Timer icon
+                text: "󱎫"
                 font.family: Fonts.icon || "JetBrainsMono Nerd Font"
                 font.pixelSize: Dimens.fontSizeMd
                 color: Colors.accent
@@ -166,7 +163,6 @@ Rectangle {
         }
     }
 
-    // ================= CLOCK + CALENDAR (right side) =================
     Column {
         anchors.right: parent.right
         anchors.rightMargin: 18

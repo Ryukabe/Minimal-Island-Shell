@@ -72,7 +72,7 @@ Rectangle {
         id: track
         height: 4
         radius: Dimens.radiusXSmall
-        color: Colors.bgSurface
+        color: Colors.subBgMica
         anchors.left: root.iconSource === "" ? iconText.right : iconImage.right
         anchors.leftMargin: 10
         anchors.right: percentText.left

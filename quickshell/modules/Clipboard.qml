@@ -165,7 +165,7 @@ Item {
                 width: clipList.width
                 height: 38
                 radius: Dimens.borderRadiusMedium
-                color: index === root.selectedIndex ? Colors.bgSurface : "transparent"
+                color: index === root.selectedIndex ? Colors.subBgMica : "transparent"
 
                 RowLayout {
                     anchors.fill: parent

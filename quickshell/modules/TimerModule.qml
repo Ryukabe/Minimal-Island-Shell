@@ -20,7 +20,6 @@ Item {
         anchors.margins: 16
         spacing: 12
 
-        // Header
         RowLayout {
             Layout.fillWidth: true
             Text {
@@ -39,7 +38,6 @@ Item {
             }
         }
 
-        // Display or Preset Controls
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -66,7 +64,7 @@ Item {
                         width: 70
                         height: 32
                         radius: 16
-                        color: Colors.bgSurface
+                        color: Colors.subBgMica
                         Text {
                             anchors.centerIn: parent
                             text: TimerService.running ? "Pause" : "Resume"
@@ -83,7 +81,7 @@ Item {
                         width: 70
                         height: 32
                         radius: 16
-                        color: Colors.bgSurface
+                        color: Colors.subBgMica
                         Text {
                             anchors.centerIn: parent
                             text: "Reset"
@@ -98,7 +96,6 @@ Item {
                 }
             }
 
-            // Quick Preset Selection (when idle)
             ColumnLayout {
                 anchors.centerIn: parent
                 visible: TimerService.secondsRemaining === 0 && !TimerService.running
@@ -112,7 +109,7 @@ Item {
                             width: 44
                             height: 36
                             radius: 8
-                            color: root.selectedMinutes === modelData ? Colors.accent : Colors.bgSurface
+                            color: root.selectedMinutes === modelData ? Colors.accent : Colors.subBgMica
                             Text {
                                 anchors.centerIn: parent
                                 text: modelData + "m"
