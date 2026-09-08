@@ -18,14 +18,20 @@ Item {
         return HyprlandKeybindsService.binds.filter(b => b.category === catName)
     }
 
+    function clearAddForm() {
+        // Single source of truth for wiping the "Add New Bind" form —
+        // called from both the Cancel button and the expand/collapse
+        // watcher, so there's no path that hides the form without
+        // clearing it.
+        newBindCapture.deactivateAndClear()
+        newCommandInput.text = ""
+        root.newKeyText = ""
+        root.newCommandText = ""
+    }
+
     onAddExpandedChanged: {
         if (!addExpanded) {
-            // Collapsing the section safely exits capture mode and clears all inputs
-            newBindCapture.exitCapture()
-            newBindCapture.reset()
-            root.newKeyText = ""
-            root.newCommandText = ""
-            newCommandInput.text = ""
+            root.clearAddForm()
         }
     }
 
@@ -121,10 +127,13 @@ Item {
                             Layout.fillWidth: true
                             onComboChanged: (combo) => root.newKeyText = combo
 
-                            // Click-to-capture: Field only activates when you explicitly click it
+                            // Click-to-capture: the field only arms and
+                            // starts listening for keys when this
+                            // MouseArea is explicitly clicked — never
+                            // automatically when the section expands.
                             MouseArea {
                                 anchors.fill: parent
-                                onClicked: newBindCapture.forceActiveFocus()
+                                onClicked: newBindCapture.activate()
                             }
                         }
 
@@ -161,8 +170,10 @@ Item {
                             SettingsButton {
                                 text: "Cancel"
                                 onClicked: {
-                                    // Triggering collapse handles the field clean-ups automatically
-                                    root.addExpanded = false
+                                    // Clear the capture pill + command input back to empty,
+                                    // but keep the "Add New Bind" section expanded — only the
+                                    // chevron toggle should collapse it now.
+                                    root.clearAddForm()
                                 }
                             }
 

@@ -29,14 +29,13 @@ Item {
     onEditingChanged: {
         if (editing) {
             captureField.reset()
-            captureField.forceActiveFocus()
-            captureField.enterCapture()
+            captureField.activate()
         } else {
             // Explicit exit on every close path (Save, Cancel, or
-            // Escape via the cancelled() connection below) — do not
-            // rely on visibility/focus loss alone to release the
-            // Hyprland submap.
-            captureField.exitCapture()
+            // Escape via the cancelled() connection below) — always goes
+            // through deactivateAndClear() so disarm + submap reset +
+            // wipe happen together, in one place.
+            captureField.deactivateAndClear()
         }
     }
 

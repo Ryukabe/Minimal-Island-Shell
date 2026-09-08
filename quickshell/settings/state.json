@@ -26,6 +26,6 @@
   "motionReduced": false,
   "motionMovementMs": 480,
   "motionFadeMs": 220,
-  "motionHoverMs": 60,
-  "motionBouncePercent": 79
+  "motionHoverMs": 130,
+  "motionBouncePercent": 30
 }

@@ -56,6 +56,14 @@ QtObject {
     property real motionBouncePercent: 20
     property bool motionSpringEnabled: false
 
+    // Keeps Hyprland's own window-manager animations (workspace switches,
+    // window open/close, etc.) in sync with the shell's Reduce Motion
+    // toggle. This only flips Hyprland's global animations:enabled switch
+    // — it never touches which preset is selected in
+    // HyprlandAnimationsService, so turning Reduce Motion back off
+    // restores whatever preset was already active instead of resetting it.
+    onMotionReducedChanged: HyprlandAnimationsService.setEnabled(!motionReduced)
+
     function motionDuration(ms) {
         return root.motionReduced ? 0 : ms
     }
@@ -157,4 +165,11 @@ QtObject {
     property Process dndProcess: Process { id: dndProcess }
 
     function toggleClipboard() { togglePage("clipboard") }
+
+    Component.onCompleted: {
+        // Sync Hyprland's animation switch to whatever motionReduced was
+        // restored to at startup (e.g. if it was left true from a
+        // previous session), rather than waiting for the next toggle.
+        HyprlandAnimationsService.setEnabled(!motionReduced)
+    }
 }

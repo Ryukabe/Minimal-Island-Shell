@@ -38,6 +38,7 @@ WlSessionLock {
                         errorMessage.visible = true
                         passwordInput.text = ""
                         passwordInput.forceActiveFocus()
+                        shakeAnim.start()
                         pam.start()
                     }
                 }
@@ -47,6 +48,7 @@ WlSessionLock {
                     errorMessage.visible = true
                     passwordInput.text = ""
                     passwordInput.forceActiveFocus()
+                    shakeAnim.start()
                     pam.start()
                 }
             }
@@ -55,6 +57,106 @@ WlSessionLock {
             Process { id: powerOffProc; command: ["systemctl", "poweroff"] }
             Process { id: rebootProc; command: ["systemctl", "reboot"] }
             Process { id: exitHyprlandProc; command: ["hyprctl", "dispatch", "exit"] }
+
+            // ---- ENTRANCE ANIMATION ----
+            // Fires once per lock (this component is re-created every time
+            // the surface locks). Staggers a soft fade+slide-up on the
+            // clock, hyprland action, and identity/password block, plus a
+            // slow Ken-Burns-style zoom-fade on the wallpaper itself.
+            // Respects ShellState.motionReduced via motionDuration() —
+            // durations collapse to 0 (i.e. instant) when reduced motion
+            // is on, same convention as the rest of the shell.
+            ParallelAnimation {
+                id: entranceAnim
+
+                NumberAnimation {
+                    target: wallpaperScale
+                    property: "xScale"
+                    from: 1.06; to: 1.0
+                    duration: ShellState.motionDuration(1400)
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    target: wallpaperScale
+                    property: "yScale"
+                    from: 1.06; to: 1.0
+                    duration: ShellState.motionDuration(1400)
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    target: wallpaperFade
+                    property: "opacity"
+                    from: 0; to: 1
+                    duration: ShellState.motionDuration(500)
+                    easing.type: Easing.OutCubic
+                }
+
+                SequentialAnimation {
+                    PauseAnimation { duration: ShellState.motionDuration(120) }
+                    ParallelAnimation {
+                        NumberAnimation {
+                            target: clockBlock
+                            property: "opacity"
+                            from: 0; to: 1
+                            duration: ShellState.motionDuration(420)
+                            easing.type: Easing.OutCubic
+                        }
+                        NumberAnimation {
+                            target: clockBlockTranslate
+                            property: "y"
+                            from: 18; to: 0
+                            duration: ShellState.motionDuration(520)
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+
+                SequentialAnimation {
+                    PauseAnimation { duration: ShellState.motionDuration(220) }
+                    ParallelAnimation {
+                        NumberAnimation {
+                            target: authBlock
+                            property: "opacity"
+                            from: 0; to: 1
+                            duration: ShellState.motionDuration(420)
+                            easing.type: Easing.OutCubic
+                        }
+                        NumberAnimation {
+                            target: authBlockTranslate
+                            property: "y"
+                            from: 18; to: 0
+                            duration: ShellState.motionDuration(520)
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+
+                SequentialAnimation {
+                    PauseAnimation { duration: ShellState.motionDuration(320) }
+                    NumberAnimation {
+                        target: hyprlandBtn
+                        property: "opacity"
+                        from: 0; to: 1
+                        duration: ShellState.motionDuration(400)
+                        easing.type: Easing.OutCubic
+                    }
+                }
+            }
+
+            // Wrong-password feedback: a short horizontal shake on the
+            // identity/password block. Amplitude tapers off each leg so it
+            // reads as a "no" shake rather than a jitter. Triggered from
+            // pam.onCompleted (failure branch) and pam.onError above.
+            SequentialAnimation {
+                id: shakeAnim
+                NumberAnimation { target: authBlockShake; property: "x"; to: -10; duration: 45; easing.type: Easing.OutCubic }
+                NumberAnimation { target: authBlockShake; property: "x"; to: 8;   duration: 45; easing.type: Easing.OutCubic }
+                NumberAnimation { target: authBlockShake; property: "x"; to: -6;  duration: 45; easing.type: Easing.OutCubic }
+                NumberAnimation { target: authBlockShake; property: "x"; to: 4;   duration: 45; easing.type: Easing.OutCubic }
+                NumberAnimation { target: authBlockShake; property: "x"; to: 0;   duration: 45; easing.type: Easing.OutCubic }
+            }
+
+            Component.onCompleted: entranceAnim.start()
 
             // Background focus handling
             MouseArea {
@@ -73,6 +175,24 @@ WlSessionLock {
                         asynchronous: true
                         cache: true
                         visible: !LockScreenSettings.frostedBlurEnabled
+                        opacity: wallpaperFade.opacity
+
+                        transform: Scale {
+                            id: wallpaperScale
+                            origin.x: wallpaper.width / 2
+                            origin.y: wallpaper.height / 2
+                            xScale: 1.0
+                            yScale: 1.0
+                        }
+                    }
+
+                    // Dummy opacity holder driven by entranceAnim — kept
+                    // separate from wallpaper.opacity's own property so the
+                    // animation target stays valid even if
+                    // frostedBlurEnabled swaps visibility.
+                    Item {
+                        id: wallpaperFade
+                        opacity: 0
                     }
 
                     FastBlur {
@@ -80,6 +200,7 @@ WlSessionLock {
                         source: wallpaper
                         radius: LockScreenSettings.frostedBlurRadius
                         visible: LockScreenSettings.frostedBlurEnabled
+                        opacity: wallpaperFade.opacity
                     }
 
                     Rectangle {
@@ -97,6 +218,12 @@ WlSessionLock {
                         anchors.topMargin: parent.height * 0.06
                         anchors.leftMargin: parent.width * 0.05
                         spacing: Dimens.spacingSmall
+                        opacity: 0
+
+                        transform: Translate {
+                            id: clockBlockTranslate
+                            y: 18
+                        }
 
                         Text {
                             text: Qt.formatDateTime(new Date(), LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
@@ -129,6 +256,7 @@ WlSessionLock {
                         font.pixelSize: Dimens.fontSizeXs
                         font.letterSpacing: 1.5
                         color: hyprlandArea.containsMouse ? Colors.fg : Colors.fgMuted
+                        opacity: 0
 
                         MouseArea {
                             id: hyprlandArea
@@ -148,6 +276,12 @@ WlSessionLock {
                         anchors.rightMargin: parent.width * 0.05
                         anchors.bottomMargin: parent.height * 0.06
                         spacing: Dimens.spacingSmall
+                        opacity: 0
+
+                        transform: [
+                            Translate { id: authBlockTranslate; y: 18 },
+                            Translate { id: authBlockShake; x: 0 }
+                        ]
 
                         Text {
                             id: usernameLabel

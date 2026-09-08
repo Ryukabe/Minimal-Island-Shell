@@ -28,6 +28,28 @@ Item {
         applyProc.running = true
     }
 
+    // Called from ShellState when motionReduced toggles. A plain runtime
+    // `hyprctl keyword animations:enabled` does NOT survive `hyprctl
+    // reload` — the active preset's .lua file re-asserts its own
+    // `hl.config({ animations = { enabled = ... } })` line on every
+    // reload, which happens elsewhere in the shell (rebinding a key,
+    // switching animation presets, etc.) and would silently re-enable
+    // animations underneath this toggle. So instead this edits that exact
+    // line in the CURRENTLY ACTIVE preset file, then reloads — same
+    // rewrite-then-reload pattern as applyAnimation() above. This means
+    // the on/off state is stored per-preset in the preset file itself; if
+    // no preset name is known yet (currentAnimation still empty because
+    // currentProc hasn't resolved), the call is skipped rather than
+    // guessing a file path.
+    function setEnabled(enabled) {
+        if (!root.currentAnimation) return
+        let targetFile = root.animationsDir + "/" + root.currentAnimation + ".lua"
+        let targetValue = enabled ? "true" : "false"
+        setEnabledProc.command = ["sh", "-c",
+            "sed -i 's/hl\\.config({ animations = { enabled = [a-z]* } })/hl.config({ animations = { enabled = " + targetValue + " } })/' " + targetFile + " && hyprctl reload"]
+        setEnabledProc.running = true
+    }
+
     Component.onCompleted: refresh()
 
     // Lists preset files, strips path + .lua extension for display names.
@@ -61,6 +83,17 @@ Item {
         id: applyProc
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0) currentProc.running = true
+        }
+    }
+
+    Process {
+        id: setEnabledProc
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.trim().length > 0) {
+                    console.log("[HyprlandAnimationsService] setEnabled failed:", text.trim())
+                }
+            }
         }
     }
 }

@@ -171,6 +171,7 @@ PanelWindow {
                        && ShellState.activePage !== "brightness" 
                        && ShellState.activePage !== "settings" 
                        && ShellState.activePage !== "lock"
+                       && ShellState.activePage !== "polkit"
         readonly property int compactHeight: ShellState.islandCompactHeight
         readonly property int compactWidth: ShellState.islandCompactWidth
 
@@ -185,7 +186,7 @@ PanelWindow {
             return Math.max(pageLoader.item.implicitHeight, floor)
         }
 
-        width: targetWidth
+                width: targetWidth
         height: targetHeight
 
         radius: Math.min(height / 2, ShellState.islandCornerRadius)
@@ -193,18 +194,36 @@ PanelWindow {
         border.color: Colors.border
         border.width: ShellState.islandNotchMode ? 0 : ShellState.islandBorderWidth
 
+        NumberAnimation {
+            id: widthEaseAnim
+            duration: ShellState.motionDuration(ShellState.motionMovementMs)
+            easing.type: Easing.OutExpo
+        }
+
+        SpringAnimation {
+            id: widthSpringAnim
+            spring: ShellState.springStiffness()
+            damping: ShellState.springDamping()
+        }
+
         Behavior on width {
-            NumberAnimation {
-                duration: ShellState.motionDuration(ShellState.motionMovementMs)
-                easing.type: Easing.OutExpo
-            }
+            animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? widthSpringAnim : widthEaseAnim
+        }
+
+        NumberAnimation {
+            id: heightEaseAnim
+            duration: ShellState.motionDuration(ShellState.motionMovementMs)
+            easing.type: Easing.OutExpo
+        }
+
+        SpringAnimation {
+            id: heightSpringAnim
+            spring: ShellState.springStiffness()
+            damping: ShellState.springDamping()
         }
 
         Behavior on height {
-            NumberAnimation {
-                duration: ShellState.motionDuration(ShellState.motionMovementMs)
-                easing.type: Easing.OutExpo
-            }
+            animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? heightSpringAnim : heightEaseAnim
         }
 
         Behavior on radius {
