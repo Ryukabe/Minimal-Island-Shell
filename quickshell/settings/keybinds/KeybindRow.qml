@@ -30,6 +30,13 @@ Item {
         if (editing) {
             captureField.reset()
             captureField.forceActiveFocus()
+            captureField.enterCapture()
+        } else {
+            // Explicit exit on every close path (Save, Cancel, or
+            // Escape via the cancelled() connection below) — do not
+            // rely on visibility/focus loss alone to release the
+            // Hyprland submap.
+            captureField.exitCapture()
         }
     }
 

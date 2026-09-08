@@ -1,4 +1,12 @@
 local mainMod = "SUPER"
+-- === Capture submap (used by Settings > Keybinds while rebinding) ===
+-- While active, NO bind outside this submap can fire — this is what lets
+-- you rebind a combo that's already in use without triggering the old
+-- action. Escape is the safety-valve bind so you're never stuck if
+-- Quickshell crashes/closes mid-capture without resetting it.
+hl.define_submap("capture", function()
+    hl.bind("Escape", hl.dsp.submap("reset"))
+end)
 
 
 --- System ---
@@ -85,7 +93,7 @@ hl.bind(mainMod .. " + N ",                 hl.dsp.exec_cmd("qs ipc call notific
 hl.bind(mainMod .. " + Escape ",            hl.dsp.exec_cmd("qs ipc call power toggle"))
 
 -- Lock Screen
-hl.bind("SHIFT + ALT + L",                 hl.dsp.exec_cmd("quickshell ipc call lock lock"))
+hl.bind("SUPER + L",                        hl.dsp.exec_cmd("quickshell ipc call lock lock"))
 
 -- Theme Switcher
 hl.bind(mainMod .. " + T ",                 hl.dsp.exec_cmd("qs ipc call themeswitcher toggle"))
@@ -130,7 +138,7 @@ hl.bind(mainMod .. " + S",                  hl.dsp.exec_cmd("spotify"))
 
 -- Look & Powermenu
 hl.bind(mainMod .. " + F4",                 hl.dsp.exec_cmd("$HOME/.config/wlogout/scripts/wlogout.sh")) --For powermenu
-hl.bind(mainMod .. " + L",                  hl.dsp.exec_cmd("hyprlock -c $HOME/.config/hypr/hyprlock/hyprlock.conf")) --To lock
+hl.bind("SHIFT + ALT + L",                  hl.dsp.exec_cmd("hyprlock -c $HOME/.config/hypr/hyprlock/hyprlock.conf")) --To lock
 
 -- Clipboard 
 --hl.bind(mainMod .. " + V",                  hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/clipboard-toggle.sh"))
@@ -142,6 +150,7 @@ hl.bind(mainMod .. " + SHIFT + Print",      hl.dsp.exec_cmd("hyprshot -m region 
 
 -- Color Picker
 hl.bind(mainMod .. " + P",                  hl.dsp.exec_cmd("hyprpicker -a -f hex"))
+
 
 
 

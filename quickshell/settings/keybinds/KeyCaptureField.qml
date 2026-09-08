@@ -3,7 +3,19 @@
 // pressing to overwrite the staged combo. Escape always cancels and discards
 // whatever was staged. Actual commit happens only via KeybindRow's Save
 // button. Mouse-button binds aren't capturable this way.
+//
+// While this field is active, Hyprland is switched into the "capture"
+// submap (declared statically in binds.lua via hl.define_submap, with a
+// safety-valve Escape -> reset bind inside it). While that submap is
+// active, NO bind outside it can fire — including the one currently being
+// rebound — so pressing a combo that's already in use here won't also
+// trigger its old action. Capture mode is exited explicitly by the caller
+// (KeybindRow calls exitCapture() whenever it closes editing, on every
+// path: Save, Cancel, or Escape/cancelled), not left to rely on focus loss
+// alone. onActiveFocusChanged and Component.onDestruction remain as backup
+// safety nets in case the field loses focus or is torn down some other way.
 import QtQuick
+import Quickshell.Io
 import "../../styles"
 
 Rectangle {
@@ -22,11 +34,52 @@ Rectangle {
     border.width: 1
 
     property var _heldMods: []
+    property bool _inCaptureMode: false
 
     function reset() {
         root.resultCombo = ""
         root._heldMods = []
     }
+
+    Process {
+        id: submapProc
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.trim().length > 0) {
+                    console.log("[KeyCaptureField] submap dispatch error:", text.trim())
+                }
+            }
+        }
+    }
+
+    // Public — call to start capturing. Uses Hyprland's Lua-eval dispatch
+    // form since binds.lua runs on Hyprland's native Lua config engine
+    // (hl.bind/hl.dsp), matching how the "capture" submap itself is
+    // declared there via hl.define_submap.
+    function enterCapture() {
+        if (root._inCaptureMode) return
+        root._inCaptureMode = true
+        submapProc.command = ["hyprctl", "dispatch", "hl.dsp.submap(\"capture\")"]
+        submapProc.running = true
+    }
+
+    // Public — call explicitly whenever editing closes, from any path
+    // (Save, Cancel, Escape/cancelled). Do not rely on focus loss alone.
+    function exitCapture() {
+        if (!root._inCaptureMode) return
+        root._inCaptureMode = false
+        submapProc.command = ["hyprctl", "dispatch", "hl.dsp.submap(\"reset\")"]
+        submapProc.running = true
+    }
+
+    onActiveFocusChanged: {
+        // Backup safety net only — primary control is the caller's
+        // explicit enterCapture()/exitCapture() calls.
+        if (activeFocus) root.enterCapture()
+        else root.exitCapture()
+    }
+
+    Component.onDestruction: root.exitCapture()
 
     function _modNames(mods) {
         let names = []
@@ -66,8 +119,13 @@ Rectangle {
     Keys.onPressed: (event) => {
         if (event.isAutoRepeat) { event.accepted = true; return }
 
-        // Escape always exits editing and discards the staged combo —
-        // it never saves. Saving is Save-button-only.
+        // Escape always exits editing and discards the staged combo — it
+        // never saves. Saving is Save-button-only. KeybindRow's
+        // onEditingChanged (triggered via the cancelled() handler setting
+        // editing=false) calls exitCapture() explicitly. This is separate
+        // from the Escape -> submap reset safety bind inside binds.lua,
+        // which only matters if something goes wrong and Quickshell isn't
+        // around to issue the dispatch itself.
         if (event.key === Qt.Key_Escape) {
             root.cancelled()
             event.accepted = true

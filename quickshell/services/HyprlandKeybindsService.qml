@@ -361,5 +361,11 @@ Item {
         root._parse()
     }
 
+    // NOTE: the "capture" submap used by KeyCaptureField.qml (for
+    // suppressing all other binds while rebinding) is declared statically
+    // in binds.lua via hl.define_submap("capture", ...) — it must exist
+    // there with at least one real bind inside it, or Hyprland refuses to
+    // switch into it ("submap doesn't exist / wasn't registered"). Nothing
+    // needs to register it at runtime from here.
     Component.onCompleted: refresh()
 }
