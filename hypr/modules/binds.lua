@@ -154,4 +154,3 @@ hl.bind(mainMod .. " + P",                  hl.dsp.exec_cmd("hyprpicker -a -f he
 
 
 
-

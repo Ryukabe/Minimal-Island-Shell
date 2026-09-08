@@ -6,7 +6,7 @@ hl.on("hyprland.start", function()
     -- System tools
     hl.exec_cmd("awww-daemon")
     hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 24")
-    hl.exec_cmd("qs")
+    hl.exec_cmd("quickshell")
     hl.exec_cmd("hypridle")
     
     -- Applications

@@ -7,15 +7,22 @@ Rectangle {
     property string iconSource: ""
     property int percent: 50
     property color barColor: Colors.accent
-    property bool interactive: false   // NEW: set true to allow drag-to-set
+    property bool interactive: false   // set true to allow drag-to-set
 
-    signal percentDragged(int pct)     // NEW: emitted while dragging the track
-    signal iconClicked()               // NEW: emitted on icon tap (e.g. mute toggle)
+    signal percentDragged(int pct)     // emitted while dragging the track
+    signal iconClicked()               // emitted on icon tap (e.g. mute toggle)
 
-    implicitWidth: 160
-    implicitHeight: 36
+    implicitWidth: 200
+    implicitHeight: Math.max(36, contentRow.implicitHeight )
     color: "transparent"
-    radius: height / 2
+
+    Row {
+        id: contentRow
+        anchors.centerIn: parent
+        spacing: 12
+
+        // Optional, or you can retain your absolute anchors below if preferred.
+    }
 
     Text {
         id: iconText

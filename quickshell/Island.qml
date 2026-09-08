@@ -164,7 +164,13 @@ PanelWindow {
         anchors.topMargin: ShellState.islandNotchMode ? 0 : ShellState.islandTopMargin
         clip: true
 
-                readonly property bool expanded: ShellState.activePage !== "clock" && ShellState.activePage !== "timertoast" && ShellState.activePage !== "settings" && ShellState.activePage !== "lock"
+        readonly property bool expanded: ShellState.activePage !== "clock" 
+                       && ShellState.activePage !== "timertoast" 
+                       && ShellState.activePage !== "notificationtoast" 
+                       && ShellState.activePage !== "volume" 
+                       && ShellState.activePage !== "brightness" 
+                       && ShellState.activePage !== "settings" 
+                       && ShellState.activePage !== "lock"
         readonly property int compactHeight: ShellState.islandCompactHeight
         readonly property int compactWidth: ShellState.islandCompactWidth
 

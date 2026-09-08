@@ -102,6 +102,16 @@ Rectangle {
         }
         if (map[key] !== undefined) return map[key]
         if (key >= Qt.Key_F1 && key <= Qt.Key_F35) return "F" + (key - Qt.Key_F1 + 1)
+
+        // Letters and digits: derive from the key code itself, not
+        // event.text. event.text is unreliable once CTRL/ALT is held — it
+        // often carries a control character (e.g. Ctrl+A -> \x01) instead
+        // of the plain letter, which has no glyph and renders as a box.
+        // Qt.Key_A..Z and Qt.Key_0..9 map 1:1 onto ASCII codes, so
+        // String.fromCharCode(key) is safe no matter what modifiers are held.
+        if (key >= Qt.Key_A && key <= Qt.Key_Z) return String.fromCharCode(key)
+        if (key >= Qt.Key_0 && key <= Qt.Key_9) return String.fromCharCode(key)
+
         if (text && text.length === 1) return text.toUpperCase()
         return ""
     }
