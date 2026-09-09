@@ -22,3 +22,7 @@ singleton TimerService 1.0 TimerService.qml
 singleton HyprlandAnimationsService 1.0 HyprlandAnimationsService.qml
 singleton HyprlandKeybindsService 1.0 HyprlandKeybindsService.qml
 singleton LockScreenSettings 1.0 LockScreenSettings.qml
+singleton InputSettingsService 1.0 InputSettingsService.qml
+singleton MonitorSettingsService 1.0 MonitorSettingsService.qml
+singleton HyprlandDecorationService 1.0 HyprlandDecorationService.qml
+singleton AutostartService 1.0 AutostartService.qml

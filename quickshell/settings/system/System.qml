@@ -1,35 +1,21 @@
 // settings/system/System.qml — consolidated Display, Notifications, and
 // Mouse & Touchpad settings under one "System" page.
-// NOTE: this pass adds UI-only rows/sections — new properties are plain
-// local state (matching the existing peaceMode/naturalScrolling pattern),
-// not yet wired to any real backend service. Wire each to its actual
-// service once the backend exists, the same way ControlCenter's tiles
-// were only wired after their services were confirmed real.
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
+import "../../services"
 import "../common"
 
 Item {
     id: root
 
     property bool peaceMode: false
-    property bool naturalScrolling: true
 
-    // ---- new UI-only state ----
-    property string displayScale: "100%"
-    property bool reduceTransparency: false
-    property bool autoHideBar: false
-
+    // ---- other UI-only state (not yet wired) ----
     property bool showNotificationPreviews: true
-    property string notificationPosition: "Top"
-
     property bool tapToClick: true
-    property real cursorSize: 24
-    property real scrollSpeed: 50
 
-    property bool autoStartOnBoot: true
-    property string powerProfile: "Balanced"
+    property string newAppCommand: ""
 
     SettingsScrollView {
         SettingsHeader {
@@ -40,25 +26,47 @@ Item {
 
         SettingsSectionLabel { label: "Display" }
 
-        SettingsRow {
-            label: "Display Scale Factor"
-            value: root.displayScale
-            showChevron: false
-            showDivider: true
+        // Fully dynamic — one block per monitor MonitorSettingsService
+        // actually found via hyprctl, no hardcoded monitor name anywhere.
+        Repeater {
+            model: MonitorSettingsService.monitors
+            delegate: ColumnLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                spacing: Dimens.spacingSmall
+
+                SettingsSectionLabel { label: parent.modelData.description }
+
+                SettingsDropdownRow {
+                    id: resolutionDropdown
+                    label: "Resolution & Refresh Rate"
+                    options: parent.modelData.availableModes
+                    selectedValue: parent.modelData.width + "x" + parent.modelData.height + "@" + Math.round(parent.modelData.refreshRate)
+                    onToggled: resolutionDropdown.isOpen = !resolutionDropdown.isOpen
+                    onOptionSelected: (value) => {
+                        MonitorSettingsService.setMode(parent.modelData.name, value)
+                        resolutionDropdown.isOpen = false
+                    }
+                }
+
+                SettingsSliderRow {
+                    label: "Scale"
+                    from: 0.5; to: 3.0; stepSize: 0.05
+                    value: parent.modelData.scale
+                    decimals: 2
+                    onMoved: (val) => MonitorSettingsService.setScale(parent.modelData.name, val)
+                }
+            }
         }
 
         SettingsToggleRow {
             label: "Reduce Transparency"
-            checked: root.reduceTransparency
-            showDivider: true
-            onToggled: (val) => root.reduceTransparency = val
-        }
-
-        SettingsToggleRow {
-            label: "Auto-hide Bar"
-            checked: root.autoHideBar
+            checked: Colors.reduceTransparency
             showDivider: false
-            onToggled: (val) => root.autoHideBar = val
+            onToggled: (val) => {
+                Colors.reduceTransparency = val
+                HyprlandDecorationService.setBlurEnabled(!val)
+            }
         }
 
         SettingsSectionLabel { label: "Notifications" }
@@ -73,24 +81,26 @@ Item {
         SettingsToggleRow {
             label: "Show Notification Previews"
             checked: root.showNotificationPreviews
-            showDivider: true
+            showDivider: false
             onToggled: (val) => root.showNotificationPreviews = val
-        }
-
-        SettingsSegmentedRow {
-            label: "Notification Position"
-            options: ["Top", "Top Right", "Bottom Right"]
-            selectedValue: root.notificationPosition
-            onOptionSelected: (value) => root.notificationPosition = value
         }
 
         SettingsSectionLabel { label: "Mouse & Touchpad" }
 
-        SettingsToggleRow {
-            label: "Natural Scrolling"
-            checked: root.naturalScrolling
-            showDivider: true
-            onToggled: (val) => root.naturalScrolling = val
+        SettingsSliderRow {
+            label: "Movement Sensitivity (Global)"
+            from: -1.0; to: 1.0; stepSize: 0.05
+            value: InputSettingsService.sensitivity
+            decimals: 2
+            onMoved: (val) => InputSettingsService.setSensitivity(val)
+        }
+
+        SettingsSliderRow {
+            label: "Scroll Speed (Mouse)"
+            from: 0.1; to: 5.0; stepSize: 0.1
+            value: InputSettingsService.scrollFactor
+            decimals: 1
+            onMoved: (val) => InputSettingsService.setScrollFactor(val)
         }
 
         SettingsToggleRow {
@@ -100,36 +110,117 @@ Item {
             onToggled: (val) => root.tapToClick = val
         }
 
-        SettingsSliderRow {
-            label: "Cursor Size"
-            from: 16; to: 48; stepSize: 2
-            value: root.cursorSize
-            unit: " px"
-            onMoved: (val) => root.cursorSize = val
+        SettingsToggleRow {
+            label: "Natural Scrolling (Touchpad)"
+            checked: InputSettingsService.touchpadNaturalScroll
+            showDivider: true
+            onToggled: (val) => InputSettingsService.setTouchpadNaturalScroll(val)
         }
 
         SettingsSliderRow {
-            label: "Scroll Speed"
-            from: 0; to: 100; stepSize: 5
-            value: root.scrollSpeed
-            unit: "%"
-            onMoved: (val) => root.scrollSpeed = val
+            label: "Scroll Speed (Touchpad)"
+            from: 0.1; to: 5.0; stepSize: 0.1
+            value: InputSettingsService.touchpadScrollFactor
+            decimals: 1
+            onMoved: (val) => InputSettingsService.setTouchpadScrollFactor(val)
+        }
+
+        SettingsSliderRow {
+            label: "Movement Sensitivity (Touchpad Override)"
+            from: -1.0; to: 1.0; stepSize: 0.05
+            value: InputSettingsService.touchpadSensitivity
+            decimals: 2
+            onMoved: (val) => InputSettingsService.setTouchpadSensitivity(val)
         }
 
         SettingsSectionLabel { label: "Power" }
 
         SettingsSegmentedRow {
             label: "Power Profile"
-            options: ["Power Saver", "Balanced", "Performance"]
-            selectedValue: root.powerProfile
-            onOptionSelected: (value) => root.powerProfile = value
+            options: PowerProfileService.profiles.map(p => p.name)
+            selectedValue: {
+                let match = PowerProfileService.profiles.find(p => p.id === PowerProfileService.activeProfile)
+                return match ? match.name : ""
+            }
+            onOptionSelected: (name) => {
+                let match = PowerProfileService.profiles.find(p => p.name === name)
+                if (match) PowerProfileService.setProfile(match.id)
+            }
         }
 
-        SettingsToggleRow {
-            label: "Start Shell on Boot"
-            checked: root.autoStartOnBoot
-            showDivider: false
-            onToggled: (val) => root.autoStartOnBoot = val
+        SettingsSectionLabel { label: "Startup Apps" }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 32
+            radius: Dimens.radiusSmall
+            color: Colors.subBgMica
+            border.color: Colors.border
+            border.width: 1
+
+            TextInput {
+                id: newAppInput
+                anchors.fill: parent
+                anchors.margins: 8
+                color: Colors.fg
+                font.family: Fonts.mono
+                font.pixelSize: Dimens.fontSizeSm
+                onTextChanged: root.newAppCommand = text
+                onAccepted: {
+                    if (root.newAppCommand.trim().length > 0) {
+                        AutostartService.addApp(root.newAppCommand.trim())
+                        text = ""
+                    }
+                }
+                Text {
+                    visible: parent.text.length === 0
+                    text: "Command to launch, e.g. spotify"
+                    color: Colors.subtext
+                    font: parent.font
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.bottomMargin: Dimens.spacingSmall
+
+            Item { Layout.fillWidth: true }
+
+            SettingsButton {
+                primary: true
+                text: "Add"
+                enabled: root.newAppCommand.trim().length > 0
+                onClicked: {
+                    AutostartService.addApp(root.newAppCommand.trim())
+                    newAppInput.text = ""
+                }
+            }
+        }
+
+        SettingsSectionLabel { label: "Starting Apps" }
+        
+        Repeater {
+            model: AutostartService.apps
+            delegate: RowLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                Layout.bottomMargin: Dimens.spacingSmall
+
+                Text {
+                    text: modelData.command
+                    color: Colors.fg
+                    font.family: Fonts.mono
+                    font.pixelSize: Dimens.fontSizeSm
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+
+                SettingsButton {
+                    text: "Remove"
+                    onClicked: AutostartService.removeApp(modelData.command)
+                }
+            }
         }
     }
 }

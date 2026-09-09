@@ -15,6 +15,12 @@ Item {
     property real micaAlpha: 1.0
     property real micaBeta: 0.80
 
+    // When true, forces mica backgrounds fully opaque regardless of the
+    // user's chosen micaAlpha/micaBeta — without overwriting those
+    // stored values, so turning Reduce Transparency back off restores
+    // whatever transparency level was set on the Appearance page.
+    property bool reduceTransparency: false
+
     // Guards against feedback loops and pre-load overwrites, same pattern
     // used in SettingsStore.qml.
     property bool _configLoaded: false
@@ -51,6 +57,7 @@ Item {
                 if (data.micaAlpha !== undefined) root.micaAlpha = data.micaAlpha;
                 if (data.micaBeta !== undefined) root.micaBeta = data.micaBeta;
                 if (data.lightModeEnabled !== undefined) root.lightModeEnabled = data.lightModeEnabled;
+                if (data.reduceTransparency !== undefined) root.reduceTransparency = data.reduceTransparency;
                 if (data.iconStyle !== undefined) Fonts.iconStyle = data.iconStyle;
                 if (data.iconWeight !== undefined) Fonts.iconWeight = data.iconWeight;
             } catch (e) {
@@ -74,6 +81,7 @@ Item {
             "micaAlpha": root.micaAlpha,
             "micaBeta": root.micaBeta,
             "lightModeEnabled": root.lightModeEnabled,
+            "reduceTransparency": root.reduceTransparency,
             "iconStyle": Fonts.iconStyle,
             "iconWeight": Fonts.iconWeight
         };
@@ -84,6 +92,7 @@ Item {
     onMicaAlphaChanged: saveAppearanceConfig()
     onMicaBetaChanged: saveAppearanceConfig()
     onLightModeEnabledChanged: saveAppearanceConfig()
+    onReduceTransparencyChanged: saveAppearanceConfig()
 
     Connections {
         target: Fonts
@@ -165,8 +174,16 @@ Item {
     readonly property color black: darkMode ? subBg : border
     readonly property color white: darkMode ? "#ffffff" : subBg
 
-    readonly property color mainBgMica: Qt.rgba(bg.r, bg.g, bg.b, micaAlpha)
-    readonly property color subBgMica: Qt.rgba(bgsur.r, bgsur.g, bgsur.b, micaBeta)
+    // Effective alpha/beta collapse to fully opaque (1.0) when
+    // reduceTransparency is on, WITHOUT touching the stored
+    // micaAlpha/micaBeta values themselves — so the Appearance page's
+    // sliders still show the user's real chosen values, and turning
+    // Reduce Transparency back off instantly restores them.
+    readonly property real _effectiveMicaAlpha: root.reduceTransparency ? 1.0 : root.micaAlpha
+    readonly property real _effectiveMicaBeta: root.reduceTransparency ? 1.0 : root.micaBeta
+
+    readonly property color mainBgMica: Qt.rgba(bg.r, bg.g, bg.b, root._effectiveMicaAlpha)
+    readonly property color subBgMica: Qt.rgba(bgsur.r, bgsur.g, bgsur.b, root._effectiveMicaBeta)
 
     function toHex(c) {
         if (!c || c.r === undefined) return "#000000";
