@@ -165,7 +165,7 @@ WlSessionLock {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Colors.bg
+                    color: Colors.mainBgMica
 
                     Image {
                         id: wallpaper

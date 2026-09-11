@@ -11,3 +11,4 @@ SettingsCarouselRow 1.0 SettingsCarouselRow.qml
 SettingsCarouselRow 1.0 SettingsCarouselRow.qml
 SettingsDropdownRow 1.0 SettingsDropdownRow.qml
 SettingsSegmentedRow 1.0 SettingsSegmentedRow.qml
+SettingsColorRow 1.0 SettingsColorRow.qml

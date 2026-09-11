@@ -19,6 +19,20 @@ Item {
     readonly property var bodyFontOptions: ["Inter", "Roboto", "JetBrains Mono", "Sans-Serif"]
     readonly property var displayFontOptions: ["Cabinet Grotesk", "Inter Display", "Outfit", "SF Pro Display"]
     readonly property var iconStyles: ["Rounded", "Outlined", "Sharp"]
+    readonly property var colorKeys: [
+        { key: "background", label: "Background" },
+        { key: "surface", label: "Surface" },
+        { key: "foreground", label: "Foreground" },
+        { key: "fgMuted", label: "Muted Text" },
+        { key: "border", label: "Border" },
+        { key: "accent", label: "Accent" },
+        { key: "red", label: "Red" },
+        { key: "green", label: "Green" },
+        { key: "yellow", label: "Yellow" },
+        { key: "blue", label: "Blue" },
+        { key: "purple", label: "Purple" },
+        { key: "cyan", label: "Cyan" }
+    ]
 
     MouseArea {
         id: dropdownBackdrop
@@ -193,6 +207,43 @@ Item {
                     from: 100; to: 700; stepSize: 50
                     value: Fonts.iconWeight
                     onMoved: (val) => Fonts.iconWeight = val
+                }
+
+                SettingsToggleRow {
+                    label: "Colors follow theme"
+                    checked: Colors.colorsFollowTheme
+                    showDivider: false
+                    onToggled: (val) => Colors.colorsFollowTheme = val
+                }
+
+                SettingsSectionLabel {
+                    label: "Custom Colors — Dark"
+                }
+
+                Repeater {
+                    model: root.colorKeys
+                    delegate: SettingsColorRow {
+                        Layout.fillWidth: true
+                        label: modelData.label
+                        value: Colors.hardcodedPalette.dark[modelData.key]
+                        showDivider: index !== root.colorKeys.length - 1
+                        onCommitted: (hex) => Colors.setHardcodedColor("dark", modelData.key, hex)
+                    }
+                }
+
+                SettingsSectionLabel {
+                    label: "Custom Colors — Light"
+                }
+
+                Repeater {
+                    model: root.colorKeys
+                    delegate: SettingsColorRow {
+                        Layout.fillWidth: true
+                        label: modelData.label
+                        value: Colors.hardcodedPalette.light[modelData.key]
+                        showDivider: index !== root.colorKeys.length - 1
+                        onCommitted: (hex) => Colors.setHardcodedColor("light", modelData.key, hex)
+                    }
                 }
             }
         }

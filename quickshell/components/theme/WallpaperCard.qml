@@ -38,7 +38,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 90
             radius: card.radius
-            color: Colors.subBg
+            color: Colors.subBgMica
             border.width: card.isApplied ? 2 : (card.isSelected ? 1.5 : 0)
             border.color: card.isApplied ? (Colors.accent) : Qt.rgba(1, 1, 1, 0.4)
 

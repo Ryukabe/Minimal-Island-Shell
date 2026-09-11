@@ -15,14 +15,46 @@ Item {
     property real micaAlpha: 1.0
     property real micaBeta: 0.80
 
-    // When true, forces mica backgrounds fully opaque regardless of the
-    // user's chosen micaAlpha/micaBeta — without overwriting those
-    // stored values, so turning Reduce Transparency back off restores
-    // whatever transparency level was set on the Appearance page.
     property bool reduceTransparency: false
 
-    // Guards against feedback loops and pre-load overwrites, same pattern
-    // used in SettingsStore.qml.
+    // When true (default), every pick()-based color tracks the active
+    // theme as usual. When false, pick() reads from hardcodedPalette
+    // instead — still split by light/dark, so toggling Light Mode while
+    // frozen still swaps to a sane hardcoded pair rather than one fixed
+    // set for both modes.
+    property bool colorsFollowTheme: true
+
+    property var hardcodedPalette: ({
+        dark: {
+            background: "#131413",
+            surface: "#1e1e1e",
+            foreground: "#f5e2c5",
+            fgMuted: "#c4b09a",
+            border: "#152a26",
+            accent: "#3dd1b0",
+            red: "#ff6048",
+            green: "#7ad9a8",
+            yellow: "#f5cd5b",
+            blue: "#5fc8d4",
+            purple: "#e89aa8",
+            cyan: "#3dd1b0"
+        },
+        light: {
+            background: "#fffcf0",
+            surface: "#f5f2e7",
+            foreground: "#1a1a1a",
+            fgMuted: "#5a5a5a",
+            border: "#dddddd",
+            accent: "#2a9d8f",
+            red: "#d1453d",
+            green: "#4a9d6f",
+            yellow: "#b8932e",
+            blue: "#3a8fa0",
+            purple: "#b06a7a",
+            cyan: "#2a9d8f"
+        }
+    })
+
     property bool _configLoaded: false
     property bool _applyingConfig: false
 
@@ -58,6 +90,8 @@ Item {
                 if (data.micaBeta !== undefined) root.micaBeta = data.micaBeta;
                 if (data.lightModeEnabled !== undefined) root.lightModeEnabled = data.lightModeEnabled;
                 if (data.reduceTransparency !== undefined) root.reduceTransparency = data.reduceTransparency;
+                if (data.colorsFollowTheme !== undefined) root.colorsFollowTheme = data.colorsFollowTheme;
+                if (data.hardcodedPalette !== undefined) root.hardcodedPalette = data.hardcodedPalette;
                 if (data.iconStyle !== undefined) Fonts.iconStyle = data.iconStyle;
                 if (data.iconWeight !== undefined) Fonts.iconWeight = data.iconWeight;
             } catch (e) {
@@ -82,6 +116,8 @@ Item {
             "micaBeta": root.micaBeta,
             "lightModeEnabled": root.lightModeEnabled,
             "reduceTransparency": root.reduceTransparency,
+            "colorsFollowTheme": root.colorsFollowTheme,
+            "hardcodedPalette": root.hardcodedPalette,
             "iconStyle": Fonts.iconStyle,
             "iconWeight": Fonts.iconWeight
         };
@@ -93,11 +129,25 @@ Item {
     onMicaBetaChanged: saveAppearanceConfig()
     onLightModeEnabledChanged: saveAppearanceConfig()
     onReduceTransparencyChanged: saveAppearanceConfig()
+    onColorsFollowThemeChanged: saveAppearanceConfig()
+    onHardcodedPaletteChanged: saveAppearanceConfig()
 
     Connections {
         target: Fonts
         function onIconStyleChanged() { root.saveAppearanceConfig() }
         function onIconWeightChanged() { root.saveAppearanceConfig() }
+    }
+
+    // Call this to edit one hardcoded color. `mode` is "dark" or "light",
+    // `key` matches the quickshell.json keys (background, surface,
+    // foreground, fgMuted, border, accent, red, green, yellow, blue,
+    // purple, cyan). Reassigns the whole object since QML doesn't emit
+    // change notifications for in-place mutation of nested `var` props.
+    function setHardcodedColor(mode, key, hexValue) {
+        var next = JSON.parse(JSON.stringify(root.hardcodedPalette));
+        if (!next[mode]) next[mode] = {};
+        next[mode][key] = hexValue;
+        root.hardcodedPalette = next;
     }
 
     // --- Theme Loader ---
@@ -136,7 +186,15 @@ Item {
         return root.palette;
     }
 
+    // Single gate for every color below. When colorsFollowTheme is off,
+    // reads from hardcodedPalette[mode] first; falls through to the
+    // theme/safety palette only if that key is missing there too.
     function pick(key) {
+        if (!root.colorsFollowTheme) {
+            var mode = root.lightModeEnabled ? "light" : "dark";
+            var hc = root.hardcodedPalette[mode];
+            if (hc && hc[key] !== undefined) return hc[key];
+        }
         var val = root.activePalette[key];
         if (val === undefined) {
             return root._safetyPalette[key] !== undefined ? root._safetyPalette[key] : "#000000";
@@ -152,10 +210,11 @@ Item {
 
     readonly property bool darkMode: !pick("isLight")
 
-    readonly property color mainBg: root.lightModeEnabled ? "#fffcf0" : "#131413"
-    readonly property color subBg: root.lightModeEnabled ? "#f5f2e7" : "#1e1e1e"
     readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(bgsur, 1.08) : Qt.lighter(bgsur, 1.35)
 
+    // All of these already route through pick(), so the colorsFollowTheme
+    // toggle applies to every one of them automatically — no per-property
+    // changes needed below this line.
     readonly property color bg: pick("background")
     readonly property color bgsur: pick("surface")
     readonly property color fg: pick("foreground")
@@ -171,14 +230,9 @@ Item {
     readonly property color purple: pick("purple")
     readonly property color cyan: pick("cyan")
 
-    readonly property color black: darkMode ? subBg : border
-    readonly property color white: darkMode ? "#ffffff" : subBg
+    readonly property color black: darkMode ? subBgMica : border
+    readonly property color white: darkMode ? subBgMica : border
 
-    // Effective alpha/beta collapse to fully opaque (1.0) when
-    // reduceTransparency is on, WITHOUT touching the stored
-    // micaAlpha/micaBeta values themselves — so the Appearance page's
-    // sliders still show the user's real chosen values, and turning
-    // Reduce Transparency back off instantly restores them.
     readonly property real _effectiveMicaAlpha: root.reduceTransparency ? 1.0 : root.micaAlpha
     readonly property real _effectiveMicaBeta: root.reduceTransparency ? 1.0 : root.micaBeta
 

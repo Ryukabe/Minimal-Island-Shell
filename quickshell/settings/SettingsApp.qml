@@ -187,7 +187,7 @@ Scope {
                                 Rectangle {
                                     anchors.fill: parent
                                     anchors.margins: 2
-                                    color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.subBg : "transparent")
+                                    color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.subBgMica : "transparent")
                                     opacity: isSelected ? 0.2 : 1.0
                                     radius: Dimens.radiusMedium
 
