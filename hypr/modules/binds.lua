@@ -124,7 +124,7 @@ hl.bind("XF86AudioMute",                    hl.dsp.exec_cmd("qs ipc call volume 
 
 --Terminal
 hl.bind(mainMod .. " + RETURN",             hl.dsp.exec_cmd("kitty"))
---hl.bind(mainMod .. " + ALT + RETURN",     hl.dsp.exec_cmd("foot"))
+hl.bind(mainMod .. " + ALT + RETURN",     hl.dsp.exec_cmd("alacritty"))
 
 --File Manager
 hl.bind(mainMod .. " + F",                  hl.dsp.exec_cmd("nautilus"))

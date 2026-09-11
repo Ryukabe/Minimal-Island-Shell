@@ -1,0 +1,96 @@
+# ~/.config/starship.toml
+
+# Don't print a new line at the start of the prompt
+add_newline = false
+
+format = """
+$cmd_duration $directory$git_branch
+  $character"""
+
+[fill]
+symbol = '-'
+style = 'fg:#928374'
+
+# Prompt Character configuration
+[character]
+success_symbol = "[ ](bold fg:#a9b665)"
+error_symbol = "[ ](bold fg:#ea6962)"
+
+# Disable the package module, hiding it from the prompt completely
+[package]
+disabled = true
+
+[git_branch]
+style = "bg:#d3869b"
+symbol = "󰘬"
+truncation_length = 12
+truncation_symbol = ""
+format = " 󰜥 [](bold fg:#d3869b)[$symbol $branch(:$remote_branch)](fg:#1d2021 bg:#d3869b)[ ](bold fg:#d3869b)"
+
+[git_commit]
+commit_hash_length = 4
+tag_symbol = " "
+
+[git_state]
+format = '[\($state( $progress_current of $progress_total)\)]($style) '
+cherry_pick = "[🍒 PICKING](bold fg:#ea6962)"
+
+[git_status]
+conflicted = " 🏳 "
+ahead = " 🏎💨 "
+behind = " 😰 "
+diverged = " 😵 "
+untracked = " 🤷 ‍"
+stashed = " 📦 "
+modified = " 📝 "
+staged = '[++\($count\)](fg:#a9b665)'
+renamed = " ✍️ "
+deleted = " 🗑 "
+
+[hostname]
+ssh_only = false
+format =  "[•$hostname](bg:#d4be98 bold fg:#1d2021)[](bold fg:#d4be98)"
+trim_at = ".companyname.com"
+disabled = false
+
+[line_break]
+disabled = false
+
+[memory_usage]
+disabled = true
+threshold = -1
+symbol = " "
+style = "bold fg:#a9b665"
+
+[time]
+disabled = true
+format = '🕙[\[ $time \]]($style) '
+time_format = "%T"
+
+[username]
+style_user = "bold bg:#d4be98 fg:#1d2021"
+style_root = "fg:#ea6962 bold"
+format = "[](bold fg:#d4be98)[$user]($style)"
+disabled = false
+show_always = true
+
+[directory]
+home_symbol = " "
+read_only = "  "
+style = "bg:#7daea3 fg:#1d2021"
+truncation_length = 2
+truncation_symbol = ".../"
+format = '[](bold fg:#7daea3)[󰉋 → $path]($style)[](bold fg:#7daea3)'
+
+[directory.substitutions]
+"Desktop" = "  "
+"Documents" = "  "
+"Downloads" = "  "
+"Music" = " 󰎈 "
+"Pictures" = "  "
+"Videos" = "  "
+"GitHub" = " 󰊤 "
+
+[cmd_duration]
+min_time = 0
+format = '[](bold fg:#d8a657)[󰪢 $duration](bold bg:#d8a657 fg:#1d2021)[](bold fg:#d8a657)'
