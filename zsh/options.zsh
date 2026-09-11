@@ -15,9 +15,9 @@ setopt HIST_REDUCE_BLANKS
 
 # --- DIRECTORY NAVIGATION OPTIONS ---
 setopt AUTO_CD
-setopt AUTO_PUSHD
-setopt PUSHD_IGNORE_DUPS
-setopt GLOB_COMPLETE
+#setopt AUTO_PUSHD
+#setopt PUSHD_IGNORE_DUPS
+#setopt GLOB_COMPLETE
 
 # --- COMPLETION STYLES ---
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'

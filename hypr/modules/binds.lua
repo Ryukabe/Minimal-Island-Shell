@@ -11,6 +11,9 @@ end)
 
 --- System ---
 
+-- System Reload
+hl.bind(mainMod .. " + CTRL + SHIFT + ALT + RETURN", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/system_reload.sh"))
+
 -- Window management
 hl.bind(mainMod .. " + SHIFT + F",            hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + SHIFT + P",            hl.dsp.window.pseudo())
@@ -68,8 +71,14 @@ hl.bind("XF86AudioPrev",                    hl.dsp.exec_cmd("playerctl previous"
 hl.bind("CTRL + ALT + DELETE",              hl.dsp.exec_cmd("hyprctl kill"))
 hl.bind("ALT + F4",                         hl.dsp.window.close())
 
+-- Hyperland Reload
+hl.bind(mainMod .. " + CTRL + SHIFT + R",                   hl.dsp.exec_cmd("hyprctl reload"))
+
 
 --- QuickShell ---
+ 
+-- Reload Shell
+hl.bind(mainMod .. " + ALT + CTRL + R ", hl.dsp.exec_cmd(" quickshell || quickshell reload"))
 
 -- Settings
 hl.bind(mainMod .. " + COMMA ",             hl.dsp.exec_cmd("qs ipc call settings toggle"))--, { locked = true })
@@ -150,7 +159,4 @@ hl.bind(mainMod .. " + SHIFT + Print",      hl.dsp.exec_cmd("hyprshot -m region 
 
 -- Color Picker
 hl.bind(mainMod .. " + P",                  hl.dsp.exec_cmd("hyprpicker -a -f hex"))
-
-
-
 
