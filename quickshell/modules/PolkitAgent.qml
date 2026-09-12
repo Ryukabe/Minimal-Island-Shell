@@ -85,7 +85,7 @@ Item {
             border.color: passInput.activeFocus ? Colors.accent : Colors.subBgMica
 
             Behavior on border.color {
-                ColorAnimation { duration: ShellState.motionDuration(ShellState.motionFadeMs) }
+                ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
             }
 
             TextInput {
@@ -144,11 +144,21 @@ Item {
                 color: Colors.subBgMica
 
                 scale: cancelBtnMouse.pressed ? 0.95 : 1.0
+
+                SpringAnimation {
+                    id: cancelPressSpring
+                    spring: Motion.snapSpring
+                    damping: Motion.snapDamping
+                    mass: Motion.snapMass
+                    epsilon: Motion.epsilon
+                }
+                NumberAnimation {
+                    id: cancelPressEase
+                    duration: ShellState.motionDuration(Motion.snapMs)
+                    easing.type: Easing.OutCubic
+                }
                 Behavior on scale {
-                    NumberAnimation {
-                        duration: ShellState.motionDuration(ShellState.motionHoverMs)
-                        easing.type: Easing.OutCubic
-                    }
+                    animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? cancelPressSpring : cancelPressEase
                 }
 
                 Text {
@@ -176,11 +186,21 @@ Item {
                 color: Colors.accent
 
                 scale: authBtnMouse.pressed ? 0.95 : 1.0
+
+                SpringAnimation {
+                    id: authPressSpring
+                    spring: Motion.snapSpring
+                    damping: Motion.snapDamping
+                    mass: Motion.snapMass
+                    epsilon: Motion.epsilon
+                }
+                NumberAnimation {
+                    id: authPressEase
+                    duration: ShellState.motionDuration(Motion.snapMs)
+                    easing.type: Easing.OutCubic
+                }
                 Behavior on scale {
-                    NumberAnimation {
-                        duration: ShellState.motionDuration(ShellState.motionHoverMs)
-                        easing.type: Easing.OutCubic
-                    }
+                    animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? authPressSpring : authPressEase
                 }
 
                 Text {

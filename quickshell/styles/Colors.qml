@@ -17,6 +17,17 @@ Item {
 
     property bool reduceTransparency: false
 
+    // Island drop-shadow — persisted the same way as micaAlpha/micaBeta.
+    // shadowBlur = edge softness (0-1). shadowScale = how far the halo
+    // reaches outward before blurring — this is the "left/right spread"
+    // knob; blur alone doesn't push it wider, it just softens the edge.
+    property bool islandShadowEnabled: true
+    property color shadowColor: "#000000"
+    property real shadowOpacity: 0.55
+    property real shadowBlur: 0.75
+    property real shadowScale: 1.25
+    property real shadowVerticalOffset: 6
+
     // When true (default), every pick()-based color tracks the active
     // theme as usual. When false, pick() reads from hardcodedPalette
     // instead — still split by light/dark, so toggling Light Mode while
@@ -92,6 +103,12 @@ Item {
                 if (data.reduceTransparency !== undefined) root.reduceTransparency = data.reduceTransparency;
                 if (data.colorsFollowTheme !== undefined) root.colorsFollowTheme = data.colorsFollowTheme;
                 if (data.hardcodedPalette !== undefined) root.hardcodedPalette = data.hardcodedPalette;
+                if (data.islandShadowEnabled !== undefined) root.islandShadowEnabled = data.islandShadowEnabled;
+                if (data.shadowColor !== undefined) root.shadowColor = data.shadowColor;
+                if (data.shadowOpacity !== undefined) root.shadowOpacity = data.shadowOpacity;
+                if (data.shadowBlur !== undefined) root.shadowBlur = data.shadowBlur;
+                if (data.shadowScale !== undefined) root.shadowScale = data.shadowScale;
+                if (data.shadowVerticalOffset !== undefined) root.shadowVerticalOffset = data.shadowVerticalOffset;
                 if (data.iconStyle !== undefined) Fonts.iconStyle = data.iconStyle;
                 if (data.iconWeight !== undefined) Fonts.iconWeight = data.iconWeight;
             } catch (e) {
@@ -118,6 +135,12 @@ Item {
             "reduceTransparency": root.reduceTransparency,
             "colorsFollowTheme": root.colorsFollowTheme,
             "hardcodedPalette": root.hardcodedPalette,
+            "islandShadowEnabled": root.islandShadowEnabled,
+            "shadowColor": root.toHex(root.shadowColor),
+            "shadowOpacity": root.shadowOpacity,
+            "shadowBlur": root.shadowBlur,
+            "shadowScale": root.shadowScale,
+            "shadowVerticalOffset": root.shadowVerticalOffset,
             "iconStyle": Fonts.iconStyle,
             "iconWeight": Fonts.iconWeight
         };
@@ -131,6 +154,12 @@ Item {
     onReduceTransparencyChanged: saveAppearanceConfig()
     onColorsFollowThemeChanged: saveAppearanceConfig()
     onHardcodedPaletteChanged: saveAppearanceConfig()
+    onIslandShadowEnabledChanged: saveAppearanceConfig()
+    onShadowColorChanged: saveAppearanceConfig()
+    onShadowOpacityChanged: saveAppearanceConfig()
+    onShadowBlurChanged: saveAppearanceConfig()
+    onShadowScaleChanged: saveAppearanceConfig()
+    onShadowVerticalOffsetChanged: saveAppearanceConfig()
 
     Connections {
         target: Fonts

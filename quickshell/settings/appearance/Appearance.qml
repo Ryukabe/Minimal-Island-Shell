@@ -184,6 +184,43 @@ Item {
                     onMoved: (val) => root.smallRadius = val
                 }
 
+                SettingsSectionLabel { label: "Shadow" }
+
+                SettingsToggleRow {
+                    label: "Enable shadow"
+                    checked: Colors.islandShadowEnabled
+                    showDivider: false
+                    onToggled: (val) => Colors.islandShadowEnabled = val
+                }
+
+                SettingsColorRow {
+                    Layout.fillWidth: true
+                    label: "Shadow color"
+                    value: Colors.shadowColor
+                    showDivider: true
+                    onCommitted: (hex) => Colors.shadowColor = hex
+                }
+
+                SettingsSliderRow {
+                    label: "Shadow softness"
+                    from: 0.0; to: 1.0; stepSize: 0.01
+                    decimals: 2
+                    value: Colors.shadowBlur
+                    enabled: Colors.islandShadowEnabled
+                    opacity: Colors.islandShadowEnabled ? 1.0 : 0.4
+                    onMoved: (val) => Colors.shadowBlur = val
+                }
+
+                SettingsSliderRow {
+                    label: "Shadow spread (left/right reach)"
+                    from: 1.0; to: 2.0; stepSize: 0.05
+                    decimals: 2
+                    value: Colors.shadowScale
+                    enabled: Colors.islandShadowEnabled
+                    opacity: Colors.islandShadowEnabled ? 1.0 : 0.4
+                    onMoved: (val) => Colors.shadowScale = val
+                }
+                
                 SettingsSectionLabel { label: "Display" }
 
                 SettingsToggleRow {

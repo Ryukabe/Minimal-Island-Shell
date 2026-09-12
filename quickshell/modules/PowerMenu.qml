@@ -112,7 +112,7 @@ Item {
 
                 width: 52
                 height: 52
-                radius: width / 2
+                radius: islandRadius
                 color: index === root.selectedIndex ? Colors.accent : Colors.subBgMica
                 border.width: 1
                 border.color: Colors.border
@@ -120,22 +120,22 @@ Item {
                 scale: index === root.selectedIndex ? 1.15 : 1.0
 
                 Behavior on color {
-                    ColorAnimation { duration: ShellState.motionDuration(ShellState.motionFadeMs) }
+                    ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
                 }
 
-                NumberAnimation {
-                    id: scaleEaseAnim
-                    duration: ShellState.motionDuration(ShellState.motionHoverMs)
-                    easing.type: Easing.OutBack
-                    easing.overshoot: ShellState.motionOvershoot()
-                }
-
+                // Icon selection is snap tier
                 SpringAnimation {
                     id: scaleSpringAnim
-                    spring: ShellState.springStiffness()
-                    damping: ShellState.springDamping()
+                    spring: Motion.snapSpring
+                    damping: Motion.snapDamping
+                    mass: Motion.snapMass
+                    epsilon: Motion.epsilon
                 }
-
+                NumberAnimation {
+                    id: scaleEaseAnim
+                    duration: ShellState.motionDuration(Motion.snapMs)
+                    easing.type: Easing.OutCubic
+                }
                 Behavior on scale {
                     animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? scaleSpringAnim : scaleEaseAnim
                 }
@@ -151,6 +151,7 @@ Item {
                 }
 
                 MouseArea {
+                    id: powerMouse
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     hoverEnabled: true

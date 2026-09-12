@@ -16,10 +16,12 @@ QtObject {
     // ================= BAR & ISLAND PROPERTIES =================
     property real islandTopMargin: 5
     property real islandCornerRadius: 12
+    property real islandExpandedCornerRadius: 12
     property real islandBorderWidth: 0
     property bool islandClickOutsideDismiss: true
     property bool islandNotchMode: false
     property real islandNotchFlare: 14
+    property real islandHoverScale: 1.02
 
     property real islandCompactHeight: 36
     property real islandCompactWidth: 160
@@ -72,17 +74,24 @@ QtObject {
         return root.motionReduced ? 1.0 : (1.0 + root.motionBouncePercent / 100)
     }
 
-    function springStiffness() {
-        var t = Math.max(50, Math.min(400, root.motionHoverMs))
-        var normalized = 1 - (t - 50) / (400 - 50)
-        return 2.0 + normalized * 4.0
+    // Generalized spring-stiffness mapping: shorter user-set duration (ms)
+    // -> higher stiffness (snappier convergence). minK/maxK are the actual
+    // SpringAnimation.spring range a tier should produce (e.g. 250-550 for
+    // the snap tier, 150-400 for the slower glide tier).
+    function springStiffnessFor(ms, minMs, maxMs, minK, maxK) {
+        var t = Math.max(minMs, Math.min(maxMs, ms))
+        var normalized = 1 - (t - minMs) / (maxMs - minMs)
+        return minK + normalized * (maxK - minK)
     }
 
-    function springDamping() {
+    // Generalized damping mapping, shared "Bounce" slider: more bounce %
+    // -> lower damping (more oscillation before settling). minD/maxD are
+    // the actual SpringAnimation.damping range a tier should produce.
+    function springDampingFor(minD, maxD) {
         var b = Math.max(0, Math.min(100, root.motionBouncePercent))
-        return 0.5 - (b / 100) * 0.35
+        return maxD - (b / 100) * (maxD - minD)
     }
-    
+
     // ================= TIMERS & HELPERS =================
     property Timer hoverResetTimer: Timer {
         interval: 300

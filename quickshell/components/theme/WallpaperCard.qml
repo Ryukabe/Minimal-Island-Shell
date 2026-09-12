@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
+import "../../services"
 import "../../styles"
 
 Item {
@@ -15,16 +16,76 @@ Item {
 
     readonly property bool isRaised: isSelected || isHovered
 
+    // Visual amplitude — how far each state pushes, not how fast.
+    readonly property real liftY: isSelected ? -6 : (isHovered ? -4 : 0)
+    readonly property real boxScale: isSelected ? 1.035 : (isHovered ? 1.02 : 1.0)
+
     implicitWidth: 145
     implicitHeight: 125
     property real radius: Dimens.radiusSmall
 
     z: card.isRaised ? 3 : 1
 
+    // ---- hover-tier lift/scale: light, low-bounce ----
+    SpringAnimation {
+        id: hoverLiftSpring
+        spring: Motion.hoverSpring
+        damping: Motion.hoverDamping
+        mass: Motion.hoverMass
+        epsilon: Motion.epsilon
+    }
+    NumberAnimation {
+        id: hoverLiftEase
+        duration: ShellState.motionDuration(Motion.hoverMs)
+        easing.type: Easing.OutCubic
+    }
+    SpringAnimation {
+        id: hoverScaleSpring
+        spring: Motion.hoverSpring
+        damping: Motion.hoverDamping
+        mass: Motion.hoverMass
+        epsilon: Motion.epsilon
+    }
+    NumberAnimation {
+        id: hoverScaleEase
+        duration: ShellState.motionDuration(Motion.hoverMs)
+        easing.type: Easing.OutCubic
+    }
+
+    // ---- select-tier lift/scale: heavier, more travel/bounce ----
+    SpringAnimation {
+        id: selectLiftSpring
+        spring: Motion.selectSpring
+        damping: Motion.selectDamping
+        mass: Motion.selectMass
+        epsilon: Motion.epsilon
+    }
+    NumberAnimation {
+        id: selectLiftEase
+        duration: ShellState.motionDuration(Motion.selectMs)
+        easing.type: Easing.OutCubic
+    }
+    SpringAnimation {
+        id: selectScaleSpring
+        spring: Motion.selectSpring
+        damping: Motion.selectDamping
+        mass: Motion.selectMass
+        epsilon: Motion.epsilon
+    }
+    NumberAnimation {
+        id: selectScaleEase
+        duration: ShellState.motionDuration(Motion.selectMs)
+        easing.type: Easing.OutCubic
+    }
+
     transform: Translate {
-        y: card.isRaised ? -4 : 0
+        y: card.liftY
         Behavior on y {
-            NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
+            animation: {
+                var tier = card.isSelected ? (ShellState.motionSpringEnabled && !ShellState.motionReduced ? selectLiftSpring : selectLiftEase)
+                                            : (ShellState.motionSpringEnabled && !ShellState.motionReduced ? hoverLiftSpring : hoverLiftEase)
+                return tier
+            }
         }
     }
 
@@ -42,9 +103,13 @@ Item {
             border.width: card.isApplied ? 2 : (card.isSelected ? 1.5 : 0)
             border.color: card.isApplied ? (Colors.accent) : Qt.rgba(1, 1, 1, 0.4)
 
-            scale: card.isHovered ? 1.02 : 1.0
+            scale: card.boxScale
             Behavior on scale {
-                NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
+                animation: {
+                    var tier = card.isSelected ? (ShellState.motionSpringEnabled && !ShellState.motionReduced ? selectScaleSpring : selectScaleEase)
+                                                : (ShellState.motionSpringEnabled && !ShellState.motionReduced ? hoverScaleSpring : hoverScaleEase)
+                    return tier
+                }
             }
 
             // Wallpaper Image
@@ -107,7 +172,7 @@ Item {
             maximumLineCount: 1
 
             Behavior on color {
-                ColorAnimation { duration: 140 }
+                ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
             }
         }
     }

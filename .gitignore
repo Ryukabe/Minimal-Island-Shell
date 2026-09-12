@@ -3,7 +3,6 @@ ags/
 autostart/
 Code/
 dconf/
-fish/
 gh/
 go/
 gtk-3.0/
@@ -20,7 +19,6 @@ nwg-look/
 pcloud/
 pulse/
 rofi/
-snappy-switcher/
 spicetify/
 spotify/
 swaync/
@@ -38,6 +36,8 @@ gtkrc-2.0
 mimeapps.list
 user-dirs.dirs
 user-dirs.locale
+pavucontrol.ini
+QtProject.conf
 
 #zsh
 zsh/ohmyzsh

@@ -161,21 +161,21 @@ Item {
 
             scale: delegateRoot.index === root.selectedIndex ? 1.015 : 1.0
 
-            NumberAnimation {
-                id: scaleEaseAnim
-                duration: ShellState.motionDuration(ShellState.motionHoverMs)
-                easing.type: Easing.OutBack
-                easing.overshoot: ShellState.motionOvershoot()
-            }
-
+            // Row selection is snap tier — small, frequent, must not lag key repeats
             SpringAnimation {
-                id: scaleSpringAnim
-                spring: ShellState.springStiffness()
-                damping: ShellState.springDamping()
+                id: selectSpringAnim
+                spring: Motion.snapSpring
+                damping: Motion.snapDamping
+                mass: Motion.snapMass
+                epsilon: Motion.epsilon
             }
-
+            NumberAnimation {
+                id: selectEaseAnim
+                duration: ShellState.motionDuration(Motion.snapMs)
+                easing.type: Easing.OutCubic
+            }
             Behavior on scale {
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? scaleSpringAnim : scaleEaseAnim
+                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? selectSpringAnim : selectEaseAnim
             }
 
             Row {

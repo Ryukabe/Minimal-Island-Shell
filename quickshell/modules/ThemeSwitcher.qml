@@ -151,8 +151,20 @@ FocusScope {
                 border.width: searchInput.activeFocus ? 1 : 0
                 border.color: Colors.accent
 
+                SpringAnimation {
+                    id: searchWidthSpring
+                    spring: Motion.glideSpring
+                    damping: Motion.glideDamping
+                    mass: Motion.glideMass
+                    epsilon: Motion.epsilon
+                }
+                NumberAnimation {
+                    id: searchWidthEase
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.OutCubic
+                }
                 Behavior on implicitWidth {
-                    NumberAnimation { duration: ShellState.motionDuration(ShellState.motionMovementMs); easing.type: Easing.OutCubic }
+                    animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? searchWidthSpring : searchWidthEase
                 }
 
                 TextInput {
@@ -234,8 +246,14 @@ FocusScope {
 
             flickableDirection: Flickable.HorizontalFlick
             boundsBehavior: Flickable.StopAtBounds
-            highlightMoveDuration: 0
-            
+
+            // Was hardcoded to 0 (hard snap). Now tied to the Movement
+            // slider and Reduce Motion, same as everything else — note
+            // this is a plain duration, not a true spring; ListView's
+            // built-in highlight-follow doesn't support swapping in a
+            // SpringAnimation without replacing the follow mechanism.
+            highlightMoveDuration: ShellState.motionDuration(Motion.glideMs)
+
             highlightRangeMode: ListView.StrictlyEnforceRange
             preferredHighlightBegin: width / 2 - 72
             preferredHighlightEnd: width / 2 + 72

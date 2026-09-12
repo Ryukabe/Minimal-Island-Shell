@@ -1,1 +1,1 @@
-{"clockFormat24h":false,"showDate":true,"showUsername":true,"passwordPlaceholder":"password","wallpaperDimOpacity":0.35,"frostedBlurEnabled":true,"frostedBlurRadius":42,"showHyprlandAction":true,"showRebootAction":true,"showPowerAction":true,"errorUsesAccent":false}
+{"clockFormat24h":false,"showDate":true,"showUsername":true,"passwordPlaceholder":"password","wallpaperDimOpacity":0.35,"frostedBlurEnabled":true,"frostedBlurRadius":42,"showHyprlandAction":false,"showRebootAction":true,"showPowerAction":true,"errorUsesAccent":false}

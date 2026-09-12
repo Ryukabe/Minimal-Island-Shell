@@ -13,9 +13,9 @@ QtObject {
     readonly property int borderRadiusLarge: radiusLarge
 
     // Padding & Spacing
-    readonly property int paddingSmall: 8
-    readonly property int paddingMedium: 14
-    readonly property int paddingLarge: 20
+    readonly property int paddingSmall: 6
+    readonly property int paddingMedium: 12
+    readonly property int paddingLarge: 18
     readonly property int paddingSm: paddingSmall
     readonly property int paddingMd: paddingMedium
     readonly property int paddingLg: paddingLarge
@@ -58,5 +58,5 @@ QtObject {
     readonly property int fontSizeDisplay: 64
 
     // Island radius    
-    readonly property int islandRadius: 12
+    readonly property int islandRadius: 15
 }

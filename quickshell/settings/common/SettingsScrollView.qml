@@ -32,17 +32,28 @@ Item {
         ScrollBar.vertical: ScrollBar {
             id: vbar
             policy: ScrollBar.AlwaysOn
-            width: 6
+            width: 8
             active: true
 
+            // Track — the part that was missing entirely before, which is
+            // why the bar was invisible at rest. A faint always-visible
+            // pill so the scrollable area reads clearly even when idle.
+            background: Rectangle {
+                implicitWidth: 8
+                radius: 4
+                color: Colors.fg
+                opacity: 0.06
+            }
+
             contentItem: Rectangle {
-                implicitWidth: 6
-                radius: 3
+                implicitWidth: 8
+                radius: 4
                 color: Colors.accent
-                opacity: vbar.pressed ? 1.0 : (vbar.hovered ? 0.8 : 0.5)
+                // Idle opacity raised from 0.5 to 0.65 so the thumb is
+                // clearly visible without hovering, not just when dragged.
+                opacity: vbar.pressed ? 1.0 : (vbar.hovered ? 0.85 : 0.65)
                 Behavior on opacity { NumberAnimation { duration: 120 } }
             }
-            background: Item {}
         }
 
         Item {

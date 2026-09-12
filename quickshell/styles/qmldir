@@ -2,3 +2,4 @@ module styles
 singleton Colors 1.0 Colors.qml
 singleton Dimens 1.0 Dimens.qml
 singleton Fonts 1.0 Fonts.qml
+singleton Motion 1.0 Motion.qml

@@ -12,7 +12,7 @@ end)
 --- System ---
 
 -- System Reload
-hl.bind(mainMod .. " + CTRL + SHIFT + ALT + RETURN", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/system_reload.sh"))
+hl.bind(mainMod .. " + CTRL + ALT + RETURN", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/system_reload.sh"))
 
 -- Window management
 hl.bind(mainMod .. " + SHIFT + F",            hl.dsp.window.float({ action = "toggle" }))
@@ -72,13 +72,13 @@ hl.bind("CTRL + ALT + DELETE",              hl.dsp.exec_cmd("hyprctl kill"))
 hl.bind("ALT + F4",                         hl.dsp.window.close())
 
 -- Hyperland Reload
-hl.bind(mainMod .. " + CTRL + SHIFT + R",                   hl.dsp.exec_cmd("hyprctl reload"))
+hl.bind(mainMod .. " + ALT + R",                   hl.dsp.exec_cmd("hyprctl reload"))
 
 
 --- QuickShell ---
  
 -- Reload Shell
-hl.bind(mainMod .. " + ALT + CTRL + R ", hl.dsp.exec_cmd(" quickshell || quickshell reload"))
+hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd(" quickshell || quickshell reload"))
 
 -- Settings
 hl.bind(mainMod .. " + COMMA ",             hl.dsp.exec_cmd("qs ipc call settings toggle"))--, { locked = true })

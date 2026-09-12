@@ -14,14 +14,6 @@ Item {
     Layout.fillWidth: true
     implicitHeight: 44
 
-    // Hardcoded row background
-    Rectangle {
-        anchors.fill: parent
-        color: Colors.elevatedBg
-        radius: Dimens.radiusMedium
-        z: -1
-    }
-
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Dimens.paddingMedium

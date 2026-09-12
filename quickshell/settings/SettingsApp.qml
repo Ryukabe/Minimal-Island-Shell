@@ -1,3 +1,4 @@
+// SettingsApp.qml
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -8,7 +9,7 @@ import "bar"
 import "clock"
 import "media"
 import "appearance"
-import "motion"
+import "motion" as MotionPage
 import "launcher"
 import "controlcenter"
 import "lockscreen"
@@ -139,8 +140,11 @@ Scope {
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.margins: Dimens.paddingLarge
-                    spacing: Dimens.spacingLarge
+                    Layout.topMargin: 4
+                    Layout.leftMargin: Dimens.paddingMedium
+                    Layout.rightMargin: 0
+                    Layout.bottomMargin: Dimens.paddingMedium
+                    spacing: Dimens.spacingMedium
 
                     ListView {
                         id: sectionList
@@ -228,7 +232,7 @@ Scope {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: Colors.subBgMica
+                        color: "transparent"
                         radius: Dimens.radiusLarge
 
                         StackLayout {
@@ -240,7 +244,7 @@ Scope {
                             Clock {}
                             Media {}
                             Appearance {}
-                            Motion {}
+                            MotionPage.Motion {}
                             Launcher {}
                             ControlCenter {}
                             LockScreen {}

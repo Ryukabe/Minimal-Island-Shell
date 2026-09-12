@@ -1,6 +1,7 @@
 // Island.qml — bar window, page router, and IPC
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -98,7 +99,7 @@ PanelWindow {
     IpcHandler {
         target: "notificationcenter"
         function toggle(): void { ShellState.activePage === "notificationcenter" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("notificationcenter") }
-        function open(): void { ShellState.showPage("notificationcenter") }
+        function open() { ShellState.showPage("notificationcenter") }
         function close() { ShellState.showPage(getDefaultPage()) }
     }
 
@@ -157,6 +158,43 @@ PanelWindow {
         fillColor: Colors.mainBgMica
     }
 
+    // ---- Island drop shadow ----
+    // islandShadowSource is an exact-shape, exact-position copy of the
+    // island (same anchors, same size, same radius) sitting directly
+    // behind it. MultiEffect's autoPaddingEnabled grows the effect's
+    // rendered bounds beyond the source automatically — no fixed pixel
+    // margin to guess. shadowScale grows the shadow shape itself before
+    // blurring, which is what pushes the halo out past the LEFT/RIGHT
+    // edges specifically (shadowBlur alone only softens the edge, it
+    // doesn't reach further). The island, painted on top at identical
+    // geometry, covers the crisp unblurred center completely.
+    Rectangle {
+        id: islandShadowSource
+        anchors.horizontalCenter: island.horizontalCenter
+        anchors.top: island.top
+        width: island.width
+        height: island.height
+        radius: island.radius
+        color: Colors.mainBgMica
+        visible: Colors.islandShadowEnabled
+    }
+
+    MultiEffect {
+        id: islandShadow
+        anchors.fill: islandShadowSource
+        source: islandShadowSource
+        visible: Colors.islandShadowEnabled
+        z: -0.5
+        autoPaddingEnabled: true
+        shadowEnabled: true
+        shadowColor: Colors.shadowColor
+        shadowOpacity: Colors.shadowOpacity
+        shadowBlur: Colors.shadowBlur
+        shadowScale: Colors.shadowScale
+        shadowVerticalOffset: Colors.shadowVerticalOffset
+        shadowHorizontalOffset: 0
+    }
+
     Rectangle {
         id: island
         anchors.horizontalCenter: parent.horizontalCenter
@@ -186,63 +224,69 @@ PanelWindow {
             return Math.max(pageLoader.item.implicitHeight, floor)
         }
 
-                width: targetWidth
+        width: targetWidth
         height: targetHeight
 
-        radius: Math.min(height / 2, ShellState.islandCornerRadius)
+        radius: island.expanded
+            ? Math.min(height / 2, ShellState.islandExpandedCornerRadius)
+            : Math.min(height / 2, ShellState.islandCornerRadius)
         color: ShellState.islandNotchMode ? "transparent" : Colors.mainBgMica
         border.color: Colors.border
         border.width: ShellState.islandNotchMode ? 0 : ShellState.islandBorderWidth
 
-        NumberAnimation {
-            id: widthEaseAnim
-            duration: ShellState.motionDuration(ShellState.motionMovementMs)
-            easing.type: Easing.OutExpo
-        }
-
+        // ---- width/height: the "big" morph, gets the full spring/ease toggle ----
         SpringAnimation {
             id: widthSpringAnim
-            spring: ShellState.springStiffness()
-            damping: ShellState.springDamping()
+            spring: Motion.glideSpring
+            damping: Motion.glideDamping
+            mass: Motion.glideMass
+            epsilon: Motion.epsilon
         }
-
+        NumberAnimation {
+            id: widthEaseAnim
+            duration: ShellState.motionDuration(Motion.glideMs)
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+        }
         Behavior on width {
             animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? widthSpringAnim : widthEaseAnim
         }
 
-        NumberAnimation {
-            id: heightEaseAnim
-            duration: ShellState.motionDuration(ShellState.motionMovementMs)
-            easing.type: Easing.OutExpo
-        }
-
         SpringAnimation {
             id: heightSpringAnim
-            spring: ShellState.springStiffness()
-            damping: ShellState.springDamping()
+            spring: Motion.glideSpring
+            damping: Motion.glideDamping
+            mass: Motion.glideMass
+            epsilon: Motion.epsilon
         }
-
+        NumberAnimation {
+            id: heightEaseAnim
+            duration: ShellState.motionDuration(Motion.glideMs)
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+        }
         Behavior on height {
             animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? heightSpringAnim : heightEaseAnim
         }
 
+        // ---- radius/topMargin/border.width: intentionally short plain eases, never spring ----
         Behavior on radius {
             NumberAnimation {
-                duration: ShellState.motionDuration(ShellState.motionMovementMs)
+                duration: ShellState.motionDuration(Motion.glideMs * 0.85)
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on anchors.topMargin {
             NumberAnimation {
-                duration: ShellState.motionDuration(ShellState.motionMovementMs)
+                duration: ShellState.motionDuration(Motion.glideMs)
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on border.width {
             NumberAnimation {
-                duration: ShellState.motionDuration(ShellState.motionFadeMs)
+                duration: ShellState.motionDuration(Motion.fadeMs)
                 easing.type: Easing.OutCubic
             }
         }
@@ -272,48 +316,49 @@ PanelWindow {
             id: pageLoader
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            scale: islandTapArea.containsMouse ? 1.02 : 1.0
+            scale: islandTapArea.containsMouse ? ShellState.islandHoverScale : 1.0
             opacity: 1.0
 
-            NumberAnimation {
-                id: hoverScaleEaseAnim
-                duration: ShellState.motionDuration(ShellState.motionHoverMs)
-                easing.type: Easing.OutBack
-                easing.overshoot: ShellState.motionOvershoot()
-            }
-
+            // hover feedback = snap tier
             SpringAnimation {
-                id: hoverScaleSpringAnim
-                spring: ShellState.springStiffness()
-                damping: ShellState.springDamping()
+                id: hoverSpringAnim
+                spring: Motion.snapSpring
+                damping: Motion.snapDamping
+                mass: Motion.snapMass
+                epsilon: Motion.epsilon
             }
-
+            NumberAnimation {
+                id: hoverEaseAnim
+                duration: ShellState.motionDuration(Motion.snapMs)
+                easing.type: Easing.OutCubic
+            }
             Behavior on scale {
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? hoverScaleSpringAnim : hoverScaleEaseAnim
+                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? hoverSpringAnim : hoverEaseAnim
             }
 
             onItemChanged: {
                 if (item) {
-                    contentAnimStandard.stop()
                     contentAnimSpring.stop()
+                    contentAnimEase.stop()
                     item.opacity = 0
                     item.scale = 0.94
                     if (ShellState.motionSpringEnabled && !ShellState.motionReduced) {
                         contentAnimSpring.start()
                     } else {
-                        contentAnimStandard.start()
+                        contentAnimEase.start()
                     }
                 }
             }
 
+            // Content entrance — ease variant (spring toggle off / reduced motion)
             ParallelAnimation {
-                id: contentAnimStandard
+                id: contentAnimEase
                 NumberAnimation {
                     target: pageLoader.item
                     property: "opacity"
                     from: 0
                     to: 1
-                    duration: ShellState.motionDuration(ShellState.motionFadeMs)
+                    duration: ShellState.motionDuration(Motion.fadeMs)
                     easing.type: Easing.OutCubic
                 }
                 NumberAnimation {
@@ -321,12 +366,13 @@ PanelWindow {
                     property: "scale"
                     from: 0.94
                     to: 1.0
-                    duration: ShellState.motionDuration(ShellState.motionMovementMs)
-                    easing.type: Easing.OutBack
-                    easing.overshoot: ShellState.motionOvershoot()
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
                 }
             }
 
+            // Content entrance — real spring variant (spring toggle on)
             ParallelAnimation {
                 id: contentAnimSpring
                 NumberAnimation {
@@ -334,16 +380,17 @@ PanelWindow {
                     property: "opacity"
                     from: 0
                     to: 1
-                    duration: ShellState.motionDuration(ShellState.motionFadeMs)
+                    duration: ShellState.motionDuration(Motion.fadeMs)
                     easing.type: Easing.OutCubic
                 }
                 SpringAnimation {
                     target: pageLoader.item
                     property: "scale"
-                    from: 0.94
                     to: 1.0
-                    spring: ShellState.springStiffness()
-                    damping: ShellState.springDamping()
+                    spring: Motion.glideSpring
+                    damping: Motion.glideDamping
+                    mass: Motion.glideMass
+                    epsilon: Motion.epsilon
                 }
             }
 

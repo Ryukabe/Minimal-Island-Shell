@@ -40,15 +40,23 @@ Rectangle {
             width: 72
             height: 72
             radius: Dimens.radiusMediumLarge
-                color: Colors.subBgMica
+            color: Colors.subBgMica
             clip: true
 
             Image {
+                id: artImage
                 anchors.fill: parent
                 source: AudioService.artUrl
                 fillMode: Image.PreserveAspectCrop
-                visible: AudioService.artUrl !== ""
                 asynchronous: true
+                opacity: AudioService.artUrl !== "" ? 1 : 0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: ShellState.motionDuration(Motion.fadeMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
             Text {
                 anchors.centerIn: parent
@@ -56,7 +64,14 @@ Rectangle {
                 font.family: Fonts.icon || "JetBrainsMono Nerd Font"
                 font.pixelSize: Dimens.fontSizeXxxl
                 color: Colors.subtext
-                visible: AudioService.artUrl === ""
+                opacity: AudioService.artUrl === "" ? 1 : 0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: ShellState.motionDuration(Motion.fadeMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
         }
 
@@ -197,6 +212,18 @@ Rectangle {
                         radius: width / 2
                         color: isToday ? Colors.accent : "transparent"
                         anchors.horizontalCenter: parent.horizontalCenter
+
+                        // Rolls over once a day at most — a plain ease is
+                        // enough here, doesn't need the full spring toggle.
+                        Behavior on width {
+                            NumberAnimation { duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.OutCubic }
+                        }
+                        Behavior on height {
+                            NumberAnimation { duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.OutCubic }
+                        }
+                        Behavior on color {
+                            ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                        }
 
                         Text {
                             anchors.centerIn: parent

@@ -50,10 +50,10 @@ Item {
             }
         }
 
-               onItemChanged: {
+        onItemChanged: {
             if (item) {
-                subviewAnimStandard.stop()
-                subviewAnimSpring.stop()
+                contentAnimSpring.stop()
+                contentAnimEase.stop()
                 if (root._subviewFirstLoad) {
                     item.opacity = 1
                     item.scale = 1.0
@@ -62,22 +62,23 @@ Item {
                     item.opacity = 0
                     item.scale = 0.95
                     if (ShellState.motionSpringEnabled && !ShellState.motionReduced) {
-                        subviewAnimSpring.start()
+                        contentAnimSpring.start()
                     } else {
-                        subviewAnimStandard.start()
+                        contentAnimEase.start()
                     }
                 }
             }
         }
 
+        // Subview swap — ease variant (spring toggle off / reduced motion)
         ParallelAnimation {
-            id: subviewAnimStandard
+            id: contentAnimEase
             NumberAnimation {
                 target: pageLoader.item
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: ShellState.motionDuration(ShellState.motionFadeMs)
+                duration: ShellState.motionDuration(Motion.fadeMs)
                 easing.type: Easing.OutCubic
             }
             NumberAnimation {
@@ -85,29 +86,31 @@ Item {
                 property: "scale"
                 from: 0.95
                 to: 1.0
-                duration: ShellState.motionDuration(ShellState.motionMovementMs)
-                easing.type: Easing.OutBack
-                easing.overshoot: ShellState.motionOvershoot()
+                duration: ShellState.motionDuration(Motion.glideMs)
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
             }
         }
 
+        // Subview swap — real spring variant (spring toggle on)
         ParallelAnimation {
-            id: subviewAnimSpring
+            id: contentAnimSpring
             NumberAnimation {
                 target: pageLoader.item
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: ShellState.motionDuration(ShellState.motionFadeMs)
+                duration: ShellState.motionDuration(Motion.fadeMs)
                 easing.type: Easing.OutCubic
             }
             SpringAnimation {
                 target: pageLoader.item
                 property: "scale"
-                from: 0.95
                 to: 1.0
-                spring: ShellState.springStiffness()
-                damping: ShellState.springDamping()
+                spring: Motion.glideSpring
+                damping: Motion.glideDamping
+                mass: Motion.glideMass
+                epsilon: Motion.epsilon
             }
         }
     }
