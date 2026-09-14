@@ -55,10 +55,15 @@ Scope {
         title: "Settings"
         visible: ShellState.settingsOpen
         color: Colors.mainBgMica
-        implicitWidth: 600
-        implicitHeight: 800
+        implicitWidth: 1080
+        implicitHeight: 1440
 
-        onVisibleChanged: if (visible) focusDelay.start()
+        onVisibleChanged: {
+            if (visible) {
+                focusDelay.start()
+                gearSpinAnim.restart() // Triggers gear animation on window open
+            }
+        }
 
         Timer {
             id: focusDelay
@@ -86,172 +91,348 @@ Scope {
                 }
             }
 
-            ColumnLayout {
+            RowLayout {
                 anchors.fill: parent
                 spacing: 0
 
+                // ==========================================
+                // SIDEBAR NAVIGATION
+                // ==========================================
                 Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 54
-                    color: "transparent"
-                    z: 10
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: 260
+                    color: Colors.mainBgMica
 
-                    MouseArea {
+                    ColumnLayout {
                         anchors.fill: parent
-                        acceptedButtons: Qt.LeftButton
-                        onPressed: window.startSystemMove()
-                    }
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: Dimens.paddingLarge
-                        anchors.rightMargin: Dimens.paddingLarge
+                        anchors.margins: Dimens.paddingMedium
                         spacing: Dimens.spacingMedium
 
+                        // 1. Settings Header (With Interactive Animated Gear Icon)
                         RowLayout {
+                            Layout.fillWidth: true
                             spacing: Dimens.spacingSmall
-                            Text {
-                                text: "settings"
-                                color: Colors.accent
-                                font.family: Fonts.icon
-                                font.pixelSize: Dimens.fontSizeXl
+
+                            Rectangle {
+                                width: 40
+                                height: 40
+                                radius: 20
+                                color: gearMouse.containsMouse ? Colors.elevatedBg : "transparent"
+
+                                Behavior on color { ColorAnimation { duration: 120 } }
+
+                                Text {
+                                    id: settingsGearIcon
+                                    anchors.centerIn: parent
+                                    text: "settings"
+                                    color: Colors.accent
+                                    font.family: Fonts.icon
+                                    font.pixelSize: Dimens.fontSizeLg
+                                    transformOrigin: Item.Center
+                                    scale: gearMouse.pressed ? 0.9 : (gearMouse.containsMouse ? 1.1 : 1.0)
+
+                                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+
+                                    // 360 degree spin animation
+                                    RotationAnimation {
+                                        id: gearSpinAnim
+                                        target: settingsGearIcon
+                                        from: 0
+                                        to: 360
+                                        duration: 500
+                                        easing.type: Easing.OutBack
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: gearMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: gearSpinAnim.restart()
+                                }
                             }
-                            Text {
-                                text: "Settings"
-                                color: Colors.fg
-                                font.family: Fonts.display
-                                font.pixelSize: Dimens.fontSizeLg
-                                font.weight: Font.Bold
+
+                            ColumnLayout {
+                                spacing: 0
+                                Layout.fillWidth: true
+
+                                Text {
+                                    text: "Settings"
+                                    color: Colors.fg
+                                    font.family: Fonts.display
+                                    font.pixelSize: Dimens.fontSizeLg
+                                    font.weight: Font.Bold
+                                }
+
+                                Text {
+                                    text: "Minimal Island Shell"
+                                    color: Colors.subtext
+                                    font.family: Fonts.text
+                                    font.pixelSize: Dimens.fontSizeXs
+                                }
                             }
                         }
 
-                        Item { Layout.fillWidth: true }
-
+                        // 2. Search Box
                         SearchBox {
                             id: searchBox
+                            Layout.fillWidth: true
                             onOptionSelected: (idx) => {
                                 sectionList.currentIndex = idx
                                 contentRoot.forceActiveFocus()
                             }
                         }
+
+                        Item { height: 2 }
+
+                        // 3. Navigation List
+                        ListView {
+                            id: sectionList
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            spacing: 3
+
+                            model: ListModel {
+                                id: allSections
+                                ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "top margin corner radius border notch mode height" }
+                                ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "24-hour clock seconds format" }
+                                ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "mpris volume audio output" }
+                                ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent" }
+                                ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
+                                ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
+                                ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles network wifi" }
+                                ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
+                                ListElement { sectionName: "Keybinds"; icon: "keyboard"; tag: "hyprland shortcuts binds hotkeys rebind" }
+                                ListElement { sectionName: "System"; icon: "tune"; tag: "display resolution scale notifications toast dnd peace mode mouse touchpad cursor scrolling natural" }
+                                ListElement { sectionName: "About"; icon: "info"; tag: "hardware power info sleep battery updates" }
+                            }
+
+                            delegate: Item {
+                                width: sectionList.width
+                                height: matchesSearch ? 40 : 0
+                                visible: height > 0
+                                clip: true
+
+                                property bool isSelected: sectionList.currentIndex === index
+                                property bool matchesSearch: {
+                                    let query = searchBox.searchText.toLowerCase().trim()
+                                    if (query === "") return true
+                                    return model.sectionName.toLowerCase().includes(query) || model.tag.toLowerCase().includes(query)
+                                }
+
+                                Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+                                Item {
+                                    width: parent.width
+                                    height: 36
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: Dimens.radiusMedium
+                                        color: isSelected 
+                                               ? Colors.accent
+                                               : (itemMouse.containsMouse ? Colors.elevatedBg : "transparent")
+                                        opacity: isSelected ? 0.18 : 1.0
+
+                                        Behavior on color { ColorAnimation { duration: 120 } }
+                                    }
+
+                                    Rectangle {
+                                        width: 3
+                                        height: 16
+                                        radius: 1.5
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 3
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: Colors.accent
+                                        visible: isSelected
+                                    }
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: Dimens.paddingMedium
+                                        anchors.rightMargin: Dimens.paddingSmall
+                                        spacing: Dimens.spacingMedium
+
+                                        // Animated Menu Icon
+                                        Text {
+                                            id: menuIcon
+                                            text: model.icon
+                                            color: isSelected ? Colors.accent : Colors.fg
+                                            font.family: Fonts.icon
+                                            font.pixelSize: Dimens.fontSize15
+                                            transformOrigin: Item.Center
+                                            scale: isSelected ? 1.2 : (itemMouse.containsMouse ? 1.1 : 1.0)
+                                            rotation: itemMouse.pressed ? -15 : 0
+
+                                            Behavior on scale {
+                                                NumberAnimation { duration: 180; easing.type: Easing.OutBack }
+                                            }
+                                            Behavior on rotation {
+                                                NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+                                            }
+                                            Behavior on color {
+                                                ColorAnimation { duration: 120 }
+                                            }
+                                        }
+
+                                        Text {
+                                            text: model.sectionName
+                                            color: isSelected ? Colors.accent : Colors.fg
+                                            font.family: Fonts.text
+                                            font.pixelSize: Dimens.fontSizeBase
+                                            font.weight: isSelected ? Font.DemiBold : Font.Normal
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: itemMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onClicked: sectionList.currentIndex = index
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                RowLayout {
+                Rectangle {
+                    Layout.fillHeight: true
+                    width: 1
+                    color: Colors.border
+                    opacity: 0.3
+                }
+
+                // ==========================================
+                // MAIN CONTENT SECTION WITH ELEVATED CARDS
+                // ==========================================
+                Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.topMargin: 4
-                    Layout.leftMargin: Dimens.paddingMedium
-                    Layout.rightMargin: 0
-                    Layout.bottomMargin: Dimens.paddingMedium
-                    spacing: Dimens.spacingMedium
+                    color: "transparent"
 
-                    ListView {
-                        id: sectionList
-                        Layout.preferredWidth: 220
-                        Layout.fillHeight: true
-                        clip: true
-                        spacing: 0
-
-                    model: ListModel {
-                        id: allSections
-                        ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "top margin corner radius border notch mode height" }
-                        ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "24-hour clock seconds format" }
-                        ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "mpris volume audio output" }
-                        ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent" }
-                        ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
-                        ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
-                        ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles network wifi" }
-                        ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
-                        ListElement { sectionName: "Keybinds"; icon: "keyboard"; tag: "hyprland shortcuts binds hotkeys rebind" }
-                        ListElement { sectionName: "System"; icon: "settings"; tag: "display resolution scale notifications toast dnd peace mode mouse touchpad cursor scrolling natural" }
-                        ListElement { sectionName: "About"; icon: "info"; tag: "hardware power info sleep battery updates" }
+                    MouseArea {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 40
+                        acceptedButtons: Qt.LeftButton
+                        onPressed: window.startSystemMove()
                     }
 
-                        delegate: Item {
-                            width: sectionList.width
-                            height: matchesSearch ? 42 : 0
-                            visible: height > 0
-                            clip: true
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: Dimens.paddingLarge
+                        spacing: Dimens.spacingMedium
 
-                            property bool isSelected: sectionList.currentIndex === index
-                            property bool matchesSearch: {
-                                let query = searchBox.searchText.toLowerCase().trim()
-                                if (query === "") return true
-                                return model.sectionName.toLowerCase().includes(query) || model.tag.toLowerCase().includes(query)
-                            }
-
-                            Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        // Header Info Banner (With Explicit Anchoring to Fix Gap)
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: 70
+                            radius: Dimens.radiusMedium
+                            color: Colors.subBgMica
+                            border.color: Colors.border
+                            border.width: 0
 
                             Item {
-                                width: parent.width
-                                height: 38
-                                anchors.top: parent.top
+                                anchors.fill: parent
 
                                 Rectangle {
-                                    anchors.fill: parent
-                                    anchors.margins: 2
-                                    color: isSelected ? Colors.accent : (itemMouse.containsMouse ? Colors.subBgMica : "transparent")
-                                    opacity: isSelected ? 0.2 : 1.0
-                                    radius: Dimens.radiusMedium
-
-                                    Behavior on color { ColorAnimation { duration: 120 } }
-                                }
-
-                                RowLayout {
-                                    anchors.fill: parent
+                                    id: iconBadge
+                                    width: 40
+                                    height: 40
+                                    radius: 20
+                                    anchors.left: parent.left
                                     anchors.leftMargin: Dimens.paddingMedium
-                                    spacing: Dimens.spacingMedium
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    color: Colors.elevatedBg
 
                                     Text {
-                                        text: model.icon
-                                        color: isSelected ? Colors.accent : Colors.fg
+                                        id: bannerIcon
+                                        anchors.centerIn: parent
+                                        text: allSections.get(sectionList.currentIndex).icon
+                                        color: Colors.accent
                                         font.family: Fonts.icon
-                                        font.pixelSize: Dimens.fontSize15
-                                    }
+                                        font.pixelSize: 22
+                                        transformOrigin: Item.Center
 
-                                    Text {
-                                        text: model.sectionName
-                                        color: isSelected ? Colors.accent : Colors.fg
-                                        font.family: Fonts.text
-                                        font.pixelSize: Dimens.fontSizeBase
-                                        font.weight: isSelected ? Font.Bold : Font.Normal
+                                        // Pop / scale animation when switching sections
+                                        SequentialAnimation {
+                                            id: bannerIconPop
+                                            running: false
+                                            NumberAnimation { target: bannerIcon; property: "scale"; from: 0.4; to: 1.25; duration: 160; easing.type: Easing.OutCubic }
+                                            NumberAnimation { target: bannerIcon; property: "scale"; from: 1.25; to: 1.0; duration: 120; easing.type: Easing.InOutQuad }
+                                        }
+
+                                        Connections {
+                                            target: sectionList
+                                            function onCurrentIndexChanged() {
+                                                bannerIconPop.restart()
+                                            }
+                                        }
                                     }
                                 }
 
-                                MouseArea {
-                                    id: itemMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onClicked: sectionList.currentIndex = index
+                                ColumnLayout {
+                                    anchors.left: iconBadge.right
+                                    anchors.leftMargin: 12 // Direct 12px gap from badge edge
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: Dimens.paddingMedium
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 2
+
+                                    Text {
+                                        text: allSections.get(sectionList.currentIndex).sectionName
+                                        color: Colors.fg
+                                        font.family: Fonts.display
+                                        font.pixelSize: Dimens.fontSizeLg
+                                        font.weight: Font.Bold
+                                    }
+
+                                    Text {
+                                        text: "Configure settings and options for " + allSections.get(sectionList.currentIndex).sectionName
+                                        color: Colors.fgMuted
+                                        font.family: Fonts.text
+                                        font.pixelSize: Dimens.fontSizeXs
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        color: "transparent"
-                        radius: Dimens.radiusLarge
+                        // Expandable Dropdown Views Wrapper
+                        ScrollView {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            contentWidth: availableWidth
 
-                        StackLayout {
-                            anchors.fill: parent
-                            anchors.margins: Dimens.paddingLarge
-                            currentIndex: sectionList.currentIndex
+                            StackLayout {
+                                id: pageStack
+                                width: parent.width
+                                currentIndex: sectionList.currentIndex
+                                implicitHeight: (currentIndex >= 0 && currentIndex < children.length) 
+                                                ? children[currentIndex].implicitHeight 
+                                                : 0
 
-                            Bar {}
-                            Clock {}
-                            Media {}
-                            Appearance {}
-                            MotionPage.Motion {}
-                            Launcher {}
-                            ControlCenter {}
-                            LockScreen {}
-                            Keybinds {}
-                            System {}
-                            About {}
-                        }
+                                Bar {}
+                                Clock {}
+                                Media {}
+                                Appearance {}
+                                MotionPage.Motion {}
+                                Launcher {}
+                                ControlCenter {}
+                                LockScreen {}
+                                Keybinds {}
+                                System {}
+                                About {}
+                            }
+                        }                    
                     }
                 }
             }

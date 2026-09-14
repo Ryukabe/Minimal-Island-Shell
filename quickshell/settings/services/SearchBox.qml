@@ -48,7 +48,7 @@ Rectangle {
 
         Text {
             text: "search"
-            color: Colors.subtext
+            color: searchInput.activeFocus ? Colors.accent : Qt.rgba(1, 1, 1, 0.08)
             font.family: Fonts.icon
             font.variableAxes: Fonts.iconAxes
             font.pixelSize: Dimens.fontSizeMd
@@ -147,6 +147,38 @@ Rectangle {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Close / Clear Button
+        Rectangle {
+            id: clearBtn
+            implicitWidth: 20
+            implicitHeight: 20
+            radius: 10
+            color: clearMouse.containsMouse ? Colors.red : "transparent"
+            visible: searchInput.text.length > 0
+
+            Behavior on color { ColorAnimation { duration: 120 } }
+
+            Text {
+                anchors.centerIn: parent
+                text: "close"
+                color: clearMouse.containsMouse ? "#ffffff" : Colors.subtext
+                font.family: Fonts.icon
+                font.variableAxes: Fonts.iconAxes
+                font.pixelSize: Dimens.fontSizeSm
+            }
+
+            MouseArea {
+                id: clearMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    root.clear()
+                    searchInput.forceActiveFocus()
                 }
             }
         }
