@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import "./services"
+import "./common"
 import "bar"
 import "clock"
 import "media"
@@ -56,12 +57,12 @@ Scope {
         visible: ShellState.settingsOpen
         color: Colors.mainBgMica
         implicitWidth: 1080
-        implicitHeight: 1440
+        implicitHeight: 720
 
         onVisibleChanged: {
             if (visible) {
                 focusDelay.start()
-                gearSpinAnim.restart() // Triggers gear animation on window open
+                gearSpinAnim.restart()
             }
         }
 
@@ -95,9 +96,7 @@ Scope {
                 anchors.fill: parent
                 spacing: 0
 
-                // ==========================================
-                // SIDEBAR NAVIGATION
-                // ==========================================
+                // Sidebar
                 Rectangle {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 260
@@ -108,7 +107,6 @@ Scope {
                         anchors.margins: Dimens.paddingMedium
                         spacing: Dimens.spacingMedium
 
-                        // 1. Settings Header (With Interactive Animated Gear Icon)
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: Dimens.spacingSmall
@@ -133,7 +131,6 @@ Scope {
 
                                     Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
 
-                                    // 360 degree spin animation
                                     RotationAnimation {
                                         id: gearSpinAnim
                                         target: settingsGearIcon
@@ -174,7 +171,6 @@ Scope {
                             }
                         }
 
-                        // 2. Search Box
                         SearchBox {
                             id: searchBox
                             Layout.fillWidth: true
@@ -186,7 +182,6 @@ Scope {
 
                         Item { height: 2 }
 
-                        // 3. Navigation List
                         ListView {
                             id: sectionList
                             Layout.fillWidth: true
@@ -257,7 +252,6 @@ Scope {
                                         anchors.rightMargin: Dimens.paddingSmall
                                         spacing: Dimens.spacingMedium
 
-                                        // Animated Menu Icon
                                         Text {
                                             id: menuIcon
                                             text: model.icon
@@ -309,9 +303,7 @@ Scope {
                     opacity: 0.3
                 }
 
-                // ==========================================
-                // MAIN CONTENT SECTION WITH ELEVATED CARDS
-                // ==========================================
+                // Content View area
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -321,7 +313,8 @@ Scope {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        height: 40
+                        height: 24
+                        z: 10
                         acceptedButtons: Qt.LeftButton
                         onPressed: window.startSystemMove()
                     }
@@ -331,108 +324,32 @@ Scope {
                         anchors.margins: Dimens.paddingLarge
                         spacing: Dimens.spacingMedium
 
-                        // Header Info Banner (With Explicit Anchoring to Fix Gap)
-                        Rectangle {
-                            Layout.fillWidth: true
-                            implicitHeight: 70
-                            radius: Dimens.radiusMedium
-                            color: Colors.subBgMica
-                            border.color: Colors.border
-                            border.width: 0
-
-                            Item {
-                                anchors.fill: parent
-
-                                Rectangle {
-                                    id: iconBadge
-                                    width: 40
-                                    height: 40
-                                    radius: 20
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: Dimens.paddingMedium
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    color: Colors.elevatedBg
-
-                                    Text {
-                                        id: bannerIcon
-                                        anchors.centerIn: parent
-                                        text: allSections.get(sectionList.currentIndex).icon
-                                        color: Colors.accent
-                                        font.family: Fonts.icon
-                                        font.pixelSize: 22
-                                        transformOrigin: Item.Center
-
-                                        // Pop / scale animation when switching sections
-                                        SequentialAnimation {
-                                            id: bannerIconPop
-                                            running: false
-                                            NumberAnimation { target: bannerIcon; property: "scale"; from: 0.4; to: 1.25; duration: 160; easing.type: Easing.OutCubic }
-                                            NumberAnimation { target: bannerIcon; property: "scale"; from: 1.25; to: 1.0; duration: 120; easing.type: Easing.InOutQuad }
-                                        }
-
-                                        Connections {
-                                            target: sectionList
-                                            function onCurrentIndexChanged() {
-                                                bannerIconPop.restart()
-                                            }
-                                        }
-                                    }
-                                }
-
-                                ColumnLayout {
-                                    anchors.left: iconBadge.right
-                                    anchors.leftMargin: 12 // Direct 12px gap from badge edge
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: Dimens.paddingMedium
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 2
-
-                                    Text {
-                                        text: allSections.get(sectionList.currentIndex).sectionName
-                                        color: Colors.fg
-                                        font.family: Fonts.display
-                                        font.pixelSize: Dimens.fontSizeLg
-                                        font.weight: Font.Bold
-                                    }
-
-                                    Text {
-                                        text: "Configure settings and options for " + allSections.get(sectionList.currentIndex).sectionName
-                                        color: Colors.fgMuted
-                                        font.family: Fonts.text
-                                        font.pixelSize: Dimens.fontSizeXs
-                                    }
-                                }
-                            }
+                        // Header Banner
+                        SettingsHeader {
+                            icon: allSections.get(sectionList.currentIndex).icon
+                            title: allSections.get(sectionList.currentIndex).sectionName
+                            subtitle: "Configure settings and options for " + allSections.get(sectionList.currentIndex).sectionName
                         }
 
-                        // Expandable Dropdown Views Wrapper
-                        ScrollView {
+                        // Stacked Subviews (Each view has its own SettingsScrollView)
+                        StackLayout {
+                            id: pageStack
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            clip: true
-                            contentWidth: availableWidth
+                            currentIndex: sectionList.currentIndex
 
-                            StackLayout {
-                                id: pageStack
-                                width: parent.width
-                                currentIndex: sectionList.currentIndex
-                                implicitHeight: (currentIndex >= 0 && currentIndex < children.length) 
-                                                ? children[currentIndex].implicitHeight 
-                                                : 0
-
-                                Bar {}
-                                Clock {}
-                                Media {}
-                                Appearance {}
-                                MotionPage.Motion {}
-                                Launcher {}
-                                ControlCenter {}
-                                LockScreen {}
-                                Keybinds {}
-                                System {}
-                                About {}
-                            }
-                        }                    
+                            Bar {}
+                            Clock {}
+                            Media {}
+                            Appearance {}
+                            MotionPage.Motion {}
+                            Launcher {}
+                            ControlCenter {}
+                            LockScreen {}
+                            Keybinds {}
+                            System {}
+                            About {}
+                        }
                     }
                 }
             }

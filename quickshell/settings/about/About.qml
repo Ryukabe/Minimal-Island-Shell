@@ -9,12 +9,6 @@ Item {
     property string powerProfile: "balanced"
 
     SettingsScrollView {
-        SettingsHeader {
-            icon: "info"
-            title: "About"
-            subtitle: "Hardware status, power management, and updates."
-        }
-
         SettingsSectionLabel { label: "About" }
 
         SettingsRow { label: "Device Name"; value: SystemInfoService.hostname; showChevron: false }

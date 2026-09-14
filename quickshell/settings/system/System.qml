@@ -14,12 +14,6 @@ Item {
     property string newAppCommand: ""
 
     SettingsScrollView {
-        SettingsHeader {
-            icon: "tune"
-            title: "System"
-            subtitle: "Display, notifications, mouse, touchpad, and startup applications."
-        }
-
         // Group 1: Display & Resolution
         SettingsGroup {
             title: "Display & Resolution"
@@ -222,7 +216,7 @@ Item {
             }
 
             SettingsSectionLabel { label: "Starting Apps" }
-            
+
             Repeater {
                 model: AutostartService.apps
                 delegate: RowLayout {

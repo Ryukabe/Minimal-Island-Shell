@@ -1,13 +1,12 @@
 module settings.common
 
-SettingsHeader 1.0 SettingsHeader.qml
 SettingsRow 1.0 SettingsRow.qml
+SettingsHeader 1.0 SettingsHeader.qml
 SettingsSectionLabel 1.0 SettingsSectionLabel.qml
 SettingsSliderRow 1.0 SettingsSliderRow.qml
 SettingsToggleRow 1.0 SettingsToggleRow.qml
 SettingsButton 1.0 SettingsButton.qml
 SettingsScrollView 1.0 SettingsScrollView.qml
-SettingsCarouselRow 1.0 SettingsCarouselRow.qml
 SettingsCarouselRow 1.0 SettingsCarouselRow.qml
 SettingsDropdownRow 1.0 SettingsDropdownRow.qml
 SettingsSegmentedRow 1.0 SettingsSegmentedRow.qml

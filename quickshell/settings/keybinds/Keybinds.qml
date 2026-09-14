@@ -19,10 +19,6 @@ Item {
     }
 
     function clearAddForm() {
-        // Single source of truth for wiping the "Add New Bind" form —
-        // called from both the Cancel button and the expand/collapse
-        // watcher, so there's no path that hides the form without
-        // clearing it.
         newBindCapture.deactivateAndClear()
         newCommandInput.text = ""
         root.newKeyText = ""
@@ -36,12 +32,6 @@ Item {
     }
 
     SettingsScrollView {
-        SettingsHeader {
-            icon: "keyboard"
-            title: "Keybinds"
-            subtitle: "Rebind any Hyprland shortcut, or add a new app/command bind."
-        }
-
         // --- Add New Bind (Everything contained inside the Box) ---
         Rectangle {
             id: formBackground
@@ -60,7 +50,6 @@ Item {
                 anchors.margins: Dimens.paddingMedium
                 spacing: Dimens.spacingSmall
 
-                // 1. Header Row (Label + Chevron) 
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 6
@@ -101,7 +90,6 @@ Item {
                     }
                 }
 
-                // 2. Collapsible Form Section
                 Item {
                     Layout.fillWidth: true
                     clip: true
@@ -127,10 +115,6 @@ Item {
                             Layout.fillWidth: true
                             onComboChanged: (combo) => root.newKeyText = combo
 
-                            // Click-to-capture: the field only arms and
-                            // starts listening for keys when this
-                            // MouseArea is explicitly clicked — never
-                            // automatically when the section expands.
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: newBindCapture.activate()
@@ -170,9 +154,6 @@ Item {
                             SettingsButton {
                                 text: "Cancel"
                                 onClicked: {
-                                    // Clear the capture pill + command input back to empty,
-                                    // but keep the "Add New Bind" section expanded — only the
-                                    // chevron toggle should collapse it now.
                                     root.clearAddForm()
                                 }
                             }
@@ -208,7 +189,6 @@ Item {
                                     cursorShape: addButton.enabledState ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     onClicked: {
                                         HyprlandKeybindsService.addExecBind(newBindCapture.resultCombo.trim(), root.newCommandText.trim())
-                                        // Triggering collapse handles the field clean-ups automatically
                                         root.addExpanded = false
                                     }
                                 }

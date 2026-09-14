@@ -9,14 +9,6 @@ Item {
     id: root
 
     SettingsScrollView {
-        anchors.fill: parent
-
-        SettingsHeader {
-            icon: "lock"
-            title: "Lock Screen"
-            subtitle: "Security and background appearance while locked."
-        }
-
         SettingsSectionLabel { label: "Clock" }
 
         SettingsToggleRow {

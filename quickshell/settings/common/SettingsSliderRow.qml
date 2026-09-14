@@ -3,107 +3,131 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import "../../styles"
-import "../../components/common"
 
-ColumnLayout {
+Item {
     id: root
     property string label: ""
     property real from: 0
     property real to: 100
-    property real value: 0
     property real stepSize: 1
+    property real value: 0
     property string unit: ""
     property int decimals: 0
+    property bool showDivider: true
+
     signal moved(real value)
 
     Layout.fillWidth: true
-    Layout.bottomMargin: Dimens.spacingMedium
-    spacing: Dimens.spacingSmall
+    implicitHeight: 56
 
-    RowLayout {
-        Layout.fillWidth: true
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Dimens.paddingMedium
+        anchors.rightMargin: Dimens.paddingMedium
+        spacing: 4
 
-        Text {
-            text: root.label
-            color: Colors.fg
-            font.family: Fonts.text
-            font.pixelSize: Dimens.fontSizeBase
+        RowLayout {
             Layout.fillWidth: true
-        }
 
-        Rectangle {
-            id: inputContainer
-            implicitWidth: Math.max(56, inputRow.implicitWidth + 16)
-            implicitHeight: 28
-            color: inputField.activeFocus 
-                   ? Qt.rgba(1, 1, 1, 0.08) 
-                   : (inputMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
-            radius: Dimens.radiusSmall
-            border.color: inputField.activeFocus ? Colors.accent : Qt.rgba(1, 1, 1, 0.12)
-            border.width: 1
-
-            MouseArea {
-                id: inputMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: inputField.forceActiveFocus()
+            Text {
+                text: root.label
+                color: Colors.fg
+                font.family: Fonts.text
+                font.pixelSize: Dimens.fontSizeBase
+                Layout.fillWidth: true
             }
 
-            RowLayout {
-                id: inputRow
-                anchors.centerIn: parent
-                spacing: 2
+            // Interactive Value Box
+            Rectangle {
+                implicitWidth: Math.max(50, valInput.implicitWidth + 16)
+                implicitHeight: 24
+                radius: Dimens.radiusSmall
+                color: valInput.activeFocus ? Colors.mainBgMica : Colors.elevatedBg
+                border.color: valInput.activeFocus ? Colors.accent : Colors.border
+                border.width: 1
 
                 TextInput {
-                    id: inputField
-                    color: activeFocus ? Colors.fg : Colors.subtext
-                    font.family: Fonts.text
-                    font.pixelSize: Dimens.fontSizeBase
-                    horizontalAlignment: Text.AlignHCenter
+                    id: valInput
+                    anchors.centerIn: parent
+                    text: root.value.toFixed(root.decimals) + root.unit
+                    color: valInput.activeFocus ? Colors.fg : Colors.subtext
+                    font.family: Fonts.mono
+                    font.pixelSize: Dimens.fontSizeSm
                     selectByMouse: true
-                    text: root.decimals > 0 ? root.value.toFixed(root.decimals) : Math.round(root.value).toString()
 
-                    onAccepted: root.forceActiveFocus()
-                    Keys.onEscapePressed: root.forceActiveFocus()
-
+                    // Sync slider value when text input is committed
                     onEditingFinished: {
-                        let raw = text.trim()
-                        let parsed = parseFloat(raw)
-
-                        if (!isNaN(parsed)) {
-                            if (root.to <= 1.0 && parsed > 1.0) {
-                                let digitsOnly = raw.replace(/[^0-9]/g, "")
-                                let converted = parseFloat("0." + digitsOnly)
-                                if (!isNaN(converted)) {
-                                    parsed = converted
-                                }
-                            }
-
-                            let clamped = Math.max(root.from, Math.min(root.to, parsed))
-                            root.moved(clamped)
+                        var cleaned = text.replace(root.unit, "").trim();
+                        var num = parseFloat(cleaned);
+                        if (!isNaN(num)) {
+                            var clamped = Math.max(root.from, Math.min(root.to, num));
+                            root.moved(clamped);
                         }
+                        // Re-format display text
+                        text = root.value.toFixed(root.decimals) + root.unit;
+                    }
 
-                        text = Qt.binding(() => root.decimals > 0 ? root.value.toFixed(root.decimals) : Math.round(root.value).toString())
+                    // Keep text in sync when slider moves
+                    Connections {
+                        target: root
+                        function onValueChanged() {
+                            if (!valInput.activeFocus) {
+                                valInput.text = root.value.toFixed(root.decimals) + root.unit;
+                            }
+                        }
                     }
                 }
+            }
+        }
 
-                Text {
-                    visible: root.unit !== ""
-                    text: root.unit.trim()
-                    color: Colors.subtext
-                    font.family: Fonts.text
-                    font.pixelSize: Dimens.fontSizeBase
+        Slider {
+            Layout.fillWidth: true
+            from: root.from
+            to: root.to
+            stepSize: root.stepSize
+            value: root.value
+            onMoved: root.moved(value)
+
+            background: Rectangle {
+                x: parent.leftPadding
+                y: parent.topPadding + parent.availableHeight / 2 - height / 2
+                implicitWidth: 200
+                implicitHeight: 4
+                width: parent.availableWidth
+                height: implicitHeight
+                radius: 2
+                color: Colors.elevatedBg
+
+                Rectangle {
+                    width: parent.parent.visualPosition * parent.width
+                    height: parent.height
+                    color: Colors.accent
+                    radius: 2
                 }
+            }
+
+            handle: Rectangle {
+                x: parent.leftPadding + parent.visualPosition * (parent.availableWidth - width)
+                y: parent.topPadding + parent.availableHeight / 2 - height / 2
+                implicitWidth: 16
+                implicitHeight: 16
+                radius: 8
+                color: Colors.fg
+                border.color: Colors.fg
+                border.width: 1
             }
         }
     }
 
-    SliderControl {
-        Layout.fillWidth: true
-        from: root.from
-        to: root.to
-        stepSize: root.stepSize
-        value: root.value
-        onMoved: (val) => root.moved(val)
+    Rectangle {
+        visible: root.showDivider
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Dimens.paddingMedium
+        anchors.rightMargin: Dimens.paddingMedium
+        height: 1
+        color: Colors.border
+        opacity: 0.35
     }
 }

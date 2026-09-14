@@ -1,9 +1,9 @@
 {
   "islandTopMargin": 5,
   "islandCornerRadius": 14,
-  "islandExpandedCornerRadius": 28,
+  "islandExpandedCornerRadius": 13,
   "islandBorderWidth": 0,
-  "islandClickOutsideDismiss": true,
+  "islandClickOutsideDismiss": false,
   "islandNotchMode": false,
   "islandNotchFlare": 27,
   "islandHoverScale": 1,

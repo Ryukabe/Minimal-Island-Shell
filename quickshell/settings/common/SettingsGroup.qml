@@ -14,9 +14,9 @@ Rectangle {
     default property alias content: contentLayout.children
 
     Layout.fillWidth: true
-    implicitHeight: mainColumn.implicitHeight + (Dimens.paddingMedium * 2)
+    implicitHeight: mainColumn.implicitHeight + (Dimens.paddingLarge * 2)
     radius: Dimens.radiusMedium
-    color: Colors.elevatedBg
+    color: Colors.subBgMica
     border.color: Colors.border
     border.width: 1
 
@@ -29,33 +29,47 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: Dimens.paddingMedium
+        anchors.margins: Dimens.paddingLarge
         spacing: Dimens.spacingMedium
 
         // Header Row (Clickable Dropdown Toggle)
         MouseArea {
             Layout.fillWidth: true
-            implicitHeight: headerRow.implicitHeight
+            implicitHeight: 36
             cursorShape: Qt.PointingHandCursor
             onClicked: root.expanded = !root.expanded
 
-            RowLayout {
-                id: headerRow
+            Item {
                 anchors.fill: parent
-                spacing: Dimens.spacingMedium
 
-                // Material Symbol Icon
-                Text {
+                // Icon Badge
+                Rectangle {
+                    id: iconBadge
                     visible: root.icon !== ""
-                    text: root.icon
-                    color: Colors.accent
-                    font.family: Fonts.icon
-                    font.pixelSize: 22
-                    font.styleName: Fonts.iconStyle
+                    width: 36
+                    height: 36
+                    radius: 18
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: Colors.elevatedBg
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.icon
+                        color: Colors.accent
+                        font.family: Fonts.icon
+                        font.pixelSize: 18
+                        font.styleName: Fonts.iconStyle
+                    }
                 }
 
+                // Title & Subtitle Column (positioned right next to icon badge)
                 ColumnLayout {
-                    Layout.fillWidth: true
+                    anchors.left: iconBadge.visible ? iconBadge.right : parent.left
+                    anchors.leftMargin: iconBadge.visible ? Dimens.spacingSmall : 0
+                    anchors.right: expandIcon.left
+                    anchors.rightMargin: Dimens.spacingMedium
+                    anchors.verticalCenter: parent.verticalCenter
                     spacing: 2
 
                     Text {
@@ -64,6 +78,7 @@ Rectangle {
                         font.family: Fonts.text
                         font.pixelSize: Dimens.fontSizeBase
                         font.weight: Font.DemiBold
+                        elide: Text.ElideRight
                     }
 
                     Text {
@@ -72,20 +87,20 @@ Rectangle {
                         color: Colors.subtext
                         font.family: Fonts.text
                         font.pixelSize: Dimens.fontSizeXs
+                        elide: Text.ElideRight
                     }
                 }
 
-                // Dropdown Expand/Collapse Icon
+                // Arrow pinned to far right
                 Text {
+                    id: expandIcon
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
                     text: root.expanded ? "expand_less" : "expand_more"
                     color: Colors.fgMuted
                     font.family: Fonts.icon
                     font.pixelSize: 22
                     font.styleName: Fonts.iconStyle
-
-                    Behavior on rotation {
-                        NumberAnimation { duration: 150 }
-                    }
                 }
             }
         }

@@ -9,12 +9,6 @@ Item {
     id: root
 
     SettingsScrollView {
-        SettingsHeader {
-            icon: "dock_to_bottom"
-            title: "Bar & Island"
-            subtitle: "Shape, size, and individual module dimensions."
-        }
-
         // Group 1: Behavior & Margins
         SettingsGroup {
             title: "Bar Behavior & Radius"

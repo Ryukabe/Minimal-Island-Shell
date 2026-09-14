@@ -44,12 +44,6 @@ Item {
     }
 
     SettingsScrollView {
-        SettingsHeader {
-            icon: "palette"
-            title: "Appearance"
-            subtitle: "Theme, wallpaper, fonts, opacities, and surface depth."
-        }
-
         // Group 1: Theme & Wallpaper
         SettingsGroup {
             title: "Theme & Wallpaper"

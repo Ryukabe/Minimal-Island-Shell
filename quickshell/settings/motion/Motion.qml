@@ -10,12 +10,6 @@ Item {
     id: root
 
     SettingsScrollView {
-        SettingsHeader {
-            icon: "speed"
-            title: "Motion"
-            subtitle: "How fast the shell animates, or whether it animates at all."
-        }
-
         SettingsToggleRow {
             label: "Reduce motion"
             checked: ShellState.motionReduced
@@ -62,7 +56,7 @@ Item {
             onMoved: (val) => ShellState.motionBouncePercent = val
         }
 
-                SettingsToggleRow {
+        SettingsToggleRow {
             label: "Spring physics for bounce (experimental)"
             checked: ShellState.motionSpringEnabled
             onToggled: (val) => ShellState.motionSpringEnabled = val

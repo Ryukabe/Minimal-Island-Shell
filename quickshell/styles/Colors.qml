@@ -239,7 +239,7 @@ Item {
 
     readonly property bool darkMode: !pick("isLight")
 
-    readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(bgsur, 1.08) : Qt.lighter(bgsur, 1.35)
+    readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(bgsur, 1.18) : Qt.lighter(bgsur, 1.25)
 
     // All of these already route through pick(), so the colorsFollowTheme
     // toggle applies to every one of them automatically — no per-property
