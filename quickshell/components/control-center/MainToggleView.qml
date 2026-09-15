@@ -8,14 +8,14 @@ import "../common"
 Item {
     id: root
     implicitWidth: 580
-    implicitHeight: Math.min(contentColumn.implicitHeight + 32, 640)
+    implicitHeight: contentColumn.implicitHeight + 32
 
     signal openWifi()
     signal openBluetooth()
     signal openFocus()
     signal openPowerProfile()
     signal openCaffeine()
-    
+
     Column {
         id: contentColumn
         anchors.top: parent.top
@@ -23,22 +23,6 @@ Item {
         anchors.right: parent.right
         anchors.margins: 16
         spacing: 16
-
-        // ---- Header ----
-        Item {
-            id: headerRow
-            width: parent.width
-            height: 28
-
-            Text {
-                text: "Control Center"
-                font.family: Fonts.text
-                font.pixelSize: Dimens.fontSize15
-                font.bold: true
-                color: Colors.fg
-                anchors.centerIn: parent
-            }
-        }
 
         // ---- Paged toggle grid ----
         TogglePager {
@@ -77,7 +61,7 @@ Item {
                 font.pixelSize: Dimens.fontSizeMd
                 font.variableAxes: Fonts.iconAxes
                 font.features: { "liga": 1, "dlig": 1 }
-                color: Colors.fg
+                color: Colors.subBgMica
                 anchors.left: parent.left
                 anchors.leftMargin: 16
                 anchors.verticalCenter: parent.verticalCenter
@@ -138,7 +122,7 @@ Item {
                 font.pixelSize: Dimens.fontSizeMd
                 font.variableAxes: Fonts.iconAxes
                 font.features: { "liga": 1, "dlig": 1 }
-                color: Colors.fg
+                color: Colors.subBgMica
                 anchors.left: parent.left
                 anchors.leftMargin: 16
                 anchors.verticalCenter: parent.verticalCenter

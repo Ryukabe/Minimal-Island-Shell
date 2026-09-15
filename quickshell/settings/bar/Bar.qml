@@ -35,14 +35,6 @@ Item {
             }
 
             SettingsSliderRow {
-                label: "Corner radius (expanded)"
-                from: 0; to: 40; stepSize: 1
-                value: ShellState.islandExpandedCornerRadius
-                unit: " px"
-                onMoved: (val) => ShellState.islandExpandedCornerRadius = val
-            }
-
-            SettingsSliderRow {
                 label: "Stage lift on hover"
                 from: 1.0; to: 1.1; stepSize: 0.005
                 decimals: 3

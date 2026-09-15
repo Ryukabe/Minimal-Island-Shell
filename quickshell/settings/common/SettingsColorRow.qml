@@ -26,7 +26,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: Dimens.radiusMedium
+        radius: Dimens.settingsContainerRadius
         color: "transparent"
     }
 
@@ -48,7 +48,7 @@ Item {
             id: swatch
             width: 28
             height: 28
-            radius: Dimens.radiusSmall
+            radius: Dimens.settingsControlRadius
             color: root.value
             border.width: 1
             border.color: Colors.border
@@ -57,7 +57,7 @@ Item {
         Rectangle {
             width: 100
             height: 32
-            radius: Dimens.radiusSmall
+            radius: Dimens.settingsControlRadius
             color: Colors.elevatedBg
             border.width: hexField.activeFocus ? 1 : 0
             border.color: Colors.accent

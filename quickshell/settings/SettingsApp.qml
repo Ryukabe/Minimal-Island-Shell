@@ -226,7 +226,7 @@ Scope {
 
                                     Rectangle {
                                         anchors.fill: parent
-                                        radius: Dimens.radiusMedium
+                                        radius:Dimens.settingsContainerRadius
                                         color: isSelected 
                                                ? Colors.accent
                                                : (itemMouse.containsMouse ? Colors.elevatedBg : "transparent")

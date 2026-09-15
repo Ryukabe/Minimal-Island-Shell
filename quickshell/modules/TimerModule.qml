@@ -15,6 +15,11 @@ Item {
 
     property int selectedMinutes: 5
 
+    // Outer ColumnLayout below sits at a 16px margin off the island's own
+    // bounds, so the minute-picker chips derive off the master with that
+    // real gap.
+    readonly property real _chipRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, 16)
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
@@ -108,7 +113,7 @@ Item {
                         Rectangle {
                             width: 44
                             height: 36
-                            radius: 8
+                            radius: root._chipRadius
                             color: root.selectedMinutes === modelData ? Colors.accent : Colors.subBgMica
                             Text {
                                 anchors.centerIn: parent

@@ -17,7 +17,6 @@ Item {
         return {
             islandTopMargin: 5,
             islandCornerRadius: 12,
-            islandExpandedCornerRadius: 12,
             islandBorderWidth: 0,
             islandClickOutsideDismiss: true,
             islandNotchMode: false,
@@ -105,7 +104,6 @@ Item {
         target: ShellState
         function onIslandTopMarginChanged() { root._scheduleSave() }
         function onIslandCornerRadiusChanged() { root._scheduleSave() }
-        function onIslandExpandedCornerRadiusChanged() { root._scheduleSave() }
         function onIslandBorderWidthChanged() { root._scheduleSave() }
         function onIslandClickOutsideDismissChanged() { root._scheduleSave() }
         function onIslandNotchModeChanged() { root._scheduleSave() }

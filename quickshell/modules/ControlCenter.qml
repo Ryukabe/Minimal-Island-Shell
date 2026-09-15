@@ -12,8 +12,8 @@ Item {
     property string activeSubview: ""
     property bool _subviewFirstLoad: true
 
-    implicitWidth: ShellState.controlCenterWidth
-    implicitHeight: ShellState.controlCenterHeight
+    implicitWidth: pageLoader.item ? pageLoader.item.implicitWidth : ShellState.controlCenterWidth
+    implicitHeight: pageLoader.item ? pageLoader.item.implicitHeight : ShellState.controlCenterHeight
 
     focus: true
     Keys.onPressed: (event) => {
@@ -37,8 +37,8 @@ Item {
 
     Loader {
         id: pageLoader
-        anchors.top: parent.top
-        anchors.left: parent.left
+        anchors.fill: parent
+
         sourceComponent: {
             switch (root.activeSubview) {
             case "wifi": return wifiSubviewComp

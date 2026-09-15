@@ -15,6 +15,11 @@ Item {
     readonly property int maxWidth: ShellState.launcherWidth
     readonly property int chromeHeight: 76 
 
+    // AppLauncher fills the island directly (no settings-window layer in
+    // between), so its containers derive straight off the master with
+    // their own real margin (12px, matching Dimens.paddingMedium below).
+    readonly property real _outerRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, Dimens.paddingMedium)
+
     property string query: ""
     property var results: AppLauncherService.filteredApps(query)
     property int selectedIndex: 0
@@ -55,7 +60,7 @@ Item {
         anchors.right: parent.right
         anchors.margins: 12
         height: 44
-        radius: Dimens.borderRadiusLarge
+        radius: root._outerRadius
         color: Colors.subBgMica
 
         MouseArea {
@@ -156,7 +161,7 @@ Item {
 
             width: appList.width
             height: root.rowHeight - appList.spacing
-            radius: Dimens.borderRadiusLarge
+            radius: root._outerRadius
             color: (delegateRoot.index !== undefined && delegateRoot.index === root.selectedIndex) ? Colors.subBgMica : "transparent"
 
             scale: delegateRoot.index === root.selectedIndex ? 1.015 : 1.0
@@ -206,7 +211,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: Dimens.borderRadiusMedium
+                        radius: Dimens.nestedRadius(root._outerRadius, Dimens.paddingSmall)
                         color: (delegateRoot.index !== undefined && delegateRoot.index === root.selectedIndex) ? Colors.mainBgMica : Colors.subBgMica
                         visible: appIcon.status !== Image.Ready
 

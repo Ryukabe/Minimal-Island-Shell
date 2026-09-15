@@ -31,13 +31,14 @@ Item {
     }
 
     Rectangle {
+        id: popup
         visible: root.isOpen
         width: root.popupWidth
         anchors.top: parent.bottom
         anchors.topMargin: 4
         anchors.right: parent.right
         color: Colors.elevatedBg
-        radius: Dimens.radiusMedium
+        radius: Dimens.settingsContainerRadius
         border.color: Qt.rgba(1, 1, 1, 0.12)
         border.width: 1
         z: 210
@@ -69,7 +70,7 @@ Item {
                     anchors.fill: parent
                     color: isHighlighted ? Colors.accent : "transparent"
                     opacity: isHighlighted ? (isSelected ? 0.3 : 0.15) : 0
-                    radius: Dimens.radiusSmall
+                    radius: Dimens.nestedRadius(popup.radius, 4)
                 }
 
                 RowLayout {

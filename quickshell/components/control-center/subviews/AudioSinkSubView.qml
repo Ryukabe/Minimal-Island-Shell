@@ -1,28 +1,30 @@
-// components/control-center/subviews/AudioSinkSubView.qml
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import "../../../styles"
 import "../../../services"
 
 Item {
     id: root
     implicitWidth: 580
-    implicitHeight: 200
+    implicitHeight: contentColumn.implicitHeight + 32
 
     signal backRequested()
 
-    ColumnLayout {
-        anchors.fill: parent
+    Column {
+        id: contentColumn
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.margins: 16
         spacing: 12
 
         Item {
-            Layout.fillWidth: true
-            implicitHeight: 32
+            width: parent.width
+            height: 32
 
             Text {
+                id: backBtn
                 text: "arrow_back"
                 font.family: Fonts.icon
                 font.pixelSize: Dimens.fontSizeLg
@@ -44,13 +46,15 @@ Item {
                 font.pixelSize: Dimens.fontSize15
                 font.bold: true
                 color: Colors.fg
-                anchors.centerIn: parent
+                anchors.left: backBtn.right
+                anchors.leftMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
 
         Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            width: parent.width
+            height: 120
             radius: Dimens.radiusLarge
             color: Colors.subBgMica
             border.width: 1

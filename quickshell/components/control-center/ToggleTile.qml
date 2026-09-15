@@ -13,7 +13,7 @@ Rectangle {
     property bool external: false
     property bool compact: false
     property bool hasSubview: false
-    property int signalBars: -1 // -1 = show iconGlyph, 0-4 = show bar indicator instead
+    property int signalBars: -1 
 
     signal toggled()
     signal subviewRequested()
@@ -37,7 +37,7 @@ Rectangle {
         }
     }
 
-    // ---- Compact layout: icon (or signal bars) + label stacked, bottom-left ----
+    // ---- Compact layout ----
     Column {
         id: compactContent
         visible: tile.compact
@@ -106,7 +106,7 @@ Rectangle {
         onClicked: tile.subviewRequested()
     }
 
-    // ---- Full layout: icon + title/subtitle, left-aligned ----
+    // ---- Full layout ----
     Row {
         id: fullContent
         visible: !tile.compact

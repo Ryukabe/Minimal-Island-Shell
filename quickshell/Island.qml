@@ -227,9 +227,11 @@ PanelWindow {
         width: targetWidth
         height: targetHeight
 
-        radius: island.expanded
-            ? Math.min(height / 2, ShellState.islandExpandedCornerRadius)
-            : Math.min(height / 2, ShellState.islandCornerRadius)
+        // Single source of truth: both compact and expanded states read
+        // the same master radius now. (Previously expanded had its own
+        // independent ShellState.islandExpandedCornerRadius, which is
+        // what let the two drift out of sync.)
+        radius: Math.min(height / 2, ShellState.islandCornerRadius)
         color: ShellState.islandNotchMode ? "transparent" : Colors.mainBgMica
         border.color: Colors.border
         border.width: ShellState.islandNotchMode ? 0 : ShellState.islandBorderWidth

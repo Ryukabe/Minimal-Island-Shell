@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../../styles"
+import "../../services"
 
 Rectangle {
     id: root
@@ -19,11 +20,17 @@ Rectangle {
         searchInput.cursorPosition = searchInput.text.length
     }
 
+    // This box sits directly in the sidebar's padded column (margin =
+    // paddingMedium), not inside a SettingsGroup, so it derives straight
+    // off the master with that local gap rather than sharing
+    // Dimens.settingsContainerRadius (which is keyed to paddingLarge).
+    readonly property real _boxRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, Dimens.paddingMedium)
+
     Layout.preferredWidth: 280
     Layout.preferredHeight: 34
 
     color: searchInput.activeFocus ? Colors.elevatedBg : Colors.subBgMica
-    radius: Dimens.radiusMedium
+    radius: root._boxRadius
     border.color: searchInput.activeFocus ? Colors.accent : Qt.rgba(1, 1, 1, 0.08)
     border.width: 1
 
@@ -191,7 +198,7 @@ Rectangle {
         anchors.topMargin: 6
         anchors.right: parent.right
         color: Colors.elevatedBg
-        radius: Dimens.radiusMedium
+        radius: root._boxRadius
         border.color: Qt.rgba(1, 1, 1, 0.1)
         border.width: 1
         z: 200
@@ -322,7 +329,7 @@ Rectangle {
                     anchors.fill: parent
                     color: isHighlighted ? Colors.accent : "transparent"
                     opacity: isHighlighted ? 0.2 : 1.0
-                    radius: Dimens.radiusSmall
+                    radius: Dimens.nestedRadius(searchOverlay.radius, 4)
                 }
 
                 RowLayout {

@@ -16,7 +16,6 @@ QtObject {
     // ================= BAR & ISLAND PROPERTIES =================
     property real islandTopMargin: 5
     property real islandCornerRadius: 12
-    property real islandExpandedCornerRadius: 12
     property real islandBorderWidth: 0
     property bool islandClickOutsideDismiss: true
     property bool islandNotchMode: false

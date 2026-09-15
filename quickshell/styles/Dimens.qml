@@ -1,6 +1,7 @@
 // styles/Dimens.qml
 pragma Singleton
 import QtQuick
+import "../services"
 
 QtObject {
     // Border Radii
@@ -57,6 +58,27 @@ QtObject {
     readonly property int fontSizeMassive: 32
     readonly property int fontSizeDisplay: 64
 
-    // Island radius    
+    // Island radius
     readonly property int islandRadius: 15
+
+    // --- Nested-radius system ---
+    // Derives a child layer's corner radius from its parent's radius and
+    // the gap (padding) between them, so nested rounded-rect corners stay
+    // concentric instead of each layer picking its own independent number.
+    // outer_r = inner_r + padding  =>  inner_r = outer_r - padding.
+    // Clamped to radiusXSmall so deeply-nested elements never hit 0/negative
+    // even if islandCornerRadius is dragged low.
+    function nestedRadius(outerRadius, gap) {
+        return Math.max(radiusXSmall, outerRadius - gap)
+    }
+
+    // --- Settings UI derived radii ---
+    // Shared two-level chain used by every component that lives directly
+    // in the settings content area (Level 1) or inside a row inside one
+    // of those containers (Level 2). Centralized here — rather than each
+    // component recomputing the same formula — so the whole settings UI
+    // moves together off one master value with no risk of the copies
+    // drifting apart from each other.
+    readonly property real settingsContainerRadius: nestedRadius(ShellState.islandCornerRadius, paddingLarge)
+    readonly property real settingsControlRadius: nestedRadius(settingsContainerRadius, paddingMedium)
 }

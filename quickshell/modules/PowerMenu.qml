@@ -12,6 +12,12 @@ Item {
     focus: true
     clip: true
 
+    // No settings-window layer here either — PowerMenu's tiles sit
+    // directly in the island, so they derive straight off the master.
+    // Gap kept small (paddingSmall) since the row is centered with no
+    // large fixed margin defined in this file.
+    readonly property real _tileRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, Dimens.paddingSmall)
+
     readonly property var actions: [
         {
             icon: "lock",
@@ -112,7 +118,7 @@ Item {
 
                 width: 52
                 height: 52
-                radius: islandRadius
+                radius: root._tileRadius
                 color: index === root.selectedIndex ? Colors.accent : Colors.subBgMica
                 border.width: 1
                 border.color: Colors.border

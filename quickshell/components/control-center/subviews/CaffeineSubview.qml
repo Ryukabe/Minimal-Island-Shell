@@ -1,31 +1,35 @@
 import QtQuick
-import QtQuick.Layouts
 import "../../../styles"
 import "../../../services"
 
 Item {
     id: root
     implicitWidth: 340
-    implicitHeight: 280
+    implicitHeight: contentColumn.implicitHeight + 32
 
     signal backRequested()
 
-    ColumnLayout {
-        anchors.fill: parent
+    Column {
+        id: contentColumn
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.margins: 16
         spacing: 16
 
         // ---- Header with Back Button ----
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 12
+        Item {
+            width: parent.width
+            height: 32
 
             Text {
+                id: backBtn
                 text: "arrow_back"
                 font.family: Fonts.icon
                 font.pixelSize: Dimens.fontSizeLg
                 color: Colors.fg
-                Layout.alignment: Qt.AlignVCenter
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
 
                 MouseArea {
                     anchors.fill: parent
@@ -41,20 +45,22 @@ Item {
                 font.pixelSize: Dimens.fontSize15
                 font.bold: true
                 color: Colors.fg
-                Layout.alignment: Qt.AlignVCenter
+                anchors.left: backBtn.right
+                anchors.leftMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
 
         // ---- Status Card ----
         Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 64
+            width: parent.width
+            height: 64
             radius: Dimens.radiusMediumLarge
             color: Colors.subBgMica
             border.width: 1
             border.color: Colors.border
 
-            RowLayout {
+            Row {
                 anchors.fill: parent
                 anchors.leftMargin: 16
                 anchors.rightMargin: 16
@@ -65,12 +71,12 @@ Item {
                     font.family: Fonts.icon
                     font.pixelSize: Dimens.fontSizeXl
                     color: CaffeineService.enabled ? Colors.accent : Colors.fgMuted
-                    Layout.alignment: Qt.AlignVCenter
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Column {
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignVCenter
+                    width: parent.width - 100
+                    anchors.verticalCenter: parent.verticalCenter
                     spacing: 2
 
                     Text {
@@ -97,6 +103,7 @@ Item {
                     color: CaffeineService.enabled ? Colors.accent : Colors.bgSurface
                     border.width: 1
                     border.color: Colors.border
+                    anchors.verticalCenter: parent.verticalCenter
 
                     Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -119,7 +126,5 @@ Item {
                 }
             }
         }
-
-        Item { Layout.fillHeight: true }
     }
 }

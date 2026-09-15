@@ -21,7 +21,8 @@ Item {
     Flickable {
         id: pagesFlick
         width: parent.width
-        height: 168
+        // Dynamic height bound to the grid's natural height
+        height: grid1.implicitHeight > 0 ? grid1.implicitHeight : 168
         contentWidth: width * root.pageCount + root.pageGap * (root.pageCount - 1)
         contentHeight: height
         flickableDirection: Flickable.HorizontalFlick
@@ -50,7 +51,7 @@ Item {
         Row {
             spacing: root.pageGap
 
-            // ---- Page 1: 6 tiles, full grid ----
+            // ---- Page 1 ----
             Item {
                 width: pagesFlick.width
                 height: pagesFlick.height
@@ -93,7 +94,7 @@ Item {
                 }
             }
 
-            // ---- Page 2: remaining 3 tiles, room for 3 more before a 3rd page is needed ----
+            // ---- Page 2 ----
             Item {
                 width: pagesFlick.width
                 height: pagesFlick.height

@@ -11,6 +11,13 @@ Item {
 
     focus: true
 
+    // No settings-window layer here — PolkitAgent sits directly in the
+    // island. mainColumn's own margin is 16, so the password field derives
+    // off the master with that real gap; the two buttons nest one step
+    // further in, off the password field's own radius.
+    readonly property real _fieldRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, 16)
+    readonly property real _buttonRadius: Dimens.nestedRadius(root._fieldRadius, Dimens.paddingSmall)
+
     Keys.onPressed: (event) => {
         if (event.key === Qt.Key_Escape) {
             PolkitService.cancel()
@@ -79,7 +86,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: 38
-            radius: Dimens.radiusMedium
+            radius: root._fieldRadius
             color: Colors.subBgMica
             border.width: 1
             border.color: passInput.activeFocus ? Colors.accent : Colors.subBgMica
@@ -140,7 +147,7 @@ Item {
             Rectangle {
                 implicitWidth: 80
                 implicitHeight: 30
-                radius: Dimens.radiusTiny
+                radius: root._buttonRadius
                 color: Colors.subBgMica
 
                 scale: cancelBtnMouse.pressed ? 0.95 : 1.0
@@ -182,7 +189,7 @@ Item {
             Rectangle {
                 implicitWidth: 95
                 implicitHeight: 30
-                radius: Dimens.radiusTiny
+                radius: root._buttonRadius
                 color: Colors.accent
 
                 scale: authBtnMouse.pressed ? 0.95 : 1.0

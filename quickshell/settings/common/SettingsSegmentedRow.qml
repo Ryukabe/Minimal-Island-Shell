@@ -25,10 +25,11 @@ RowLayout {
     }
 
     Rectangle {
+        id: track
         implicitWidth: segmentedRow.implicitWidth + 8
         implicitHeight: 32
         color: Qt.rgba(1, 1, 1, 0.04)
-        radius: Dimens.radiusMedium
+        radius: Dimens.settingsControlRadius
         border.color: Qt.rgba(1, 1, 1, 0.12)
 
         RowLayout {
@@ -45,7 +46,7 @@ RowLayout {
 
                     implicitWidth: 72
                     implicitHeight: 26
-                    radius: Dimens.radiusSmall
+                    radius: Dimens.nestedRadius(track.radius, Dimens.paddingSmall)
                     color: isSelected ? Colors.accent : (segMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
 
                     Text {

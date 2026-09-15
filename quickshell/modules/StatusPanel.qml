@@ -9,7 +9,10 @@ Rectangle {
     implicitWidth: ShellState.statusPanelWidth
     implicitHeight: ShellState.statusPanelHeight
     color: Colors.bg
-    radius: Dimens.radiusXLarge
+    // This panel fills the island's own bounds directly — no gap between
+    // them — so it just reads the master radius, rather than deriving
+    // through nestedRadius() for a zero gap.
+    radius: ShellState.islandCornerRadius
     focus: true
 
     Component.onCompleted: root.forceActiveFocus()
@@ -39,7 +42,7 @@ Rectangle {
             anchors.top: parent.top
             width: 72
             height: 72
-            radius: Dimens.radiusMediumLarge
+            radius: Dimens.nestedRadius(root.radius, 16)
             color: Colors.subBgMica
             clip: true
 
@@ -136,7 +139,7 @@ Rectangle {
         anchors.topMargin: 16
         width: 250
         height: 40
-        radius: Dimens.borderRadiusMedium
+        radius: Dimens.nestedRadius(root.radius, 16)
         color: Colors.subBgMica
 
         RowLayout {

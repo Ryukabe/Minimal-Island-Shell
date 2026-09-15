@@ -41,7 +41,7 @@ Item {
             Rectangle {
                 implicitWidth: Math.max(50, valInput.implicitWidth + 16)
                 implicitHeight: 24
-                radius: Dimens.radiusSmall
+                radius: Dimens.settingsControlRadius
                 color: valInput.activeFocus ? Colors.mainBgMica : Colors.elevatedBg
                 border.color: valInput.activeFocus ? Colors.accent : Colors.border
                 border.width: 1

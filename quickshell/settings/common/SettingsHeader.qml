@@ -11,7 +11,7 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: 70
-    radius: Dimens.radiusMedium
+    radius: Dimens.settingsContainerRadius
     color: Colors.subBgMica
     border.color: Colors.border
     border.width: 1

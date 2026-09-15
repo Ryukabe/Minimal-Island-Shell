@@ -1,3 +1,4 @@
+// services/WifiService.qml
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -32,12 +33,27 @@ Singleton {
         }
     }
 
+    Process { id: toggleProc }
+    Process { id: connectProc }
+
+    // Triggers iwd to perform an active scan on the wireless interface
     Process {
-        id: toggleProc
+        id: triggerScanProc
+        command: ["iwctl", "station", root.device, "scan"]
+        onExited: (code, status) => {
+            scanDelayTimer.restart()
+        }
     }
 
-    Process {
-        id: connectProc
+    // Gives iwd a short window to discover access points before requesting results
+    Timer {
+        id: scanDelayTimer
+        interval: 600
+        repeat: false
+        onTriggered: {
+            scanProc._lines = []
+            scanProc.running = true
+        }
     }
 
     Process {
@@ -80,10 +96,9 @@ Singleton {
     }
 
     function scanNetworks() {
-        if (!root.enabled || scanProc.running) return
+        if (!root.enabled || triggerScanProc.running || scanProc.running) return
         root.scanning = true
-        scanProc._lines = []
-        scanProc.running = true
+        triggerScanProc.running = true
     }
 
     function _parseDeviceLine(line) {
@@ -107,11 +122,6 @@ Singleton {
         }
     }
 
-    // Converts iwctl's strength token into a 0-4 bar count. iwctl's
-    // traditional format is asterisks ("*" through "****"). If your
-    // iwd version prints something else (percentage, dBm), this falls
-    // back to a medium default rather than crash — tell me the raw
-    // output if that happens and this gets adjusted to match it.
     function _signalBarsFromToken(token) {
         if (/^\*+$/.test(token)) {
             return Math.min(4, token.length)
@@ -123,20 +133,13 @@ Singleton {
             if (num >= 25) return 2
             return 1
         }
-        return 2 // unknown format — medium default, not a guess dressed as certainty
+        return 2
     }
 
-    // NOTE: iwctl's "get-networks" table format can vary between iwd
-    // versions. This expects lines shaped like:
-    //   NetworkName        psk        ****
-    //   OpenNetwork         open       ***
-    // and skips header/separator lines. If nothing shows up, paste the raw
-    // output of `iwctl station wlan0 get-networks` and this regex gets tuned
-    // to match — don't assume this is right without testing it live.
     function _parseNetworksOutput(lines) {
         const parsed = []
         for (const raw of lines) {
-            const line = raw.replace(/\x1b\[[0-9;]*m/g, "") // strip ANSI color codes
+            const line = raw.replace(/\x1b\[[0-9;]*m/g, "")
             if (!line.trim()) continue
             if (/^-+$/.test(line.trim())) continue
             if (/^\s*Network name/i.test(line)) continue

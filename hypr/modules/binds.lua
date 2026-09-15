@@ -78,7 +78,7 @@ hl.bind(mainMod .. " + ALT + R",                   hl.dsp.exec_cmd("hyprctl relo
 --- QuickShell ---
  
 -- Reload Shell
-hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd(" quickshell || quickshell reload"))
+hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd(" pkill quickshell || quickshell "))
 
 -- Settings
 hl.bind(mainMod .. " + COMMA ",             hl.dsp.exec_cmd("qs ipc call settings toggle"))--, { locked = true })
