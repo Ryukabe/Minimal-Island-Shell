@@ -70,7 +70,7 @@ Item {
                     anchors.fill: parent
                     color: isHighlighted ? Colors.accent : "transparent"
                     opacity: isHighlighted ? (isSelected ? 0.3 : 0.15) : 0
-                    radius: Dimens.nestedRadius(popup.radius, 4)
+                    radius: popup.radius
                 }
 
                 RowLayout {

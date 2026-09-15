@@ -20,3 +20,4 @@ hl.device({
     name        = "synps/2-synaptics-touchpad",
     sensitivity = 0,
 })
+
