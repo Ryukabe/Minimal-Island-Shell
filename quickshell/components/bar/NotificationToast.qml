@@ -11,8 +11,8 @@ Item {
     readonly property int iconSpacing: 10
     readonly property int maxTextWidth: 260
 
-    implicitWidth: ShellState.islandCompactWidth
-    implicitHeight: ShellState.islandCompactHeight
+    implicitWidth: ShellState.islandCompactWidth + 5
+    implicitHeight: ShellState.islandCompactHeight 
 
     Row {
         id: contentRow

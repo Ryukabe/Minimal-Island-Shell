@@ -12,7 +12,7 @@ Item {
         // Group 1: Behavior & Margins
         SettingsGroup {
             title: "Bar Behavior & Radius"
-            description: "Margins, corner radii, borders, and hover effects"
+            description: "Margins, corner radii, borders, notch integration, and hover effects"
             icon: "aspect_ratio"
             expanded: true
 
@@ -53,24 +53,8 @@ Item {
             }
 
             SettingsToggleRow {
-                label: "Click outside to dismiss"
-                checked: ShellState.islandClickOutsideDismiss
-                showDivider: false
-                onToggled: (val) => ShellState.islandClickOutsideDismiss = val
-            }
-        }
-
-        // Group 2: Notch Configuration
-        SettingsGroup {
-            title: "Dynamic Notch"
-            description: "Configure notch integration and curvature flare"
-            icon: "ad_units"
-            expanded: true
-
-            SettingsToggleRow {
                 label: "Notch mode"
                 checked: ShellState.islandNotchMode
-                showDivider: false
                 onToggled: (val) => ShellState.islandNotchMode = val
             }
 
@@ -82,9 +66,16 @@ Item {
                 visible: ShellState.islandNotchMode
                 onMoved: (val) => ShellState.islandNotchFlare = val
             }
+
+            SettingsToggleRow {
+                label: "Click outside to dismiss"
+                checked: ShellState.islandClickOutsideDismiss
+                showDivider: false
+                onToggled: (val) => ShellState.islandClickOutsideDismiss = val
+            }
         }
 
-        // Group 3: Global Sizing
+        // Group 2: Global Sizing
         SettingsGroup {
             title: "Global Bar Sizing"
             description: "Default bar heights, compact width, and expand constraints"
@@ -124,7 +115,7 @@ Item {
             }
         }
 
-        // Group 4: Module Sizing
+        // Group 3: Module Sizing
         SettingsGroup {
             title: "Module Dimensions"
             description: "Heights and widths for launcher, control center, and panels"

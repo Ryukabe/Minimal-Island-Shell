@@ -1,6 +1,6 @@
 {
   "islandTopMargin": 5,
-  "islandCornerRadius": 12,
+  "islandCornerRadius": 15,
   "islandBorderWidth": 0,
   "islandClickOutsideDismiss": true,
   "islandNotchMode": true,
@@ -15,7 +15,7 @@
   "clipboardWidth": 420,
   "clipboardMaxRows": 5,
   "controlCenterWidth": 580,
-  "controlCenterHeight": 400,
+  "controlCenterHeight": 500,
   "notificationCenterWidth": 360,
   "notificationCenterMaxHeight": 480,
   "powerMenuWidth": 350,

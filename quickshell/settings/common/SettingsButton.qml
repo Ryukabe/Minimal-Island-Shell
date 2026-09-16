@@ -19,13 +19,13 @@ Rectangle {
 
     implicitWidth: label.implicitWidth + Dimens.paddingLarge * 2
     implicitHeight: label.implicitHeight + Dimens.paddingSmall * 2
-    radius: height / 2
+    radius: Dimens.settingsContainerRadius
 
     color: !root.enabled
-        ? Colors.subBgMica
+        ? Colors.elevatedBg
         : root.primary
             ? Qt.rgba(_tint.r, _tint.g, _tint.b, mouseArea.pressed ? 0.30 : (mouseArea.containsMouse ? 0.22 : 0.16))
-            : (mouseArea.pressed ? Colors.border : (mouseArea.containsMouse ? Qt.lighter(Colors.subBgMica, 1.25) : Colors.subBgMica))
+            : (mouseArea.pressed ? Colors.border : (mouseArea.containsMouse ? Qt.lighter(Colors.mainBgMica, 1.25) : Colors.subBgMica))
 
     border.width: 1
     border.color: root.primary ? Qt.rgba(_tint.r, _tint.g, _tint.b, 0.4) : Colors.border

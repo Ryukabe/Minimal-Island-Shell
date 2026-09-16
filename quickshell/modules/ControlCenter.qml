@@ -1,4 +1,3 @@
-// modules/ControlCenter.qml
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -70,7 +69,6 @@ Item {
             }
         }
 
-        // Subview swap — ease variant (spring toggle off / reduced motion)
         ParallelAnimation {
             id: contentAnimEase
             NumberAnimation {
@@ -92,7 +90,6 @@ Item {
             }
         }
 
-        // Subview swap — real spring variant (spring toggle on)
         ParallelAnimation {
             id: contentAnimSpring
             NumberAnimation {
@@ -118,11 +115,7 @@ Item {
     Component {
         id: mainViewComp
         MainToggleView {
-            onOpenWifi: root.activeSubview = "wifi"
-            onOpenBluetooth: root.activeSubview = "bluetooth"
-            onOpenFocus: root.activeSubview = "focus"
-            onOpenPowerProfile: root.activeSubview = "powerprofile"
-            onOpenCaffeine: root.activeSubview = "caffeine"
+            onSubviewRequestedFor: (viewName) => root.activeSubview = viewName
         }
     }
 

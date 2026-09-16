@@ -26,3 +26,4 @@ singleton InputSettingsService 1.0 InputSettingsService.qml
 singleton MonitorSettingsService 1.0 MonitorSettingsService.qml
 singleton HyprlandDecorationService 1.0 HyprlandDecorationService.qml
 singleton AutostartService 1.0 AutostartService.qml
+singleton ControlCenterLayoutService 1.0 ControlCenterLayoutService.qml

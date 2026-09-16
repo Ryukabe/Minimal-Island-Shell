@@ -68,18 +68,17 @@ QtObject {
     // outer_r = inner_r + padding  =>  inner_r = outer_r - padding.
     // Clamped to radiusXSmall so deeply-nested elements never hit 0/negative
     // even if islandCornerRadius is dragged low.
-    // Still used outside the Settings UI (module chain) — left intact.
     function nestedRadius(outerRadius, gap) {
         return Math.max(radiusXSmall, outerRadius - gap)
     }
 
-    // --- Settings UI radii ---
-    // Alvi wants every Settings-UI corner (containers, rows, controls,
-    // popups) to read as exactly the same radius as the island itself —
-    // not a smaller concentric value. Both bind straight to
-    // ShellState.islandCornerRadius with no subtraction. Kept as two
-    // separate names (rather than collapsing to one) so call sites don't
-    // need to change meaning if a nested variant is ever wanted again.
+    // --- Settings UI derived radii ---
+    // Shared two-level chain used by every component that lives directly
+    // in the settings content area (Level 1) or inside a row inside one
+    // of those containers (Level 2). Centralized here — rather than each
+    // component recomputing the same formula — so the whole settings UI
+    // moves together off one master value with no risk of the copies
+    // drifting apart from each other.
     readonly property real settingsContainerRadius: ShellState.islandCornerRadius
-    readonly property real settingsControlRadius: ShellState.islandCornerRadius
+    readonly property real settingsControlRadius: nestedRadius(settingsContainerRadius, paddingMedium)
 }

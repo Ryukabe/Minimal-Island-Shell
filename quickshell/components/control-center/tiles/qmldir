@@ -10,3 +10,5 @@ PowerProfileToggleTile 1.0 PowerProfileToggleTile.qml
 RecordingToggleTile 1.0 RecordingToggleTile.qml
 WifiToggleTile 1.0 WifiToggleTile.qml
 LightModeToggleTile 1.0 LightModeToggleTile.qml
+BrightnessToggleTile 1.0 BrightnessToggleTile.qml
+VolumeToggleTile 1.0 VolumeToggleTile.qml

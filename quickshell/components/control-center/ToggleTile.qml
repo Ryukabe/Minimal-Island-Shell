@@ -19,7 +19,6 @@ Rectangle {
     signal subviewRequested()
 
     implicitWidth: compact ? 76 : 160
-    implicitHeight: compact ? 78 : 64
     radius: compact ? Dimens.radiusMedium : Dimens.radiusMediumLarge
     color: Colors.subBgMica
     border.width: 1
