@@ -3,24 +3,25 @@ import QtQuick
 import QtQuick.Layouts
 import "../../styles"
 import "../common"
+import "../../components/control-center"
 
 Item {
     id: root
     property bool compactSliders: false
 
     SettingsScrollView {
-        SettingsGroup {
-            title: "Control Center Tiles"
-            description: "Layout and appearance of quick toggle tiles"
-            icon: "widgets"
-            expanded: true
 
-            SettingsToggleRow {
-                label: "Compact Slider Layout"
-                checked: root.compactSliders
-                showDivider: false
-                onToggled: (val) => root.compactSliders = val
-            }
+        SettingsToggleRow {
+            label: "Compact Slider Layout"
+            checked: root.compactSliders
+            showDivider: false
+            onToggled: (val) => root.compactSliders = val
+        }
+
+        ControlGrid {
+            Layout.fillWidth: true
+            Layout.preferredHeight: implicitHeight
+            editMode: true
         }
     }
 }

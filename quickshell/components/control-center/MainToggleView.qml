@@ -11,30 +11,14 @@ Item {
 
     signal subviewRequestedFor(string viewName)
 
-    Text {
-        id: editToggle
-        text: grid.editMode ? "Done" : "Edit Layout"
-        color: Colors.accent
-        font.pixelSize: Dimens.fontSizeSm
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.margins: 16
-
-        MouseArea {
-            anchors.fill: parent
-            anchors.margins: -8
-            cursorShape: Qt.PointingHandCursor
-            onClicked: grid.editMode = !grid.editMode
-        }
-    }
-
     ControlGrid {
         id: grid
-        anchors.top: editToggle.bottom
+        anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: 16
-        
+        editMode: false
+
         onSubviewRequestedFor: (type) => root.subviewRequestedFor(type)
     }
 }
