@@ -1,4 +1,5 @@
 import QtQuick
+import "../../services"
 import QtQuick.Layouts
 import Quickshell
 import "../../styles"
@@ -35,7 +36,7 @@ Item {
                     Rectangle {
                         width: parent.implicitWidth
                         color: Colors.accent
-                        radius: 1.5
+                        radius: ShellState.islandCornerRadius
                         anchors.bottom: parent.bottom
 
                         SequentialAnimation on height {

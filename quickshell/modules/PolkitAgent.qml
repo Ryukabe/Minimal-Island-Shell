@@ -15,8 +15,8 @@ Item {
     // island. mainColumn's own margin is 16, so the password field derives
     // off the master with that real gap; the two buttons nest one step
     // further in, off the password field's own radius.
-    readonly property real _fieldRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, 16)
-    readonly property real _buttonRadius: Dimens.nestedRadius(root._fieldRadius, Dimens.paddingSmall)
+    readonly property real _fieldRadius: ShellState.islandCornerRadius 
+    readonly property real _buttonRadius: ShellState.islandCornerRadius 
 
     Keys.onPressed: (event) => {
         if (event.key === Qt.Key_Escape) {

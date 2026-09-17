@@ -86,7 +86,7 @@ Item {
 
                         width: parent.width
                         height: 52
-                        radius: Dimens.radiusLarge
+                        radius: ShellState.islandCornerRadius
                         color: isSelected ? Colors.bgSurface : Colors.subBgMica
                         border.width: 1
                         border.color: isSelected ? Colors.accent : Colors.border

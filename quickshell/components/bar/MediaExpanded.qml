@@ -16,7 +16,7 @@ Rectangle {
     border.color: Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.4)
     border.width: 1
     
-    radius: Dimens.borderRadiusLarge
+    radius: ShellState.islandCornerRadius
     clip: true
 
     RowLayout {
@@ -29,7 +29,7 @@ Rectangle {
             Layout.preferredWidth: 64
             Layout.preferredHeight: 64
             Layout.alignment: Qt.AlignVCenter
-            radius: Dimens.borderRadiusSmall
+            radius: ShellState.islandCornerRadius
             color: Colors.subBgMica
             clip: true
 

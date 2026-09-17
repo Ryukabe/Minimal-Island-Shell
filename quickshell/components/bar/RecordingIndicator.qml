@@ -1,4 +1,5 @@
 import QtQuick
+import "../../services"
 
 Item {
     id: root
@@ -32,7 +33,7 @@ Item {
         width: root.dotSize
         height: root.dotSize
         anchors.centerIn: parent
-        radius: width / 2
+        radius: ShellState.islandCornerRadius
         color: root.dotColor
         opacity: 1.0
     }

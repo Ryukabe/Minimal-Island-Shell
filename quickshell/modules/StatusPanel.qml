@@ -42,7 +42,7 @@ Rectangle {
             anchors.top: parent.top
             width: 72
             height: 72
-            radius: Dimens.nestedRadius(root.radius, 16)
+            radius: ShellState.islandCornerRadius
             color: Colors.subBgMica
             clip: true
 
@@ -139,7 +139,7 @@ Rectangle {
         anchors.topMargin: 16
         width: 250
         height: 40
-        radius: Dimens.nestedRadius(root.radius, 16)
+        radius: ShellState.islandCornerRadius
         color: Colors.subBgMica
 
         RowLayout {

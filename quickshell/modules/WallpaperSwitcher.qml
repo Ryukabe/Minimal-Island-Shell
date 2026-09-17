@@ -127,7 +127,7 @@ FocusScope {
             Rectangle {
                 implicitWidth: countText.implicitWidth + 12
                 implicitHeight: 20
-                radius: 10
+                radius: ShellState.islandCornerRadius
                 color: Qt.rgba(1, 1, 1, 0.08)
 
                 Text {
@@ -147,7 +147,7 @@ FocusScope {
                 visible: switcherRoot.searchActive
                 implicitWidth: switcherRoot.searchActive ? 180 : 0
                 implicitHeight: 30
-                radius: 15
+                radius: ShellState.islandCornerRadius
                 color: Qt.rgba(1, 1, 1, 0.08)
                 border.width: searchInput.activeFocus ? 1 : 0
                 border.color: Colors.accent
@@ -206,7 +206,7 @@ FocusScope {
             Rectangle {
                 implicitWidth: 30
                 implicitHeight: 30
-                radius: 15
+                radius: ShellState.islandCornerRadius
                 color: switcherRoot.searchActive ? Qt.rgba(1, 1, 1, 0.15) : Qt.rgba(1, 1, 1, 0.08)
 
                 Text {

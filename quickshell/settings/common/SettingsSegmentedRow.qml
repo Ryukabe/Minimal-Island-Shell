@@ -46,7 +46,7 @@ RowLayout {
 
                     implicitWidth: 72
                     implicitHeight: 26
-                    radius: track.radius
+                    radius: Dimens.settingsControlRadius
                     color: isSelected ? Colors.accent : (segMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
 
                     Text {

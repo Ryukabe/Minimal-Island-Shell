@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Shapes
+import "../../services"
 import "../../styles"
 
 Shape {
     id: root
     property real notchWidth: 160
     property real notchHeight: 36
-    property real bottomRadius: 12
+    property real bottomRadius: ShellState.islandCornerRadius
     property real flare: 14
     property color fillColor: Colors.mainBgMica
 

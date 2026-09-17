@@ -4,7 +4,7 @@ import "../../../services"
 
 Rectangle {
     id: root
-    radius: height / 2
+    radius: ShellState.islandCornerRadius
     color: Colors.subBgMica
     border.width: 1
     border.color: Colors.border

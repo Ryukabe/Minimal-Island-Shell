@@ -75,7 +75,7 @@ Item {
             }            Rectangle {
                 width: parent.width
                 height: 48
-                radius: Dimens.radiusLarge
+                radius: ShellState.islandCornerRadius
                 color: Colors.subBgMica
                 border.width: 1
                 border.color: Colors.border
@@ -117,7 +117,7 @@ Item {
                     Rectangle {
                         width: 40
                         height: 22
-                        radius: 11
+                        radius: ShellState.islandCornerRadius
                         color: ShellState.focusModeEnabled ? Colors.accent : Colors.subBgMica
                         border.width: 1
                         border.color: Colors.border
@@ -126,7 +126,7 @@ Item {
                         Rectangle {
                             width: 16
                             height: 16
-                            radius: 8
+                            radius: ShellState.islandCornerRadius
                             color: Colors.fg
                             anchors.verticalCenter: parent.verticalCenter
                             x: ShellState.focusModeEnabled ? parent.width - width - 3 : 3
@@ -169,7 +169,7 @@ Item {
 
                         width: parent.width
                         height: 52
-                        radius: Dimens.radiusLarge
+                        radius: ShellState.islandCornerRadius
                         color: isSelected ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.15) 
                              : (modeMa.containsMouse ? Colors.bgSurface : Colors.subBgMica)
                         border.width: 1
@@ -189,7 +189,7 @@ Item {
                             Rectangle {
                                 width: 32
                                 height: 32
-                                radius: 16
+                                radius: ShellState.islandCornerRadius
                                 color: isSelected ? Colors.accent : Qt.rgba(1, 1, 1, 0.08)
                                 anchors.verticalCenter: parent.verticalCenter
 

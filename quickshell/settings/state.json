@@ -3,7 +3,7 @@
   "islandCornerRadius": 15,
   "islandBorderWidth": 0,
   "islandClickOutsideDismiss": true,
-  "islandNotchMode": true,
+  "islandNotchMode": false,
   "islandNotchFlare": 16,
   "islandHoverScale": 1,
   "islandCompactHeight": 35,

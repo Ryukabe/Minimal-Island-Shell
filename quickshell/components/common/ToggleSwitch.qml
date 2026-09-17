@@ -1,4 +1,5 @@
 import QtQuick
+import "../../services"
 import "../../styles"
 
 Item {
@@ -12,7 +13,7 @@ Item {
     Rectangle {
         id: track
         anchors.fill: parent
-        radius: Dimens.radiusFull
+        radius: ShellState.islandCornerRadius
         color: root.checked ? Colors.accent : Colors.subBgMica
         border.width: 0
 
@@ -22,7 +23,7 @@ Item {
             id: knob
             width: parent.height - 4
             height: parent.height - 4
-            radius: Dimens.radiusFull
+            radius: ShellState.islandCornerRadius
             color: Colors.mainBgMica
             anchors.verticalCenter: parent.verticalCenter
             x: root.checked ? parent.width - width - 2 : 2

@@ -1,11 +1,11 @@
 // modules/AppLauncher.qml
 pragma ComponentBehavior: Bound
 
+import "../services"
+import "../styles"
 import QtQuick
 import QtQuick.Controls
 import Quickshell
-import "../services"
-import "../styles"
 
 Item {
     id: root
@@ -18,7 +18,7 @@ Item {
     // AppLauncher fills the island directly (no settings-window layer in
     // between), so its containers derive straight off the master with
     // their own real margin (12px, matching Dimens.paddingMedium below).
-    readonly property real _outerRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, Dimens.paddingMedium)
+    readonly property real _outerRadius: ShellState.islandCornerRadius
 
     property string query: ""
     property var results: AppLauncherService.filteredApps(query)
@@ -211,7 +211,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: Dimens.nestedRadius(root._outerRadius, Dimens.paddingSmall)
+                        radius: ShellState.islandCornerRadius
                         color: (delegateRoot.index !== undefined && delegateRoot.index === root.selectedIndex) ? Colors.mainBgMica : Colors.subBgMica
                         visible: appIcon.status !== Image.Ready
 

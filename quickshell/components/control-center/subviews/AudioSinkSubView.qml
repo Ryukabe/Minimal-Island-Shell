@@ -55,7 +55,7 @@ Item {
         Rectangle {
             width: parent.width
             height: 120
-            radius: Dimens.radiusLarge
+            radius: ShellState.islandCornerRadius
             color: Colors.subBgMica
             border.width: 1
             border.color: Colors.border

@@ -142,7 +142,7 @@ readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
             id: previewBox
             Layout.fillWidth: true
             Layout.preferredHeight: 90
-            radius: Dimens.radiusSmall
+            radius: ShellState.islandCornerRadius
             color: card.previewBg
 
             border.width: card.isApplied ? 2 : (card.isSelected ? 1.5 : 0)
@@ -165,19 +165,19 @@ readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
                 Rectangle {
                     width: 14
                     height: 28
-                    radius: 4
+                    radius: ShellState.islandCornerRadius
                     color: card.previewAccent
                 }
                 Rectangle {
                     width: 14
                     height: 28
-                    radius: 4
+                    radius: ShellState.islandCornerRadius
                     color: card.previewFg
                 }
                 Rectangle {
                     width: 14
                     height: 28
-                    radius: 4
+                    radius: ShellState.islandCornerRadius
                     color: Qt.rgba(card.previewFg.r, card.previewFg.g, card.previewFg.b, 0.3)
                 }
             }
@@ -189,7 +189,7 @@ readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
                 anchors.margins: 6
                 width: 20
                 height: 20
-                radius: 10
+                radius: ShellState.islandCornerRadius
                 color: card.previewAccent
                 visible: card.isApplied
 

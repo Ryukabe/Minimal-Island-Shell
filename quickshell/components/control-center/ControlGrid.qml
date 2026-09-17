@@ -178,7 +178,7 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
-                radius: Dimens.radiusMedium
+                radius: ShellState.islandCornerRadius
                 color: "transparent"
                 border.color: tileWrapper.selected ? Colors.accent : Colors.border
                 border.width: tileWrapper.selected ? 2 : 1
@@ -223,7 +223,7 @@ Item {
                 Rectangle {
                     width: 16
                     height: 16
-                    radius: 8
+                    radius: ShellState.islandCornerRadius
                     color: Colors.accent
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom

@@ -1,4 +1,5 @@
 import QtQuick
+import "../../services"
 import "../../styles"
 
 Rectangle {
@@ -19,7 +20,7 @@ Rectangle {
     signal subviewRequested()
 
     implicitWidth: compact ? 76 : 160
-    radius: compact ? Dimens.radiusMedium : Dimens.radiusMediumLarge
+    radius: ShellState.islandCornerRadius
     color: Colors.subBgMica
     border.width: 1
     border.color: Colors.border
@@ -75,7 +76,7 @@ Rectangle {
                         required property int index
                         width: 3
                         height: 6 + index * 4
-                        radius: 1
+                        radius: ShellState.islandCornerRadius
                         anchors.bottom: parent.bottom
                         color: index < tile.signalBars
                             ? (tile.active ? Colors.accent : Colors.fg)
@@ -159,7 +160,7 @@ Rectangle {
     Rectangle {
         width: 8
         height: 8
-        radius: 4
+        radius: ShellState.islandCornerRadius
         color: tile.active ? Colors.accent : Colors.fgMuted
         anchors.top: parent.top
         anchors.right: parent.right

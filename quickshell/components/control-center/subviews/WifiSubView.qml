@@ -71,7 +71,7 @@ Item {
                 Rectangle {
                     width: 28
                     height: 28
-                    radius: 14
+                    radius: ShellState.islandCornerRadius
                     color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
@@ -94,7 +94,7 @@ Item {
                 Rectangle {
                     width: 28
                     height: 28
-                    radius: 14
+                    radius: ShellState.islandCornerRadius
                     color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
@@ -148,7 +148,7 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: 52
-                    radius: Dimens.radiusLarge
+                    radius: ShellState.islandCornerRadius
                     color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
@@ -225,7 +225,7 @@ Item {
                                 required property var modelData
                                 width: listColumn.width
                                 height: 48
-                                radius: Dimens.radiusLarge
+                                radius: ShellState.islandCornerRadius
                                 color: Colors.subBgMica
                                 border.width: 1
                                 border.color: Colors.border
@@ -274,7 +274,7 @@ Item {
                                     Rectangle {
                                         width: 74
                                         height: 28
-                                        radius: 14
+                                        radius: ShellState.islandCornerRadius
                                         color: Colors.accent
                                         anchors.verticalCenter: parent.verticalCenter
 
@@ -334,7 +334,7 @@ Item {
             Rectangle {
                 width: parent.width
                 height: 40
-                radius: Dimens.radiusMedium
+                radius: ShellState.islandCornerRadius
                 color: Colors.subBgMica
                 border.width: 1
                 border.color: Colors.border
@@ -359,7 +359,7 @@ Item {
                 Rectangle {
                     width: (parent.width - 10) / 2
                     height: 38
-                    radius: Dimens.radiusMedium
+                    radius: ShellState.islandCornerRadius
                     color: Colors.subBgMica
 
                     Text {
@@ -380,7 +380,7 @@ Item {
                     id: connectBtn
                     width: (parent.width - 10) / 2
                     height: 38
-                    radius: Dimens.radiusMedium
+                    radius: ShellState.islandCornerRadius
                     color: Colors.accent
 
                     signal click()

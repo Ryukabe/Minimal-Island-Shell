@@ -54,7 +54,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 40
-            radius: Dimens.borderRadiusLarge
+            radius: ShellState.islandCornerRadius
             color: Colors.subBgMica
 
             RowLayout {
@@ -123,7 +123,7 @@ Item {
                 Rectangle {
                     width: 24
                     height: 24
-                    radius: Dimens.borderRadiusSmall
+                    radius: ShellState.islandCornerRadius
                     color: "transparent"
                     visible: ClipboardService.history.length > 0
 
@@ -164,7 +164,7 @@ Item {
 
                 width: clipList.width
                 height: 38
-                radius: Dimens.borderRadiusMedium
+                radius: ShellState.islandCornerRadius
                 color: index === root.selectedIndex ? Colors.subBgMica : "transparent"
 
                 RowLayout {

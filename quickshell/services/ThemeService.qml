@@ -53,7 +53,7 @@ Item {
         var list = [];
         for (var i = 0; i < folderModel.count; i++) {
             var folderName = folderModel.get(i, "fileName");
-            if (!folderName.startsWith(".")) list.push({ name: folderName });
+            if (!folderName.startsWith(".") && !folderName.endsWith(".bak")) list.push({ name: folderName });
         }
         themesList = list;
     }

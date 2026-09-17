@@ -1,4 +1,5 @@
 import QtQuick
+import "../../services"
 import "../../styles"
 import "tiles"
 
@@ -172,7 +173,7 @@ Item {
                     required property int index
                     width: 6
                     height: 6
-                    radius: 3
+                    radius: ShellState.islandCornerRadius
                     color: index === root.currentPage ? Colors.accent : Colors.fgMuted
                     Behavior on color { ColorAnimation { duration: 150 } }
 

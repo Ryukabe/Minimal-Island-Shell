@@ -22,7 +22,7 @@ Item {
 
     implicitWidth: 145
     implicitHeight: 125
-    property real radius: Dimens.radiusSmall
+    property real radius: ShellState.islandCornerRadius
 
     z: card.isRaised ? 3 : 1
 
@@ -144,7 +144,7 @@ Item {
                 anchors.margins: 6
                 width: 20
                 height: 20
-                radius: 10
+                radius: ShellState.islandCornerRadius
                 color: Colors.accent
                 visible: card.isApplied
 

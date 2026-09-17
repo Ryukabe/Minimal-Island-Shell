@@ -44,7 +44,7 @@ Item {
                 width: 24
                 height: 24
                 color: Colors.subBgMica
-                radius: Dimens.islandRadius
+                radius: ShellState.islandCornerRadius
 
                 Text {
                     anchors.centerIn: parent
@@ -74,7 +74,7 @@ Item {
                 width: 24
                 height: 24
                 color: Colors.subBgMica
-                radius: Dimens.islandRadius
+                radius: ShellState.islandCornerRadius
 
                 Text {
                     anchors.centerIn: parent

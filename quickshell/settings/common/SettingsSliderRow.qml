@@ -95,14 +95,14 @@ Item {
                 implicitHeight: 4
                 width: parent.availableWidth
                 height: implicitHeight
-                radius: 2
+                radius: Dimens.settingsControlRadius
                 color: Colors.elevatedBg
 
                 Rectangle {
                     width: parent.parent.visualPosition * parent.width
                     height: parent.height
                     color: Colors.accent
-                    radius: 2
+                    radius: Dimens.settingsControlRadius
                 }
             }
 
@@ -111,7 +111,7 @@ Item {
                 y: parent.topPadding + parent.availableHeight / 2 - height / 2
                 implicitWidth: 16
                 implicitHeight: 16
-                radius: 8
+                radius: Dimens.settingsControlRadius
                 color: Colors.fg
                 border.color: Colors.fg
                 border.width: 1

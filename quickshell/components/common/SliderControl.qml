@@ -1,4 +1,5 @@
 import QtQuick
+import "../../services"
 import "../../styles"
 
 Item {
@@ -21,14 +22,14 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
         height: 6
-        radius: Dimens.radiusFull
+        radius: ShellState.islandCornerRadius
         color: Colors.subBgMica
         border.color: Colors.border
         border.width: 1
 
         Rectangle {
             height: parent.height
-            radius: Dimens.radiusFull
+            radius: ShellState.islandCornerRadius
             color: Colors.accent
             width: Math.max(height, track.width * root.ratio)
         }
@@ -38,7 +39,7 @@ Item {
         id: handle
         width: 16
         height: 16
-        radius: Dimens.radiusFull
+        radius: ShellState.islandCornerRadius
         color: Colors.white
         border.color: Colors.accent
         border.width: 2

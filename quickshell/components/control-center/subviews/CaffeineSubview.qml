@@ -55,7 +55,7 @@ Item {
         Rectangle {
             width: parent.width
             height: 64
-            radius: Dimens.radiusMediumLarge
+            radius: ShellState.islandCornerRadius
             color: Colors.subBgMica
             border.width: 1
             border.color: Colors.border
@@ -99,7 +99,7 @@ Item {
                 Rectangle {
                     width: 44
                     height: 24
-                    radius: 12
+                    radius: ShellState.islandCornerRadius
                     color: CaffeineService.enabled ? Colors.accent : Colors.bgSurface
                     border.width: 1
                     border.color: Colors.border
@@ -110,7 +110,7 @@ Item {
                     Rectangle {
                         width: 18
                         height: 18
-                        radius: 9
+                        radius: ShellState.islandCornerRadius
                         color: Colors.fg
                         anchors.verticalCenter: parent.verticalCenter
                         x: CaffeineService.enabled ? parent.width - width - 3 : 3

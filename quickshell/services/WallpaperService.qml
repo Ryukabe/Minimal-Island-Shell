@@ -37,7 +37,7 @@ Item {
         folder: "file://" + root.wallpapersPath
         showDirs: false
         showFiles: true
-        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp"]
+        nameFilters: ["*.jpg", "*.jpeg", "*.png"]
         showDotAndDotDot: false
         onCountChanged: updateWallpapers()
         onStatusChanged: {
@@ -82,7 +82,7 @@ Item {
             // No saved entry for this theme — fall back to the first wallpaper in its folder.
             if (!root._lookupFound) {
                 fallbackFirstProc.command = ["bash", "-c",
-                    "ls '" + Quickshell.shellDir + "/assets/wallpapers/" + root._lookupThemeName + "' 2>/dev/null | grep -Ei '\\.(jpg|jpeg|png|webp)$' | sort | head -n1"]
+                    "ls '" + Quickshell.shellDir + "/assets/wallpapers/" + root._lookupThemeName + "' 2>/dev/null | grep -Ei '\\.(jpg|jpeg|png)$' | sort | head -n1"]
                 fallbackFirstProc.running = true
             }
         }

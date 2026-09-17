@@ -153,7 +153,7 @@ PanelWindow {
         z: -1
         notchWidth: island.width
         notchHeight: island.height
-        bottomRadius: Math.min(island.height / 2, ShellState.islandCornerRadius)
+        bottomRadius: ShellState.islandCornerRadius
         flare: ShellState.islandNotchFlare
         fillColor: Colors.mainBgMica
     }
@@ -231,7 +231,7 @@ PanelWindow {
         // the same master radius now. (Previously expanded had its own
         // independent ShellState.islandExpandedCornerRadius, which is
         // what let the two drift out of sync.)
-        radius: Math.min(height / 2, ShellState.islandCornerRadius)
+        radius: ShellState.islandCornerRadius
         color: ShellState.islandNotchMode ? "transparent" : Colors.mainBgMica
         border.color: Colors.border
         border.width: ShellState.islandNotchMode ? 0 : ShellState.islandBorderWidth

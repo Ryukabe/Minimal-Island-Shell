@@ -18,7 +18,7 @@ Item {
     // Outer ColumnLayout below sits at a 16px margin off the island's own
     // bounds, so the minute-picker chips derive off the master with that
     // real gap.
-    readonly property real _chipRadius: Dimens.nestedRadius(ShellState.islandCornerRadius, 16)
+    readonly property real _chipRadius: ShellState.islandCornerRadius
 
     ColumnLayout {
         anchors.fill: parent
@@ -68,7 +68,7 @@ Item {
                     Rectangle {
                         width: 70
                         height: 32
-                        radius: 16
+                        radius: ShellState.islandCornerRadius
                         color: Colors.subBgMica
                         Text {
                             anchors.centerIn: parent
@@ -85,7 +85,7 @@ Item {
                     Rectangle {
                         width: 70
                         height: 32
-                        radius: 16
+                        radius: ShellState.islandCornerRadius
                         color: Colors.subBgMica
                         Text {
                             anchors.centerIn: parent
@@ -133,7 +133,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     width: 120
                     height: 36
-                    radius: 18
+                    radius: ShellState.islandCornerRadius
                     color: Colors.accent
                     Text {
                         anchors.centerIn: parent

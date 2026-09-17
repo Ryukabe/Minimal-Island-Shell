@@ -1,4 +1,5 @@
 import QtQuick
+import "../../services"
 import "../../styles"
 
 Rectangle {
@@ -78,7 +79,7 @@ Rectangle {
     Rectangle {
         id: track
         height: 4
-        radius: Dimens.radiusXSmall
+        radius: ShellState.islandCornerRadius
         color: Colors.subBgMica
         anchors.left: root.iconSource === "" ? iconText.right : iconImage.right
         anchors.leftMargin: 10

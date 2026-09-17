@@ -5,6 +5,7 @@
 // hover-lighten state and an isApplied checkmark, same pattern as
 // Theme/Wallpaper cards.
 import QtQuick
+import "../../services"
 import "../../styles"
 
 Rectangle {
@@ -18,7 +19,7 @@ Rectangle {
 
     implicitWidth: 130
     implicitHeight: 90
-    radius: Dimens.radiusMedium
+    radius: ShellState.islandCornerRadius
 
     color: root.isSelected
         ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.16)

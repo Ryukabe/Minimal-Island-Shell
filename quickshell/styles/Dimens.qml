@@ -69,7 +69,7 @@ QtObject {
     // Clamped to radiusXSmall so deeply-nested elements never hit 0/negative
     // even if islandCornerRadius is dragged low.
     function nestedRadius(outerRadius, gap) {
-        return Math.max(radiusXSmall, outerRadius - gap)
+        return Math.max(outerRadius - gap)
     }
 
     // --- Settings UI derived radii ---
@@ -80,6 +80,6 @@ QtObject {
     // moves together off one master value with no risk of the copies
     // drifting apart from each other.
     readonly property real settingsContainerRadius: ShellState.islandCornerRadius
-    readonly property real settingsControlRadius: nestedRadius(settingsContainerRadius, paddingMedium)
-    readonly property real settingsButtonRadius: ShellState.islandCornerRadius 
+    readonly property real settingsControlRadius: nestedRadius(settingsContainerRadius, paddingSmall)
+    //readonly property real settingsButtonRadius: ShellState.islandCornerRadius 
 }
