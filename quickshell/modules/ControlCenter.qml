@@ -45,6 +45,8 @@ Item {
             case "focus": return focusSubviewComp
             case "powerprofile": return powerProfileSubviewComp
             case "caffeine": return caffeineSubviewComp
+            case "volume": return volumeSubviewComp
+            case "brightness": return brightnessSubviewComp
             default: return mainViewComp
             }
         }
@@ -142,5 +144,15 @@ Item {
     Component {
         id: caffeineSubviewComp
         CaffeineSubview { onBackRequested: root.activeSubview = "" }
+    }
+
+    Component {
+        id: volumeSubviewComp
+        VolumeSubView { onBackRequested: root.activeSubview = "" }
+    }
+
+    Component {
+        id: brightnessSubviewComp
+        BrightnessSubView { onBackRequested: root.activeSubview = "" }
     }
 }

@@ -23,21 +23,27 @@ Item {
         var tile = ControlCenterLayoutService.layoutModel.get(idx)
 
         if (event.key === Qt.Key_Left) {
+            ControlCenterLayoutService.pushUndoSnapshot()
             ControlCenterLayoutService.moveTile(root.selectedTileId, tile.col - 1, tile.row)
             event.accepted = true
         } else if (event.key === Qt.Key_Right) {
+            ControlCenterLayoutService.pushUndoSnapshot()
             ControlCenterLayoutService.moveTile(root.selectedTileId, tile.col + 1, tile.row)
             event.accepted = true
         } else if (event.key === Qt.Key_Up) {
+            ControlCenterLayoutService.pushUndoSnapshot()
             ControlCenterLayoutService.moveTile(root.selectedTileId, tile.col, tile.row - 1)
             event.accepted = true
         } else if (event.key === Qt.Key_Down) {
+            ControlCenterLayoutService.pushUndoSnapshot()
             ControlCenterLayoutService.moveTile(root.selectedTileId, tile.col, tile.row + 1)
             event.accepted = true
         } else if (event.key === Qt.Key_BracketRight) {
+            ControlCenterLayoutService.pushUndoSnapshot()
             ControlCenterLayoutService.stepSize(root.selectedTileId, 1)
             event.accepted = true
         } else if (event.key === Qt.Key_BracketLeft) {
+            ControlCenterLayoutService.pushUndoSnapshot()
             ControlCenterLayoutService.stepSize(root.selectedTileId, -1)
             event.accepted = true
         }
@@ -73,7 +79,6 @@ Item {
             width: colSpan * cellW + (colSpan - 1) * ControlCenterLayoutService.cellSpacing
             height: rowSpan * cellH + (rowSpan - 1) * ControlCenterLayoutService.cellSpacing
 
-            // ---- x/y: the "move" morph, same spring/ease toggle as Island's width/height ----
             SpringAnimation {
                 id: xSpringAnim
                 spring: Motion.glideSpring
@@ -110,10 +115,6 @@ Item {
                 animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? ySpringAnim : yEaseAnim
             }
 
-            // ---- width/height: the "resize" morph. Disabled while actively
-            // dragging the handle so it tracks the cursor 1:1 with no lag;
-            // re-enabled the instant you let go, so the final snap to the
-            // grid cell animates instead of jumping.
             SpringAnimation {
                 id: widthSpringAnim
                 spring: Motion.glideSpring
@@ -171,6 +172,7 @@ Item {
                     case "lightmode": return lightmodeTile
                     case "volume": return volumeTile
                     case "brightness": return brightnessTile
+                    case "media": return mediaTile
                     default: return null
                     }
                 }
@@ -185,8 +187,6 @@ Item {
                 visible: root.editMode
                 z: 10
 
-                // ---- border feedback: short plain ease, never spring —
-                // same category as Island's radius/border.width treatment
                 Behavior on border.color {
                     ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
                 }
@@ -202,6 +202,7 @@ Item {
                     preventStealing: true
 
                     onPressed: {
+                        ControlCenterLayoutService.pushUndoSnapshot()
                         root.selectedTileId = tileWrapper.tileId
                         root.forceActiveFocus()
                     }
@@ -239,6 +240,7 @@ Item {
                         property size startSize
 
                         onPressed: (mouse) => {
+                            ControlCenterLayoutService.pushUndoSnapshot()
                             root.selectedTileId = tileWrapper.tileId
                             root.forceActiveFocus()
                             tileWrapper.resizing = true
@@ -276,6 +278,7 @@ Item {
     Component { id: airplaneTile; AirplaneModeToggleTile {} }
     Component { id: recordingTile; RecordingToggleTile {} }
     Component { id: lightmodeTile; LightModeToggleTile {} }
-    Component { id: volumeTile; VolumeToggleTile {} }
-    Component { id: brightnessTile; BrightnessToggleTile {} }
+    Component { id: mediaTile; MediaToggleTile {} }
+    Component { id: volumeTile; VolumeToggleTile { onSubviewRequested: root.subviewRequestedFor("volume") } }
+    Component { id: brightnessTile; BrightnessToggleTile { onSubviewRequested: root.subviewRequestedFor("brightness") } }
 }

@@ -6,3 +6,5 @@ FocusSubView 1.0 FocusSubView.qml
 PowerProfileSubView 1.0 PowerProfileSubView.qml
 CaffeineSubview 1.0 CaffeineSubview.qml
 WifiSubView 1.0 WifiSubView.qml
+BrightnessSubView 1.0 BrightnessSubView.qml
+VolumeSubView 1.0 VolumeSubView.qml

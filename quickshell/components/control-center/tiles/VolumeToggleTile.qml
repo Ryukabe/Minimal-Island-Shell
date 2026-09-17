@@ -9,6 +9,8 @@ Rectangle {
     border.width: 1
     border.color: Colors.border
 
+    signal subviewRequested()
+
     Rectangle {
         anchors.left: parent.left
         anchors.top: parent.top
@@ -43,19 +45,41 @@ Rectangle {
         font.pixelSize: Dimens.fontSizeSm
         font.weight: Font.DemiBold
         color: Colors.fg
-        anchors.right: parent.right
-        anchors.rightMargin: 16
+        anchors.right: chevron.left
+        anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
     }
 
     MouseArea {
         anchors.fill: parent
+        anchors.rightMargin: 28
         cursorShape: Qt.PointingHandCursor
         function updatePct(x) {
-            var pct = Math.max(0, Math.min(100, Math.round((x / width) * 100)))
+            var pct = Math.max(0, Math.min(100, Math.round((x / root.width) * 100)))
             VolumeService.setPercent(pct)
         }
         onPressed: (mouse) => updatePct(mouse.x)
         onPositionChanged: (mouse) => { if (pressed) updatePct(mouse.x) }
+    }
+
+    Text {
+        id: chevron
+        text: "chevron_right"
+        font.family: Fonts.icon
+        font.pixelSize: Dimens.fontSizeMd
+        font.variableAxes: Fonts.iconAxes
+        color: chevronMouse.containsMouse ? Colors.accent : Colors.subBgMica
+        anchors.right: parent.right
+        anchors.rightMargin: 12
+        anchors.verticalCenter: parent.verticalCenter
+
+        MouseArea {
+            id: chevronMouse
+            anchors.fill: parent
+            anchors.margins: -8
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.subviewRequested()
+        }
     }
 }
