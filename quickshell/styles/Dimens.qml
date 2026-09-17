@@ -81,4 +81,5 @@ QtObject {
     // drifting apart from each other.
     readonly property real settingsContainerRadius: ShellState.islandCornerRadius
     readonly property real settingsControlRadius: nestedRadius(settingsContainerRadius, paddingMedium)
+    readonly property real settingsButtonRadius: ShellState.islandCornerRadius 
 }
