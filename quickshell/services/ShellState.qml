@@ -49,6 +49,32 @@ QtObject {
     property real timerWidth: 320
     property real timerHeight: 180
 
+    // ================= CLOCK =================
+    // Single source of truth for the bar clock AND the Clock settings preview.
+    // The two format strings below are derived — never persisted, never set by hand.
+    property bool clockUse24Hour: false
+    property bool clockShowSeconds: false
+    property bool clockLeadingZero: true
+    property bool clockLowercaseAmPm: false
+    property int clockDateStyle: 0            // 0 = off, 1 = "ddd d", 2 = "ddd d MMM"
+    property bool clockShowVisualizer: true
+    property bool clockShowTimerIcon: true
+    property bool clockShowRecordingIndicator: true
+    property bool timerToastShowRecordingIndicator: true
+
+    // 12-hour mode always includes an AM/PM token, which is what makes h/hh
+    // render as 1-12 instead of 0-23.
+    readonly property string clockTimeFormat: {
+        const hour = clockUse24Hour
+            ? (clockLeadingZero ? "HH" : "H")
+            : (clockLeadingZero ? "hh" : "h")
+        const seconds = clockShowSeconds ? ":ss" : ""
+        const ampm = clockUse24Hour ? "" : (clockLowercaseAmPm ? " ap" : " AP")
+        return hour + ":mm" + seconds + ampm
+    }
+
+    readonly property string clockDateFormat: clockDateStyle === 2 ? "ddd d MMM" : "ddd d"
+
         // ================= MOTION & ANIMATIONS =================
     property bool motionReduced: false
     property real motionMovementMs: 480

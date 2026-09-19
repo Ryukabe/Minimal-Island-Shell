@@ -171,6 +171,8 @@ Scope {
                             }
                         }
 
+                        // Search box also owns the results list. While searching it
+                        // fills the space below it, and the section list is hidden.
                         SearchBox {
                             id: searchBox
                             Layout.fillWidth: true
@@ -186,6 +188,7 @@ Scope {
                             id: sectionList
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                            visible: !searchBox.searching
                             clip: true
                             spacing: 3
 
@@ -206,18 +209,10 @@ Scope {
 
                             delegate: Item {
                                 width: sectionList.width
-                                height: matchesSearch ? 40 : 0
-                                visible: height > 0
+                                height: 40
                                 clip: true
 
                                 property bool isSelected: sectionList.currentIndex === index
-                                property bool matchesSearch: {
-                                    let query = searchBox.searchText.toLowerCase().trim()
-                                    if (query === "") return true
-                                    return model.sectionName.toLowerCase().includes(query) || model.tag.toLowerCase().includes(query)
-                                }
-
-                                Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
 
                                 Item {
                                     width: parent.width

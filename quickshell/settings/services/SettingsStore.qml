@@ -1,4 +1,4 @@
-// settings/services/SettingsStore.qml — persists all Bar/Island/Motion/panel-size settings to disk
+// settings/services/SettingsStore.qml — persists all Bar/Island/Motion/panel-size/Clock settings to disk
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -44,7 +44,16 @@ Item {
             motionMovementMs: 480,
             motionFadeMs: 220,
             motionHoverMs: 250,
-            motionBouncePercent: 20
+            motionBouncePercent: 20,
+            clockUse24Hour: false,
+            clockShowSeconds: false,
+            clockLeadingZero: true,
+            clockLowercaseAmPm: false,
+            clockDateStyle: 0,
+            clockShowVisualizer: true,
+            clockShowTimerIcon: true,
+            clockShowRecordingIndicator: true,
+            timerToastShowRecordingIndicator: true
         }
     }
 
@@ -132,5 +141,14 @@ Item {
         function onMotionFadeMsChanged() { root._scheduleSave() }
         function onMotionHoverMsChanged() { root._scheduleSave() }
         function onMotionBouncePercentChanged() { root._scheduleSave() }
+        function onClockUse24HourChanged() { root._scheduleSave() }
+        function onClockShowSecondsChanged() { root._scheduleSave() }
+        function onClockLeadingZeroChanged() { root._scheduleSave() }
+        function onClockLowercaseAmPmChanged() { root._scheduleSave() }
+        function onClockDateStyleChanged() { root._scheduleSave() }
+        function onClockShowVisualizerChanged() { root._scheduleSave() }
+        function onClockShowTimerIconChanged() { root._scheduleSave() }
+        function onClockShowRecordingIndicatorChanged() { root._scheduleSave() }
+        function onTimerToastShowRecordingIndicatorChanged() { root._scheduleSave() }
     }
 }

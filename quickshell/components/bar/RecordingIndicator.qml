@@ -1,3 +1,4 @@
+// Componrnts/bar/recordingindicator.qml
 import QtQuick
 import "../../services"
 

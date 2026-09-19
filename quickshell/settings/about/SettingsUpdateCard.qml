@@ -24,7 +24,7 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: contentCol.implicitHeight + Dimens.paddingMedium * 2
-    radius: Dimens.radiusMedium
+    radius: Dimens.settingsControlRadius
     color: Colors.subBgMica
     // Borders removed per design feedback — the mica background alone
     // separates the card from the page without an outline.

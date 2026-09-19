@@ -28,5 +28,14 @@
   "motionMovementMs": 400,
   "motionFadeMs": 300,
   "motionHoverMs": 130,
-  "motionBouncePercent": 25
+  "motionBouncePercent": 25,
+  "clockUse24Hour": false,
+  "clockShowSeconds": false,
+  "clockLeadingZero": true,
+  "clockLowercaseAmPm": false,
+  "clockDateStyle": 0,
+  "clockShowVisualizer": true,
+  "clockShowTimerIcon": true,
+  "clockShowRecordingIndicator": true,
+  "timerToastShowRecordingIndicator": false
 }

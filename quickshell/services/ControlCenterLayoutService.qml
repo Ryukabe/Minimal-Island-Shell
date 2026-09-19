@@ -11,7 +11,7 @@ QtObject {
     property real cellSpacing: Dimens.spacingSm
 
 property var universalSizes: [
-    {c:1,r:2}, {c:1,r:3}, {c:1,r:4},
+    {c:1,r:1}, {c:1,r:2}, {c:1,r:3}, {c:1,r:4},
     {c:2,r:1}, {c:2,r:2},
     {c:3,r:1}, {c:3,r:2},
     {c:4,r:2}, {c:4,r:4},
@@ -32,6 +32,30 @@ property var universalSizes: [
         "brightness": universalSizes,
         "media": universalSizes,
         "notifications": universalSizes
+    })
+
+    // Types with a real ToggleTile component wired in ControlGrid's Loader
+    // switch — these are the only ones eligible for the Add-a-control tray's
+    // functional add/remove. ("notifications" is deliberately excluded: it
+    // has layout data but no rendering case yet.)
+    property var manageableTypes: [
+        "wifi", "bluetooth", "nightlight", "focus", "airplane", "caffeine",
+        "recording", "powerprofile", "lightmode", "volume", "brightness", "media"
+    ]
+
+    property var typeDisplayNames: ({
+        wifi: "Wi-Fi",
+        bluetooth: "Bluetooth",
+        nightlight: "Night Light",
+        focus: "Focus",
+        airplane: "Airplane Mode",
+        caffeine: "Caffeine",
+        recording: "Recording",
+        powerprofile: "Power Profile",
+        lightmode: "Light Mode",
+        volume: "Volume",
+        brightness: "Brightness",
+        media: "Media"
     })
 
     property var defaultLayout: [
@@ -321,6 +345,57 @@ property var universalSizes: [
             layoutModel.setProperty(i, "row", pos.row)
             placed.push({ col: pos.col, row: pos.row, colSpan: t.colSpan, rowSpan: t.rowSpan })
         }
+        saveLayout()
+    }
+
+    // ---- Add-a-control tray ----
+
+    // manageableTypes not currently present in layoutModel (by type — one
+    // placed instance per type, same assumption the rest of the file makes
+    // since tileId === type everywhere in defaultLayout).
+    function unplacedTypes() {
+        var placed = {}
+        for (var i = 0; i < layoutModel.count; i++) {
+            placed[layoutModel.get(i).type] = true
+        }
+        var result = []
+        for (var j = 0; j < manageableTypes.length; j++) {
+            if (!placed[manageableTypes[j]]) result.push(manageableTypes[j])
+        }
+        return result
+    }
+
+    // Smallest-area allowed size for a type — used as the size a tile
+    // enters the grid at when added from the tray.
+    function defaultSizeForType(type) {
+        var sizes = allowedSizes[type]
+        if (!sizes || sizes.length === 0) return { c: 1, r: 1 }
+        var best = sizes[0]
+        for (var i = 1; i < sizes.length; i++) {
+            if (sizes[i].c * sizes[i].r < best.c * best.r) best = sizes[i]
+        }
+        return best
+    }
+
+    function addTile(type) {
+        if (indexForId(type) >= 0) return // already placed
+        pushUndoSnapshot()
+        var size = defaultSizeForType(type)
+        var placedRects = []
+        for (var i = 0; i < layoutModel.count; i++) {
+            var t = layoutModel.get(i)
+            placedRects.push({ col: t.col, row: t.row, colSpan: t.colSpan, rowSpan: t.rowSpan })
+        }
+        var pos = findFirstFit(size.c, size.r, placedRects)
+        layoutModel.append({ tileId: type, type: type, col: pos.col, row: pos.row, colSpan: size.c, rowSpan: size.r })
+        saveLayout()
+    }
+
+    function removeTile(tileId) {
+        var idx = indexForId(tileId)
+        if (idx < 0) return
+        pushUndoSnapshot()
+        layoutModel.remove(idx, 1)
         saveLayout()
     }
 }

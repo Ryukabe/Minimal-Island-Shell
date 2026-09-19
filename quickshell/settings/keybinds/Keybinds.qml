@@ -38,9 +38,8 @@ Item {
             Layout.fillWidth: true
             implicitHeight: contentCol.implicitHeight + (Dimens.paddingMedium * 2)
             color: Colors.elevatedBg
-            border.color: Colors.border
-            border.width: 1
-            radius: Dimens.radiusMedium
+
+            radius: Dimens.settingsControlRadius
 
             ColumnLayout {
                 id: contentCol
@@ -65,7 +64,7 @@ Item {
                         id: chevronHit
                         implicitWidth: 28
                         implicitHeight: 28
-                        radius: Dimens.radiusSmall
+                        radius: Dimens.settingsControlRadius
                         color: chevronMouse.containsMouse ? Colors.subBgMica : "transparent"
 
                         Text {
@@ -124,7 +123,7 @@ Item {
                         Rectangle {
                             Layout.fillWidth: true
                             implicitHeight: 32
-                            radius: Dimens.radiusSmall
+                            radius: Dimens.settingsControlRadius
                             color: Colors.subBgMica
                             border.color: Colors.border
                             border.width: 1
@@ -163,7 +162,7 @@ Item {
                                 property bool enabledState: newBindCapture.resultCombo.trim().length > 0 && root.newCommandText.trim().length > 0
                                 implicitWidth: addBtnText.implicitWidth + Dimens.paddingLarge * 2
                                 implicitHeight: addBtnText.implicitHeight + Dimens.paddingSmall * 2
-                                radius: height / 2
+                                radius: Dimens.settingsControlRadius
                                 color: !enabledState
                                     ? Colors.subBgMica
                                     : (addMouse.pressed ? Qt.darker(Colors.accent, 1.15) : (addMouse.containsMouse ? Qt.lighter(Colors.accent, 1.1) : Colors.accent))

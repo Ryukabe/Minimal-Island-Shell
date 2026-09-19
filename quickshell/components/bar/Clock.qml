@@ -1,9 +1,8 @@
 import QtQuick
-import "../../services"
 import QtQuick.Layouts
 import Quickshell
-import "../../styles"
 import "../../services"
+import "../../styles"
 
 Item {
     id: root
@@ -11,9 +10,10 @@ Item {
     implicitWidth: Math.max(140, layout.implicitWidth + 32)
     implicitHeight: Math.max(36, layout.implicitHeight + 8)
 
+    // Only ticks every second while the user has "Show Seconds" on.
     SystemClock {
         id: clock
-        precision: SystemClock.Minutes
+        precision: ShellState.clockShowSeconds ? SystemClock.Seconds : SystemClock.Minutes
     }
 
     RowLayout {
@@ -24,7 +24,7 @@ Item {
         // 1. Music Visualizer (Left)
         RowLayout {
             spacing: 3
-            visible: AudioService.isPlaying
+            visible: ShellState.clockShowVisualizer && AudioService.isPlaying
             Layout.alignment: Qt.AlignVCenter
 
             Repeater {
@@ -40,7 +40,7 @@ Item {
                         anchors.bottom: parent.bottom
 
                         SequentialAnimation on height {
-                            running: AudioService.isPlaying
+                            running: ShellState.clockShowVisualizer && AudioService.isPlaying
                             loops: Animation.Infinite
 
                             NumberAnimation {
@@ -59,9 +59,22 @@ Item {
             }
         }
 
-        // 2. Clock Display (Middle)
+        // 2. Date (optional, before the time)
         Text {
-            text: Qt.formatDateTime(clock.date, "hh:mm AP")
+            visible: ShellState.clockDateStyle > 0
+            text: Qt.formatDateTime(clock.date, ShellState.clockDateFormat)
+            color: Colors.fgMuted
+            Layout.alignment: Qt.AlignVCenter
+            font {
+                family: Fonts.display
+                pixelSize: 13
+                weight: 500
+            }
+        }
+
+        // 3. Clock Display (Middle)
+        Text {
+            text: Qt.formatDateTime(clock.date, ShellState.clockTimeFormat)
             color: Colors.fg
             font {
                 family: Fonts.display
@@ -70,14 +83,14 @@ Item {
             }
         }
 
-        // 3. Timer Quick Icon (Right Side - Click toggles global timer page)
+        // 4. Timer Quick Icon (Right Side - Click toggles global timer page)
         Text {
             text: "timer"
             font.family: Fonts.icon
             font.pixelSize: 14
             color: TimerService.running || TimerService.secondsRemaining > 0 ? Colors.accent : Colors.fgMuted
             Layout.alignment: Qt.AlignVCenter
-            visible: TimerService.secondsRemaining > 0 || TimerService.running 
+            visible: ShellState.clockShowTimerIcon && (TimerService.secondsRemaining > 0 || TimerService.running)
 
             MouseArea {
                 anchors.fill: parent
@@ -89,7 +102,7 @@ Item {
             }
         }
 
-        // 4. Recording Indicator (Right)
+        // 5. Recording Indicator (Right) — always shown, not user-hideable
         RecordingIndicator {
             active: RecordingService.enabled
             dotSize: 6

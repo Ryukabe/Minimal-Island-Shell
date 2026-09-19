@@ -86,9 +86,21 @@ Item {
         }
 
         ControlGrid {
+            id: grid
             Layout.fillWidth: true
             Layout.preferredHeight: implicitHeight
             editMode: true
+        }
+
+        TileSizePicker {
+            Layout.fillWidth: true
+            Layout.topMargin: Dimens.spacingMd
+            tileId: grid.selectedTileId
+        }
+
+        AddControlTray {
+            Layout.fillWidth: true
+            Layout.topMargin: Dimens.spacingMd
         }
     }
 }

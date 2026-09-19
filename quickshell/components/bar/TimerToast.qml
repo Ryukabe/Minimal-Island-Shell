@@ -94,6 +94,14 @@ Item {
                 }
             }
         }
+
+        // Recording Indicator — mirrors the bar clock so it stays visible while a timer is showing
+        RecordingIndicator {
+            active: RecordingService.enabled
+            dotSize: 6
+            dotColor: Colors.red
+            Layout.alignment: Qt.AlignVCenter
+        }
     }
 
     MouseArea {
