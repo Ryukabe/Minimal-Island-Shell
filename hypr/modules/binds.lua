@@ -75,10 +75,6 @@ hl.bind("ALT + F4",                         hl.dsp.window.close())
 hl.bind(mainMod .. " + ALT + R",            hl.dsp.exec_cmd("hyprctl reload"))
 
 
---- AGS ---
-hl.bind(mainMod.. " + CTRL + ALT + A",      hl.dsp.exec_cmd("$HOME/.config/ags/reloard.sh"))
-
-
 --- QuickShell ---
  
 -- Reload Shell
@@ -122,6 +118,23 @@ hl.bind("XF86MonBrightnessDown",            hl.dsp.exec_cmd("qs ipc call brightn
 hl.bind("XF86AudioRaiseVolume",             hl.dsp.exec_cmd("qs ipc call volume increase"), { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume",             hl.dsp.exec_cmd("qs ipc call volume decrease"), { locked = true, repeating = true })
 hl.bind("XF86AudioMute",                    hl.dsp.exec_cmd("qs ipc call volume toggle"),   { locked = true, repeating = true })
+
+
+
+--- AGS Binds ---
+
+-- Reload AGS
+hl.bind(mainMod .. " + CTRL + ALT + A",     hl.dsp.exec_cmd("$HOME/.config/ags/reload.sh"))
+
+-- Brightness Control (Triggers AGS OSD)
+hl.bind("XF86MonBrightnessUp",              hl.dsp.exec_cmd("brightnessctl s +5%"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown",            hl.dsp.exec_cmd("brightnessctl s 5%-"), { locked = true, repeating = true })
+
+-- Volume Control (Triggers AGS OSD)
+hl.bind("XF86AudioRaiseVolume",             hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume",             hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        { locked = true, repeating = true })
+hl.bind("XF86AudioMute",                    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),      { locked = true, repeating = true })
+
 
 
 --- Apps ---

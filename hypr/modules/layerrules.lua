@@ -12,7 +12,7 @@ hl.layer_rule({
     blur         = true,
     ignore_alpha = 0.5,
     no_anim      = true,
-    animation = "slide top",
+    animation = "slide down",
 })
 
 hl.layer_rule({
@@ -23,6 +23,11 @@ hl.layer_rule({
 hl.layer_rule({
     match = { namespace = "^quicksettings$" },
     animation = "slide right",
+})
+
+hl.layer_rule({
+    match = { namespace = "^island-panel$" },
+    animation = "popin 80%",
 })
 
 -- Waybar
