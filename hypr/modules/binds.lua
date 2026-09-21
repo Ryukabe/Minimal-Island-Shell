@@ -72,7 +72,11 @@ hl.bind("CTRL + ALT + DELETE",              hl.dsp.exec_cmd("hyprctl kill"))
 hl.bind("ALT + F4",                         hl.dsp.window.close())
 
 -- Hyperland Reload
-hl.bind(mainMod .. " + ALT + R",                   hl.dsp.exec_cmd("hyprctl reload"))
+hl.bind(mainMod .. " + ALT + R",            hl.dsp.exec_cmd("hyprctl reload"))
+
+
+--- AGS ---
+hl.bind(mainMod.. " + CTRL + ALT + A",      hl.dsp.exec_cmd("$HOME/.config/ags/reloard.sh"))
 
 
 --- QuickShell ---

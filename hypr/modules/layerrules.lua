@@ -1,10 +1,30 @@
--- Waybar
+-- Quickshell
 hl.layer_rule({
     match        = { namespace = "quickshell:island" },
     blur         = true,
     ignore_alpha = 0.5,
     no_anim      = true,
 })
+
+-- AGS
+hl.layer_rule({
+    match = { namespace = "^ags-top-bar$" },
+    blur         = true,
+    ignore_alpha = 0.5,
+    no_anim      = true,
+    animation = "slide top",
+})
+
+hl.layer_rule({
+    match = { namespace = "^dashboard$" },
+    animation = "slide left",
+})
+
+hl.layer_rule({
+    match = { namespace = "^quicksettings$" },
+    animation = "slide right",
+})
+
 -- Waybar
 hl.layer_rule({
     match        = { namespace = "waybar" },
