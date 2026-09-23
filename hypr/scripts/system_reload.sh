@@ -2,4 +2,9 @@
 
 hyprctl reload 
 
-pkill quickshell || quickshell &
+pkill quickshell &>/dev/null
+
+sleep 0.5
+
+quickshell & disown
+

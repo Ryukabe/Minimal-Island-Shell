@@ -3,7 +3,7 @@ hl.layer_rule({
     match        = { namespace = "quickshell:island" },
     blur         = true,
     ignore_alpha = 0.5,
-    no_anim      = true,
+    animation = "slide down",
 })
 
 -- AGS
@@ -11,7 +11,6 @@ hl.layer_rule({
     match = { namespace = "^ags-top-bar$" },
     blur         = true,
     ignore_alpha = 0.5,
-    no_anim      = true,
     animation = "slide down",
 })
 
@@ -27,7 +26,7 @@ hl.layer_rule({
 
 hl.layer_rule({
     match = { namespace = "^island-panel$" },
-    animation = "popin 80%",
+    animation = "slide top",
 })
 
 -- Waybar
