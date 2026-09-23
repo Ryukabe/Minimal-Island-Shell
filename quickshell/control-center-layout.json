@@ -26,7 +26,7 @@
   {
     "tileId": "brightness",
     "type": "brightness",
-    "col": 1,
+    "col": 2,
     "row": 2,
     "colSpan": 1,
     "rowSpan": 2
@@ -94,5 +94,13 @@
     "row": 0,
     "colSpan": 1,
     "rowSpan": 1
+  },
+  {
+    "tileId": "notifications",
+    "type": "notifications",
+    "col": 3,
+    "row": 3,
+    "colSpan": 3,
+    "rowSpan": 2
   }
 ]

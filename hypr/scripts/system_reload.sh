@@ -6,5 +6,5 @@ pkill quickshell &>/dev/null
 
 sleep 0.5
 
-quickshell & disown
+quickshell & 
 

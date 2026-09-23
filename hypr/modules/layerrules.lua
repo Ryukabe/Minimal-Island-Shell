@@ -29,6 +29,11 @@ hl.layer_rule({
     animation = "slide top",
 })
 
+hl.layer_rule({
+    match     = { namespace = "notification-popups" },
+    animation = "fade",
+})
+
 -- Waybar
 hl.layer_rule({
     match        = { namespace = "waybar" },

@@ -45,21 +45,6 @@ hl.bind("ALT + Tab", function() hl.dispatch(hl.dsp.window.cycle_next()) hl.dispa
 hl.bind(mainMod .. " + mouse:272",     hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273",     hl.dsp.window.resize(), { mouse = true })
 
--- Laptop Brightness & Volume (With Fn keys)
---hl.bind("XF86MonBrightnessUp",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/brightness.sh --inc"), { locked = true, repeating = true })
---hl.bind("XF86MonBrightnessDown",  hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/brightness.sh --dec"), { locked = true, repeating = true })
---hl.bind("XF86AudioRaiseVolume",   hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --inc"), { locked = true, repeating = true })
---hl.bind("XF86AudioLowerVolume",   hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --dec"),      { locked = true, repeating = true })
---hl.bind("XF86AudioMute",          hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --toggle"),     { locked = true, repeating = true })
---hl.bind("XF86AudioMicMute",       hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --toggle"),   { locked = true, repeating = true })
-
--- External Keyboard Brightness & Volume Control (With Fn keys)
---hl.bind("F3",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/brightness.sh --inc"), { locked = true, repeating = true })
---hl.bind("F2",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/brightness.sh --dec"), { locked = true, repeating = true })
---hl.bind("F8",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --inc"), { locked = true, repeating = true })
---hl.bind("F7",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --dec"),      { locked = true, repeating = true })
---hl.bind("F6",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --toggle"),     { locked = true, repeating = true })
---hl.bind("F4",    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/volume_wpctl.sh --toggle"),   { locked = true, repeating = true })
 
 -- Media
 -- Media
@@ -102,7 +87,7 @@ hl.bind(mainMod .. " + N ",                 hl.dsp.exec_cmd("qs ipc call notific
 hl.bind(mainMod .. " + Escape ",            hl.dsp.exec_cmd("qs ipc call power toggle"))
 
 -- Lock Screen
-hl.bind("SUPER + L",                        hl.dsp.exec_cmd("quickshell ipc call lock lock"))
+hl.bind( mainMod.." + L",                        hl.dsp.exec_cmd("quickshell ipc call lock lock"))
 
 -- Theme Switcher
 hl.bind(mainMod .. " + T ",                 hl.dsp.exec_cmd("qs ipc call themeswitcher toggle"))
@@ -123,17 +108,13 @@ hl.bind("XF86AudioMute",                    hl.dsp.exec_cmd("qs ipc call volume 
 
 --- AGS Binds ---
 
+-- Launch AGS
+hl.bind(mainMod .. " + CTRL + ALT + A",     hl.dsp.exec_cmd("$HOME/.config/ags/ags-launch-kill.sh"))
+
 -- Reload AGS
-hl.bind(mainMod .. " + CTRL + ALT + A",     hl.dsp.exec_cmd("$HOME/.config/ags/reload.sh"))
+hl.bind(mainMod .. " + CTRL + ALT + R",     hl.dsp.exec_cmd("$HOME/.config/ags/reload.sh"))
 
--- Brightness Control (Triggers AGS OSD)
-hl.bind("XF86MonBrightnessUp",              hl.dsp.exec_cmd("brightnessctl s +5%"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",            hl.dsp.exec_cmd("brightnessctl s 5%-"), { locked = true, repeating = true })
 
--- Volume Control (Triggers AGS OSD)
-hl.bind("XF86AudioRaiseVolume",             hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume",             hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        { locked = true, repeating = true })
-hl.bind("XF86AudioMute",                    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),      { locked = true, repeating = true })
 
 
 
