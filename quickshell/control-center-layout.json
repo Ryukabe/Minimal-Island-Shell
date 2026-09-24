@@ -19,17 +19,17 @@
     "tileId": "lightmode",
     "type": "lightmode",
     "col": 2,
-    "row": 1,
+    "row": 0,
     "colSpan": 1,
-    "rowSpan": 1
+    "rowSpan": 2
   },
   {
     "tileId": "brightness",
     "type": "brightness",
-    "col": 2,
+    "col": 3,
     "row": 2,
     "colSpan": 1,
-    "rowSpan": 2
+    "rowSpan": 3
   },
   {
     "tileId": "volume",
@@ -37,14 +37,14 @@
     "col": 0,
     "row": 2,
     "colSpan": 1,
-    "rowSpan": 2
+    "rowSpan": 3
   },
   {
     "tileId": "nightlight",
     "type": "nightlight",
-    "col": 2,
-    "row": 0,
-    "colSpan": 1,
+    "col": 1,
+    "row": 2,
+    "colSpan": 2,
     "rowSpan": 1
   },
   {
@@ -53,21 +53,21 @@
     "col": 5,
     "row": 0,
     "colSpan": 1,
-    "rowSpan": 1
+    "rowSpan": 2
   },
   {
     "tileId": "powerprofile",
     "type": "powerprofile",
-    "col": 1,
-    "row": 1,
-    "colSpan": 1,
+    "col": 4,
+    "row": 3,
+    "colSpan": 2,
     "rowSpan": 1
   },
   {
     "tileId": "media",
     "type": "media",
-    "col": 3,
-    "row": 1,
+    "col": 1,
+    "row": 3,
     "colSpan": 2,
     "rowSpan": 2
   },
@@ -77,30 +77,22 @@
     "col": 1,
     "row": 0,
     "colSpan": 1,
-    "rowSpan": 1
+    "rowSpan": 2
   },
   {
     "tileId": "focus",
     "type": "focus",
     "col": 3,
     "row": 0,
-    "colSpan": 1,
-    "rowSpan": 1
+    "colSpan": 2,
+    "rowSpan": 2
   },
   {
     "tileId": "airplane",
     "type": "airplane",
     "col": 4,
-    "row": 0,
-    "colSpan": 1,
+    "row": 2,
+    "colSpan": 2,
     "rowSpan": 1
-  },
-  {
-    "tileId": "notifications",
-    "type": "notifications",
-    "col": 3,
-    "row": 3,
-    "colSpan": 3,
-    "rowSpan": 2
   }
 ]

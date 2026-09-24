@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
+import "../../services"
 import "../common"
 import "../../components/control-center"
 

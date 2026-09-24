@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import "../../services"
 import "../../styles"
 
@@ -12,12 +13,20 @@ Rectangle {
     property color iconColor: Colors.fg
     property bool active: false
     property bool external: false
-    property bool compact: false
+    property bool compact: false   // legacy: kept so existing tile files still compile, ignored now
     property bool hasSubview: false
-    property int signalBars: -1 
+    property int signalBars: -1
 
     signal toggled()
     signal subviewRequested()
+
+    // Layout is chosen by the tile's SHAPE, never by its text, so every tile
+    // of the same size looks the same. Wider than roomyAspect x its height gets
+    // the icon-left layout, everything else gets the compact one.
+    readonly property real roomyAspect: 1.6
+    readonly property bool roomy: width >= height * roomyAspect
+    readonly property Item _content: roomy ? fullRow : compactContent
+    readonly property real _hitPad: Dimens.spacingSmall
 
     implicitWidth: compact ? 76 : 160
     radius: ShellState.islandCornerRadius
@@ -25,7 +34,7 @@ Rectangle {
     border.width: 1
     border.color: Colors.border
 
-    Behavior on color { ColorAnimation { duration: 150 } }
+    Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
 
     MouseArea {
         anchors.fill: parent
@@ -37,18 +46,20 @@ Rectangle {
         }
     }
 
-    // ---- Compact layout ----
+    // ---- Compact layout: icon + short name, bottom-left ----
     Column {
         id: compactContent
-        visible: tile.compact
+        visible: !tile.roomy
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.margins: 10
-        spacing: 6
+        anchors.margins: Dimens.paddingMedium
+        width: tile.width - Dimens.paddingMedium * 2
+        spacing: Dimens.spacingSmall
 
         Item {
+            id: iconBox
             width: Math.max(iconText.implicitWidth, barsRow.implicitWidth)
-            height: 22
+            height: iconText.implicitHeight
 
             Text {
                 id: iconText
@@ -74,8 +85,8 @@ Rectangle {
                     model: 4
                     delegate: Rectangle {
                         required property int index
-                        width: 3
-                        height: 6 + index * 4
+                        width: Math.max(2, Math.round(iconBox.height / 7))
+                        height: iconBox.height * (0.3 + index * 0.2)
                         radius: ShellState.islandCornerRadius
                         anchors.bottom: parent.bottom
                         color: index < tile.signalBars
@@ -92,28 +103,20 @@ Rectangle {
             font.pixelSize: Dimens.fontSizeXSm
             color: Colors.fgMuted
             elide: Text.ElideRight
-            width: tile.width - 20
+            width: compactContent.width
         }
     }
 
-    MouseArea {
-        visible: tile.compact
-        enabled: tile.hasSubview
-        x: compactContent.x - 6
-        y: compactContent.y - 6
-        width: compactContent.width + 12
-        height: compactContent.height + 12
-        onClicked: tile.subviewRequested()
-    }
-
-    // ---- Full layout ----
-    Row {
-        id: fullContent
-        visible: !tile.compact
+    // ---- Full layout: icon left, title + subtitle right ----
+    RowLayout {
+        id: fullRow
+        visible: tile.roomy
         anchors.left: parent.left
+        anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: 14
-        spacing: 10
+        anchors.leftMargin: Dimens.paddingMedium
+        anchors.rightMargin: Dimens.paddingMedium
+        spacing: Dimens.spacingSmall
 
         Text {
             text: tile.iconGlyph
@@ -122,12 +125,13 @@ Rectangle {
             font.variableAxes: Fonts.iconAxes
             font.features: { "liga": 1, "dlig": 1 }
             color: tile.active ? Colors.accent : Colors.fg
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
         }
 
-        Column {
-            spacing: 1
-            anchors.verticalCenter: parent.verticalCenter
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 0
 
             Text {
                 text: tile.title
@@ -135,25 +139,30 @@ Rectangle {
                 font.pixelSize: Dimens.fontSizeSm
                 font.bold: true
                 color: Colors.fg
+                elide: Text.ElideRight
+                Layout.fillWidth: true
             }
 
             Text {
                 text: tile.subtitle
+                visible: text !== ""
+                font.family: Fonts.text
                 font.pixelSize: Dimens.fontSizeXSm
                 color: tile.active ? Colors.accent : Colors.fgMuted
                 elide: Text.ElideRight
-                width: Math.min(implicitWidth, tile.width - 60)
+                Layout.fillWidth: true
             }
         }
     }
 
+    // Separate tap target for opening the subview
     MouseArea {
-        visible: !tile.compact
+        visible: tile.hasSubview
         enabled: tile.hasSubview
-        x: fullContent.x - 6
-        y: fullContent.y - 6
-        width: fullContent.width + 12
-        height: fullContent.height + 12
+        x: tile._content.x - tile._hitPad
+        y: tile._content.y - tile._hitPad
+        width: tile._content.width + tile._hitPad * 2
+        height: tile._content.height + tile._hitPad * 2
         onClicked: tile.subviewRequested()
     }
 
@@ -165,6 +174,6 @@ Rectangle {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: 8
-        Behavior on color { ColorAnimation { duration: 150 } }
+        Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
     }
 }

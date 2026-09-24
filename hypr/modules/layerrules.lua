@@ -24,6 +24,11 @@ hl.layer_rule({
     animation = "slide right",
 })
 
+hl.layer_rule({ 
+    match = { namespace = "^ags-polkit$" }, 
+    animation = "popin 80%",
+})
+
 hl.layer_rule({
     match = { namespace = "^island-panel$" },
     animation = "slide top",

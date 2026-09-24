@@ -9,6 +9,7 @@ gtk-3.0/
 gtk-4.0/
 htop/
 HyprDF/
+hypr.bak/
 kdeconnect/
 matugen/
 mozilla/
@@ -31,14 +32,18 @@ yay/
 zen/
 ristretto/
 
+
 # Files
+baloofileinformationrc
 dolphinrc
 gtkrc-2.0
+kactivitymanagerdrc
 mimeapps.list
+QtProject.conf
 user-dirs.dirs
 user-dirs.locale
 pavucontrol.ini
-QtProject.conf
+
 
 #zsh
 zsh/ohmyzsh

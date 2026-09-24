@@ -14,3 +14,4 @@ BrightnessToggleTile 1.0 BrightnessToggleTile.qml
 VolumeToggleTile 1.0 VolumeToggleTile.qml
 MediaToggleTile 1.0 MediaToggleTile.qml
 NotificationToggleTile 1.0 NotificationToggleTile.qml
+SliderTile 1.0 SliderTile.qml

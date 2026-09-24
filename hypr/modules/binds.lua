@@ -1,160 +1,17 @@
-local mainMod = "SUPER"
--- === Capture submap (used by Settings > Keybinds while rebinding) ===
--- While active, NO bind outside this submap can fire — this is what lets
--- you rebind a combo that's already in use without triggering the old
--- action. Escape is the safety-valve bind so you're never stuck if
--- Quickshell crashes/closes mid-capture without resetting it.
-hl.define_submap("capture", function()
-    hl.bind("Escape", hl.dsp.submap("reset"))
-end)
+local home  = os.getenv("HOME")
+local shell = "qs"
 
-
---- System ---
-
--- System Reload
-hl.bind(mainMod .. " + CTRL + ALT + RETURN", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/system_reload.sh"))
-
--- Window management
-hl.bind(mainMod .. " + SHIFT + F",            hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + SHIFT + P",            hl.dsp.window.pseudo())
-
--- Focus
-hl.bind(mainMod .. " + left",                 hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right",                hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up",                   hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + down",                 hl.dsp.focus({ direction = "down" }))
-
--- To this (or whatever key you prefer):
-hl.bind(mainMod .. " + ALT + K", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/changeLayout3.sh"))
-
--- Workspaces
-for i = 1, 10 do
-    local key = i % 10
-    hl.bind(mainMod .. " + " .. key,          hl.dsp.focus({ workspace = i }))
-    hl.bind(mainMod .. " + SHIFT + " .. key,  hl.dsp.window.move({ workspace = i }))
+local f = io.open(home .. "/.config/hypr/.active-shell")
+if f then
+    if f:read("l") == "ags" then shell = "ags" end
+    f:close()
 end
 
--- Window Switcher
-hl.bind("ALT + Tab", function() hl.dispatch(hl.dsp.window.cycle_next()) hl.dispatch(hl.dsp.window.bring_to_top()) end)
+-- Force every bind file to re-run on reload
+package.loaded["modules.binds.mainmod"] = nil
 
--- Scroll through workspaces
---hl.bind(mainMod .. " + mouse_down",    hl.dsp.focus({ workspace = "e+1" }))
---hl.bind(mainMod .. " + mouse_up",      hl.dsp.focus({ workspace = "e-1" }))
-
--- Move/resize with mouse
-hl.bind(mainMod .. " + mouse:272",     hl.dsp.window.drag(),   { mouse = true })
-hl.bind(mainMod .. " + mouse:273",     hl.dsp.window.resize(), { mouse = true })
-
-
--- Media
--- Media
-hl.bind("XF86AudioNext",                    hl.dsp.exec_cmd("playerctl next"),       { locked = true })
-hl.bind("XF86AudioPlay",                    hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPrev",                    hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
-
--- Kill & Close Apps
-hl.bind("CTRL + ALT + DELETE",              hl.dsp.exec_cmd("hyprctl kill"))
-hl.bind("ALT + F4",                         hl.dsp.window.close())
-
--- Hyperland Reload
-hl.bind(mainMod .. " + ALT + R",            hl.dsp.exec_cmd("hyprctl reload"))
-
-
---- QuickShell ---
- 
--- Reload Shell
-hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd(" pkill quickshell || quickshell "))
-
--- Settings
-hl.bind(mainMod .. " + COMMA ",             hl.dsp.exec_cmd("qs ipc call settings toggle"))--, { locked = true })
-
--- Workspaces Switcer
-hl.bind(mainMod .. " + TAB ",               hl.dsp.exec_cmd("qs ipc call workspaces toggle"))
-
--- App Launcher
-hl.bind(mainMod .. " + Space ",             hl.dsp.exec_cmd("qs ipc call launcher toggle"), { locked = true })
-
--- Clipboard
-hl.bind( mainMod .. " + V ",                hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
-
--- Control Panel / Quick Settings
-hl.bind( mainMod .. " + A ",                hl.dsp.exec_cmd("qs ipc call controlcenter toggle"))
-
--- Notification Center
-hl.bind(mainMod .. " + N ",                 hl.dsp.exec_cmd("qs ipc call notificationcenter toggle"))
-
--- Power Menu
-hl.bind(mainMod .. " + Escape ",            hl.dsp.exec_cmd("qs ipc call power toggle"))
-
--- Lock Screen
-hl.bind( mainMod.." + L",                        hl.dsp.exec_cmd("quickshell ipc call lock lock"))
-
--- Theme Switcher
-hl.bind(mainMod .. " + T ",                 hl.dsp.exec_cmd("qs ipc call themeswitcher toggle"))
-
--- Wallpaper Switcher
-hl.bind(mainMod .. " + W ",                 hl.dsp.exec_cmd("qs ipc call wallpaper toggle"))
-
--- Brightness Control
-hl.bind("XF86MonBrightnessUp",              hl.dsp.exec_cmd("qs ipc call brightness increase"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",            hl.dsp.exec_cmd("qs ipc call brightness decrease"), { locked = true, repeating = true })
-
--- Volume Control
-hl.bind("XF86AudioRaiseVolume",             hl.dsp.exec_cmd("qs ipc call volume increase"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume",             hl.dsp.exec_cmd("qs ipc call volume decrease"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute",                    hl.dsp.exec_cmd("qs ipc call volume toggle"),   { locked = true, repeating = true })
-
-
-
---- AGS Binds ---
-
--- Launch AGS
-hl.bind(mainMod .. " + CTRL + ALT + A",     hl.dsp.exec_cmd("$HOME/.config/ags/ags-launch-kill.sh"))
-
--- Reload AGS
-hl.bind(mainMod .. " + CTRL + ALT + R",     hl.dsp.exec_cmd("$HOME/.config/ags/reload.sh"))
-
-
-
-
-
---- Apps ---
-
---Terminal
-hl.bind(mainMod .. " + RETURN",             hl.dsp.exec_cmd("kitty"))
-hl.bind(mainMod .. " + ALT + RETURN",     hl.dsp.exec_cmd("alacritty"))
-
---File Manager
-hl.bind(mainMod .. " + F",                  hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + ALT + F",            hl.dsp.exec_cmd("thunar"))
-
---Browser
-hl.bind(mainMod .. " + B",                  hl.dsp.exec_cmd("zen-browser"))
-hl.bind(mainMod .. " + ALT + B",            hl.dsp.exec_cmd("helium-browser"))
---hl.bind(mainMod .. " + ALT + SHIFT + B",      hl.dsp.exec_cmd("brave"))
-
---Editor
-hl.bind(mainMod .. " + E",                  hl.dsp.exec_cmd("code"))
---hl.bind(mainMod .. " + ALT + E",          hl.dsp.exec_cmd("coddium"))
-
---Note App
-hl.bind(mainMod .. " + O",                  hl.dsp.exec_cmd("obsidian"))
-
---Music Streaming
-hl.bind(mainMod .. " + S",                  hl.dsp.exec_cmd("spotify"))
-
--- Look & Powermenu
-hl.bind(mainMod .. " + F4",                 hl.dsp.exec_cmd("$HOME/.config/wlogout/scripts/wlogout.sh")) --For powermenu
-hl.bind("SHIFT + ALT + L",                  hl.dsp.exec_cmd("hyprlock -c $HOME/.config/hypr/hyprlock/hyprlock.conf")) --To lock
-
--- Clipboard 
---hl.bind(mainMod .. " + V",                  hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/clipboard-toggle.sh"))
-hl.bind(mainMod .. " + SHIFT + V",          hl.dsp.exec_cmd("cliphist wipe")) -- to clear clipboard
-
--- Screenshots
-hl.bind(mainMod .. " + Print",              hl.dsp.exec_cmd("hyprshot -m output -m eDP-1 -o $HOME/Pictures/Screenshot"))
-hl.bind(mainMod .. " + SHIFT + Print",      hl.dsp.exec_cmd("hyprshot -m region -o $HOME/Pictures/Screenshot"))
-
--- Color Picker
-hl.bind(mainMod .. " + P",                  hl.dsp.exec_cmd("hyprpicker -a -f hex"))
-
+for _, name in ipairs({ "submaps", "common", shell, "custom" }) do
+    local mod = "modules.binds." .. name
+    package.loaded[mod] = nil
+    require(mod)
+end

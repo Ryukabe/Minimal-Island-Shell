@@ -7,11 +7,14 @@ import Quickshell.Io
 Item {
     id: root
 
-    readonly property string bindsPath: "~/.config/hypr/modules/binds.lua"
+    readonly property string bindsDir: "~/.config/hypr/modules/binds/"
     readonly property string labelsPath: "~/.config/quickshell/keybind-labels.json"
-    readonly property string customMarker: "-- === Custom binds (added via Settings) ==="
+    readonly property string mainModFile: "mainmod.lua"
+    readonly property string customFile: "custom.lua"
+    // Files shown in Settings. ags.lua is deliberately not listed.
+    readonly property var bindFiles: ["common.lua", "qs.lua", "custom.lua"]
 
-    property string rawText: ""
+    property var fileTexts: ({})
     property var binds: []
     property var conflictCounts: ({})
     property var labelOverrides: ({})
@@ -25,10 +28,19 @@ Item {
 
     Process {
         id: readProc
-        command: ["sh", "-c", "cat " + root.bindsPath]
+        command: ["sh", "-c",
+            "cd " + root.bindsDir + " && for f in " + root.mainModFile + " " +
+            root.bindFiles.join(" ") +
+            "; do printf '\\n@@FILE %s\\n' \"$f\"; cat \"$f\" 2>/dev/null; done"]
         stdout: StdioCollector {
             onStreamFinished: {
-                root.rawText = text
+                let map = {}
+                for (let chunk of text.split("\n@@FILE ").slice(1)) {
+                    let nl = chunk.indexOf("\n")
+                    if (nl === -1) continue
+                    map[chunk.substring(0, nl)] = chunk.substring(nl + 1)
+                }
+                root.fileTexts = map
                 root._parse()
                 root.loaded = true
             }
@@ -50,8 +62,15 @@ Item {
         }
     }
 
-    Process { id: reloadProc }
-    Process { id: writeProc }
+    // Reload Hyprland only after the file write has finished
+    Process {
+        id: reloadProc
+        command: ["hyprctl", "reload"]
+    }
+    Process {
+        id: writeProc
+        onExited: reloadProc.running = true
+    }
 
     Process {
         id: writeLabelsProc
@@ -67,9 +86,7 @@ Item {
 
     function setMainMod(newMod) {
         if (root.mainMod === newMod) return
-        let t = root.rawText
-        let updatedText = t.replace(/local\s+mainMod\s*=\s*"[^"]*"/, 'local mainMod = "' + newMod + '"')
-        root._write(updatedText)
+        root._write(root.mainModFile, 'return "' + newMod + '"\n')
     }
 
     function _categorizeBind(action) {
@@ -82,13 +99,31 @@ Item {
         return "Hyprland"
     }
 
+    // The two shell-switch binds are listed first in the menu
+    function _isShellBind(action) {
+        return /switch-shell\.sh/.test(action)
+    }
+
     function _parse() {
-        let t = root.rawText
-        let mm = t.match(/local\s+mainMod\s*=\s*"([^"]*)"/)
+        let mm = (root.fileTexts[root.mainModFile] || "").match(/return\s*"([^"]*)"/)
         root.mainMod = mm ? mm[1] : "SUPER"
 
         let results = []
-        let i = 0, id = 0
+        for (let name of root.bindFiles)
+            root._parseFile(name, root.fileTexts[name] || "", results)
+
+        // Shell-switch binds first, everything else keeps its order
+        let shellBinds = results.filter(b => root._isShellBind(b.actionFull))
+        let otherBinds = results.filter(b => !root._isShellBind(b.actionFull))
+        results = shellBinds.concat(otherBinds)
+        results.forEach((b, idx) => { b.id = idx })
+
+        root.binds = results
+        root._buildConflicts()
+    }
+
+    function _parseFile(fileName, t, results) {
+        let i = 0
 
         while (true) {
             let callStart = t.indexOf("hl.bind(", i)
@@ -134,14 +169,15 @@ Item {
             let actionPreview = actionFull.length > 70 ? actionFull.substring(0, 70) + "…" : actionFull
 
             results.push({
-                id: id++,
+                id: results.length,
+                file: fileName,
                 keyRaw: keyRaw,
                 keyDisplay: root._resolveKeyDisplay(keyRaw),
                 actionPreview: actionPreview,
                 actionFull: actionFull,
                 actionKey: actionFull,
                 category: root._categorizeBind(actionFull),
-                isCustom: false,
+                isCustom: fileName === root.customFile,
                 isMultiline: fullCall.indexOf("\n") !== -1,
                 keyStart: keyStart,
                 keyEnd: keyExprEnd,
@@ -151,14 +187,6 @@ Item {
 
             i = callEnd + 1
         }
-
-        let markerPos = t.indexOf(root.customMarker)
-        if (markerPos !== -1) {
-            for (let r of results) r.isCustom = r.callStart > markerPos
-        }
-
-        root.binds = results
-        root._buildConflicts()
     }
 
     function _resolveKeyDisplay(keyRaw) {
@@ -265,6 +293,9 @@ Item {
         if (/qs ipc call volume toggle/.test(action)) return "Mute Toggle"
         if (/quickshell ipc call lock/.test(action)) return "Lock Screen"
 
+        if (/switch-shell\.sh qs/.test(action)) return "Shell: Toggle Quickshell"
+        if (/switch-shell\.sh ags/.test(action)) return "Shell: Toggle AGS"
+
         if (/playerctl next/.test(action)) return "Next Track"
         if (/playerctl previous/.test(action)) return "Previous Track"
         if (/playerctl play-pause/.test(action)) return "Play / Pause"
@@ -310,62 +341,56 @@ Item {
     function rebindKey(bindId, newKeyDisplay) {
         let b = root.binds.find(x => x.id === bindId)
         if (!b) return false
-        let t = root.rawText
+        let t = root.fileTexts[b.file] || ""
         let replacement = "\"" + newKeyDisplay.replace(/"/g, '\\"') + "\""
-        root._write(t.substring(0, b.keyStart) + replacement + t.substring(b.keyEnd))
+        root._write(b.file, t.substring(0, b.keyStart) + replacement + t.substring(b.keyEnd))
         return true
     }
 
     function flattenBind(bindId) {
         let b = root.binds.find(x => x.id === bindId)
         if (!b) return false
-        let t = root.rawText
+        let t = root.fileTexts[b.file] || ""
         let call = t.substring(b.callStart, b.callEnd)
         let flat = call.replace(/\s*\n\s*/g, " ").replace(/\s+/g, " ")
-        root._write(t.substring(0, b.callStart) + flat + t.substring(b.callEnd))
+        root._write(b.file, t.substring(0, b.callStart) + flat + t.substring(b.callEnd))
         return true
     }
 
     function addExecBind(newKeyDisplay, command) {
-        let t = root.rawText
+        let t = root.fileTexts[root.customFile] || ""
         let keyLit = "\"" + newKeyDisplay.replace(/"/g, '\\"') + "\""
         let cmdLit = command.replace(/"/g, '\\"')
         let line = "hl.bind(" + keyLit + ", hl.dsp.exec_cmd(\"" + cmdLit + "\"))"
 
-        if (t.indexOf(root.customMarker) === -1) {
-            t = t.replace(/\s*$/, "") + "\n\n" + root.customMarker + "\n" + line + "\n"
-        } else {
-            t = t.replace(/\s*$/, "") + "\n" + line + "\n"
-        }
-        root._write(t)
+        t = t.replace(/\s*$/, "") + "\n" + line + "\n"
+        root._write(root.customFile, t)
     }
 
     function removeCustomBind(bindId) {
         let b = root.binds.find(x => x.id === bindId)
         if (!b || !b.isCustom) return false
-        let t = root.rawText
+        let t = root.fileTexts[b.file] || ""
         let lineStart = t.lastIndexOf("\n", b.callStart) + 1
         let lineEnd = t.indexOf("\n", b.callEnd)
-        root._write(t.substring(0, lineStart) + t.substring(lineEnd === -1 ? t.length : lineEnd + 1))
+        root._write(b.file, t.substring(0, lineStart) + t.substring(lineEnd === -1 ? t.length : lineEnd + 1))
         return true
     }
 
-    function _write(newText) {
+    function _write(fileName, newText) {
         let marker = "QS_BINDS_EOF_" + Date.now()
         writeProc.command = ["sh", "-c",
-            "cat > " + root.bindsPath + " << '" + marker + "'\n" + newText + "\n" + marker]
+            "cat > " + root.bindsDir + fileName + " << '" + marker + "'\n" + newText + "\n" + marker]
         writeProc.running = true
-        reloadProc.command = ["hyprctl", "reload"]
-        reloadProc.running = true
-        root.rawText = newText
+
+        let t = Object.assign({}, root.fileTexts)
+        t[fileName] = newText
+        root.fileTexts = t
         root._parse()
     }
 
-    // NOTE: the "capture" submap used by KeyCaptureField.qml (for
-    // suppressing all other binds while rebinding) is declared statically
-    // in binds.lua via hl.define_submap("capture", ...) — it must exist
-    // there with at least one real bind inside it, or Hyprland refuses to
-    // switch into it ("submap doesn't exist / wasn't registered"). Nothing
-    // needs to register it at runtime from here.
+    // NOTE: the "capture" submap used by KeyCaptureField.qml is declared in
+    // modules/binds/submaps.lua. It must keep at least one real bind inside it,
+    // or Hyprland refuses to switch into it.
     Component.onCompleted: refresh()
 }

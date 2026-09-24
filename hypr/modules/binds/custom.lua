@@ -1,0 +1,1 @@
+-- Binds added from the Quickshell Settings menu are written below.
