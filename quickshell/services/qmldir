@@ -27,3 +27,5 @@ singleton MonitorSettingsService 1.0 MonitorSettingsService.qml
 singleton HyprlandDecorationService 1.0 HyprlandDecorationService.qml
 singleton AutostartService 1.0 AutostartService.qml
 singleton ControlCenterLayoutService 1.0 ControlCenterLayoutService.qml
+singleton LauncherSettings 1.0 LauncherSettings.qml
+singleton CalculatorService 1.0 CalculatorService.qml

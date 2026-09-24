@@ -8,6 +8,7 @@ Singleton {
     id: root
 
     property var history: []
+    property var allHistory: []
     property var filteredHistory: []
     property string searchQuery: ""
 
@@ -67,8 +68,8 @@ Singleton {
                         })
                     }
                 }
-                root.history = items
-                root.filterHistory()
+                  root.allHistory = items
+                  root.applyLimit()
             }
         }
     }
@@ -83,11 +84,22 @@ Singleton {
         id: clearProc
         command: ["cliphist", "wipe"]
         onExited: {
+            root.allHistory = []
             root.history = []
             root.filteredHistory = []
             root.searchQuery = ""
             refreshHistory()
         }
+    }
+
+    function applyLimit() {
+          history = allHistory.slice(0, LauncherSettings.clipboardLimit)
+          filterHistory()
+    }
+
+    Connections {
+          target: LauncherSettings
+          function onClipboardLimitChanged() { root.applyLimit() }
     }
 
     function refreshHistory() {

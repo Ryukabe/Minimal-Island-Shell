@@ -1,0 +1,15 @@
+{
+  "maxResults": 8,
+  "matchMode": "Fuzzy",
+  "searchDescriptions": true,
+  "showRecentsFirst": true,
+  "recentLimit": 10,
+  "recentIds": [],
+  "showIcons": true,
+  "animateResults": true,
+  "launcherWidth": "Normal",
+  "shrinkForFewResults": true,
+  "inlineCalculator": true,
+  "clipboardHistory": true,
+  "clipboardLimit": 100
+}

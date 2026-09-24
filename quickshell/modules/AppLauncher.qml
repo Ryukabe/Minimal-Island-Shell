@@ -12,8 +12,9 @@ Item {
 
     readonly property int rowHeight: 54
     readonly property int maxVisibleRows: ShellState.launcherMaxRows
-    readonly property int maxWidth: ShellState.launcherWidth
-    readonly property int chromeHeight: 76 
+    readonly property int maxWidth: Math.round(ShellState.launcherWidth * LauncherSettings.widthScale)
+    readonly property int minWidth: Math.round(maxWidth * 0.72)
+    readonly property int chromeHeight: 76
 
     // AppLauncher fills the island directly (no settings-window layer in
     // between), so its containers derive straight off the master with
@@ -21,10 +22,30 @@ Item {
     readonly property real _outerRadius: ShellState.islandCornerRadius
 
     property string query: ""
-    property var results: AppLauncherService.filteredApps(query)
+        property var results: buildResults(query)
+
+    // Calculator result (if the query is a calculation) goes on top of the app list.
+    function buildResults(q) {
+        var apps = AppLauncherService.filteredApps(q)
+        var calc = LauncherSettings.inlineCalculator ? CalculatorService.evaluate(q) : null
+        if (!calc) return apps
+        return [{
+            kind: "calc",
+            name: "= " + calc.text,
+            comment: q.trim() + "  ·  Enter to copy",
+            value: calc.text
+        }].concat(apps)
+    }
+
+    function activate(item) {
+        if (!item) return
+        if (item.kind === "calc") CalculatorService.copy(item.value)
+        else AppLauncherService.launch(item)
+        ShellState.showPage("clock")
+    }
     property int selectedIndex: 0
 
-    implicitWidth: maxWidth
+    implicitWidth: (LauncherSettings.shrinkForFewResults && results.length <= 1) ? minWidth : maxWidth
     implicitHeight: Math.min(
         chromeHeight + Math.max(results.length, 1) * rowHeight,
         chromeHeight + maxVisibleRows * rowHeight
@@ -32,7 +53,7 @@ Item {
 
     onQueryChanged: {
         selectedIndex = 0
-        if (query.startsWith(":")) {
+        if (LauncherSettings.clipboardHistory && query.startsWith(":")) {
             ClipboardService.searchQuery = query.substring(1)
             ShellState.showPage("clipboard")
         }
@@ -118,10 +139,7 @@ Item {
                             appList.positionViewAtIndex(root.selectedIndex, ListView.Contain)
                             event.accepted = true
                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            if (root.results.length > 0) {
-                                AppLauncherService.launch(root.results[root.selectedIndex])
-                                ShellState.showPage("clock")
-                            }
+                            root.activate(root.results[root.selectedIndex])
                             event.accepted = true
                         }
                     }
@@ -166,6 +184,15 @@ Item {
 
             scale: delegateRoot.index === root.selectedIndex ? 1.015 : 1.0
 
+            // Fade-in when a row is created (runs on every filter change too)
+            readonly property bool fadeEnabled: LauncherSettings.animateResults && !ShellState.motionReduced
+            opacity: fadeEnabled ? 0 : 1
+            Behavior on opacity {
+                enabled: delegateRoot.fadeEnabled
+                NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+            }
+            Component.onCompleted: delegateRoot.opacity = 1
+
             // Row selection is snap tier — small, frequent, must not lag key repeats
             SpringAnimation {
                 id: selectSpringAnim
@@ -193,6 +220,7 @@ Item {
                     width: 32
                     height: 32
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: LauncherSettings.showIcons
 
                     Image {
                         id: appIcon
@@ -223,13 +251,23 @@ Item {
                             font.weight: Font.Bold
                             color: Colors.fg
                         }
+                                                Text {
+                            anchors.centerIn: parent
+                            visible: delegateRoot.modelData.kind === "calc"
+                            text: "calculate"
+                            font.family: Fonts.icon
+                            font.pixelSize: Dimens.fontSizeLg
+                            font.variableAxes: Fonts.iconAxes
+                            font.features: { "liga": 1, "dlig": 1 }
+                            color: Colors.accent
+                        }
                     }
                 }
 
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 1
-                    width: parent.width - 44
+                    width: parent.width - (LauncherSettings.showIcons ? 44 : 0)
 
                     Text {
                         text: delegateRoot.modelData.name
@@ -257,10 +295,7 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 onEntered: root.selectedIndex = delegateRoot.index
-                onClicked: {
-                    AppLauncherService.launch(delegateRoot.modelData)
-                    ShellState.showPage("clock")
-                }
+                onClicked: root.activate(delegateRoot.modelData)
             }
         }
     }

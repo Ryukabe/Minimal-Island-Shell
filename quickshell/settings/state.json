@@ -31,11 +31,11 @@
   "motionBouncePercent": 25,
   "clockUse24Hour": false,
   "clockShowSeconds": false,
-  "clockLeadingZero": true,
+  "clockLeadingZero": false,
   "clockLowercaseAmPm": false,
   "clockDateStyle": 0,
-  "clockShowVisualizer": true,
-  "clockShowTimerIcon": true,
+  "clockShowVisualizer": false,
+  "clockShowTimerIcon": false,
   "clockShowRecordingIndicator": true,
   "timerToastShowRecordingIndicator": false
 }
