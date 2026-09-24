@@ -10,15 +10,7 @@
   {
     "tileId": "recording",
     "type": "recording",
-    "col": 0,
-    "row": 1,
-    "colSpan": 1,
-    "rowSpan": 1
-  },
-  {
-    "tileId": "lightmode",
-    "type": "lightmode",
-    "col": 2,
+    "col": 1,
     "row": 0,
     "colSpan": 1,
     "rowSpan": 2
@@ -26,73 +18,57 @@
   {
     "tileId": "brightness",
     "type": "brightness",
-    "col": 3,
-    "row": 2,
+    "col": 5,
+    "row": 0,
     "colSpan": 1,
-    "rowSpan": 3
+    "rowSpan": 4
   },
   {
     "tileId": "volume",
     "type": "volume",
-    "col": 0,
-    "row": 2,
+    "col": 4,
+    "row": 0,
     "colSpan": 1,
-    "rowSpan": 3
+    "rowSpan": 4
   },
   {
     "tileId": "nightlight",
     "type": "nightlight",
-    "col": 1,
-    "row": 2,
-    "colSpan": 2,
+    "col": 0,
+    "row": 1,
+    "colSpan": 1,
     "rowSpan": 1
   },
   {
     "tileId": "caffeine",
     "type": "caffeine",
-    "col": 5,
+    "col": 2,
     "row": 0,
     "colSpan": 1,
-    "rowSpan": 2
-  },
-  {
-    "tileId": "powerprofile",
-    "type": "powerprofile",
-    "col": 4,
-    "row": 3,
-    "colSpan": 2,
     "rowSpan": 1
   },
   {
     "tileId": "media",
     "type": "media",
-    "col": 1,
-    "row": 3,
-    "colSpan": 2,
-    "rowSpan": 2
-  },
-  {
-    "tileId": "bluetooth",
-    "type": "bluetooth",
-    "col": 1,
-    "row": 0,
-    "colSpan": 1,
+    "col": 0,
+    "row": 2,
+    "colSpan": 4,
     "rowSpan": 2
   },
   {
     "tileId": "focus",
     "type": "focus",
-    "col": 3,
-    "row": 0,
+    "col": 2,
+    "row": 1,
     "colSpan": 2,
-    "rowSpan": 2
+    "rowSpan": 1
   },
   {
-    "tileId": "airplane",
-    "type": "airplane",
-    "col": 4,
-    "row": 2,
-    "colSpan": 2,
+    "tileId": "lightmode",
+    "type": "lightmode",
+    "col": 3,
+    "row": 0,
+    "colSpan": 1,
     "rowSpan": 1
   }
 ]

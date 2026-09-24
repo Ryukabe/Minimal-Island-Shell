@@ -86,11 +86,30 @@ Item {
             }
         }
 
-        ControlGrid {
-            id: grid
-            Layout.fillWidth: true
-            Layout.preferredHeight: implicitHeight
-            editMode: true
+        // Preview panel: same size and padding as the real Control Center popup
+        // (popup is 580 px wide around a 548 px grid, so 16 px padding).
+        Rectangle {
+            id: previewPanel
+
+            readonly property real panelPadding: 16
+
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: grid.implicitWidth + panelPadding * 2
+            Layout.preferredHeight: grid.implicitHeight + panelPadding * 2
+
+            radius: ShellState.islandCornerRadius
+            color: Colors.bg
+            border.width: 1
+            border.color: Colors.border
+
+            ControlGrid {
+                id: grid
+                x: previewPanel.panelPadding
+                y: previewPanel.panelPadding
+                width: implicitWidth
+                height: implicitHeight
+                editMode: true
+            }
         }
 
         TileSizePicker {

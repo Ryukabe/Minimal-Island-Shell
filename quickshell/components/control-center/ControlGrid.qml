@@ -12,8 +12,29 @@ Item {
     property string selectedTileId: ""
     signal subviewRequestedFor(string tileType)
 
+    // ---- Grid geometry (shared by tiles, guide dots and the drop preview) ----
+    readonly property int columns: ControlCenterLayoutService.columns
+    readonly property real gap: ControlCenterLayoutService.cellSpacing
+    readonly property real cellW: (width - (columns - 1) * gap) / columns
+    readonly property real cellH: 68
+    readonly property real stepX: cellW + gap
+    readonly property real stepY: cellH + gap
+    // In edit mode one spare row is shown so a tile can be dragged below the last one
+    readonly property int gridRows: ControlCenterLayoutService.rowCount() + (editMode ? 1 : 0)
+
     implicitWidth: 548
-    implicitHeight: ControlCenterLayoutService.rowCount() * 68 + Math.max(0, ControlCenterLayoutService.rowCount() - 1) * ControlCenterLayoutService.cellSpacing
+    implicitHeight: gridRows * cellH + Math.max(0, gridRows - 1) * gap
+
+    // ---- Drag state (filled in by whichever tile is being dragged) ----
+    property string dragTileId: ""
+    property real dragX: 0
+    property real dragY: 0
+    property int dragColSpan: 1
+    property int dragRowSpan: 1
+    readonly property bool dragActive: dragTileId !== ""
+    // Same snapping maths the drop uses (see onReleased below and moveTile in the service)
+    readonly property int dragTargetCol: Math.max(0, Math.min(columns - dragColSpan, Math.round(dragX / stepX)))
+    readonly property int dragTargetRow: Math.max(0, Math.round(dragY / stepY))
 
     focus: editMode
     Keys.onPressed: (event) => {
@@ -55,6 +76,46 @@ Item {
         onClicked: root.selectedTileId = ""
     }
 
+    // ---- Guide dots: one per cell, edit mode only (declared before the tiles so they sit behind them) ----
+    Repeater {
+        model: root.editMode ? root.columns * root.gridRows : 0
+
+        delegate: Item {
+            id: guide
+
+            required property int index
+            readonly property int c: index % root.columns
+            readonly property int r: Math.floor(index / root.columns)
+            readonly property bool inTarget: root.dragActive
+                && c >= root.dragTargetCol && c < root.dragTargetCol + root.dragColSpan
+                && r >= root.dragTargetRow && r < root.dragTargetRow + root.dragRowSpan
+
+            x: c * root.stepX
+            y: r * root.stepY
+            width: root.cellW
+            height: root.cellH
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: guide.inTarget ? 8 : 4
+                height: width
+                radius: width / 2
+                color: guide.inTarget ? Colors.accent : Colors.fg
+                opacity: guide.inTarget ? 1.0 : 0.22
+
+                Behavior on width {
+                    NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs); easing.type: Easing.OutCubic }
+                }
+                Behavior on opacity {
+                    NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                }
+                Behavior on color {
+                    ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                }
+            }
+        }
+    }
+
     Repeater {
         model: ControlCenterLayoutService.layoutModel
 
@@ -70,9 +131,27 @@ Item {
 
             property bool resizing: false
             readonly property bool selected: root.selectedTileId === tileId
+            readonly property bool isDragged: dragArea.drag.active
 
-            readonly property real cellW: (root.width - (ControlCenterLayoutService.columns - 1) * ControlCenterLayoutService.cellSpacing) / ControlCenterLayoutService.columns
-            readonly property real cellH: 68
+            readonly property real cellW: root.cellW
+            readonly property real cellH: root.cellH
+
+            // The dragged tile stays above the drop preview
+            z: isDragged ? 20 : 0
+
+            onIsDraggedChanged: {
+                if (isDragged) {
+                    root.dragColSpan = colSpan
+                    root.dragRowSpan = rowSpan
+                    root.dragX = x
+                    root.dragY = y
+                    root.dragTileId = tileId
+                } else if (root.dragTileId === tileId) {
+                    root.dragTileId = ""
+                }
+            }
+            onXChanged: if (isDragged) root.dragX = x
+            onYChanged: if (isDragged) root.dragY = y
 
             x: col * (cellW + ControlCenterLayoutService.cellSpacing)
             y: row * (cellH + ControlCenterLayoutService.cellSpacing)
@@ -266,6 +345,30 @@ Item {
                     }
                 }
             }
+        }
+    }
+
+    // ---- Drop preview: where the dragged tile will snap ----
+    Rectangle {
+        id: ghost
+        visible: root.editMode && root.dragActive
+        z: 15
+
+        x: root.dragTargetCol * root.stepX
+        y: root.dragTargetRow * root.stepY
+        width: root.dragColSpan * root.cellW + (root.dragColSpan - 1) * root.gap
+        height: root.dragRowSpan * root.cellH + (root.dragRowSpan - 1) * root.gap
+
+        radius: ShellState.islandCornerRadius
+        color: "transparent"
+        border.width: 2
+        border.color: Colors.accent
+
+        Rectangle {
+            anchors.fill: parent
+            radius: ghost.radius
+            color: Colors.accent
+            opacity: 0.14
         }
     }
 
