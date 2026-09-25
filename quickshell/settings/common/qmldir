@@ -12,3 +12,5 @@ SettingsDropdownRow 1.0 SettingsDropdownRow.qml
 SettingsSegmentedRow 1.0 SettingsSegmentedRow.qml
 SettingsColorRow 1.0 SettingsColorRow.qml
 SettingsGroup 1.0 SettingsGroup.qml
+SettingsTriggerToggleRow 1.0 SettingsTriggerToggleRow.qml
+SettingsPathRow 1.0 SettingsPathRow.qml

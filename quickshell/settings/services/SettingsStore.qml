@@ -8,9 +8,12 @@ import "../../services"
 Item {
     id: root
 
-    readonly property string settingsPath: Quickshell.shellDir + "/settings/state.json"
+    readonly property string _home: Quickshell.env("HOME")
+    readonly property string settingsPath: root._home + "/.config/quickshell/state/shell-settings.json"
+    readonly property string _legacyPath: Quickshell.shellDir + "/settings/state.json"
 
     property bool _loaded: false
+    property bool _newLoaded: false
     property bool _applying: false
 
     function _defaults() {
@@ -88,6 +91,7 @@ Item {
         printErrors: false
 
         onLoaded: {
+            root._newLoaded = true
             try {
                 root._applyToShellState(JSON.parse(text()))
             } catch (e) {
@@ -96,7 +100,34 @@ Item {
             root._loaded = true
         }
 
+        onLoadFailed: (error) => {}   // legacyFileView handles the fallback
+    }
+
+    // One-time migration from the pre-"state/" location, which lived inside
+    // the shell's own source directory (Quickshell.shellDir) rather than
+    // ~/.config/quickshell. The old file is deleted once its contents have
+    // been copied over — if that path is tracked by a dotfiles repo, you'll
+    // want to `git rm` / commit the removal there afterward.
+    FileView {
+        id: legacyFileView
+        path: root._legacyPath
+        printErrors: false
+
+        onLoaded: {
+            if (root._newLoaded) return
+            try {
+                root._applyToShellState(JSON.parse(text()))
+            } catch (e) {
+                root._applyToShellState(root._defaults())
+            }
+            root._loaded = true
+            saveTimer.stop()
+            fileView.setText(JSON.stringify(root._collectFromShellState(), null, 2))
+            Quickshell.execDetached(["rm", "-f", legacyFileView.path])
+        }
+
         onLoadFailed: (error) => {
+            if (root._newLoaded) return
             root._applyToShellState(root._defaults())
             root._loaded = true
         }

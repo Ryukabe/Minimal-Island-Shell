@@ -109,19 +109,84 @@ Item {
         }
 
         SettingsGroup {
-            title: "Extras"
-            description: "Calculator and clipboard history"
-            icon: "calculate"
+            title: "Features"
+            description: "Turn launcher powers on or off"
+            icon: "bolt"
             expanded: true
 
             SettingsToggleRow {
-                label: "Inline calculator"
+                label: "Inline calculator  (2+2, sqrt(16))"
                 checked: LauncherSettings.inlineCalculator
                 onToggled: (val) => LauncherSettings.inlineCalculator = val
             }
 
             SettingsToggleRow {
-                label: "Clipboard history (type : in the launcher)"
+                label: "Unit conversion  (10 km to mi)"
+                checked: LauncherSettings.feature("units")
+                onToggled: (val) => LauncherSettings.setFeature("units", val)
+            }
+
+            SettingsToggleRow {
+                label: "Web search  (g cats, yt lofi, ? cats)"
+                checked: LauncherSettings.feature("web")
+                onToggled: (val) => LauncherSettings.setFeature("web", val)
+            }
+
+            SettingsToggleRow {
+                label: "Run commands  (> command)"
+                checked: LauncherSettings.feature("commands")
+                onToggled: (val) => LauncherSettings.setFeature("commands", val)
+            }
+
+            SettingsToggleRow {
+                label: "File search  (/ name)"
+                checked: LauncherSettings.feature("files")
+                onToggled: (val) => LauncherSettings.setFeature("files", val)
+            }
+
+            SettingsToggleRow {
+                label: "System commands  (lock, sleep, restart)"
+                checked: LauncherSettings.feature("system")
+                onToggled: (val) => LauncherSettings.setFeature("system", val)
+            }
+
+            SettingsTriggerToggleRow {
+                label: "Emoji picker"
+                hint: "smile"
+                checked: LauncherSettings.feature("emoji")
+                trigger: LauncherSettings.triggerEmoji
+                onToggled: (val) => LauncherSettings.setFeature("emoji", val)
+                onTriggerCommitted: (val) => LauncherSettings.setTrigger("emoji", val)
+            }
+
+            SettingsTriggerToggleRow {
+                label: "Snippets"
+                hint: "email"
+                checked: LauncherSettings.feature("snippets")
+                trigger: LauncherSettings.triggerSnippets
+                onToggled: (val) => LauncherSettings.setFeature("snippets", val)
+                onTriggerCommitted: (val) => LauncherSettings.setTrigger("snippets", val)
+            }
+
+            SettingsTriggerToggleRow {
+                label: "Quick notes"
+                hint: "buy milk"
+                checked: LauncherSettings.feature("notes")
+                trigger: LauncherSettings.triggerNotes
+                showDivider: false
+                onToggled: (val) => LauncherSettings.setFeature("notes", val)
+                onTriggerCommitted: (val) => LauncherSettings.setTrigger("notes", val)
+            }
+        }
+
+        SettingsGroup {
+            title: "Clipboard"
+            description: "History from cliphist"
+            icon: "content_paste"
+            expanded: true
+
+            SettingsToggleRow {
+                label: "Clipboard history  (type : in the launcher)"
                 checked: LauncherSettings.clipboardHistory
                 showDivider: LauncherSettings.clipboardHistory
                 onToggled: (val) => LauncherSettings.clipboardHistory = val
@@ -136,6 +201,73 @@ Item {
                 value: LauncherSettings.clipboardLimit
                 showDivider: false
                 onMoved: (v) => LauncherSettings.clipboardLimit = Math.round(v)
+            }
+        }
+
+        SettingsGroup {
+            title: "Notes"
+            description: "Where quick notes are saved"
+            icon: "edit_note"
+            expanded: true
+
+            SettingsSegmentedRow {
+                Layout.leftMargin: Dimens.paddingMedium
+                Layout.rightMargin: Dimens.paddingMedium
+                label: "Storage"
+                options: ["One file", "Per day", "Per capture"]
+                selectedValue: LauncherData.notesMode === "running" ? "One file"
+                             : LauncherData.notesMode === "daily" ? "Per day" : "Per capture"
+                onOptionSelected: (v) => {
+                    LauncherData.setNotesMode(v === "One file" ? "running" : v === "Per day" ? "daily" : "capture")
+                }
+            }
+
+            SettingsPathRow {
+                visible: LauncherData.notesMode === "running"
+                Layout.topMargin: Dimens.spacingSmall
+                label: "Notes file"
+                value: LauncherData.notesFile
+                showDivider: false
+                onCommitted: (v) => LauncherData.setNotesFile(v)
+                onOpenRequested: LauncherData.openNotesFolder()
+            }
+
+            SettingsPathRow {
+                visible: LauncherData.notesMode !== "running"
+                Layout.topMargin: Dimens.spacingSmall
+                label: "Notes folder"
+                value: LauncherData.notesFolder
+                showDivider: false
+                onCommitted: (v) => LauncherData.setNotesFolder(v)
+                onOpenRequested: LauncherData.openNotesFolder()
+            }
+        }
+
+        SettingsGroup {
+            title: "Snippets"
+            description: "Folder of snippet files, one subfolder per category"
+            icon: "text_snippet"
+            expanded: true
+
+            SettingsPathRow {
+                label: "Snippets folder"
+                value: LauncherData.snippetsFolder
+                showDivider: false
+                onCommitted: (v) => LauncherData.setSnippetsFolder(v)
+                onOpenRequested: LauncherData.openSnippetsFolder()
+            }
+        }
+
+        SettingsGroup {
+            title: "Aliases, pinned apps & search engines"
+            description: "Hand-edited JSON"
+            icon: "data_object"
+            expanded: true
+
+            SettingsButton {
+                Layout.leftMargin: Dimens.paddingMedium
+                text: "Open launcher-data.json"
+                onClicked: LauncherData.openFile()
             }
         }
     }

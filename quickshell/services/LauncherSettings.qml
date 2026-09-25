@@ -8,14 +8,14 @@ Singleton {
     id: root
 
     // ---- Search ----
-    property int maxResults: 8                  // cap on SEARCH results (browsing with no query shows every app)
+    property int maxResults: 8
     property string matchMode: "Fuzzy"          // "Fuzzy" | "Prefix"
-    property bool searchDescriptions: true      // also match Comment / GenericName / Keywords
+    property bool searchDescriptions: true
 
     // ---- Recent apps ----
     property bool showRecentsFirst: true
     property int recentLimit: 10
-    property var recentIds: []                  // newest first, up to 20 stored
+    property var recentIds: []
 
     // ---- Appearance ----
     property bool showIcons: true
@@ -24,11 +24,22 @@ Singleton {
     property bool shrinkForFewResults: true
 
     // ---- Extras ----
-    property bool inlineCalculator: true        // stored only, no calculator exists yet
-    property bool clipboardHistory: true        // gates the ":" clipboard trigger
-    property int clipboardLimit: 100            // how many clipboard entries are shown
+    property bool inlineCalculator: true
+    property bool clipboardHistory: true
+    property int clipboardLimit: 100
 
-    // Multiplier applied to ShellState.launcherWidth
+    // ---- Feature switches (one per launcher provider) ----
+    property var features: ({
+        commands: true, web: true, files: true,
+        system: true, units: true, emoji: true, snippets: true, notes: true
+    })
+
+    // ---- Trigger marks for emoji / snippets / notes. Reserved: > ? / : ----
+    property string triggerEmoji: ";"
+    property string triggerSnippets: "\""
+    property string triggerNotes: "-"
+    readonly property var reservedMarks: [">", "?", "/", ":"]
+
     readonly property real widthScale: launcherWidth === "Compact" ? 0.8
                                      : (launcherWidth === "Wide" ? 1.25 : 1.0)
 
@@ -47,10 +58,14 @@ Singleton {
     onInlineCalculatorChanged: scheduleSave()
     onClipboardHistoryChanged: scheduleSave()
     onClipboardLimitChanged: scheduleSave()
+    onFeaturesChanged: scheduleSave()
+    onTriggerEmojiChanged: scheduleSave()
+    onTriggerSnippetsChanged: scheduleSave()
+    onTriggerNotesChanged: scheduleSave()
 
     FileView {
         id: file
-        path: Quickshell.env("HOME") + "/.config/quickshell/launcher-settings.json"
+        path: Quickshell.env("HOME") + "/.config/quickshell/state/launcher-settings.json"
         printErrors: false
         onLoaded: root.applyJson(text())
         onLoadFailed: (error) => root.saveNow()
@@ -82,8 +97,46 @@ Singleton {
             shrinkForFewResults: shrinkForFewResults,
             inlineCalculator: inlineCalculator,
             clipboardHistory: clipboardHistory,
-            clipboardLimit: clipboardLimit
+            clipboardLimit: clipboardLimit,
+            features: features,
+            triggerEmoji: triggerEmoji,
+            triggerSnippets: triggerSnippets,
+            triggerNotes: triggerNotes
         }, null, 2))
+    }
+
+    function feature(name) {
+        return features[name] !== false
+    }
+
+    function setFeature(name, value) {
+        var copy = {}
+        for (var k in features) copy[k] = features[k]
+        copy[name] = value
+        features = copy
+    }
+
+    // A trigger mark must be exactly one character, not a letter or digit,
+    // and not one of the marks already fixed in the parser (> ? / :).
+    function _basicValidTrigger(ch) {
+        return !!ch && ch.length === 1 && !/[a-z0-9]/i.test(ch) && reservedMarks.indexOf(ch) < 0
+    }
+
+    // Used by the Settings UI: also rejects a mark already used by one of
+    // the other two triggers. Returns false (and changes nothing) on any
+    // invalid or duplicate mark.
+    function setTrigger(name, raw) {
+        var ch = (raw || "").trim().charAt(0)
+        if (!_basicValidTrigger(ch)) return false
+        if ((name !== "emoji" && ch === triggerEmoji) ||
+            (name !== "snippets" && ch === triggerSnippets) ||
+            (name !== "notes" && ch === triggerNotes)) return false
+
+        if (name === "emoji") triggerEmoji = ch
+        else if (name === "snippets") triggerSnippets = ch
+        else if (name === "notes") triggerNotes = ch
+        else return false
+        return true
     }
 
     function _num(v, lo, hi, fallback) {
@@ -119,6 +172,18 @@ Singleton {
         inlineCalculator = _bool(d.inlineCalculator, inlineCalculator)
         clipboardHistory = _bool(d.clipboardHistory, clipboardHistory)
         clipboardLimit = _num(d.clipboardLimit, 10, 100, clipboardLimit)
+
+        // Keys from an older save (e.g. "windows", "processes") are simply
+        // dropped here since they're no longer in the default `features` set.
+        if (d.features && typeof d.features === "object") {
+            var f = {}
+            for (var k in features) f[k] = _bool(d.features[k], features[k])
+            features = f
+        }
+
+        if (_basicValidTrigger(d.triggerEmoji)) triggerEmoji = d.triggerEmoji
+        if (_basicValidTrigger(d.triggerSnippets)) triggerSnippets = d.triggerSnippets
+        if (_basicValidTrigger(d.triggerNotes)) triggerNotes = d.triggerNotes
         _loading = false
     }
 

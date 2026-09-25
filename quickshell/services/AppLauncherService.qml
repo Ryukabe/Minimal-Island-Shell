@@ -10,6 +10,11 @@ QtObject {
         return app.id || app.name || ""
     }
 
+    function _matchesRef(app, ref) {
+        var r = String(ref).toLowerCase()
+        return (app.name || "").toLowerCase() === r || (app.id || "").toLowerCase() === r
+    }
+
     function _isWordStart(text, i) {
         if (i === 0) return true
         var p = text.charAt(i - 1)
@@ -77,14 +82,27 @@ QtObject {
             for (var r = 0; r < recents.length; r++) recentRank[recents[r]] = r
         }
 
+        var aliasRef = ""
+        if (q.length > 0 && Object.prototype.hasOwnProperty.call(LauncherData.aliases, q)) {
+            aliasRef = LauncherData.aliases[q]
+        }
+        var pinned = q.length === 0 ? LauncherData.pinned : []
+
         var entries = []
         for (var i = 0; i < all.length; i++) {
             var a = all[i]
             var s = 0
+
             if (q.length > 0) {
                 s = scoreApp(a, q)
-                if (s < 0) continue
+                if (aliasRef !== "" && _matchesRef(a, aliasRef)) s = Math.max(s, 0) + 5000
+                else if (s < 0) continue
+            } else {
+                for (var p = 0; p < pinned.length; p++) {
+                    if (_matchesRef(a, pinned[p])) { s += 20000 - p; break }
+                }
             }
+
             var rank = recentRank[appId(a)]
             if (rank !== undefined) {
                 s += q.length > 0 ? (80 - rank * 4) : (10000 - rank)

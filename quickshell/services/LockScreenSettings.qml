@@ -7,9 +7,11 @@ import Quickshell.Io
 Item {
     id: root
 
-    readonly property string configPath: Quickshell.env("HOME") + "/.config/quickshell/lockscreen.json"
+    readonly property string _home: Quickshell.env("HOME")
+    readonly property string configPath: root._home + "/.config/quickshell/state/lockscreen.json"
 
     property bool _configLoaded: false
+    property bool _newConfigLoaded: false
     property bool _applyingConfig: false
 
     // Clock
@@ -35,38 +37,43 @@ Item {
     // Error/accent
     property bool errorUsesAccent: false
 
+    function _apply(data) {
+        root._applyingConfig = true
+        if (data.clockFormat24h !== undefined) root.clockFormat24h = data.clockFormat24h;
+        if (data.showDate !== undefined) root.showDate = data.showDate;
+        if (data.showUsername !== undefined) root.showUsername = data.showUsername;
+        if (data.passwordPlaceholder !== undefined) root.passwordPlaceholder = data.passwordPlaceholder;
+        if (data.wallpaperDimOpacity !== undefined) root.wallpaperDimOpacity = data.wallpaperDimOpacity;
+        if (data.frostedBlurEnabled !== undefined) root.frostedBlurEnabled = data.frostedBlurEnabled;
+        if (data.frostedBlurRadius !== undefined) root.frostedBlurRadius = data.frostedBlurRadius;
+        if (data.showHyprlandAction !== undefined) root.showHyprlandAction = data.showHyprlandAction;
+        if (data.showRebootAction !== undefined) root.showRebootAction = data.showRebootAction;
+        if (data.showPowerAction !== undefined) root.showPowerAction = data.showPowerAction;
+        if (data.errorUsesAccent !== undefined) root.errorUsesAccent = data.errorUsesAccent;
+        root._applyingConfig = false
+    }
+
     FileView {
         id: configFile
         path: root.configPath
         watchChanges: true
         onLoaded: {
-            root._applyingConfig = true
+            root._newConfigLoaded = true
             try {
-                var data = JSON.parse(text());
-                if (data.clockFormat24h !== undefined) root.clockFormat24h = data.clockFormat24h;
-                if (data.showDate !== undefined) root.showDate = data.showDate;
-                if (data.showUsername !== undefined) root.showUsername = data.showUsername;
-                if (data.passwordPlaceholder !== undefined) root.passwordPlaceholder = data.passwordPlaceholder;
-                if (data.wallpaperDimOpacity !== undefined) root.wallpaperDimOpacity = data.wallpaperDimOpacity;
-                if (data.frostedBlurEnabled !== undefined) root.frostedBlurEnabled = data.frostedBlurEnabled;
-                if (data.frostedBlurRadius !== undefined) root.frostedBlurRadius = data.frostedBlurRadius;
-                if (data.showHyprlandAction !== undefined) root.showHyprlandAction = data.showHyprlandAction;
-                if (data.showRebootAction !== undefined) root.showRebootAction = data.showRebootAction;
-                if (data.showPowerAction !== undefined) root.showPowerAction = data.showPowerAction;
-                if (data.errorUsesAccent !== undefined) root.errorUsesAccent = data.errorUsesAccent;
+                root._apply(JSON.parse(text()));
             } catch (e) {
                 console.log("[LockScreenSettings] parse error:", e);
             }
-            root._applyingConfig = false
-            root._configLoaded = true
-        }
-        onLoadFailed: error => {
             root._configLoaded = true
         }
     }
 
     Process { id: saveProcess }
 
+    // Unchanged from before: this builds the save command as a shell string
+    // with the JSON wrapped in single quotes. If any value ever contains a
+    // literal single quote, the command breaks. Not something you asked me
+    // to fix, just flagging it since we're already in this file.
     function save() {
         if (!root._configLoaded || root._applyingConfig) return;
         var data = {
@@ -82,7 +89,7 @@ Item {
             "showPowerAction": root.showPowerAction,
             "errorUsesAccent": root.errorUsesAccent
         };
-        saveProcess.command = ["sh", "-c", "mkdir -p ~/.config/quickshell && echo '" + JSON.stringify(data) + "' > " + root.configPath];
+        saveProcess.command = ["sh", "-c", "mkdir -p ~/.config/quickshell/state && echo '" + JSON.stringify(data) + "' > " + root.configPath];
         saveProcess.running = true;
     }
 

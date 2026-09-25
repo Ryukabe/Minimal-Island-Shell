@@ -34,9 +34,6 @@ QtObject {
         "notifications": universalSizes
     })
 
-    // Types with a real ToggleTile component wired in ControlGrid's Loader
-    // switch. Only these appear in the Add-a-control tray.
-    // ("notifications" is excluded: it has layout data but no rendering case yet.)
     property var manageableTypes: [
         "wifi", "bluetooth", "nightlight", "focus", "airplane", "caffeine",
         "recording", "powerprofile", "lightmode", "volume", "brightness", "media"
@@ -74,21 +71,20 @@ QtObject {
     ]
 
     property ListModel layoutModel: ListModel {}
-
-    // Undo history: array of full layout snapshots, most recent last.
-    // Reassigned (never mutated in place) so bindings on undoStack.length
-    // update reactively.
     property var undoStack: []
+    property bool _newLoaded: false
+
+    readonly property string _home: Quickshell.env("HOME")
 
     property FileView layoutFile: FileView {
         id: layoutFile
-        path: Quickshell.env("HOME") + "/.config/quickshell/control-center-layout.json"
+        path: root._home + "/.config/quickshell/state/control-center-layout.json"
         printErrors: false
-        onLoaded: root.loadFromJson(text())
-        onLoadFailed: (error) => root.resetToDefault()
+        onLoaded: {
+            root._newLoaded = true
+            root.loadFromJson(text())
+        }
     }
-
-    // ---- Load / save ----
 
     function resetToDefault() {
         if (layoutModel.count > 0) pushUndoSnapshot()
@@ -99,9 +95,6 @@ QtObject {
         saveLayout()
     }
 
-    // FIX: loads exactly what was saved. It no longer re-adds default tiles
-    // that are missing from the file, which is what brought removed
-    // controls back after every restart.
     function loadFromJson(jsonText) {
         if (!jsonText || jsonText.trim() === "") {
             resetToDefault()
@@ -127,7 +120,7 @@ QtObject {
         for (var i = 0; i < arr.length; i++) {
             layoutModel.append(arr[i])
         }
-        if (healOverlaps()) saveLayout()  
+        if (healOverlaps()) saveLayout()
     }
 
     function snapshotLayout() {
@@ -144,11 +137,9 @@ QtObject {
     }
 
     function saveLayout() {
-        healOverlaps()  
+        healOverlaps()
         layoutFile.setText(serializeLayout())
     }
-
-    // ---- Undo ----
 
     function pushUndoSnapshot() {
         var stack = undoStack.slice()
@@ -169,8 +160,6 @@ QtObject {
         }
         saveLayout()
     }
-
-    // ---- Helpers ----
 
     function rowCount() {
         var maxRow = 0
@@ -193,10 +182,6 @@ QtObject {
                a.row < b.row + b.rowSpan && a.row + a.rowSpan > b.row
     }
 
-    // ---- Swap / displacement logic ----
-
-    // True if `rect` overlaps no tile, ignoring any tile whose id is a key
-    // in the `ignore` map.
     function isFree(rect, ignore) {
         for (var i = 0; i < layoutModel.count; i++) {
             var t = layoutModel.get(i)
@@ -206,8 +191,6 @@ QtObject {
         return true
     }
 
-    // Free spot for `tileId` (same size) closest to (refCol, refRow), in any
-    // direction. Ties go to the earliest spot in reading order.
     function nearestFreeSpot(tileId, refCol, refRow, ignore) {
         var idx = indexForId(tileId)
         var t = layoutModel.get(idx)
@@ -230,16 +213,10 @@ QtObject {
             }
         }
 
-        // Grid completely full, so use a fresh row below everything.
         if (!best) best = { col: 0, row: maxRow + 1 }
         return best
     }
 
-    // The anchor tile stays where it is. Every tile it overlaps is moved to
-    // the free spot nearest (refCol, refRow), the anchor's previous position.
-    // When you drop a tile onto another of the same size, the other tile
-    // lands exactly where yours came from, which is a swap. Nothing is ever
-    // pushed on top of another tile.
     function resolveOverlaps(anchorId, refCol, refRow) {
         var anchorIdx = indexForId(anchorId)
         if (anchorIdx < 0) return
@@ -256,11 +233,8 @@ QtObject {
         }
         if (displaced.length === 0) return
 
-        // Keep reading order so several displaced tiles stay in sequence.
         displaced.sort(function(x, y) { return (x.row - y.row) || (x.col - y.col) })
 
-        // Displaced tiles ignore each other until each has been placed, so a
-        // tile that is about to move never blocks another one.
         var ignore = {}
         for (var d = 0; d < displaced.length; d++) ignore[displaced[d].id] = true
 
@@ -274,9 +248,28 @@ QtObject {
         }
     }
 
-        // Safety net: if any tiles overlap (e.g. from a layout file saved by the
-    // older buggy code), keep the tile that comes first in reading order and
-    // move the others to their nearest free spot. Returns true if anything moved.
+    function resolveAllOverlaps() {
+        var guard = 0
+        var changed = true
+        while (changed && guard < 100) {
+            changed = false
+            guard++
+            for (var i = 0; i < layoutModel.count; i++) {
+                for (var j = i + 1; j < layoutModel.count; j++) {
+                    var a = layoutModel.get(i)
+                    var b = layoutModel.get(j)
+                    if (rectsOverlap(a, b)) {
+                        layoutModel.setProperty(j, "row", a.row + a.rowSpan)
+                        changed = true
+                    }
+                }
+            }
+        }
+    }
+
+    // Safety net: if any tiles overlap (e.g. from a layout file saved by
+    // older code), keep the tile that comes first in reading order and move
+    // the others to their nearest free spot. Returns true if anything moved.
     function healOverlaps() {
         var order = []
         for (var i = 0; i < layoutModel.count; i++) {
@@ -304,29 +297,6 @@ QtObject {
         }
         return changed
     }
-
-    // Pairwise resolution with no anchor, used after a column-count change
-    // when many tiles can shift at once.
-    function resolveAllOverlaps() {
-        var guard = 0
-        var changed = true
-        while (changed && guard < 100) {
-            changed = false
-            guard++
-            for (var i = 0; i < layoutModel.count; i++) {
-                for (var j = i + 1; j < layoutModel.count; j++) {
-                    var a = layoutModel.get(i)
-                    var b = layoutModel.get(j)
-                    if (rectsOverlap(a, b)) {
-                        layoutModel.setProperty(j, "row", a.row + a.rowSpan)
-                        changed = true
-                    }
-                }
-            }
-        }
-    }
-
-    // ---- Editing actions ----
 
     function moveTile(tileId, newCol, newRow) {
         var idx = indexForId(tileId)
@@ -404,10 +374,6 @@ QtObject {
         saveLayout()
     }
 
-    // Changes the grid's column count. Clamps each tile's column so it
-    // doesn't overflow the new width. Does not shrink colSpan, so a tile
-    // wider than the new column count would still overflow (not an issue at
-    // columns >= 5 with the current tile set).
     function setColumns(n) {
         pushUndoSnapshot()
         columns = n
@@ -420,7 +386,6 @@ QtObject {
         saveLayout()
     }
 
-    // Repacks every tile top-left, in current list order, first-fit.
     function findFirstFit(colSpan, rowSpan, placed) {
         var row = 0
         while (row < 1000) {
@@ -450,10 +415,6 @@ QtObject {
         saveLayout()
     }
 
-    // ---- Add-a-control tray ----
-
-    // manageableTypes not currently placed in layoutModel (one instance per
-    // type; tileId === type everywhere).
     function unplacedTypes() {
         var placed = {}
         for (var i = 0; i < layoutModel.count; i++) {
@@ -466,8 +427,6 @@ QtObject {
         return result
     }
 
-    // Smallest-area allowed size for a type: the size a tile enters the
-    // grid at when added from the tray.
     function defaultSizeForType(type) {
         var sizes = allowedSizes[type]
         if (!sizes || sizes.length === 0) return { c: 1, r: 1 }
@@ -479,7 +438,7 @@ QtObject {
     }
 
     function addTile(type) {
-        if (indexForId(type) >= 0) return // already placed
+        if (indexForId(type) >= 0) return
         pushUndoSnapshot()
         var size = defaultSizeForType(type)
         var placedRects = []

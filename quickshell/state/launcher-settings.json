@@ -11,5 +11,18 @@
   "shrinkForFewResults": true,
   "inlineCalculator": true,
   "clipboardHistory": true,
-  "clipboardLimit": 100
+  "clipboardLimit": 100,
+  "features": {
+    "commands": true,
+    "web": true,
+    "files": true,
+    "system": true,
+    "units": true,
+    "emoji": true,
+    "snippets": true,
+    "notes": true
+  },
+  "triggerEmoji": ";",
+  "triggerSnippets": "\"",
+  "triggerNotes": "-"
 }

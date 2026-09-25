@@ -69,7 +69,7 @@ Item {
     property bool _configLoaded: false
     property bool _applyingConfig: false
 
-    readonly property string configPath: Quickshell.env("HOME") + "/.config/quickshell/appearance.json"
+    readonly property string configPath: Quickshell.env("HOME") + "/.config/quickshell/state/appearance.json"
 
     // --- Safety Palette ---
     readonly property var _safetyPalette: ({

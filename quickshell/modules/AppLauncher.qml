@@ -22,27 +22,9 @@ Item {
     readonly property real _outerRadius: ShellState.islandCornerRadius
 
     property string query: ""
-        property var results: buildResults(query)
-
-    // Calculator result (if the query is a calculation) goes on top of the app list.
-    function buildResults(q) {
-        var apps = AppLauncherService.filteredApps(q)
-        var calc = LauncherSettings.inlineCalculator ? CalculatorService.evaluate(q) : null
-        if (!calc) return apps
-        return [{
-            kind: "calc",
-            name: "= " + calc.text,
-            comment: q.trim() + "  ·  Enter to copy",
-            value: calc.text
-        }].concat(apps)
-    }
-
-    function activate(item) {
-        if (!item) return
-        if (item.kind === "calc") CalculatorService.copy(item.value)
-        else AppLauncherService.launch(item)
-        ShellState.showPage("clock")
-    }
+    // App rows are DesktopEntry objects; everything else is a plain row object
+    // with a `kind` (see services/LauncherSearch.qml).
+    property var results: LauncherSearch.search(query)
     property int selectedIndex: 0
 
     implicitWidth: (LauncherSettings.shrinkForFewResults && results.length <= 1) ? minWidth : maxWidth
@@ -51,8 +33,13 @@ Item {
         chromeHeight + maxVisibleRows * rowHeight
     )
 
+    function activate(item) {
+        if (LauncherSearch.activate(item)) ShellState.showPage("clock")
+    }
+
     onQueryChanged: {
         selectedIndex = 0
+        LauncherSearch.prepare(query)
         if (LauncherSettings.clipboardHistory && query.startsWith(":")) {
             ClipboardService.searchQuery = query.substring(1)
             ShellState.showPage("clipboard")
@@ -177,6 +164,9 @@ Item {
             required property int index
             required property var modelData
 
+            // Non-app rows (calculator, web search, files, ...) carry a `kind`.
+            readonly property bool isAction: modelData.kind !== undefined
+
             width: appList.width
             height: root.rowHeight - appList.spacing
             radius: root._outerRadius
@@ -227,6 +217,7 @@ Item {
                         anchors.fill: parent
                         fillMode: Image.PreserveAspectFit
                         source: {
+                            if (delegateRoot.isAction) return ""
                             if (!delegateRoot.modelData.icon) return ""
                             if (delegateRoot.modelData.icon.startsWith("/")) {
                                 return "file://" + delegateRoot.modelData.icon
@@ -243,18 +234,22 @@ Item {
                         color: (delegateRoot.index !== undefined && delegateRoot.index === root.selectedIndex) ? Colors.mainBgMica : Colors.subBgMica
                         visible: appIcon.status !== Image.Ready
 
+                        // first letter for apps without an icon
                         Text {
                             anchors.centerIn: parent
+                            visible: !delegateRoot.isAction
                             text: delegateRoot.modelData.name ? delegateRoot.modelData.name.charAt(0).toUpperCase() : "?"
                             font.family: Fonts.text
                             font.pixelSize: Dimens.fontSizeMd
                             font.weight: Font.Bold
                             color: Colors.fg
                         }
-                                                Text {
+
+                        // glyph for calculator / web / files / system / ... rows
+                        Text {
                             anchors.centerIn: parent
-                            visible: delegateRoot.modelData.kind === "calc"
-                            text: "calculate"
+                            visible: delegateRoot.isAction
+                            text: delegateRoot.modelData.glyph || "bolt"
                             font.family: Fonts.icon
                             font.pixelSize: Dimens.fontSizeLg
                             font.variableAxes: Fonts.iconAxes
@@ -271,7 +266,7 @@ Item {
 
                     Text {
                         text: delegateRoot.modelData.name
-                        color: Colors.fg
+                        color: delegateRoot.modelData.kind === "info" ? Colors.fgMuted : Colors.fg
                         font.family: Fonts.text
                         font.pixelSize: Dimens.fontSizeMd
                         font.weight: Font.DemiBold
@@ -317,6 +312,7 @@ Item {
             if (ShellState.activePage === "launcher") {
                 searchInput.text = ""
                 root.selectedIndex = 0
+                LauncherSearch.prepare("")
                 focusTimer.restart()
             }
         }

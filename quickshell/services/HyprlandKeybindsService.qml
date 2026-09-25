@@ -11,7 +11,7 @@ Item {
     readonly property string labelsPath: "~/.config/quickshell/keybind-labels.json"
     readonly property string mainModFile: "mainmod.lua"
     readonly property string customFile: "custom.lua"
-    // Files shown in Settings. ags.lua is deliberately not listed.
+    // Files shown in Settings.
     readonly property var bindFiles: ["common.lua", "qs.lua", "custom.lua"]
 
     property var fileTexts: ({})
