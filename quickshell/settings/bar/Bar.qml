@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../styles"
 import "../../services"
+import "../services"
 import "../common"
 
 Item {
@@ -247,6 +248,13 @@ Item {
                 unit: " px"
                 onMoved: (val) => ShellState.timerHeight = val
             }
+        }
+
+        SettingsButton {
+            Layout.fillWidth: true
+            Layout.topMargin: Dimens.spacingLarge
+            text: "Reset to Defaults"
+            onClicked: SettingsStore.resetBarDefaults()
         }
     }
 }

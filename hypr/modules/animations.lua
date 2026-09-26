@@ -1,1 +1,1 @@
-require("modules.animations.anime")
+require("modules.animations.apple")

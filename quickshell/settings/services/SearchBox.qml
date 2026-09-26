@@ -324,6 +324,7 @@ ColumnLayout {
         ListElement { title: "Status panel height"; sectionIndex: 0; sectionName: "Bar & Island" }
         ListElement { title: "Timer width"; sectionIndex: 0; sectionName: "Bar & Island" }
         ListElement { title: "Timer height"; sectionIndex: 0; sectionName: "Bar & Island" }
+        ListElement { title: "Reset to Defaults"; sectionIndex: 0; sectionName: "Bar & Island" }
 
         // -- Clock & Date (index 1) — unconfirmed, left as previously entered --
         ListElement { title: "24-Hour Clock"; sectionIndex: 1; sectionName: "Clock & Date" }
@@ -337,10 +338,10 @@ ColumnLayout {
         ListElement { title: "Main opacity"; sectionIndex: 3; sectionName: "Appearance" }
         ListElement { title: "Secondary opacity"; sectionIndex: 3; sectionName: "Appearance" }
         ListElement { title: "Spacing unit"; sectionIndex: 3; sectionName: "Appearance" }
-        ListElement { title: "Small radius"; sectionIndex: 3; sectionName: "Appearance" }
         ListElement { title: "Light Mode"; sectionIndex: 3; sectionName: "Appearance" }
         ListElement { title: "Icon Style"; sectionIndex: 3; sectionName: "Appearance" }
         ListElement { title: "Icon Weight"; sectionIndex: 3; sectionName: "Appearance" }
+        ListElement { title: "Filled Icons"; sectionIndex: 3; sectionName: "Appearance" }
 
         // -- Motion (index 4) --
         ListElement { title: "Reduce motion"; sectionIndex: 4; sectionName: "Motion" }
@@ -366,6 +367,8 @@ ColumnLayout {
         // -- System (index 9) --
         ListElement { title: "Display Scale Factor"; sectionIndex: 9; sectionName: "System" }
         ListElement { title: "Peace Mode (Do Not Disturb)"; sectionIndex: 9; sectionName: "System" }
+        ListElement { title: "Show Notification Previews"; sectionIndex: 9; sectionName: "System" }
+        ListElement { title: "Tap to Click"; sectionIndex: 9; sectionName: "System" }
         ListElement { title: "Natural Scrolling"; sectionIndex: 9; sectionName: "System" }
 
         // -- About (index 10) --
@@ -379,5 +382,6 @@ ColumnLayout {
         ListElement { title: "System Packages"; sectionIndex: 10; sectionName: "About" }
         ListElement { title: "Minimal-Island-Shell"; sectionIndex: 10; sectionName: "About" }
         ListElement { title: "Reload Shell State"; sectionIndex: 10; sectionName: "About" }
+        ListElement { title: "Reset All to Defaults"; sectionIndex: 10; sectionName: "About" }
     }
 }

@@ -2,7 +2,7 @@
   "islandTopMargin": 6,
   "islandCornerRadius": 15,
   "islandBorderWidth": 0,
-  "islandClickOutsideDismiss": false,
+  "islandClickOutsideDismiss": true,
   "islandNotchMode": true,
   "islandNotchFlare": 16,
   "islandHoverScale": 1,
@@ -34,8 +34,11 @@
   "clockLeadingZero": false,
   "clockLowercaseAmPm": false,
   "clockDateStyle": 0,
-  "clockShowVisualizer": false,
+  "clockShowVisualizer": true,
   "clockShowTimerIcon": false,
   "clockShowRecordingIndicator": true,
-  "timerToastShowRecordingIndicator": false
+  "timerToastShowRecordingIndicator": false,
+  "notificationPreviewsEnabled": true,
+  "focusModeEnabled": false,
+  "activeFocusMode": "Do Not Disturb"
 }

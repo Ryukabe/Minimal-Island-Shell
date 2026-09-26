@@ -12,7 +12,6 @@ Item {
 
     property real fontSize: 15
     property real spacingUnit: 4
-    property real smallRadius: 10
 
     property string activeDropdown: ""
 
@@ -152,12 +151,19 @@ Item {
                 value: Fonts.iconWeight
                 onMoved: (val) => Fonts.iconWeight = val
             }
+
+            SettingsToggleRow {
+                label: "Filled Icons"
+                checked: Fonts.iconFill
+                showDivider: false
+                onToggled: (val) => Fonts.iconFill = val
+            }
         }
 
-        // Group 3: Opacity, Radius & Depth
+        // Group 3: Opacity & Depth
         SettingsGroup {
             title: "Opacity & Surface Depth"
-            description: "Mica transparency, geometry radii, and drop shadows"
+            description: "Mica transparency, spacing, and drop shadows"
             icon: "layers"
             expanded: false
 
@@ -183,14 +189,6 @@ Item {
                 value: root.spacingUnit
                 unit: " px"
                 onMoved: (val) => root.spacingUnit = val
-            }
-
-            SettingsSliderRow {
-                label: "Small radius"
-                from: 0; to: 24; stepSize: 1
-                value: root.smallRadius
-                unit: " px"
-                onMoved: (val) => root.smallRadius = val
             }
 
             SettingsToggleRow {

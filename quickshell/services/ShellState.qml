@@ -10,6 +10,7 @@ QtObject {
     property string previousPage: "clock"
     property bool focusModeEnabled: false
     property string activeFocusMode: "Do Not Disturb"
+    property bool notificationPreviewsEnabled: true
     property bool ignoreHover: false
     property bool settingsOpen: false
 
@@ -171,13 +172,17 @@ QtObject {
     function closeSettings() { root.settingsOpen = false }
     function toggleSettings() { root.settingsOpen = !root.settingsOpen }
 
+    // Hook for per-mode backend behavior (deferred: personal/work/calm
+    // presets each changing wallpaper/theme/animations/border style — see
+    // project notes). The previous mako-based Do Not Disturb implementation
+    // has been removed from here: mako is gone from this project —
+    // NotificationService.qml owns notifications directly and already
+    // gates toast popups on focusModeEnabled itself, so calling makoctl
+    // was commanding a daemon that isn't running. Nothing needs to happen
+    // here for "Do Not Disturb" anymore; wire real per-mode backends here
+    // as they get built.
     function _applyBackendForMode(mode, enabled) {
-        if (mode === "Do Not Disturb") {
-            dndProcess.command = enabled
-                ? ["makoctl", "mode", "-a", "do-not-disturb"]
-                : ["makoctl", "mode", "-r", "do-not-disturb"]
-            dndProcess.running = true
-        }
+        // intentionally empty for now
     }
 
     function toggleFocusMode() {
@@ -195,8 +200,6 @@ QtObject {
         root.focusModeEnabled = true
         _applyBackendForMode(name, true)
     }
-
-    property Process dndProcess: Process { id: dndProcess }
 
     function toggleClipboard() { togglePage("clipboard") }
 

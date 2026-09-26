@@ -32,6 +32,17 @@ Item {
     // Touchpad-specific
     property bool touchpadNaturalScroll: false
     property real touchpadScrollFactor: 1.0
+    // FLAGGED ASSUMPTION: parsed/written as `tap_to_click` (underscore,
+    // matching this file's existing natural_scroll/scroll_factor naming).
+    // Hyprland's real config key for this is hyphenated (`tap-to-click`),
+    // so if input.lua embeds actual Hyprland keys rather than this
+    // underscored abstraction, the regex below won't match — check after
+    // a restart. Also: this only *replaces* an existing line, it doesn't
+    // insert one — if your touchpad block doesn't have this key at all
+    // yet, toggling will silently do nothing. Paste the touchpad block if
+    // either of those turns out to be true and I'll fix the regex/add an
+    // insert-if-missing path.
+    property bool touchpadTapToClick: true
 
     // Per-device override (targets the confirmed real touchpad device
     // name via hl.device({ name = "synps/2-synaptics-touchpad", ... }))
@@ -123,6 +134,8 @@ Item {
             root.touchpadNaturalScroll = nsMatch ? nsMatch[1] === "true" : false
             let tsfMatch = inner.match(/scroll_factor\s*=\s*([^,]*),/)
             root.touchpadScrollFactor = tsfMatch ? parseFloat(tsfMatch[1]) : 1.0
+            let ttcMatch = inner.match(/tap_to_click\s*=\s*(true|false)/)
+            root.touchpadTapToClick = ttcMatch ? ttcMatch[1] === "true" : true
         }
 
         let deviceB = root._deviceBounds(t)
@@ -175,6 +188,18 @@ Item {
             let newInner = inner.replace(/scroll_factor(\s*)=(\s*)[^,]*,/, "scroll_factor$1=$2" + val + ",")
             root._write(t.substring(0, b.innerStart) + newInner + t.substring(b.innerEnd))
         })
+    }
+
+    function setTouchpadTapToClick(val) {
+        // Discrete toggle click, not a drag — writes immediately, no
+        // debounce needed. See the FLAGGED comment on touchpadTapToClick
+        // above before trusting this in production.
+        let t = root.rawText
+        let b = root._touchpadBounds(t)
+        if (!b) return
+        let inner = t.substring(b.innerStart, b.innerEnd)
+        let newInner = inner.replace(/tap_to_click(\s*)=(\s*)(true|false)/, "tap_to_click$1=$2" + (val ? "true" : "false"))
+        root._write(t.substring(0, b.innerStart) + newInner + t.substring(b.innerEnd))
     }
 
     function setTouchpadSensitivity(val) {

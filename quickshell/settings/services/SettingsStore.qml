@@ -56,9 +56,28 @@ Item {
             clockShowVisualizer: true,
             clockShowTimerIcon: true,
             clockShowRecordingIndicator: true,
-            timerToastShowRecordingIndicator: true
+            timerToastShowRecordingIndicator: true,
+            notificationPreviewsEnabled: true,
+            focusModeEnabled: false,
+            activeFocusMode: "Do Not Disturb"
         }
     }
+
+    // Bar/Island/module-sizing subset of _defaults() — lets Bar.qml's Reset
+    // button reset just its own page instead of also nuking Motion/Clock/
+    // Focus state along with it.
+    readonly property var barKeys: [
+        "islandTopMargin", "islandCornerRadius", "islandBorderWidth",
+        "islandClickOutsideDismiss", "islandNotchMode", "islandNotchFlare",
+        "islandHoverScale", "islandCompactHeight", "islandCompactWidth",
+        "islandExpandedHeight", "islandMinExpandedWidth",
+        "launcherWidth", "launcherMaxRows", "clipboardWidth", "clipboardMaxRows",
+        "controlCenterWidth", "controlCenterHeight",
+        "notificationCenterWidth", "notificationCenterMaxHeight",
+        "powerMenuWidth", "powerMenuHeight",
+        "statusPanelWidth", "statusPanelHeight",
+        "timerWidth", "timerHeight"
+    ]
 
     function _applyToShellState(obj) {
         root._applying = true
@@ -83,6 +102,32 @@ Item {
     function _scheduleSave() {
         if (!root._loaded || root._applying) return
         saveTimer.restart()
+    }
+
+    // Resets only the given keys back to their _defaults() values, then
+    // saves once. Used for scoped "Reset to Defaults" buttons.
+    function resetKeys(keys) {
+        const defaults = root._defaults()
+        root._applying = true
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i]
+            if (defaults[key] !== undefined && ShellState[key] !== undefined) {
+                ShellState[key] = defaults[key]
+            }
+        }
+        root._applying = false
+        root._scheduleSave()
+    }
+
+    function resetBarDefaults() { resetKeys(root.barKeys) }
+
+    // Full reset — every SettingsStore-backed key (Bar/Island/Motion/Clock/
+    // Peace Mode/notification previews) in one go. Used by About's global
+    // "Reset All to Defaults" button, as opposed to resetBarDefaults()
+    // above which stays scoped to just the Bar page.
+    function resetAllDefaults() {
+        root._applyToShellState(root._defaults())
+        root._scheduleSave()
     }
 
     FileView {
@@ -181,5 +226,8 @@ Item {
         function onClockShowTimerIconChanged() { root._scheduleSave() }
         function onClockShowRecordingIndicatorChanged() { root._scheduleSave() }
         function onTimerToastShowRecordingIndicatorChanged() { root._scheduleSave() }
+        function onNotificationPreviewsEnabledChanged() { root._scheduleSave() }
+        function onFocusModeEnabledChanged() { root._scheduleSave() }
+        function onActiveFocusModeChanged() { root._scheduleSave() }
     }
 }

@@ -8,16 +8,8 @@ import "../../components/control-center"
 
 Item {
     id: root
-    property bool compactSliders: false
 
     SettingsScrollView {
-
-        SettingsToggleRow {
-            label: "Compact Slider Layout"
-            checked: root.compactSliders
-            showDivider: false
-            onToggled: (val) => root.compactSliders = val
-        }
 
         RowLayout {
             Layout.fillWidth: true

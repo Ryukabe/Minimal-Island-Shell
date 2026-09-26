@@ -2,11 +2,12 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
+import "../../services"
+import "../services"
 import "../common"
 
 Item {
     id: root
-    property string powerProfile: "balanced"
 
     SettingsScrollView {
         SettingsSectionLabel { label: "About" }
@@ -22,7 +23,10 @@ Item {
 
         SettingsRow {
             label: "Active Power Profile"
-            value: root.powerProfile.toUpperCase()
+            value: {
+                let match = PowerProfileService.profiles.find(p => p.id === PowerProfileService.activeProfile)
+                return match ? match.name.toUpperCase() : ""
+            }
             showChevron: false
             showDivider: false
         }
@@ -67,6 +71,13 @@ Item {
             Layout.fillWidth: true
             Layout.topMargin: Dimens.spacingLarge
             text: "Reload Shell State"
+        }
+
+        SettingsButton {
+            Layout.fillWidth: true
+            Layout.topMargin: Dimens.spacingSmall
+            text: "Reset All to Defaults"
+            onClicked: SettingsStore.resetAllDefaults()
         }
     }
 }

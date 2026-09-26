@@ -30,7 +30,9 @@ Item {
 
         Text {
             id: summaryText
-            text: toast.notif ? toast.notif.summary : ""
+            text: toast.notif
+                ? (ShellState.notificationPreviewsEnabled ? toast.notif.summary : "New notification")
+                : ""
             font.family: Fonts.text
             font.pixelSize: Dimens.fontSizeBase
             font.bold: true

@@ -8,9 +8,6 @@ import "../common"
 Item {
     id: root
 
-    property bool peaceMode: false
-    property bool showNotificationPreviews: true
-    property bool tapToClick: true
     property string newAppCommand: ""
 
     SettingsScrollView {
@@ -72,16 +69,16 @@ Item {
 
             SettingsToggleRow {
                 label: "Peace Mode (Do Not Disturb)"
-                checked: root.peaceMode
+                checked: ShellState.focusModeEnabled
                 showDivider: true
-                onToggled: (val) => root.peaceMode = val
+                onToggled: ShellState.toggleFocusMode()
             }
 
             SettingsToggleRow {
                 label: "Show Notification Previews"
-                checked: root.showNotificationPreviews
+                checked: ShellState.notificationPreviewsEnabled
                 showDivider: false
-                onToggled: (val) => root.showNotificationPreviews = val
+                onToggled: (val) => ShellState.notificationPreviewsEnabled = val
             }
         }
 
@@ -110,9 +107,9 @@ Item {
 
             SettingsToggleRow {
                 label: "Tap to Click"
-                checked: root.tapToClick
+                checked: InputSettingsService.touchpadTapToClick
                 showDivider: true
-                onToggled: (val) => root.tapToClick = val
+                onToggled: (val) => InputSettingsService.setTouchpadTapToClick(val)
             }
 
             SettingsToggleRow {
