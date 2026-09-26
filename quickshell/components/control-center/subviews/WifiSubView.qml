@@ -12,8 +12,25 @@ Item {
     property string selectedSsid: ""
     property bool showingPasswordInput: false
     readonly property var availableNetworks: WifiService.networks.filter(function(n) { return n.ssid !== WifiService.ssid })
+    readonly property var connectedNetworkInfo: {
+        for (const n of WifiService.networks) {
+            if (n.ssid === WifiService.ssid) return n
+        }
+        return null
+    }
 
-    
+    // Auto-close the password sheet once a connect attempt finishes
+    // successfully; on failure it stays open so the error text (bound to
+    // WifiService.lastError) is visible right where the user is.
+    Connections {
+        target: WifiService
+        function onConnectingChanged() {
+            if (!WifiService.connecting && WifiService.lastError === "") {
+                root.showingPasswordInput = false
+            }
+        }
+    }
+
     Column {
         id: contentColumn
         anchors.top: parent.top
@@ -41,6 +58,7 @@ Item {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         if (root.showingPasswordInput) {
+                            WifiService.clearError()
                             root.showingPasswordInput = false
                         } else {
                             root.backRequested()
@@ -98,7 +116,7 @@ Item {
                     color: Colors.subBgMica
                     border.width: 1
                     border.color: Colors.border
-                    visible: WifiService.enabled
+                    visible: WifiService.enabled && !WifiService.adapterMissing
 
                     Text {
                         anchors.centerIn: parent
@@ -118,10 +136,20 @@ Item {
         }
 
         Text {
-            text: "Wi-Fi is turned off"
+            text: WifiService.lastError
+            color: Colors.red
+            font.pixelSize: Dimens.fontSizeXSm
+            visible: WifiService.lastError !== "" && !root.showingPasswordInput
+            width: parent.width
+            wrapMode: Text.Wrap
+            horizontalAlignment: Text.AlignHCenter
+        }
+
+        Text {
+            text: WifiService.adapterMissing ? "No Wi-Fi adapter found" : "Wi-Fi is turned off"
             font.pixelSize: Dimens.fontSizeSm
             color: Colors.fgMuted
-            visible: !WifiService.enabled && !root.showingPasswordInput
+            visible: (!WifiService.enabled || WifiService.adapterMissing) && !root.showingPasswordInput
             anchors.horizontalCenter: parent.horizontalCenter
             topPadding: 20
             bottomPadding: 20
@@ -130,7 +158,7 @@ Item {
         Column {
             width: parent.width
             spacing: 10
-            visible: WifiService.enabled && !root.showingPasswordInput
+            visible: WifiService.enabled && !WifiService.adapterMissing && !root.showingPasswordInput
 
             Column {
                 width: parent.width
@@ -160,7 +188,7 @@ Item {
                         spacing: 10
 
                         Column {
-                            width: parent.width - 50
+                            width: parent.width - 120
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 2
 
@@ -181,12 +209,44 @@ Item {
                             }
                         }
 
-                        Text {
-                            text: "wifi"
-                            font.family: Fonts.icon
-                            font.pixelSize: Dimens.fontSizeMd
+                        Row {
+                            spacing: 2
+                            visible: root.connectedNetworkInfo !== null
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Repeater {
+                                model: 4
+                                delegate: Rectangle {
+                                    required property int index
+                                    width: 3
+                                    height: 5 + index * 3
+                                    radius: 1
+                                    anchors.bottom: parent.bottom
+                                    color: (root.connectedNetworkInfo && index < root.connectedNetworkInfo.signalBars) ? Colors.accent : Colors.border
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: 84
+                            height: 28
+                            radius: ShellState.islandCornerRadius
                             color: Colors.accent
                             anchors.verticalCenter: parent.verticalCenter
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "Disconnect"
+                                font.pixelSize: Dimens.fontSizeXSm
+                                font.bold: true
+                                color: Colors.bg
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: WifiService.disconnect()
+                            }
                         }
                     }
                 }
@@ -290,6 +350,7 @@ Item {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
+                                                WifiService.clearError()
                                                 root.selectedSsid = modelData.ssid
                                                 if (modelData.secured) {
                                                     passwordInput.text = ""
@@ -352,6 +413,15 @@ Item {
                 }
             }
 
+            Text {
+                text: WifiService.lastError
+                color: Colors.red
+                font.pixelSize: Dimens.fontSizeXSm
+                visible: WifiService.lastError !== ""
+                width: parent.width
+                wrapMode: Text.Wrap
+            }
+
             Row {
                 width: parent.width
                 spacing: 10
@@ -372,7 +442,10 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.showingPasswordInput = false
+                        onClicked: {
+                            WifiService.clearError()
+                            root.showingPasswordInput = false
+                        }
                     }
                 }
 
@@ -382,16 +455,17 @@ Item {
                     height: 38
                     radius: ShellState.islandCornerRadius
                     color: Colors.accent
+                    opacity: WifiService.connecting ? 0.6 : 1.0
 
                     signal click()
                     onClick: {
+                        if (WifiService.connecting) return
                         WifiService.connectToNetwork(root.selectedSsid, passwordInput.text)
-                        root.showingPasswordInput = false
                     }
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Connect"
+                        text: WifiService.connecting ? "Connecting…" : "Connect"
                         color: Colors.bg
                         font.bold: true
                         font.pixelSize: Dimens.fontSizeSm
@@ -400,6 +474,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        enabled: !WifiService.connecting
                         onClicked: connectBtn.click()
                     }
                 }

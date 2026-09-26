@@ -58,6 +58,7 @@ PanelWindow {
         Hyprland
         Kitty
         VSCode
+        Gtk
         SettingsStore
     }
 

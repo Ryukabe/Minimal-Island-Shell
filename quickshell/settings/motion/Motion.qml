@@ -51,8 +51,8 @@ Item {
             from: 0; to: 100; stepSize: 1
             value: ShellState.motionBouncePercent
             unit: " %"
-            enabled: !ShellState.motionReduced
-            opacity: ShellState.motionReduced ? 0.4 : 1.0
+            enabled: !ShellState.motionReduced && ShellState.motionSpringEnabled
+            opacity: (ShellState.motionReduced || !ShellState.motionSpringEnabled) ? 0.4 : 1.0
             onMoved: (val) => ShellState.motionBouncePercent = val
         }
 

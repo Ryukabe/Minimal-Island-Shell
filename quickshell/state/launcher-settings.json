@@ -4,7 +4,9 @@
   "searchDescriptions": true,
   "showRecentsFirst": true,
   "recentLimit": 10,
-  "recentIds": [],
+  "recentIds": [
+    "nwg-look"
+  ],
   "showIcons": true,
   "animateResults": true,
   "launcherWidth": "Normal",

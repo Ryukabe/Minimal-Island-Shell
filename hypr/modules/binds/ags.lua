@@ -1,5 +1,5 @@
 -- Power Menu
-hl.bind("SUPER + ESCAPE", hl.dsp.exec_cmd("ags request powermenu-toggle"))
+hl.bind("SUPER + ESCAPE", hl.dsp.exec_cmd("ags request power-toggle"))
 
 -- Brightness
 hl.bind("XF86MonBrightnessUp",               hl.dsp.exec_cmd("brightnessctl s +5%"), { locked = true, repeating = true })

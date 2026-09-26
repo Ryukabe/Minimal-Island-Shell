@@ -231,6 +231,20 @@ Item {
         return val;
     }
 
+    // Bright terminal colors (kitty color8-15). Prefers an explicit
+    // "bright" block in the active theme's quickshell.json — e.g.
+    // "bright": { "black": "#...", "red": "#...", ... "white": "#..." }
+    // — and only falls back to a computed lighten of the matching base
+    // color when colorsFollowTheme is off (hardcoded palette has no
+    // bright entries) or the current theme hasn't defined its own set yet.
+    function pickBright(key, baseColor) {
+        if (root.colorsFollowTheme) {
+            var brightSet = root.activePalette.bright;
+            if (brightSet && brightSet[key] !== undefined) return brightSet[key];
+        }
+        return Qt.lighter(baseColor, 1.4);
+    }
+
     function toggleLightMode() {
         if (root.themeHasBothVariants) {
             root.lightModeEnabled = !root.lightModeEnabled;
@@ -261,6 +275,15 @@ Item {
 
     readonly property color black: darkMode ? subBgMica : border
     readonly property color white: darkMode ? subBgMica : border
+
+    readonly property color brightBlack: pickBright("black", black)
+    readonly property color brightRed: pickBright("red", red)
+    readonly property color brightGreen: pickBright("green", green)
+    readonly property color brightYellow: pickBright("yellow", yellow)
+    readonly property color brightBlue: pickBright("blue", blue)
+    readonly property color brightPurple: pickBright("purple", purple)
+    readonly property color brightCyan: pickBright("cyan", cyan)
+    readonly property color brightWhite: pickBright("white", white)
 
     readonly property real _effectiveMicaAlpha: root.reduceTransparency ? 1.0 : root.micaAlpha
     readonly property real _effectiveMicaBeta: root.reduceTransparency ? 1.0 : root.micaBeta
