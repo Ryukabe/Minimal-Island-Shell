@@ -7,16 +7,19 @@ import Quickshell.Io
 import "./services"
 import "./common"
 import "bar"
-import "clock"
-import "media"
+import "network"
+import "soundmedia"
+import "display"
+import "focusnotifications"
+import "trackpadmouse"
 import "appearance"
+import "general"
 import "motion" as MotionPage
 import "launcher"
 import "controlcenter"
 import "lockscreen"
-import "system"
-import "about"
 import "keybinds"
+import "about"
 import "../services"
 import "../styles"
 
@@ -96,7 +99,6 @@ Scope {
                 anchors.fill: parent
                 spacing: 0
 
-                // Sidebar
                 Rectangle {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 260
@@ -171,8 +173,6 @@ Scope {
                             }
                         }
 
-                        // Search box also owns the results list. While searching it
-                        // fills the space below it, and the section list is hidden.
                         SearchBox {
                             id: searchBox
                             Layout.fillWidth: true
@@ -195,15 +195,18 @@ Scope {
                             model: ListModel {
                                 id: allSections
                                 ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "top margin corner radius border notch mode height" }
-                                ListElement { sectionName: "Clock & Date"; icon: "schedule"; tag: "24-hour clock seconds format" }
-                                ListElement { sectionName: "Media"; icon: "graphic_eq"; tag: "mpris volume audio output" }
-                                ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent" }
+                                ListElement { sectionName: "Wi-Fi & Bluetooth"; icon: "wifi"; tag: "network wireless connect pair devices" }
+                                ListElement { sectionName: "Sound & Media"; icon: "graphic_eq"; tag: "volume output mpris visualizer" }
+                                ListElement { sectionName: "Displays"; icon: "desktop_windows"; tag: "resolution refresh rate scale transparency monitor" }
+                                ListElement { sectionName: "Focus & Notifications"; icon: "notifications"; tag: "peace mode do not disturb previews dnd" }
+                                ListElement { sectionName: "Trackpad & Mouse"; icon: "mouse"; tag: "sensitivity scroll tap click natural scrolling touchpad" }
+                                ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent wallpaper" }
+                                ListElement { sectionName: "General"; icon: "tune"; tag: "clock date time seconds startup login items" }
                                 ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
                                 ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
-                                ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles network wifi" }
+                                ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles grid" }
                                 ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
-                                ListElement { sectionName: "Keybinds"; icon: "keyboard"; tag: "hyprland shortcuts binds hotkeys rebind" }
-                                ListElement { sectionName: "System"; icon: "tune"; tag: "display resolution scale notifications toast dnd peace mode mouse touchpad cursor scrolling natural" }
+                                ListElement { sectionName: "Keyboard"; icon: "keyboard"; tag: "hyprland shortcuts binds hotkeys rebind" }
                                 ListElement { sectionName: "About"; icon: "info"; tag: "hardware power info sleep battery updates" }
                             }
 
@@ -298,7 +301,6 @@ Scope {
                     opacity: 0.3
                 }
 
-                // Content View area
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -319,14 +321,12 @@ Scope {
                         anchors.margins: Dimens.paddingLarge
                         spacing: Dimens.spacingMedium
 
-                        // Header Banner
                         SettingsHeader {
                             icon: allSections.get(sectionList.currentIndex).icon
                             title: allSections.get(sectionList.currentIndex).sectionName
                             subtitle: "Configure settings and options for " + allSections.get(sectionList.currentIndex).sectionName
                         }
 
-                        // Stacked Subviews (Each view has its own SettingsScrollView)
                         StackLayout {
                             id: pageStack
                             Layout.fillWidth: true
@@ -334,15 +334,18 @@ Scope {
                             currentIndex: sectionList.currentIndex
 
                             Bar {}
-                            Clock {}
-                            Media {}
+                            WifiBluetooth {}
+                            SoundMedia {}
+                            Display {}
+                            FocusNotifications {}
+                            TrackpadMouse {}
                             Appearance {}
+                            General {}
                             MotionPage.Motion {}
                             Launcher {}
                             ControlCenter {}
                             LockScreen {}
                             Keybinds {}
-                            System {}
                             About {}
                         }
                     }

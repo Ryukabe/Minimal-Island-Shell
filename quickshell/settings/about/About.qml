@@ -1,4 +1,4 @@
-// settings/system/About.qml
+// settings/system/About.qml (or settings/about/About.qml — see note below) — Power Profile switcher added
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
@@ -21,14 +21,17 @@ Item {
 
         SettingsSectionLabel { label: "Power" }
 
-        SettingsRow {
-            label: "Active Power Profile"
-            value: {
+        SettingsSegmentedRow {
+            label: "Power Profile"
+            options: PowerProfileService.profiles.map(p => p.name)
+            selectedValue: {
                 let match = PowerProfileService.profiles.find(p => p.id === PowerProfileService.activeProfile)
-                return match ? match.name.toUpperCase() : ""
+                return match ? match.name : ""
             }
-            showChevron: false
-            showDivider: false
+            onOptionSelected: (name) => {
+                let match = PowerProfileService.profiles.find(p => p.name === name)
+                if (match) PowerProfileService.setProfile(match.id)
+            }
         }
 
         SettingsSectionLabel { label: "Updates" }

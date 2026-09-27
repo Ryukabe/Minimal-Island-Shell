@@ -1,0 +1,3 @@
+module settings.wifibluetooth
+
+WifiBluetooth 1.0 WifiBluetooth.qml

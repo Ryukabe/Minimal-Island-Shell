@@ -8,10 +8,10 @@ hl.layer_rule({
 
 -- AGS
 hl.layer_rule({
-    match = { namespace = "^ags-top-bar$" },
+    match        = { namespace = "^ags-top-bar$" },
     blur         = true,
     ignore_alpha = 0.5,
-    animation = "slide down",
+    no_anim      = true,
 })
 
 hl.layer_rule({
@@ -30,7 +30,7 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
-    match = { namespace = "^island-panel$" },
+    match = { namespace = "^ags-island-panel$" },
     animation = "slide top",
 })
 

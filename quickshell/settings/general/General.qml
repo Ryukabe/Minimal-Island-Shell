@@ -1,4 +1,4 @@
-// settings/clock/Clock.qml
+// settings/general/General.qml — merge of Clock.qml + System.qml's Startup Applications group
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -11,8 +11,8 @@ Item {
 
     readonly property var dateLabels: ["Off", "Short", "Long"]
     readonly property var ampmLabels: ["AM", "am"]
+    property string newAppCommand: ""
 
-    // Preview only ticks while this page is actually visible.
     SystemClock {
         id: previewClock
         enabled: root.visible
@@ -132,6 +132,86 @@ Item {
                 checked: ShellState.timerToastShowRecordingIndicator
                 showDivider: false
                 onToggled: (val) => ShellState.timerToastShowRecordingIndicator = val
+            }
+        }
+
+        SettingsGroup {
+            title: "Startup Applications"
+            description: "Manage applications that launch automatically at login"
+            icon: "rocket_launch"
+            expanded: false
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 36
+                radius: Dimens.radiusSmall
+                color: Colors.subBgMica
+                border.color: Colors.border
+                border.width: 1
+
+                TextInput {
+                    id: newAppInput
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    color: Colors.fg
+                    font.family: Fonts.mono
+                    font.pixelSize: Dimens.fontSizeSm
+                    onTextChanged: root.newAppCommand = text
+                    onAccepted: {
+                        if (root.newAppCommand.trim().length > 0) {
+                            AutostartService.addApp(root.newAppCommand.trim())
+                            text = ""
+                        }
+                    }
+                    Text {
+                        visible: parent.text.length === 0
+                        text: "Command to launch, e.g. spotify"
+                        color: Colors.subtext
+                        font: parent.font
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.bottomMargin: Dimens.spacingSmall
+
+                Item { Layout.fillWidth: true }
+
+                SettingsButton {
+                    primary: true
+                    text: "Add"
+                    enabled: root.newAppCommand.trim().length > 0
+                    onClicked: {
+                        AutostartService.addApp(root.newAppCommand.trim())
+                        newAppInput.text = ""
+                    }
+                }
+            }
+
+            SettingsSectionLabel { label: "Starting Apps" }
+
+            Repeater {
+                model: AutostartService.apps
+                delegate: RowLayout {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: Dimens.spacingSmall
+
+                    Text {
+                        text: modelData.command
+                        color: Colors.fg
+                        font.family: Fonts.mono
+                        font.pixelSize: Dimens.fontSizeSm
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+
+                    SettingsButton {
+                        text: "Remove"
+                        onClicked: AutostartService.removeApp(modelData.command)
+                    }
+                }
             }
         }
     }

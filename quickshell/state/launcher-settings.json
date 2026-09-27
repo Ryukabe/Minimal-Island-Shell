@@ -1,8 +1,8 @@
 {
   "maxResults": 8,
   "matchMode": "Fuzzy",
-  "searchDescriptions": true,
-  "showRecentsFirst": true,
+  "searchDescriptions": false,
+  "showRecentsFirst": false,
   "recentLimit": 10,
   "recentIds": [
     "nwg-look"
@@ -10,7 +10,7 @@
   "showIcons": true,
   "animateResults": true,
   "launcherWidth": "Normal",
-  "shrinkForFewResults": true,
+  "shrinkForFewResults": false,
   "inlineCalculator": true,
   "clipboardHistory": true,
   "clipboardLimit": 100,
@@ -18,13 +18,13 @@
     "commands": true,
     "web": true,
     "files": true,
-    "system": true,
+    "system": false,
     "units": true,
     "emoji": true,
     "snippets": true,
     "notes": true
   },
   "triggerEmoji": ";",
-  "triggerSnippets": "\"",
+  "triggerSnippets": ".",
   "triggerNotes": "-"
 }

@@ -6,7 +6,6 @@ singleton BluetoothService 1.0 BluetoothService.qml
 singleton BrightnessService 1.0 BrightnessService.qml
 singleton CaffeineService 1.0 CaffeineService.qml
 singleton ClipboardService 1.0 ClipboardService.qml
-singleton FocusService 1.0 FocusService.qml
 singleton NightLightService 1.0 NightLightService.qml
 singleton NotificationService 1.0 NotificationService.qml
 singleton PolkitService 1.0 PolkitService.qml

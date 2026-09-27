@@ -1,3 +1,4 @@
+// components/control-center/subviews/WifiSubView.qml
 import QtQuick
 import "../../../styles"
 import "../../../services"
@@ -9,6 +10,7 @@ Item {
 
     signal backRequested()
 
+    property bool showBackButton: true
     property string selectedSsid: ""
     property bool showingPasswordInput: false
     readonly property var availableNetworks: WifiService.networks.filter(function(n) { return n.ssid !== WifiService.ssid })
@@ -49,6 +51,7 @@ Item {
                 font.family: Fonts.icon
                 font.pixelSize: Dimens.fontSizeLg
                 color: Colors.fg
+                visible: root.showBackButton
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -73,8 +76,8 @@ Item {
                 font.pixelSize: Dimens.fontSize15
                 font.bold: true
                 color: Colors.fg
-                anchors.left: backBtn.right
-                anchors.leftMargin: 12
+                anchors.left: root.showBackButton ? backBtn.right : parent.left
+                anchors.leftMargin: root.showBackButton ? 12 : 0
                 anchors.verticalCenter: parent.verticalCenter
                 elide: Text.ElideRight
                 width: parent.width - 140

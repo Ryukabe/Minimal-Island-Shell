@@ -13,6 +13,7 @@ Item {
 
     signal backRequested()
 
+    property bool showBackButton: true
     readonly property var deviceList: BluetoothService.availableDevices.concat(BluetoothService.connectedDevices)
     readonly property var connectedList: root.deviceList.filter(function(d) { return d.connected })
     readonly property var availableList: root.deviceList.filter(function(d) { return !d.connected })
@@ -45,6 +46,7 @@ Item {
                     font.family: Fonts.icon
                     font.pixelSize: Dimens.fontSizeLg
                     color: Colors.fg
+                    visible: root.showBackButton
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
 
@@ -62,8 +64,8 @@ Item {
                     font.pixelSize: Dimens.fontSize15
                     font.bold: true
                     color: Colors.fg
-                    anchors.left: backBtn.right
-                    anchors.leftMargin: 12
+                    anchors.left: root.showBackButton ? backBtn.right : parent.left
+                    anchors.leftMargin: root.showBackButton ? 12 : 0
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
