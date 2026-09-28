@@ -10,12 +10,11 @@ import "../../styles"
 Item {
     id: root
 
-    property real fontSize: 15
     property real spacingUnit: 4
 
     property string activeDropdown: ""
 
-    readonly property var bodyFontOptions: ["Inter", "Roboto", "JetBrains Mono", "Sans-Serif"]
+    readonly property var bodyFontOptions: ["SF Pro Text", "Inter", "Roboto", "JetBrains Mono", "Sans-Serif"]
     readonly property var displayFontOptions: ["Cabinet Grotesk", "Inter Display", "Outfit", "SF Pro Display"]
     readonly property var iconStyles: ["Rounded", "Outlined", "Sharp"]
     readonly property var colorKeys: [
@@ -100,6 +99,8 @@ Item {
         }
 
         // Group 2: Typography & Style
+        // All values below live on ShellState (persisted by SettingsStore).
+        // Fonts.qml and Dimens.qml read them — never write to those directly.
         SettingsGroup {
             title: "Typography & Icon Style"
             description: "Font families, base scale, and Material Symbols styling"
@@ -108,20 +109,20 @@ Item {
 
             SettingsSliderRow {
                 label: "Font size"
-                from: 10; to: 24; stepSize: 1
-                value: root.fontSize
+                from: 12; to: 18; stepSize: 1
+                value: ShellState.fontSizeBase
                 unit: " px"
-                onMoved: (val) => root.fontSize = val
+                onMoved: (val) => ShellState.fontSizeBase = val
             }
 
             SettingsDropdownRow {
                 label: "Body font"
                 options: root.bodyFontOptions
-                selectedValue: Fonts.text
+                selectedValue: ShellState.fontBody
                 isOpen: root.activeDropdown === "bodyFont"
                 onToggled: root.activeDropdown = (root.activeDropdown === "bodyFont" ? "" : "bodyFont")
                 onOptionSelected: (value) => {
-                    Fonts.text = value
+                    ShellState.fontBody = value
                     root.activeDropdown = ""
                 }
             }
@@ -129,11 +130,11 @@ Item {
             SettingsDropdownRow {
                 label: "Display font"
                 options: root.displayFontOptions
-                selectedValue: Fonts.display
+                selectedValue: ShellState.fontDisplay
                 isOpen: root.activeDropdown === "displayFont"
                 onToggled: root.activeDropdown = (root.activeDropdown === "displayFont" ? "" : "displayFont")
                 onOptionSelected: (value) => {
-                    Fonts.display = value
+                    ShellState.fontDisplay = value
                     root.activeDropdown = ""
                 }
             }
@@ -141,22 +142,22 @@ Item {
             SettingsSegmentedRow {
                 label: "Icon Style"
                 options: root.iconStyles
-                selectedValue: Fonts.iconStyle
-                onOptionSelected: (value) => Fonts.iconStyle = value
+                selectedValue: ShellState.iconStyle
+                onOptionSelected: (value) => ShellState.iconStyle = value
             }
 
             SettingsSliderRow {
                 label: "Icon Weight"
                 from: 100; to: 700; stepSize: 50
-                value: Fonts.iconWeight
-                onMoved: (val) => Fonts.iconWeight = val
+                value: ShellState.iconWeight
+                onMoved: (val) => ShellState.iconWeight = val
             }
 
             SettingsToggleRow {
                 label: "Filled Icons"
-                checked: Fonts.iconFill
+                checked: ShellState.iconFilled
                 showDivider: false
-                onToggled: (val) => Fonts.iconFill = val
+                onToggled: (val) => ShellState.iconFilled = val
             }
         }
 

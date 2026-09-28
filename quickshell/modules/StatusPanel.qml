@@ -232,7 +232,7 @@ Rectangle {
                             anchors.centerIn: parent
                             text: Qt.formatDateTime(dayDate, "d")
                             color: isToday ? Colors.bg : (isFriday ? Colors.red : Colors.fg)
-                            font.pixelSize: isToday ? 12 : 11
+                            font.pixelSize: isToday ? Dimens.fontSizeSm : Dimens.fontSize11
                             font.bold: isToday
                         }
                     }

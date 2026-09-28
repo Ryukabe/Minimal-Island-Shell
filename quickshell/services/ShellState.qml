@@ -14,6 +14,16 @@ QtObject {
     property bool ignoreHover: false
     property bool settingsOpen: false
 
+    // ================= TYPOGRAPHY =================
+    // Single source of truth for fonts/icons. Fonts.qml and Dimens.qml
+    // read these; Appearance.qml writes them; SettingsStore persists them.
+    property real fontSizeBase: 15            // 15 = 1.0 scale for Dimens.fontSize*
+    property string fontBody: "SF Pro Text"
+    property string fontDisplay: "SF Pro Display"
+    property string iconStyle: "Rounded"      // "Rounded" | "Outlined" | "Sharp"
+    property int iconWeight: 400
+    property bool iconFilled: false
+
     // ================= BAR & ISLAND PROPERTIES =================
     property real islandTopMargin: 5
     property real islandCornerRadius: 12
@@ -76,7 +86,7 @@ QtObject {
 
     readonly property string clockDateFormat: clockDateStyle === 2 ? "ddd d MMM" : "ddd d"
 
-        // ================= MOTION & ANIMATIONS =================
+    // ================= MOTION & ANIMATIONS =================
     property bool motionReduced: false
     property real motionMovementMs: 480
     property real motionFadeMs: 220

@@ -67,7 +67,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             font {
                 family: Fonts.display
-                pixelSize: 13
+                pixelSize: Dimens.fontSizeBase
                 weight: 500
             }
         }
@@ -78,7 +78,7 @@ Item {
             color: Colors.fg
             font {
                 family: Fonts.display
-                pixelSize: 13
+                pixelSize: Dimens.fontSizeBase
                 weight: 700
             }
         }
@@ -87,7 +87,7 @@ Item {
         Text {
             text: "timer"
             font.family: Fonts.icon
-            font.pixelSize: 14
+            font.pixelSize: Dimens.fontSizeMd
             color: TimerService.running || TimerService.secondsRemaining > 0 ? Colors.accent : Colors.fgMuted
             Layout.alignment: Qt.AlignVCenter
             visible: ShellState.clockShowTimerIcon && (TimerService.secondsRemaining > 0 || TimerService.running)

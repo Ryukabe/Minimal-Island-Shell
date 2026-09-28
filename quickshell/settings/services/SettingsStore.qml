@@ -1,4 +1,4 @@
-// settings/services/SettingsStore.qml — persists all Bar/Island/Motion/panel-size/Clock settings to disk
+// settings/services/SettingsStore.qml — persists all Bar/Island/Motion/panel-size/Clock/Typography settings to disk
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -59,13 +59,19 @@ Item {
             timerToastShowRecordingIndicator: true,
             notificationPreviewsEnabled: true,
             focusModeEnabled: false,
-            activeFocusMode: "Do Not Disturb"
+            activeFocusMode: "Do Not Disturb",
+            fontSizeBase: 15,
+            fontBody: "SF Pro Text",
+            fontDisplay: "SF Pro Display",
+            iconStyle: "Rounded",
+            iconWeight: 400,
+            iconFilled: false
         }
     }
 
     // Bar/Island/module-sizing subset of _defaults() — lets Bar.qml's Reset
     // button reset just its own page instead of also nuking Motion/Clock/
-    // Focus state along with it.
+    // Focus/Typography state along with it.
     readonly property var barKeys: [
         "islandTopMargin", "islandCornerRadius", "islandBorderWidth",
         "islandClickOutsideDismiss", "islandNotchMode", "islandNotchFlare",
@@ -122,9 +128,9 @@ Item {
     function resetBarDefaults() { resetKeys(root.barKeys) }
 
     // Full reset — every SettingsStore-backed key (Bar/Island/Motion/Clock/
-    // Peace Mode/notification previews) in one go. Used by About's global
-    // "Reset All to Defaults" button, as opposed to resetBarDefaults()
-    // above which stays scoped to just the Bar page.
+    // Peace Mode/notification previews/Typography) in one go. Used by
+    // About's global "Reset All to Defaults" button, as opposed to
+    // resetBarDefaults() above which stays scoped to just the Bar page.
     function resetAllDefaults() {
         root._applyToShellState(root._defaults())
         root._scheduleSave()
@@ -229,5 +235,11 @@ Item {
         function onNotificationPreviewsEnabledChanged() { root._scheduleSave() }
         function onFocusModeEnabledChanged() { root._scheduleSave() }
         function onActiveFocusModeChanged() { root._scheduleSave() }
+        function onFontSizeBaseChanged() { root._scheduleSave() }
+        function onFontBodyChanged() { root._scheduleSave() }
+        function onFontDisplayChanged() { root._scheduleSave() }
+        function onIconStyleChanged() { root._scheduleSave() }
+        function onIconWeightChanged() { root._scheduleSave() }
+        function onIconFilledChanged() { root._scheduleSave() }
     }
 }

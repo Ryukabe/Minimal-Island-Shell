@@ -35,7 +35,7 @@ Rectangle {
                 text: root.icon
                 color: Colors.accent
                 font.family: Fonts.icon
-                font.pixelSize: 22
+                font.pixelSize: Dimens.fontSizeXxl
                 transformOrigin: Item.Center
 
                 SequentialAnimation {

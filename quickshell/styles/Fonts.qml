@@ -1,31 +1,33 @@
 // styles/Fonts.qml
 pragma Singleton
 import QtQuick
+import "../services"
 
+// Read-only view of the typography state. The source of truth is
+// ShellState (persisted by SettingsStore) — write there, never here.
 QtObject {
-    property string display: "SF Pro Display"
-    property string text: "SF Pro Text"
+    readonly property string display: ShellState.fontDisplay
+    readonly property string text: ShellState.fontBody
     readonly property string mono: "SF Pro Mono"
     readonly property string nerdFont: "JetBrains Mono Nerd Font Propo"
 
-    // Icon style — now a real picker in Appearance settings. Valid values:
-    // "Rounded", "Outlined", "Sharp".
-    property string iconStyle: "Rounded"
+    // Valid iconStyle values: "Rounded", "Outlined", "Sharp".
+    readonly property string iconStyle: ShellState.iconStyle
     readonly property string icon: "Material Symbols " + iconStyle
 
-    // Icon weight/fill — now live sliders in Appearance settings.
-    property int iconWeight: 400
-    property int iconFill: 0
+    readonly property int iconWeight: ShellState.iconWeight
+    readonly property int iconFill: ShellState.iconFilled ? 1 : 0
 
+    // Material Symbols axis tags: FILL, wght, GRAD, opsz (FILL/GRAD uppercase).
     readonly property var iconAxes: ({
-        "fill": iconFill,
+        "FILL": iconFill,
         "wght": iconWeight,
         "GRAD": 0,
         "opsz": 24
     })
 
     readonly property var iconAxesFilled: ({
-        "fill": 1,
+        "FILL": 1,
         "wght": iconWeight,
         "GRAD": 0,
         "opsz": 24

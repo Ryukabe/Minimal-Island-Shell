@@ -13,6 +13,7 @@ Item {
 
     signal backRequested()
 
+    property bool showBackButton: true
     readonly property var focusModes: [
         { name: "Do Not Disturb", icon: "do_not_disturb_on", desc: "Silence all notifications", color: "#8E8E93" },
         { name: "Work",           icon: "work",              desc: "Disable animations & flatten bar", color: "#0A84FF" },
@@ -51,6 +52,7 @@ Item {
                     font.family: Fonts.icon
                     font.pixelSize: Dimens.fontSizeLg
                     color: Colors.fg
+                    visible: root.showBackButton
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
 
@@ -68,11 +70,13 @@ Item {
                     font.pixelSize: Dimens.fontSize15
                     font.bold: true
                     color: Colors.fg
-                    anchors.left: backBtn.right
-                    anchors.leftMargin: 12
+                    anchors.left: root.showBackButton ? backBtn.right : parent.left
+                    anchors.leftMargin: root.showBackButton ? 12 : 0
                     anchors.verticalCenter: parent.verticalCenter
                 }
-            }            Rectangle {
+            }
+
+            Rectangle {
                 width: parent.width
                 height: 48
                 radius: ShellState.islandCornerRadius

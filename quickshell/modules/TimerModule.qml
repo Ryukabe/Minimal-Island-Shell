@@ -56,7 +56,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     text: TimerService.formatTime(TimerService.secondsRemaining)
                     font.family: Fonts.text
-                    font.pixelSize: 36
+                    font.pixelSize: Dimens.fontSize36
                     font.bold: true
                     color: Colors.fg
                 }

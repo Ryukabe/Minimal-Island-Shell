@@ -58,7 +58,7 @@ Rectangle {
                         text: root.icon
                         color: Colors.accent
                         font.family: Fonts.icon
-                        font.pixelSize: 18
+                        font.pixelSize: Dimens.fontSize18
                         font.styleName: Fonts.iconStyle
                     }
                 }
@@ -99,7 +99,7 @@ Rectangle {
                     text: root.expanded ? "expand_less" : "expand_more"
                     color: Colors.fgMuted
                     font.family: Fonts.icon
-                    font.pixelSize: 22
+                    font.pixelSize: Dimens.fontSizeXxl
                     font.styleName: Fonts.iconStyle
                 }
             }

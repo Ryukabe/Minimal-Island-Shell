@@ -32,10 +32,19 @@ QtObject {
     readonly property int marginMedium: 12
     readonly property int marginLg: marginMedium
 
+    // --- Font scale ---
+    // 15 px (the slider's baseline) = 1.0. Every fontSize* token below is
+    // its design value multiplied by this scale, so the Appearance
+    // "Font size" slider moves all text together.
+    readonly property real fontScale: ShellState.fontSizeBase / 15
+    function scaledFont(px) {
+        return Math.max(1, Math.round(px * fontScale))
+    }
+
     // Font Sizes
-    readonly property int fontSizeSm: 12
-    readonly property int fontSizeMd: 14
-    readonly property int fontSizeLg: 16
+    readonly property int fontSizeSm: scaledFont(12)
+    readonly property int fontSizeMd: scaledFont(14)
+    readonly property int fontSizeLg: scaledFont(16)
 
     // Component Sizes
     readonly property int barHeight: 40
@@ -47,16 +56,19 @@ QtObject {
     readonly property int radiusXXLarge: 20
 
     // Additional font sizes
-    readonly property int fontSizeXs: 9
-    readonly property int fontSizeXSm: 10
-    readonly property int fontSizeBase: 13
-    readonly property int fontSize15: 15
-    readonly property int fontSizeXl: 20
-    readonly property int fontSizeXxl: 22
-    readonly property int fontSizeXxxl: 24
-    readonly property int fontSizeHuge: 28
-    readonly property int fontSizeMassive: 32
-    readonly property int fontSizeDisplay: 64
+    readonly property int fontSizeXs: scaledFont(9)
+    readonly property int fontSizeXSm: scaledFont(10)
+    readonly property int fontSize11: scaledFont(11)
+    readonly property int fontSizeBase: scaledFont(13)
+    readonly property int fontSize15: scaledFont(15)
+    readonly property int fontSize18: scaledFont(18)
+    readonly property int fontSizeXl: scaledFont(20)
+    readonly property int fontSizeXxl: scaledFont(22)
+    readonly property int fontSizeXxxl: scaledFont(24)
+    readonly property int fontSizeHuge: scaledFont(28)
+    readonly property int fontSizeMassive: scaledFont(32)
+    readonly property int fontSize36: scaledFont(36)
+    readonly property int fontSizeDisplay: scaledFont(64)
 
     // Island radius
     readonly property int islandRadius: 15

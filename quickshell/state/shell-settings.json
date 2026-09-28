@@ -40,5 +40,11 @@
   "timerToastShowRecordingIndicator": false,
   "notificationPreviewsEnabled": true,
   "focusModeEnabled": false,
-  "activeFocusMode": "Gaming"
+  "activeFocusMode": "Do Not Disturb",
+  "fontSizeBase": 15,
+  "fontBody": "SF Pro Text",
+  "fontDisplay": "SF Pro Display",
+  "iconStyle": "Rounded",
+  "iconWeight": 400,
+  "iconFilled": false
 }

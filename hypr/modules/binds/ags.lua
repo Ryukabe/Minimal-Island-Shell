@@ -1,5 +1,8 @@
--- Power Menu
-hl.bind("SUPER + ESCAPE", hl.dsp.exec_cmd("ags request power-toggle"))
+-- Dashboard
+hl.bind("SUPER + SHIFT + grave", hl.dsp.exec_cmd("ags request toggle-dashboard"))
+
+-- Quicksettings
+hl.bind("SUPER + grave", hl.dsp.exec_cmd("ags request toggle-quicksettings"))
 
 -- Brightness
 hl.bind("XF86MonBrightnessUp",               hl.dsp.exec_cmd("brightnessctl s +5%"), { locked = true, repeating = true })

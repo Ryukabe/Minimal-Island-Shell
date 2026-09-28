@@ -213,7 +213,7 @@ FocusScope {
                     anchors.centerIn: parent
                     text: "search"
                     font.family: Fonts.icon
-                    font.pixelSize: 16
+                    font.pixelSize: Dimens.fontSizeLg
                     font.variableAxes: Fonts.iconAxes
                     font.features: { "liga": 1 }
                     color: switcherRoot.searchActive ? Colors.accent : Colors.fg

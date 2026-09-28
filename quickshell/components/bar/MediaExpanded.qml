@@ -60,7 +60,7 @@ Rectangle {
             Text {
                 text: AudioService.trackTitle || "No Media Playing"
                 font.family: Fonts.text
-                font.pixelSize: 13
+                font.pixelSize: Dimens.fontSizeBase
                 font.bold: true
                 color: Colors.fg
                 elide: Text.ElideRight
@@ -70,7 +70,7 @@ Rectangle {
             Text {
                 text: AudioService.artistName || "Unknown Artist"
                 font.family: Fonts.text
-                font.pixelSize: 11
+                font.pixelSize: Dimens.fontSize11
                 color: Colors.fgMuted
                 elide: Text.ElideRight
                 Layout.fillWidth: true
@@ -86,7 +86,7 @@ Rectangle {
                 Text {
                     text: "skip_previous"
                     font.family: Fonts.icon
-                    font.pixelSize: 20
+                    font.pixelSize: Dimens.fontSizeXl
                     font.variableAxes: Fonts.iconAxes
                     color: prevMouse.containsMouse ? Colors.accent : Colors.fg
 
@@ -102,7 +102,7 @@ Rectangle {
                 Text {
                     text: AudioService.isPlaying ? "pause" : "play_arrow"
                     font.family: Fonts.icon
-                    font.pixelSize: 24
+                    font.pixelSize: Dimens.fontSizeXxxl
                     font.variableAxes: Fonts.iconAxesFilled
                     color: Colors.accent
 
@@ -118,7 +118,7 @@ Rectangle {
                 Text {
                     text: "skip_next"
                     font.family: Fonts.icon
-                    font.pixelSize: 20
+                    font.pixelSize: Dimens.fontSizeXl
                     font.variableAxes: Fonts.iconAxes
                     color: nextMouse.containsMouse ? Colors.accent : Colors.fg
 

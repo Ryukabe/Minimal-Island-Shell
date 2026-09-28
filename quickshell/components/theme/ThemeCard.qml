@@ -13,12 +13,25 @@ Item {
     property bool isHovered: false
     signal clicked()
 
-    readonly property bool isRaised: isSelected || isHovered
+    readonly property bool isRaised: isSelected 
 
     // Visual amplitude — how far each state pushes, not how fast.
     // Selection reads as more pronounced than a passing hover.
     readonly property real liftY: isSelected ? -6 : (isHovered ? -4 : 0)
     readonly property real boxScale: isSelected ? 1.035 : (isHovered ? 1.02 : 1.0)
+
+    // Whether to use spring-based motion or plain easing, per ShellState settings.
+    readonly property bool useSpring: ShellState.motionSpringEnabled && !ShellState.motionReduced
+
+    // Animated mirrors of liftY/boxScale. Each gets exactly ONE Behavior with
+    // a fixed animation type — QML forbids reassigning a Behavior's animation
+    // object after creation, so tier/spring-vs-ease differences are driven
+    // through ordinary rebindable properties (spring/damping/mass/duration)
+    // instead of swapping animation instances.
+    property real liftYSpring: card.liftY
+    property real liftYEase: card.liftY
+    property real boxScaleSpring: card.boxScale
+    property real boxScaleEase: card.boxScale
 
     property var palette: ({})
     property bool loaded: false
@@ -70,67 +83,44 @@ readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
 
     z: card.isRaised ? 3 : 1
 
-    // ---- hover-tier lift/scale: light, low-bounce ----
-    SpringAnimation {
-        id: hoverLiftSpring
-        spring: Motion.hoverSpring
-        damping: Motion.hoverDamping
-        mass: Motion.hoverMass
-        epsilon: Motion.epsilon
+    // ---- lift (translate y): one fixed-type Behavior per motion mode ----
+    Behavior on liftYSpring {
+        enabled: card.useSpring
+        SpringAnimation {
+            spring: card.isSelected ? Motion.selectSpring : Motion.hoverSpring
+            damping: card.isSelected ? Motion.selectDamping : Motion.hoverDamping
+            mass: card.isSelected ? Motion.selectMass : Motion.hoverMass
+            epsilon: Motion.epsilon
+        }
     }
-    NumberAnimation {
-        id: hoverLiftEase
-        duration: ShellState.motionDuration(Motion.hoverMs)
-        easing.type: Easing.OutCubic
-    }
-    SpringAnimation {
-        id: hoverScaleSpring
-        spring: Motion.hoverSpring
-        damping: Motion.hoverDamping
-        mass: Motion.hoverMass
-        epsilon: Motion.epsilon
-    }
-    NumberAnimation {
-        id: hoverScaleEase
-        duration: ShellState.motionDuration(Motion.hoverMs)
-        easing.type: Easing.OutCubic
+    Behavior on liftYEase {
+        enabled: !card.useSpring
+        NumberAnimation {
+            duration: ShellState.motionDuration(card.isSelected ? Motion.selectMs : Motion.hoverMs)
+            easing.type: Easing.OutCubic
+        }
     }
 
-    // ---- select-tier lift/scale: heavier, more travel/bounce ----
-    SpringAnimation {
-        id: selectLiftSpring
-        spring: Motion.selectSpring
-        damping: Motion.selectDamping
-        mass: Motion.selectMass
-        epsilon: Motion.epsilon
+    // ---- scale: one fixed-type Behavior per motion mode ----
+    Behavior on boxScaleSpring {
+        enabled: card.useSpring
+        SpringAnimation {
+            spring: card.isSelected ? Motion.selectSpring : Motion.hoverSpring
+            damping: card.isSelected ? Motion.selectDamping : Motion.hoverDamping
+            mass: card.isSelected ? Motion.selectMass : Motion.hoverMass
+            epsilon: Motion.epsilon
+        }
     }
-    NumberAnimation {
-        id: selectLiftEase
-        duration: ShellState.motionDuration(Motion.selectMs)
-        easing.type: Easing.OutCubic
-    }
-    SpringAnimation {
-        id: selectScaleSpring
-        spring: Motion.selectSpring
-        damping: Motion.selectDamping
-        mass: Motion.selectMass
-        epsilon: Motion.epsilon
-    }
-    NumberAnimation {
-        id: selectScaleEase
-        duration: ShellState.motionDuration(Motion.selectMs)
-        easing.type: Easing.OutCubic
+    Behavior on boxScaleEase {
+        enabled: !card.useSpring
+        NumberAnimation {
+            duration: ShellState.motionDuration(card.isSelected ? Motion.selectMs : Motion.hoverMs)
+            easing.type: Easing.OutCubic
+        }
     }
 
     transform: Translate {
-        y: card.liftY
-        Behavior on y {
-            animation: {
-                var tier = card.isSelected ? (ShellState.motionSpringEnabled && !ShellState.motionReduced ? selectLiftSpring : selectLiftEase)
-                                            : (ShellState.motionSpringEnabled && !ShellState.motionReduced ? hoverLiftSpring : hoverLiftEase)
-                return tier
-            }
-        }
+        y: card.useSpring ? card.liftYSpring : card.liftYEase
     }
 
     ColumnLayout {
@@ -148,14 +138,7 @@ readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
             border.width: card.isApplied ? 2 : (card.isSelected ? 1.5 : 0)
             border.color: card.isApplied ? card.previewAccent : Qt.rgba(1, 1, 1, 0.4)
 
-            scale: card.boxScale
-            Behavior on scale {
-                animation: {
-                    var tier = card.isSelected ? (ShellState.motionSpringEnabled && !ShellState.motionReduced ? selectScaleSpring : selectScaleEase)
-                                                : (ShellState.motionSpringEnabled && !ShellState.motionReduced ? hoverScaleSpring : hoverScaleEase)
-                    return tier
-                }
-            }
+            scale: card.useSpring ? card.boxScaleSpring : card.boxScaleEase
 
             // Internal Accent Line / Mock Color Bars
             RowLayout {
@@ -197,7 +180,7 @@ readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
                     anchors.centerIn: parent
                     text: "check"
                     font.family: Fonts.icon
-                    font.pixelSize: 13
+                    font.pixelSize: Dimens.fontSizeBase
                     font.variableAxes: Fonts.iconAxes
                     font.features: { "liga": 1 }
                     color: card.previewBg
