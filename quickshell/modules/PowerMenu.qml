@@ -120,7 +120,7 @@ Item {
                 height: 52
                 radius: root._tileRadius
                 color: index === root.selectedIndex ? Colors.accent : Colors.subBgMica
-                border.width: 1
+                border.width: 0
                 border.color: Colors.border
 
                 scale: index === root.selectedIndex ? 1.15 : 1.0
@@ -153,7 +153,7 @@ Item {
                     font.pixelSize: Dimens.fontSizeXl
                     font.variableAxes: Fonts.iconAxes
                     font.features: { "liga": 1, "dlig": 1 }
-                    color: parent.index === root.selectedIndex ? Colors.fg : Colors.fgMuted
+                    color: parent.index === root.selectedIndex ? Colors.bg : Colors.fg
                 }
 
                 MouseArea {

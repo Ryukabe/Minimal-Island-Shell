@@ -5,6 +5,7 @@
   "showRecentsFirst": false,
   "recentLimit": 10,
   "recentIds": [
+    "obsidian",
     "nwg-look"
   ],
   "showIcons": true,

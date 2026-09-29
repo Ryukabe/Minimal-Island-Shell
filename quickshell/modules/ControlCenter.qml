@@ -45,8 +45,9 @@ Item {
             case "focus": return focusSubviewComp
             case "powerprofile": return powerProfileSubviewComp
             case "caffeine": return caffeineSubviewComp
-            case "volume": return volumeSubviewComp
             case "brightness": return brightnessSubviewComp
+            case "volume": return volumeSubviewComp
+            case "audiosink": return audioSinkSubviewComp
             default: return mainViewComp
             }
         }
@@ -148,11 +149,19 @@ Item {
 
     Component {
         id: volumeSubviewComp
-        VolumeSubView { onBackRequested: root.activeSubview = "" }
+        VolumeSubView {
+            onBackRequested: root.activeSubview = ""
+            onSinkRequested: root.activeSubview = "audiosink"
+        }
     }
 
     Component {
         id: brightnessSubviewComp
         BrightnessSubView { onBackRequested: root.activeSubview = "" }
+    }
+
+    Component {
+        id: audioSinkSubviewComp
+        AudioSinkSubView { onBackRequested: root.activeSubview = "volume" }
     }
 }

@@ -52,19 +52,80 @@ Item {
             }
         }
 
-        Rectangle {
+        // ---- Empty state ----
+        Text {
+            visible: VolumeService.outputSinks.length === 0
             width: parent.width
-            height: 120
-            radius: ShellState.islandCornerRadius
-            color: Colors.subBgMica
-            border.width: 1
-            border.color: Colors.border
+            horizontalAlignment: Text.AlignHCenter
+            text: "No output devices found"
+            font.family: Fonts.text
+            font.pixelSize: Dimens.fontSizeSm
+            color: Colors.fgMuted
+        }
 
-            Text {
-                anchors.centerIn: parent
-                text: "Output device switching isn't wired up yet"
-                font.pixelSize: Dimens.fontSizeSm
-                color: Colors.fgMuted
+        // ---- Device list ----
+        Repeater {
+            model: VolumeService.outputSinks
+
+            delegate: Rectangle {
+                id: row
+                required property var modelData
+                readonly property bool isDefault: VolumeService.isDefaultSink(row.modelData)
+
+                width: contentColumn.width
+                height: 56
+                radius: ShellState.islandCornerRadius
+                color: Colors.subBgMica
+                border.width: row.isDefault ? 2 : 1
+                border.color: row.isDefault ? Colors.accent : Colors.border
+
+                Behavior on border.color {
+                    ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: VolumeService.setDefaultSink(row.modelData)
+                }
+
+                Text {
+                    id: deviceIcon
+                    text: row.isDefault ? "radio_button_checked" : "radio_button_unchecked"
+                    font.family: Fonts.icon
+                    font.pixelSize: Dimens.fontSizeXl
+                    font.variableAxes: Fonts.iconAxes
+                    color: row.isDefault ? Colors.accent : Colors.fgMuted
+                    anchors.left: parent.left
+                    anchors.leftMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Text {
+                    text: VolumeService.sinkLabel(row.modelData)
+                    font.family: Fonts.text
+                    font.pixelSize: Dimens.fontSizeSm
+                    font.bold: row.isDefault
+                    color: Colors.fg
+                    elide: Text.ElideRight
+                    anchors.left: deviceIcon.right
+                    anchors.leftMargin: 12
+                    anchors.right: defaultLabel.left
+                    anchors.rightMargin: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Text {
+                    id: defaultLabel
+                    visible: row.isDefault
+                    text: "Default"
+                    font.family: Fonts.text
+                    font.pixelSize: Dimens.fontSizeXs
+                    color: Colors.accent
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
     }

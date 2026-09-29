@@ -12,13 +12,24 @@ Singleton {
     readonly property int percent: sink ? Math.round(sink.audio.volume * 100) : 0
     readonly property bool muted: sink ? sink.audio.muted : false
 
+    // ---- Per-app mixer: playback streams only (Spotify, Firefox, ...) ----
+    readonly property var appStreams: Pipewire.nodes.values.filter(
+        n => n.isStream && !n.isSink
+    )
+
+    // ---- Output devices: real sinks (speakers, headphones, HDMI), not app streams ----
+    readonly property var outputSinks: Pipewire.nodes.values.filter(
+        n => n.isSink && !n.isStream
+    )
+
     PwObjectTracker {
         objects: [Pipewire.defaultAudioSink]
     }
 
-    // no more blanket onPercentChanged/onMutedChanged watchers —
-    // flashPage is now only called explicitly from the keyboard-driven
-    // functions below, so slider drags (setPercent) don't hijack the island
+    // Streams must be bound before their audio.volume / audio.muted are usable
+    PwObjectTracker {
+        objects: root.appStreams
+    }
 
     function _setVolume(pct) {
         if (!sink) return
@@ -52,8 +63,48 @@ Singleton {
 
     function setPercent(pct) {
         _setVolume(pct)
-        // deliberately no flashPage here — this is called from the
-        // Control Center slider drag, which should stay on the control page
+        // deliberately no flashPage here — called from slider drags,
+        // which should stay on the control page
+    }
+
+    // ---- Per-app helpers (no flashPage: driven from the subview) ----
+    function appName(node) {
+        if (!node) return ""
+        const p = node.properties
+        return p["application.name"] || p["node.description"] || node.description || node.name
+    }
+
+    function appPercent(node) {
+        return (node && node.audio) ? Math.round(node.audio.volume * 100) : 0
+    }
+
+    function appMuted(node) {
+        return (node && node.audio) ? node.audio.muted : false
+    }
+
+    function setAppPercent(node, pct) {
+        if (!node || !node.audio) return
+        node.audio.volume = Math.max(0, Math.min(100, pct)) / 100
+    }
+
+    function toggleAppMute(node) {
+        if (!node || !node.audio) return
+        node.audio.muted = !node.audio.muted
+    }
+
+    // ---- Output device helpers ----
+    function sinkLabel(node) {
+        if (!node) return ""
+        return node.nickname || node.description || node.name
+    }
+
+    function isDefaultSink(node) {
+        return !!(sink && node && sink.id === node.id)
+    }
+
+    function setDefaultSink(node) {
+        if (!node) return
+        Pipewire.preferredDefaultAudioSink = node
     }
 
     IpcHandler {

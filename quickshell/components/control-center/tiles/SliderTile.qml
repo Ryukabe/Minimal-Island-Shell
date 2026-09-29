@@ -25,8 +25,11 @@ Rectangle {
     // Used ONLY for icon placement, never for the fill length.
     readonly property real iconCell: Math.min(width, height)
 
-    readonly property bool showChevron: !vertical
-        && width >= iconCell + percentLabel.implicitWidth + chevron.implicitWidth + Dimens.paddingLarge * 2
+    // Horizontal: chevron sits at the right end. Vertical: it sits under the label at the top.
+    readonly property bool showChevron: vertical
+        ? height >= iconCell + percentLabel.implicitHeight + chevron.implicitHeight
+            + Dimens.paddingMedium * 2 + Dimens.spacingSmall
+        : width >= iconCell + percentLabel.implicitWidth + chevron.implicitWidth + Dimens.paddingLarge * 2
     readonly property bool showLabel: vertical
         || width >= iconCell + percentLabel.implicitWidth + Dimens.paddingMedium * 2
 
@@ -46,7 +49,9 @@ Rectangle {
     readonly property bool labelCovered: vertical
         ? fill.height >= root.height - (Dimens.paddingMedium + percentLabel.height / 2)
         : fill.width >= percentLabel.x + percentLabel.width / 2
-    readonly property bool chevronCovered: fill.width >= chevron.x + chevron.width / 2
+    readonly property bool chevronCovered: vertical
+        ? fill.height >= root.height - (chevron.y + chevron.height / 2)
+        : fill.width >= chevron.x + chevron.width / 2
 
     Rectangle {
         id: fill
@@ -120,9 +125,13 @@ Rectangle {
         font.variableAxes: Fonts.iconAxes
         color: root.chevronCovered ? Colors.subBgMica : Colors.fgMuted
         opacity: chevronMouse.containsMouse ? 1.0 : 0.7
-        anchors.right: parent.right
+
+        anchors.right: root.vertical ? undefined : parent.right
         anchors.rightMargin: Dimens.paddingMedium
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: root.vertical ? undefined : parent.verticalCenter
+        anchors.top: root.vertical ? percentLabel.bottom : undefined
+        anchors.topMargin: Dimens.spacingSmall
+        anchors.horizontalCenter: root.vertical ? parent.horizontalCenter : undefined
 
         MouseArea {
             id: chevronMouse
