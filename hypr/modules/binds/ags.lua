@@ -1,3 +1,9 @@
+-- Reload AGS
+hl.bind("SUPER + ALT + R",      hl.dsp.exec_cmd("$HOME/.config/ags/reload.sh"))
+
+-- Settings
+hl.bind("SUPER + comma", hl.dsp.exec_cmd("ags request toggle-settings"))
+
 -- Dashboard
 hl.bind("SUPER + SHIFT + grave", hl.dsp.exec_cmd("ags request toggle-dashboard"))
 

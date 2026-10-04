@@ -3,9 +3,6 @@ local mainMod = require("modules.binds.mainmod")
 -- Settings
 hl.bind(mainMod .. " + COMMA",               hl.dsp.exec_cmd("qs ipc call settings toggle"))
 
--- Workspace switcher
-hl.bind(mainMod .. " + TAB",                 hl.dsp.exec_cmd("qs ipc call workspaces toggle"))
-
 -- App launcher
 hl.bind(mainMod .. " + Space",               hl.dsp.exec_cmd("qs ipc call launcher toggle"), { locked = true })
 

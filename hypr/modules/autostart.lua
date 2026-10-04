@@ -25,7 +25,6 @@ hl.on("hyprland.start", function()
     end
 
     -- Applications
-    hl.exec_cmd("pcloud")
 
     -- Clipboard management
     hl.exec_cmd("wl-paste --type text --watch cliphist store")

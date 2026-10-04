@@ -1,37 +1,27 @@
 #!/usr/bin/env bash
-# Script to cycle through 3 Hyprland layouts on the fly
+# Cycle Hyprland layouts: dwindle -> master -> scrolling -> dwindle
 
 notif="$HOME/.config/swaync/images/bell.png"
 
-# Get current layout
-LAYOUT=$(hyprctl -j getoption general:layout | jq '.str' | sed 's/"//g')
+get_layout() {
+    hyprctl -j getoption general:layout | jq -r '.str'
+}
 
-case $LAYOUT in
-"dwindle")
-	hyprctl keyword general:layout master
-	# Clean up dwindle keybinds and set master keybinds if needed
-	hyprctl keyword unbind SUPER,J
-	hyprctl keyword unbind SUPER,K
-	hyprctl keyword unbind SUPER,O
-	hyprctl keyword bind SUPER,J,layoutmsg,cyclenext
-	hyprctl keyword bind SUPER,K,layoutmsg,cycleprev
-	notify-send -e -u low -i "$notif" "Layout: Master"
-	;;
-"master")
-	hyprctl keyword general:layout scrolling
-	# Set keybinds specific to your 3rd layout if needed
-	hyprctl keyword unbind SUPER,J
-	hyprctl keyword unbind SUPER,K
-	notify-send -e -u low -i "$notif" "Layout: Scrolling"
-	;;
-"scrolling" | *)
-	hyprctl keyword general:layout dwindle
-	# Clean up and restore dwindle keybinds
-	hyprctl keyword unbind SUPER,J
-	hyprctl keyword unbind SUPER,K
-	hyprctl keyword bind SUPER,J,cyclenext
-	hyprctl keyword bind SUPER,K,cyclenext,prev
-	hyprctl keyword bind SUPER,O,togglesplit
-	notify-send -e -u low -i "$notif" "Layout: Dwindle"
-	;;
+case "$(get_layout)" in
+    dwindle) next=master ;;
+    master)  next=scrolling ;;
+    *)       next=dwindle ;;
 esac
+
+# `hyprctl keyword` is rejected by the Lua config; `eval` runs Lua instead.
+hyprctl eval "hl.config({ general = { layout = \"$next\" } })"
+
+# Report the layout Hyprland is really on, not the one we asked for.
+now=$(get_layout)
+if [ "$now" = "$next" ]; then
+    # layout.lua reads this on reload so the layout survives reloads and shell switches.
+    echo "$now" > "$HOME/.config/hypr/.layout"
+    notify-send -e -u low -i "$notif" "Layout: ${now^}"
+else
+    notify-send -e -u critical "Layout change failed" "Still on: $now"
+fi

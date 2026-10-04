@@ -10,10 +10,7 @@ hl.bind("SUPER + SHIFT + R",             hl.dsp.exec_cmd("hyprctl reload"))
 
 -- Shell switching (toggle Quickshell / toggle AGS)
 hl.bind("SUPER + CTRL + ALT + Q",            hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/switch-shell.sh qs"))
-hl.bind(mainMod .. " + CTRL + ALT + A",      hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/switch-shell.sh ags"))
-
--- Reload AGS
-hl.bind("SUPER + ALT + R",      hl.dsp.exec_cmd("$HOME/.config/ags/reload.sh"))
+hl.bind("SUPER + CTRL + ALT + A",      hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/switch-shell.sh ags"))
 
 --- Window management ---
 
@@ -36,9 +33,6 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
--- Window switcher
-hl.bind("ALT + Tab", function() hl.dispatch(hl.dsp.window.cycle_next()) hl.dispatch(hl.dsp.window.bring_to_top()) end)
-
 -- Move/resize with mouse
 hl.bind(mainMod .. " + mouse:272",           hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273",           hl.dsp.window.resize(), { mouse = true })
@@ -60,8 +54,8 @@ hl.bind(mainMod .. " + RETURN",              hl.dsp.exec_cmd("kitty"))
 hl.bind(mainMod .. " + ALT + RETURN",        hl.dsp.exec_cmd("alacritty"))
 
 -- File manager
-hl.bind(mainMod .. " + F",                   hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + ALT + F",             hl.dsp.exec_cmd("thunar"))
+hl.bind("SUPER + ALT + F",                   hl.dsp.exec_cmd("nautilus"))
+hl.bind("SUPER + F",             hl.dsp.exec_cmd("thunar"))
 
 -- Browser
 hl.bind(mainMod .. " + B",                   hl.dsp.exec_cmd("zen-browser"))
