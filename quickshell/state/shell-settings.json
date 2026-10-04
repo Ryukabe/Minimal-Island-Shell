@@ -33,7 +33,7 @@
   "clockShowSeconds": false,
   "clockLeadingZero": false,
   "clockLowercaseAmPm": false,
-  "clockDateStyle": 0,
+  "clockDateStyle": 1,
   "clockShowVisualizer": true,
   "clockShowTimerIcon": false,
   "clockShowRecordingIndicator": true,

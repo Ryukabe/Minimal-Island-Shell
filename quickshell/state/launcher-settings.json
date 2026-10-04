@@ -5,6 +5,7 @@
   "showRecentsFirst": false,
   "recentLimit": 10,
   "recentIds": [
+    "org.kde.kdeconnect.app",
     "obsidian",
     "nwg-look"
   ],
