@@ -11,7 +11,7 @@ import "styles/adapters"
 import "services"
 import "components/bar"
 import "components/common"
-import "settings-new/core"
+import "settings/services"
 
 PanelWindow {
     id: window

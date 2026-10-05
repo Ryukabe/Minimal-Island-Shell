@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import "services"
 import "modules"
-import "settings-new"
+import "settings"
 
 ShellRoot {
     Island {}

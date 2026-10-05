@@ -72,20 +72,23 @@ Item {
     readonly property string configPath: Quickshell.env("HOME") + "/.config/quickshell/state/appearance.json"
 
     // --- Safety Palette ---
+    // Last-resort fallback when the theme file is missing/unparseable.
+    // Values come from the Hermit palette.json (v2.0.0, dark).
+    // border = #8C8C8C at 12% opacity, pre-blended over background (#101010) -> #1F1F1F.
     readonly property var _safetyPalette: ({
         isLight: false,
-        background: "#040e0d",
-        foreground: "#f5e2c5",
-        fgMuted: "#c4b09a",
-        surface: "#0f211f",
-        border: "#152a26",
-        accent: "#3dd1b0",
-        red: "#ff6048",
-        green: "#7ad9a8",
-        yellow: "#f5cd5b",
-        blue: "#5fc8d4",
-        purple: "#e89aa8",
-        cyan: "#3dd1b0"
+        background: "#101010",
+        foreground: "#F6F1EA",
+        fgMuted: "#8C8C8C",
+        surface: "#1C1C1C",
+        border: "#1F1F1F",
+        accent: "#77B0A8",
+        red: "#DF5B61",
+        green: "#8CCF7E",
+        yellow: "#E5C76B",
+        blue: "#67B0E8",
+        purple: "#C488EC",
+        cyan: "#6CBFBF"
     })
 
     // --- Configuration Persistence ---
