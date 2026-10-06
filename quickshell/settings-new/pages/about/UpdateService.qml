@@ -1,5 +1,6 @@
 // pages/about/UpdateService.qml — real system updates (pacman/yay) and real shell self-update
-// (git fetch/pull against this repo). Checks run on creation and on a timer; "Recheck" is on demand.
+// (git fetch/pull against github.com/Ryukabe/hermit-dots, branch main). Checks run on creation and on a
+// timer; "Recheck" is on demand.
 // Not a singleton (no qmldir): SettingsApp.qml creates one instance at shell start so the checks keep
 // running while Settings is closed, and hands it to the About page.
 import QtQuick
@@ -9,7 +10,12 @@ import Quickshell.Io
 Item {
     id: root
 
+    // Local clone that holds the shell. The installer symlinks ~/.config/quickshell into ~/hermit-dots,
+    // so git walks up from here and finds the clone's .git.
     readonly property string repoPath: Quickshell.shellDir
+    // Upstream the shell updates from. Fetched by URL, so it works whatever remote the clone has set.
+    readonly property string repoUrl: "https://github.com/Ryukabe/hermit-dots.git"
+    readonly property string repoBranch: "main"
 
     function formatTime(date) {
         return date ? Qt.formatDateTime(date, "MMM d, hh:mm AP") : ""
@@ -66,6 +72,8 @@ Item {
     property int shellCommitsBehind: 0
     property bool shellUpdating: false
     property bool shellJustUpdated: false
+    // Empty = fine. Set when a check or update fails; About.qml shows it under the card.
+    property string shellError: ""
     property var shellLastChecked: null
     property var shellLastUpdated: null
 
@@ -73,17 +81,19 @@ Item {
         root.shellChecking = true
         root.shellChecked = false
         root.shellJustUpdated = false
+        root.shellError = ""
         shellFetchProc.running = true
     }
 
     function runShellUpdate() {
         root.shellUpdating = true
+        root.shellError = ""
         shellPullProc.running = true
     }
 
     Process {
         id: shellFetchProc
-        command: ["git", "-C", root.repoPath, "fetch", "--quiet"]
+        command: ["git", "-C", root.repoPath, "fetch", "--quiet", root.repoUrl, root.repoBranch]
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0) {
                 shellCountProc.running = true
@@ -91,6 +101,7 @@ Item {
                 root.shellChecking = false
                 root.shellChecked = true
                 root.shellUpdateAvailable = false
+                root.shellError = "Couldn't reach GitHub, or this isn't a git clone (installed with --copy?)."
                 root.shellLastChecked = new Date()
             }
         }
@@ -98,7 +109,7 @@ Item {
 
     Process {
         id: shellCountProc
-        command: ["git", "-C", root.repoPath, "rev-list", "--count", "HEAD..@{u}"]
+        command: ["git", "-C", root.repoPath, "rev-list", "--count", "HEAD..FETCH_HEAD"]
         stdout: StdioCollector {
             onStreamFinished: {
                 let n = parseInt(text.trim())
@@ -113,7 +124,7 @@ Item {
 
     Process {
         id: shellPullProc
-        command: ["git", "-C", root.repoPath, "pull"]
+        command: ["git", "-C", root.repoPath, "pull", "--ff-only", root.repoUrl, root.repoBranch]
         onExited: (exitCode, exitStatus) => {
             root.shellUpdating = false
             if (exitCode === 0) {
@@ -121,6 +132,8 @@ Item {
                 root.shellCommitsBehind = 0
                 root.shellJustUpdated = true
                 root.shellLastUpdated = new Date()
+            } else {
+                root.shellError = "Update failed. Local changes may be in the way; run git pull in your hermit-dots folder to see why."
             }
         }
     }

@@ -72,19 +72,16 @@ PageScroll {
             width: parent.width - Dimens.paddingLarge * 2
             spacing: Dimens.spacingSmall
 
-            Rectangle {
+            // Logo: the hermit spiral only, no background. File sits next to this page.
+            Image {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredWidth: 72
-                Layout.preferredHeight: 72
-                radius: 36
-                color: Colors.elevatedBg
-
-                SymbolIcon {
-                    anchors.centerIn: parent
-                    name: "auto_awesome"
-                    size: 34
-                    color: Colors.accent
-                }
+                Layout.preferredHeight: 77
+                source: Qt.resolvedUrl("hermit-logo.svg")
+                sourceSize: Qt.size(216, 232)
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: true
             }
 
             Text {
@@ -117,14 +114,6 @@ PageScroll {
                     font.pixelSize: Dimens.fontSizeSm
                     font.weight: Font.DemiBold
                 }
-            }
-
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                text: "A two-shell Hyprland setup"
-                color: Colors.subtext
-                font.family: Fonts.text
-                font.pixelSize: Dimens.fontSizeSm
             }
         }
     }
@@ -240,8 +229,9 @@ PageScroll {
 
     UpdateCard {
         icon: "auto_awesome"
-        title: "Minimal-Island-Shell"
-        statusText: !root.updateService.shellChecked ? "Not checked yet"
+        title: "Hermit-dots"
+        statusText: root.updateService.shellError !== "" ? "Couldn't check for updates"
+            : !root.updateService.shellChecked ? "Not checked yet"
             : !root.updateService.shellUpdateAvailable ? "Up to date"
             : root.updateService.shellCommitsBehind + " commit(s) behind"
         checking: !!root.updateService.shellChecking
@@ -250,7 +240,8 @@ PageScroll {
         busy: !!root.updateService.shellUpdating
         lastCheckedText: root._fmt(root.updateService.shellLastChecked)
         lastUpdatedText: root._fmt(root.updateService.shellLastUpdated)
-        noteText: root.updateService.shellJustUpdated ? "Updated — restart the shell (pkill qs && qs) to apply." : ""
+        noteText: root.updateService.shellError !== "" ? root.updateService.shellError
+            : root.updateService.shellJustUpdated ? "Updated — restart the shell (pkill qs && qs) to apply." : ""
         onCheckRequested: root.updateService.checkShellUpdate()
         onActionRequested: root.updateService.runShellUpdate()
     }

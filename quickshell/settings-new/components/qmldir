@@ -10,3 +10,11 @@ PlaceholderPage PlaceholderPage.qml
 SidebarItem SidebarItem.qml
 ToggleRow ToggleRow.qml
 SliderRow SliderRow.qml
+ActionButton ActionButton.qml
+InfoRow InfoRow.qml
+InfoTile InfoTile.qml
+SegmentRow SegmentRow.qml
+SearchBox SearchBox.qml
+CardCarousel CardCarousel.qml
+DropdownRow DropdownRow.qml
+ColorRow ColorRow.qml

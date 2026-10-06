@@ -10,12 +10,52 @@ import "../../../../components/theme"
 PageScroll {
     id: root
 
+    // Icon animation settings. UI only for now: these live on the page so the controls work while
+    // the settings are being built. When wiring, bind them to ShellState.motionIconsEnabled,
+    // motionIconSpeedPercent and motionIconBouncePercent (SymbolIcon already reads those names).
+    property bool iconsEnabled: true
+    property int iconSpeedPercent: 100
+    property int iconBouncePercent: 50
+
     GroupCard {
         ToggleRow {
             label: "Reduce motion"
             description: "Turns off shell animations and Hyprland's own animations"
             checked: ShellState.motionReduced
             onToggled: (val) => ShellState.motionReduced = val
+            showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Icons" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Animated icons"
+            description: "Settings icons play their own motion on hover and when a page opens"
+            checked: root.iconsEnabled
+            enabled: !ShellState.motionReduced
+            onToggled: (val) => root.iconsEnabled = val
+        }
+
+        SliderRow {
+            label: "Icon speed"
+            description: "How fast icon animations play. 100 % is the default"
+            from: 50; to: 200; stepSize: 5
+            value: root.iconSpeedPercent
+            unit: " %"
+            enabled: !ShellState.motionReduced && root.iconsEnabled
+            onMoved: (val) => root.iconSpeedPercent = val
+        }
+
+        SliderRow {
+            label: "Icon bounce"
+            description: "How far icons overshoot before they settle. 0 % is none"
+            from: 0; to: 100; stepSize: 5
+            value: root.iconBouncePercent
+            unit: " %"
+            enabled: !ShellState.motionReduced && root.iconsEnabled
+            onMoved: (val) => root.iconBouncePercent = val
             showDivider: false
         }
     }

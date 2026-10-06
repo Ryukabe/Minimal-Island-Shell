@@ -17,7 +17,7 @@
   "clipboardHistory": true,
   "clipboardLimit": 100,
   "features": {
-    "commands": true,
+    "commands": false,
     "web": true,
     "files": true,
     "system": false,

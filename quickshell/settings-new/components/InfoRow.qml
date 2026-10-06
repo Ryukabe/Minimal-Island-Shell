@@ -1,9 +1,8 @@
-// pages/about/InfoRow.qml — read-only "label ........ value" row. Give it a `link` to make it clickable.
+// components/InfoRow.qml — read-only "label ........ value" row. Give it a `link` to make it clickable.
 import QtQuick
 import QtQuick.Layouts
-import "../../components"
-import "../../../styles"
-import "../../../services"
+import "../../styles"
+import "../../services"
 
 Item {
     id: root

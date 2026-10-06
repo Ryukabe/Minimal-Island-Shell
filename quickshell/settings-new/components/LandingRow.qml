@@ -1,4 +1,5 @@
 // components/LandingRow.qml — one row in a landing list: icon, title, subtitle, chevron.
+// The row icon plays its own motion on hover, and the chevron nudges right.
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
@@ -46,6 +47,8 @@ Item {
                 name: root.icon
                 size: Dimens.fontSize18
                 color: Colors.accent
+                animated: true
+                hovered: rowMouse.containsMouse
             }
         }
 
@@ -81,6 +84,8 @@ Item {
             name: "chevron_right"
             size: Dimens.fontSizeXxl
             color: Colors.fgMuted
+            animated: true
+            hovered: rowMouse.containsMouse
         }
     }
 

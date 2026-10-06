@@ -112,8 +112,8 @@ Item {
                 if (data.shadowBlur !== undefined) root.shadowBlur = data.shadowBlur;
                 if (data.shadowScale !== undefined) root.shadowScale = data.shadowScale;
                 if (data.shadowVerticalOffset !== undefined) root.shadowVerticalOffset = data.shadowVerticalOffset;
-                if (data.iconStyle !== undefined) Fonts.iconStyle = data.iconStyle;
-                if (data.iconWeight !== undefined) Fonts.iconWeight = data.iconWeight;
+                // iconStyle / iconWeight are owned by ShellState now (Fonts only reads them), so they are
+                // not loaded from this file any more.
             } catch (e) {
                 console.log("[Colors] Config parse error:", e);
             }

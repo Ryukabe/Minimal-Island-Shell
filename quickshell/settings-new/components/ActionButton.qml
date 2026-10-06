@@ -1,8 +1,7 @@
-// pages/about/ActionButton.qml — small button. `primary` = accent fill. `busy` shows "…" and ignores clicks.
-// Page-local for now; if another page needs it, move it into components/.
+// components/ActionButton.qml — small button. `primary` = accent fill. `busy` shows "…" and ignores clicks.
 import QtQuick
-import "../../../styles"
-import "../../../services"
+import "../../styles"
+import "../../services"
 
 Rectangle {
     id: root

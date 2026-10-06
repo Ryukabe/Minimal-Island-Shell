@@ -23,6 +23,12 @@ Scope {
     SystemInfoService { id: systemInfo }
     UpdateService { id: updateService }
 
+    // Finds every individual option on every page for the search box (no hand-kept list).
+    SearchIndexService {
+        id: searchIndex
+        baseDir: decodeURIComponent(String(Qt.resolvedUrl(".")).replace(/^file:\/\//, "").replace(/\/$/, ""))
+    }
+
     // Argument and return types must be spelled out or Quickshell does not register the function.
     IpcHandler {
         target: "settings"
@@ -49,7 +55,8 @@ Scope {
         onVisibleChanged: {
             if (visible) {
                 focusDelay.start()
-                gearSpin.restart()
+                gearIcon.play()
+                searchIndex.rebuild()
             }
         }
 
@@ -66,6 +73,11 @@ Scope {
 
             // Escape steps back out of a view first, then closes the window.
             Keys.onPressed: (event) => {
+                if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_F) {
+                    searchBox.forceActiveFocus()
+                    event.accepted = true
+                    return
+                }
                 if (event.key === Qt.Key_Escape) {
                     if (SettingsNav.canGoBack) SettingsNav.back()
                     else ShellState.closeSettings()
@@ -102,22 +114,15 @@ Scope {
                                     ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
                                 }
 
+                                // The gear turns when Settings opens, on hover and on click.
                                 SymbolIcon {
                                     id: gearIcon
                                     anchors.centerIn: parent
                                     name: "settings"
                                     size: Dimens.fontSizeLg
                                     color: Colors.accent
-                                    transformOrigin: Item.Center
-
-                                    RotationAnimation {
-                                        id: gearSpin
-                                        target: gearIcon
-                                        from: 0
-                                        to: 360
-                                        duration: ShellState.motionDuration(Motion.glideMs)
-                                        easing.type: Easing.OutCubic
-                                    }
+                                    animated: true
+                                    hovered: gearMouse.containsMouse
                                 }
 
                                 MouseArea {
@@ -125,7 +130,7 @@ Scope {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: gearSpin.restart()
+                                    onClicked: gearIcon.play()
                                 }
                             }
 
@@ -150,8 +155,20 @@ Scope {
                             }
                         }
 
+                        // Search: builds its index from SettingsRegistry. While there is a query it
+                        // fills the sidebar with results and the section list below is hidden.
+                        SearchBox {
+                            id: searchBox
+                            extraEntries: searchIndex.entries
+                            onResultSelected: (menuId, viewId) => {
+                                if (viewId !== "") SettingsNav.openView(menuId, viewId)
+                                else SettingsNav.openMenu(menuId)
+                            }
+                        }
+
                         Flickable {
                             id: sidebarFlick
+                            visible: !searchBox.searching
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             contentWidth: width

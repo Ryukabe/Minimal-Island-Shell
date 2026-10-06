@@ -1,5 +1,6 @@
 // components/PageTitle.qml — title card at the top of every page.
 // On a menu's landing list it shows an icon badge; inside a view the badge is replaced by a back arrow.
+// The badge icon plays its own motion whenever the page changes; the back arrow nudges on hover.
 import QtQuick
 import QtQuick.Layouts
 import "../../styles"
@@ -43,6 +44,8 @@ Rectangle {
                 name: "arrow_back"
                 size: Dimens.fontSizeXxl
                 color: Colors.fg
+                animated: true
+                hovered: backMouse.containsMouse
             }
 
             MouseArea {
@@ -66,6 +69,8 @@ Rectangle {
                 name: root.icon
                 size: Dimens.fontSizeXxl
                 color: Colors.accent
+                animated: true
+                playOnLoad: true
             }
         }
 

@@ -1,8 +1,7 @@
-// pages/about/InfoTile.qml — Windows-style summary tile: small label, big value, caption underneath.
+// components/InfoTile.qml — Windows-style summary tile: small label, big value, caption underneath.
 import QtQuick
 import QtQuick.Layouts
-import "../../components"
-import "../../../styles"
+import "../../styles"
 
 Rectangle {
     id: root

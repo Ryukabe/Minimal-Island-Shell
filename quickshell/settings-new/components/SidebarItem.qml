@@ -60,6 +60,11 @@ Item {
             size: Dimens.fontSize18
             color: root.selected ? Colors.accent : Colors.fg
 
+            // Plays this icon's own motion on hover and when the item becomes selected.
+            animated: true
+            hovered: itemMouse.containsMouse
+            activated: root.selected
+
             Behavior on color {
                 ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
             }
