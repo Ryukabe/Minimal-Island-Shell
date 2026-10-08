@@ -92,6 +92,10 @@ QtObject {
     property real motionFadeMs: 220
     property real motionHoverMs: 250
     property real motionBouncePercent: 20
+    // Bounce amount for the Expressive tier only (Motion.qml). Independent of
+    // motionBouncePercent so frequent motion stays subtle while rare,
+    // playful moments can bounce more.
+    property real motionExpressiveBouncePercent: 45
     property bool motionSpringEnabled: false
 
     // Keeps Hyprland's own window-manager animations (workspace switches,
@@ -120,11 +124,14 @@ QtObject {
         return minK + normalized * (maxK - minK)
     }
 
-    // Generalized damping mapping, shared "Bounce" slider: more bounce %
-    // -> lower damping (more oscillation before settling). minD/maxD are
-    // the actual SpringAnimation.damping range a tier should produce.
-    function springDampingFor(minD, maxD) {
-        var b = Math.max(0, Math.min(100, root.motionBouncePercent))
+    // Generalized damping mapping: more bounce % -> lower damping (more
+    // oscillation before settling). minD/maxD are the actual
+    // SpringAnimation.damping range a tier should produce. bouncePercent is
+    // optional: omit it to use the shared Bounce slider (motionBouncePercent),
+    // pass a value to drive a tier from its own slider.
+    function springDampingFor(minD, maxD, bouncePercent) {
+        var raw = (bouncePercent === undefined) ? root.motionBouncePercent : bouncePercent
+        var b = Math.max(0, Math.min(100, raw))
         return maxD - (b / 100) * (maxD - minD)
     }
 

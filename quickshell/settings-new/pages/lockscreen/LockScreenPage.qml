@@ -1,5 +1,5 @@
-// pages/lockscreen/LockScreenPage.qml — Lock Screen. Every control binds to LockScreenSettings.
-// The password placeholder text needs a text-input row, which does not exist yet.
+// pages/lockscreen/LockScreenPage.qml — Lock Screen. Real: everything bound to LockScreenSettings.
+// The Locking rows are greyed placeholders until the lock service supports them.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -9,7 +9,39 @@ import "../../../styles"
 PageScroll {
     id: root
 
-    SectionLabel { text: "Clock and identity" }
+    SectionLabel { text: "Wallpaper" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Frosted glass"
+            description: "Blur the wallpaper behind the lock screen"
+            checked: LockScreenSettings.frostedBlurEnabled
+            onToggled: (val) => LockScreenSettings.frostedBlurEnabled = val
+            showDivider: LockScreenSettings.frostedBlurEnabled
+        }
+
+        Reveal {
+            shown: LockScreenSettings.frostedBlurEnabled
+
+            SliderRow {
+                label: "Blur strength"
+                from: 0; to: 64; stepSize: 1
+                value: LockScreenSettings.frostedBlurRadius
+                onMoved: (val) => LockScreenSettings.frostedBlurRadius = val
+            }
+        }
+
+        SliderRow {
+            label: "Dimming"
+            description: "Darkens the wallpaper so the text stays readable"
+            from: 0; to: 0.8; stepSize: 0.01
+            value: LockScreenSettings.wallpaperDimOpacity
+            onMoved: (val) => LockScreenSettings.wallpaperDimOpacity = val
+            showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Clock and name" }
 
     GroupCard {
         ToggleRow {
@@ -19,62 +51,45 @@ PageScroll {
         }
 
         ToggleRow {
-            label: "Show date"
+            label: "Show the date"
             checked: LockScreenSettings.showDate
             onToggled: (val) => LockScreenSettings.showDate = val
         }
 
         ToggleRow {
-            label: "Show username"
+            label: "Show your username"
             checked: LockScreenSettings.showUsername
             onToggled: (val) => LockScreenSettings.showUsername = val
             showDivider: false
         }
     }
 
-    SectionLabel { text: "Password field" }
+    SectionLabel { text: "Password box" }
 
     GroupCard {
+        TextRow {
+            label: "Hint text"
+            description: "Shown inside the empty password box"
+            value: LockScreenSettings.passwordPlaceholder
+            fieldWidth: 220
+            onCommitted: (v) => LockScreenSettings.passwordPlaceholder = v
+        }
+
         ToggleRow {
-            label: "Use accent colour for errors"
-            description: "Wrong passwords flash the accent colour instead of red"
+            label: "Accent colour for wrong passwords"
+            description: "Flash the accent colour instead of red"
             checked: LockScreenSettings.errorUsesAccent
             onToggled: (val) => LockScreenSettings.errorUsesAccent = val
             showDivider: false
         }
     }
 
-    SectionLabel { text: "Background" }
-
-    GroupCard {
-        ToggleRow {
-            label: "Frosted glass blur"
-            checked: LockScreenSettings.frostedBlurEnabled
-            onToggled: (val) => LockScreenSettings.frostedBlurEnabled = val
-        }
-
-        SliderRow {
-            label: "Blur strength"
-            from: 0; to: 64; stepSize: 1
-            value: LockScreenSettings.frostedBlurRadius
-            enabled: LockScreenSettings.frostedBlurEnabled
-            onMoved: (val) => LockScreenSettings.frostedBlurRadius = val
-        }
-
-        SliderRow {
-            label: "Wallpaper dim"
-            from: 0; to: 0.8; stepSize: 0.01
-            value: LockScreenSettings.wallpaperDimOpacity
-            onMoved: (val) => LockScreenSettings.wallpaperDimOpacity = val
-            showDivider: false
-        }
-    }
-
-    SectionLabel { text: "Corner actions" }
+    SectionLabel { text: "Buttons" }
 
     GroupCard {
         ToggleRow {
             label: "Hyprland"
+            description: "Leave the lock screen and go back to Hyprland"
             checked: LockScreenSettings.showHyprlandAction
             onToggled: (val) => LockScreenSettings.showHyprlandAction = val
         }
@@ -89,6 +104,31 @@ PageScroll {
             label: "Power"
             checked: LockScreenSettings.showPowerAction
             onToggled: (val) => LockScreenSettings.showPowerAction = val
+            showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Locking" }
+
+    GroupCard {
+        SliderRow {
+            label: "Lock after idle"
+            description: "Lock the screen when you have not touched anything for a while"
+            from: 1; to: 30; stepSize: 1
+            value: 5
+            unit: " min"
+            placeholder: true
+        }
+
+        ToggleRow {
+            label: "Lock when the lid closes"
+            checked: true
+            placeholder: true
+        }
+
+        ToggleRow {
+            label: "Show notifications on the lock screen"
+            placeholder: true
             showDivider: false
         }
     }

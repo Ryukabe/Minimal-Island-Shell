@@ -1,4 +1,4 @@
-hl.config({ animations = { enabled = true } })
+--hl.config({ animations = { enabled = true } })
 
 -- Animation curves using hl.curve
 hl.curve("hobbyist", { type = "bezier", points = { {0.8, 1.4}, {0.0, 1.2} } })

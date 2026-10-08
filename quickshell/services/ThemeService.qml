@@ -9,7 +9,7 @@ import "../services"
 Item {
     id: root
 
-    property string currentTheme: "monochrome"
+    property string currentTheme: "hermit"
     property var themesList: []
 
     readonly property string themesPath: Quickshell.shellDir + "/styles/themes"

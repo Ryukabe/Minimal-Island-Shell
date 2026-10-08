@@ -27,18 +27,10 @@ QtObject {
             id: "shell",
             menus: [
                 {
-                    id: "bar", title: "Bar & Island", subtitle: "Island size, shape and behaviour", icon: "dock_to_bottom",
-                    tags: "top margin corner radius border notch mode height taskbar panel",
+                    id: "bar", title: "Bar & Island", subtitle: "Shape, size and behaviour of the island", icon: "dock_to_bottom",
+                    tags: "top margin corner radius border notch flare height width collapsed expanded hover lift click outside dismiss persistent show on hover drag threshold scroll gestures",
+                    source: "pages/bar/BarSettings.qml",
                     views: [
-                        { id: "island", title: "Island", subtitle: "Margin, radius, border and notch", icon: "aspect_ratio",
-                          tags: "top margin corner radius border notch flare hover lift click outside dismiss",
-                          source: "pages/bar/island/IslandSettings.qml" },
-                        { id: "sizes", title: "Sizes", subtitle: "Bar and module dimensions", icon: "straighten",
-                          tags: "height width collapsed expanded launcher clipboard control center notification power menu status timer",
-                          source: "pages/bar/sizes/SizeSettings.qml" },
-                        { id: "behaviour", title: "Behaviour", subtitle: "Visibility and scroll actions", icon: "tune",
-                          tags: "persistent show on hover drag threshold scroll workspaces volume brightness",
-                          source: "pages/bar/behaviour/BehaviourSettings.qml" },
                         { id: "workspaces", title: "Workspaces", subtitle: "Indicators and window icons", icon: "grid_view",
                           tags: "workspace shown active indicator trail occupied windows special per-monitor",
                           source: "pages/bar/workspaces/WorkspacesSettings.qml" },
@@ -48,26 +40,49 @@ QtObject {
                     ]
                 },
                 { id: "dashboard", title: "Dashboard", subtitle: "Tabs, widgets and opening", icon: "dashboard",
-                  tags: "tabs media performance weather widgets battery gpu cpu memory storage drag threshold hover",
+                  tags: "status panel width height size tabs media performance weather widgets battery gpu cpu memory storage drag threshold hover",
                   source: "pages/dashboard/DashboardSettings.qml" },
-                { id: "launcher", title: "Launcher", subtitle: "App search and clipboard", icon: "rocket_launch",
-                  tags: "app search calc clipboard recent apps features emoji snippets notes calculator units web",
-                  source: "pages/launcher/LauncherPage.qml" },
+                {
+                    id: "launcher", title: "Launcher", subtitle: "App search, tools and clipboard", icon: "rocket_launch",
+                    tags: "app search width rows results match fuzzy prefix recent apps icons animate shrink preset",
+                    source: "pages/launcher/LauncherPage.qml",
+                    views: [
+                        { id: "searchtools", title: "Search tools", subtitle: "Calculator, web, files and quick pickers", icon: "bolt",
+                          tags: "calculator units web search commands files system emoji snippets notes trigger prefix",
+                          source: "pages/launcher/SearchToolsPage.qml" },
+                        { id: "clipboard", title: "Clipboard", subtitle: "History and panel size", icon: "content_paste",
+                          tags: "clipboard history cliphist entries width rows",
+                          source: "pages/launcher/ClipboardPage.qml" },
+                        { id: "notessnippets", title: "Notes & snippets", subtitle: "Where they are saved", icon: "edit_note",
+                          tags: "quick notes snippets folder file json aliases pinned search engines storage",
+                          source: "pages/launcher/NotesSnippetsPage.qml" }
+                    ]
+                },
                 { id: "controlcenter", title: "Control Center", subtitle: "Tiles and layout", icon: "widgets",
-                  tags: "quick settings tiles grid", placeholder: true },
+                  tags: "quick settings tiles grid columns layout edit add remove resize move tidy undo reset",
+                  source: "pages/controlcenter/ControlCenterSettings.qml" },
                 { id: "lockscreen", title: "Lock Screen", subtitle: "Look and unlock behaviour", icon: "lock",
-                  tags: "pam password security idle clock blur dim username nav actions reboot power hyprland",
-                  source: "pages/lockscreen/LockScreenPage.qml" }
+                  tags: "pam password security idle lid clock blur dim username hint text nav actions reboot power hyprland notifications",
+                  source: "pages/lockscreen/LockScreenPage.qml" },
             ]
         },
         {
             id: "devices",
             menus: [
-                { id: "network", title: "Wi-Fi & Bluetooth", subtitle: "Networks and paired devices", icon: "wifi",
-                  tags: "network wireless connect pair devices",
-                  source: "pages/network/NetworkSettings.qml" },
+                {
+                    id: "network", title: "Wi-Fi & Bluetooth", subtitle: "Networks and paired devices", icon: "wifi",
+                    tags: "network wireless connect pair devices airplane",
+                    views: [
+                        { id: "wifi", title: "Wi-Fi", subtitle: "Networks and connections", icon: "wifi",
+                          tags: "wifi wireless network password connect scan metered airplane",
+                          source: "pages/network/WifiPage.qml" },
+                        { id: "bluetooth", title: "Bluetooth", subtitle: "Paired and nearby devices", icon: "bluetooth",
+                          tags: "bluetooth pair device headphones battery discoverable",
+                          source: "pages/network/BluetoothPage.qml" }
+                    ]
+                },
                 { id: "soundmedia", title: "Sound & Media", subtitle: "Volume, outputs and players", icon: "graphic_eq",
-                  tags: "volume output mpris visualizer step max",
+                  tags: "volume output mpris visualizer step max lyrics source backend preferred default player",
                   source: "pages/soundmedia/SoundMediaSettings.qml" },
                 { id: "display", title: "Displays", subtitle: "Monitors and scaling", icon: "desktop_windows",
                   tags: "resolution refresh rate scale transparency monitor",
@@ -75,8 +90,25 @@ QtObject {
                 { id: "trackpadmouse", title: "Trackpad & Mouse", subtitle: "Pointer, tap and scroll", icon: "mouse",
                   tags: "sensitivity scroll tap click natural scrolling touchpad",
                   source: "pages/trackpadmouse/TrackpadMouseSettings.qml" },
-                { id: "keyboard", title: "Keyboard", subtitle: "Layout and shortcuts", icon: "keyboard",
-                  tags: "hyprland shortcuts binds hotkeys rebind", placeholder: true }
+                {
+                    id: "keybinds", title: "Keybinds", subtitle: "Hyprland and shell shortcuts", icon: "keyboard",
+                    tags: "keyboard shortcuts hyprland binds hotkeys rebind modifier super add custom conflict",
+                    source: "pages/keybinds/KeybindsPage.qml",
+                    views: [
+                        { id: "windows", title: "Windows", subtitle: "Windows, workspaces and layout", icon: "window",
+                          tags: "hyprland window workspace move focus tile float fullscreen close",
+                          category: "Hyprland",
+                          source: "pages/keybinds/KeybindListPage.qml" },
+                        { id: "shell", title: "Shell", subtitle: "Launcher, panels and the island", icon: "dock_to_bottom",
+                          tags: "quickshell launcher control center power menu clipboard settings island",
+                          category: "Quickshell",
+                          source: "pages/keybinds/KeybindListPage.qml" },
+                        { id: "mediasystem", title: "Media & system", subtitle: "Volume, brightness and screenshots", icon: "perm_media",
+                          tags: "media volume brightness screenshot play pause next previous lock",
+                          category: "Media & System",
+                          source: "pages/keybinds/KeybindListPage.qml" }
+                    ]
+                },
             ]
         },
         {
@@ -121,17 +153,28 @@ QtObject {
                           source: "pages/apps/allapps/AllAppsSettings.qml" }
                     ]
                 },
-                { id: "focusnotifications", title: "Focus & Notifications", subtitle: "Quiet modes and alerts", icon: "notifications",
-                  tags: "peace mode do not disturb previews dnd toasts timeout expire fullscreen",
-                  source: "pages/focusnotifications/FocusNotificationsSettings.qml" },
+                {
+                    id: "focusnotifications", title: "Focus & Notifications", subtitle: "Quiet modes and alerts", icon: "notifications",
+                    tags: "peace mode do not disturb previews dnd notification center width height",
+                    source: "pages/focusnotifications/FocusNotificationsSettings.qml",
+                    views: [
+                        { id: "alerts", title: "Alerts", subtitle: "Timeout, expiry and grouping", icon: "notification_important",
+                          tags: "timeout expire expanded group preview fullscreen",
+                          source: "pages/focusnotifications/AlertsSettings.qml" },
+                        { id: "toasts", title: "Toasts", subtitle: "Small pop-ups and what triggers them", icon: "chat_bubble",
+                          tags: "toast visible count fullscreen charging game mode audio output input",
+                          source: "pages/focusnotifications/ToastsSettings.qml" }
+                    ]
+                },
                 { id: "language", title: "Language & Region", subtitle: "Language, units and clock format", icon: "language",
                   tags: "locale language clock 12 24 hour temperature units weather location",
                   source: "pages/language/LanguageSettings.qml" },
-                { id: "services", title: "Services", subtitle: "Update intervals and backends", icon: "build",
-                  tags: "polling refresh interval media stats wifi rescan lyrics backend default player",
+                { id: "services", title: "Services", subtitle: "Background refresh rates", icon: "build",
+                  tags: "polling refresh interval media stats wifi scan",
                   source: "pages/services/ServicesSettings.qml" },
                 { id: "general", title: "General", subtitle: "Startup and everyday options", icon: "tune",
-                  tags: "startup login items light dark mode", placeholder: true },
+                  tags: "startup login items autostart light dark mode",
+                  source: "pages/general/GeneralSettings.qml" },
                 { id: "about", title: "About", subtitle: "This setup, system and updates", icon: "info",
                   tags: "hardware info updates hermit version license credits cpu gpu kernel power profile reset",
                   source: "pages/about/About.qml" }

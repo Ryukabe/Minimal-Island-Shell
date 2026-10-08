@@ -1,4 +1,4 @@
-hl.config({ animations = { enabled = true } })
+--hl.config({ animations = { enabled = true } })
 
 -- Bezier curves using hl.curve
 hl.curve("smoothOut",     { type = "bezier", points = { {0.36, 0}, {0.66, -0.56} } })

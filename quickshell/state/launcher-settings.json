@@ -4,11 +4,7 @@
   "searchDescriptions": false,
   "showRecentsFirst": false,
   "recentLimit": 10,
-  "recentIds": [
-    "org.kde.kdeconnect.app",
-    "obsidian",
-    "nwg-look"
-  ],
+  "recentIds": [],
   "showIcons": true,
   "animateResults": true,
   "launcherWidth": "Normal",
@@ -18,8 +14,8 @@
   "clipboardLimit": 100,
   "features": {
     "commands": false,
-    "web": true,
-    "files": true,
+    "web": false,
+    "files": false,
     "system": false,
     "units": true,
     "emoji": true,

@@ -1,4 +1,4 @@
-hl.config({ animations = { enabled = true } })
+--hl.config({ animations = { enabled = true } })
 
 -- Curve definitions using hl.curve
 hl.curve("md3_decel", { type = "bezier", points = { {0.05, 0.7}, {0.1, 1} } })

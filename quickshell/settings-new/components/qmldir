@@ -18,3 +18,9 @@ SearchBox SearchBox.qml
 CardCarousel CardCarousel.qml
 DropdownRow DropdownRow.qml
 ColorRow ColorRow.qml
+ViewList ViewList.qml
+Reveal Reveal.qml
+TextRow TextRow.qml
+ButtonRow ButtonRow.qml
+KeyCaptureField KeyCaptureField.qml
+KeybindRow KeybindRow.qml

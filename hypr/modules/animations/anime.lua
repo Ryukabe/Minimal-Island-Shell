@@ -1,4 +1,4 @@
-hl.config ({ animations = { enabled = true } })
+--hl.config ({ animations = { enabled = true } })
 
 -- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
 hl.curve("easeOutQuint",    { type = "bezier", points = { {0.23, 1},          {0.32, 1}    } })

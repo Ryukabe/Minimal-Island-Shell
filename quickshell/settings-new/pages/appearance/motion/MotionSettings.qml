@@ -107,12 +107,22 @@ PageScroll {
 
         SliderRow {
             label: "Bounce amount"
-            description: "Needs spring physics"
+            description: "Everyday movement: island resizes, hover and selection. Needs spring physics"
             from: 0; to: 100; stepSize: 1
             value: ShellState.motionBouncePercent
             unit: " %"
             enabled: !ShellState.motionReduced && ShellState.motionSpringEnabled
             onMoved: (val) => ShellState.motionBouncePercent = val
+        }
+
+        SliderRow {
+            label: "Playful bounce"
+            description: "Page pop-ins and other rare, playful moments. Needs spring physics"
+            from: 0; to: 100; stepSize: 1
+            value: ShellState.motionExpressiveBouncePercent
+            unit: " %"
+            enabled: !ShellState.motionReduced && ShellState.motionSpringEnabled
+            onMoved: (val) => ShellState.motionExpressiveBouncePercent = val
             showDivider: false
         }
     }

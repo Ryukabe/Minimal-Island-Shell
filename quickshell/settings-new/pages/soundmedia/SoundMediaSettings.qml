@@ -1,6 +1,7 @@
 // pages/soundmedia/SoundMediaSettings.qml — Sound & Media.
-// Output volume and the visualizer are real. Volume step and max volume are UI only for now:
-// when wiring, add ShellState.volumeStep / volumeMax and make VolumeService respect them.
+// Real: output volume and the visualizer toggle.
+// UI only for now: volume step, maximum volume, lyrics source and preferred player.
+// When wiring, add ShellState.volumeStep / volumeMax and make VolumeService respect them.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -12,6 +13,8 @@ PageScroll {
 
     property int volumeStep: 5
     property int maxVolume: 100
+    property string lyricsBackend: "Auto"
+    property string defaultPlayer: "Spotify"
 
     SectionLabel { text: "Output" }
 
@@ -57,6 +60,20 @@ PageScroll {
             description: "Show the music visualizer beside the clock in the island"
             checked: ShellState.clockShowVisualizer
             onToggled: (val) => ShellState.clockShowVisualizer = val
+        }
+
+        DropdownRow {
+            label: "Lyrics source"
+            options: ["Auto", "LRCLIB", "Local files"]
+            selectedValue: root.lyricsBackend
+            onOptionSelected: (value) => root.lyricsBackend = value
+        }
+
+        DropdownRow {
+            label: "Preferred player"
+            options: ["Spotify", "Firefox", "mpv", "Any"]
+            selectedValue: root.defaultPlayer
+            onOptionSelected: (value) => root.defaultPlayer = value
             showDivider: false
         }
     }

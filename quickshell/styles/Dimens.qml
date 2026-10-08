@@ -4,14 +4,6 @@ import QtQuick
 import "../services"
 
 QtObject {
-    // Border Radii
-    readonly property int radiusSmall: 4
-    readonly property int radiusMedium: 8
-    readonly property int radiusLarge: 12
-    readonly property int radiusFull: 9999
-    readonly property int borderRadiusSmall: radiusSmall
-    readonly property int borderRadiusMedium: radiusMedium
-    readonly property int borderRadiusLarge: radiusLarge
 
     // Padding & Spacing
     readonly property int paddingSmall: 6
@@ -49,11 +41,6 @@ QtObject {
     // Component Sizes
     readonly property int barHeight: 40
     readonly property int islandHeight: 40
-    readonly property int radiusXSmall: 2
-    readonly property int radiusTiny: 6
-    readonly property int radiusMediumLarge: 14
-    readonly property int radiusXLarge: 18
-    readonly property int radiusXXLarge: 20
 
     // Additional font sizes
     readonly property int fontSizeXs: scaledFont(9)
@@ -70,28 +57,44 @@ QtObject {
     readonly property int fontSize36: scaledFont(36)
     readonly property int fontSizeDisplay: scaledFont(64)
 
-    // Island radius
-    readonly property int islandRadius: 15
+    // ================= CORNER RADIUS SYSTEM =================
+    // Island: ShellState.islandCornerRadius, the master value and the island's own radius.
+    // Universal on  -> card follows the island, control = card - paddingSmall, chip = control / 2.
+    // Universal off -> card, control and chip each use their own ShellState value.
+    // Pills (switch tracks, slider tracks) always use radiusFull.
+    readonly property int radiusFull: 9999
 
-    // --- Nested-radius system ---
-    // Derives a child layer's corner radius from its parent's radius and
-    // the gap (padding) between them, so nested rounded-rect corners stay
-    // concentric instead of each layer picking its own independent number.
-    // outer_r = inner_r + padding  =>  inner_r = outer_r - padding.
-    // Clamped to radiusXSmall so deeply-nested elements never hit 0/negative
-    // even if islandCornerRadius is dragged low.
+    readonly property real radiusIsland: ShellState.islandCornerRadius
+    readonly property real radiusCard: ShellState.radiusUniversal
+        ? radiusIsland : ShellState.customRadiusCard
+    readonly property real radiusControl: ShellState.radiusUniversal
+        ? Math.max(0, radiusCard - paddingSmall) : ShellState.customRadiusControl
+    readonly property real radiusChip: ShellState.radiusUniversal
+        ? Math.round(radiusControl / 2) : ShellState.customRadiusChip
+
+    // Settings UI uses these two names; they are the card and control radii.
+    readonly property real settingsContainerRadius: radiusCard
+    readonly property real settingsControlRadius: radiusControl
+
+    // --- Old names, kept so files I can't see keep working ---
+    // They no longer hold fixed numbers; each one follows the system above.
+    // Delete a name once nothing in the shell uses it any more.
+    readonly property real radiusXSmall: radiusChip
+    readonly property real radiusSmall: radiusChip
+    readonly property real radiusTiny: radiusControl
+    readonly property real radiusMedium: radiusControl
+    readonly property real radiusLarge: radiusCard
+    readonly property real radiusMediumLarge: radiusCard
+    readonly property real radiusXLarge: radiusCard
+    readonly property real radiusXXLarge: radiusCard
+    readonly property real borderRadiusSmall: radiusSmall
+    readonly property real borderRadiusMedium: radiusMedium
+    readonly property real borderRadiusLarge: radiusLarge
+    readonly property real islandRadius: radiusIsland
+
+    // Old helper for module files that still compute their own nested radius from the island radius.
+    // Those files ignore the component-wise values until they are moved to the tokens above.
     function nestedRadius(outerRadius, gap) {
-        return Math.max(outerRadius - gap)
+        return Math.max(0, outerRadius - gap)
     }
-
-    // --- Settings UI derived radii ---
-    // Shared two-level chain used by every component that lives directly
-    // in the settings content area (Level 1) or inside a row inside one
-    // of those containers (Level 2). Centralized here — rather than each
-    // component recomputing the same formula — so the whole settings UI
-    // moves together off one master value with no risk of the copies
-    // drifting apart from each other.
-    readonly property real settingsContainerRadius: ShellState.islandCornerRadius
-    readonly property real settingsControlRadius: nestedRadius(settingsContainerRadius, paddingSmall)
-    //readonly property real settingsButtonRadius: ShellState.islandCornerRadius 
 }

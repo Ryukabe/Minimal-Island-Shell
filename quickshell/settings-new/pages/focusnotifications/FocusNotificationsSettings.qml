@@ -1,5 +1,5 @@
-// pages/focusnotifications/FocusNotificationsSettings.qml — Focus & Notifications.
-// Real: the Focus subview and notification previews. The rest comes from Caelestia and has no backend yet.
+// pages/focusnotifications/FocusNotificationsSettings.qml — the Focus & Notifications menu.
+// Alerts and Toasts open from the list at the bottom.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -18,77 +18,37 @@ PageScroll {
     }
 
     SectionLabel {
-        text: "Notifications"
+        text: "Notification center"
         Layout.topMargin: Dimens.spacingLarge
     }
 
     GroupCard {
         ToggleRow {
-            label: "Show notification previews"
+            label: "Show previews"
+            description: "Show the message text in notifications"
             checked: ShellState.notificationPreviewsEnabled
             onToggled: (val) => ShellState.notificationPreviewsEnabled = val
         }
 
-        ToggleRow {
-            label: "Show over fullscreen apps"
-            placeholder: true
-        }
-
-        ToggleRow {
-            label: "Expire automatically"
-            description: "Dismiss notifications after their timeout"
-            placeholder: true
-        }
-
-        ToggleRow {
-            label: "Open expanded"
-            description: "Show notifications expanded by default"
-            placeholder: true
+        SliderRow {
+            label: "Width"
+            from: 280; to: 600; stepSize: 10
+            value: ShellState.notificationCenterWidth
+            unit: " px"
+            onMoved: (val) => ShellState.notificationCenterWidth = val
         }
 
         SliderRow {
-            label: "Default timeout"
-            from: 1000; to: 15000; stepSize: 500
-            value: 5000
-            unit: " ms"
-            placeholder: true
-        }
-
-        SliderRow {
-            label: "Group preview count"
-            description: "Notifications shown per group before collapsing"
-            from: 1; to: 8; stepSize: 1
-            value: 3
-            placeholder: true
+            label: "Maximum height"
+            from: 250; to: 800; stepSize: 10
+            value: ShellState.notificationCenterMaxHeight
+            unit: " px"
+            onMoved: (val) => ShellState.notificationCenterMaxHeight = val
             showDivider: false
         }
     }
 
-    SectionLabel { text: "Toasts" }
+    SectionLabel { text: "More notification settings" }
 
-    GroupCard {
-        ToggleRow {
-            label: "Show over fullscreen apps"
-            placeholder: true
-        }
-
-        SliderRow {
-            label: "Visible toasts"
-            description: "Maximum shown at once"
-            from: 1; to: 8; stepSize: 1
-            value: 4
-            placeholder: true
-            showDivider: false
-        }
-    }
-
-    SectionLabel { text: "Toast events" }
-
-    GroupCard {
-        ToggleRow { label: "Charging changes"; placeholder: true }
-        ToggleRow { label: "Game mode changes"; placeholder: true }
-        ToggleRow { label: "Do not disturb changes"; placeholder: true }
-        ToggleRow { label: "Audio output changes"; placeholder: true }
-        ToggleRow { label: "Audio input changes"; placeholder: true; showDivider: false }
-    }
+    ViewList {}
 }

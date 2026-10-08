@@ -25,6 +25,10 @@ Item {
             islandNotchMode: false,
             islandNotchFlare: 14,
             islandHoverScale: 1.02,
+            radiusUniversal: true,
+            customRadiusCard: 12,
+            customRadiusControl: 6,
+            customRadiusChip: 3,
             islandCompactHeight: 36,
             islandCompactWidth: 140,
             islandExpandedHeight: 80,
@@ -48,6 +52,7 @@ Item {
             motionFadeMs: 220,
             motionHoverMs: 250,
             motionBouncePercent: 20,
+            motionExpressiveBouncePercent: 45,
             clockUse24Hour: false,
             clockShowSeconds: false,
             clockLeadingZero: true,
@@ -75,7 +80,9 @@ Item {
     readonly property var barKeys: [
         "islandTopMargin", "islandCornerRadius", "islandBorderWidth",
         "islandClickOutsideDismiss", "islandNotchMode", "islandNotchFlare",
-        "islandHoverScale", "islandCompactHeight", "islandCompactWidth",
+        "islandHoverScale" ,  "islandHoverScale", "radiusUniversal", "customRadiusCard",
+        "customRadiusControl", "customRadiusChip", "islandCompactHeight", "islandCompactWidth", 
+        "islandCompactHeight", "islandCompactWidth",
         "islandExpandedHeight", "islandMinExpandedWidth",
         "launcherWidth", "launcherMaxRows", "clipboardWidth", "clipboardMaxRows",
         "controlCenterWidth", "controlCenterHeight",
@@ -200,6 +207,10 @@ Item {
         function onIslandNotchModeChanged() { root._scheduleSave() }
         function onIslandNotchFlareChanged() { root._scheduleSave() }
         function onIslandHoverScaleChanged() { root._scheduleSave() }
+        function onRadiusUniversalChanged() { root._scheduleSave() }
+        function onCustomRadiusCardChanged() { root._scheduleSave() }
+        function onCustomRadiusControlChanged() { root._scheduleSave() }
+        function onCustomRadiusChipChanged() { root._scheduleSave() }
         function onIslandCompactHeightChanged() { root._scheduleSave() }
         function onIslandCompactWidthChanged() { root._scheduleSave() }
         function onIslandExpandedHeightChanged() { root._scheduleSave() }
@@ -223,6 +234,7 @@ Item {
         function onMotionFadeMsChanged() { root._scheduleSave() }
         function onMotionHoverMsChanged() { root._scheduleSave() }
         function onMotionBouncePercentChanged() { root._scheduleSave() }
+        function onMotionExpressiveBouncePercentChanged() { root._scheduleSave() }
         function onClockUse24HourChanged() { root._scheduleSave() }
         function onClockShowSecondsChanged() { root._scheduleSave() }
         function onClockLeadingZeroChanged() { root._scheduleSave() }

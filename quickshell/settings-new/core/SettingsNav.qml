@@ -18,13 +18,15 @@ QtObject {
     readonly property string icon: root.view ? root.view.icon : (root.menu ? root.menu.icon : "")
 
     // Path (relative to SettingsApp.qml) of the page the host should load.
+    // A menu with its own `source` shows that page even when it also has views; the page itself
+    // embeds a ViewList to reach them. A menu with only views shows the plain landing list.
     readonly property string pageSource: {
         if (root.view) {
             return root.view.source ? root.view.source : "components/PlaceholderPage.qml"
         }
         if (root.menu) {
-            if (root.menu.views && root.menu.views.length > 0) return "components/LandingPage.qml"
             if (root.menu.source) return root.menu.source
+            if (root.menu.views && root.menu.views.length > 0) return "components/LandingPage.qml"
         }
         return "components/PlaceholderPage.qml"
     }

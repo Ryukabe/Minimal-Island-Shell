@@ -118,6 +118,8 @@ QtObject {
 
         layoutModel.clear()
         for (var i = 0; i < arr.length; i++) {
+            // Skip tile types the grid has no component for (the old "notifications" entry).
+            if (manageableTypes.indexOf(arr[i].type) < 0) continue
             layoutModel.append(arr[i])
         }
         if (healOverlaps()) saveLayout()

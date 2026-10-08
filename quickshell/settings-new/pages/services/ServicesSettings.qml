@@ -1,5 +1,5 @@
-// pages/services/ServicesSettings.qml — Services. Polling sliders are greyed placeholders until the
-// services read ShellState values; the two dropdowns work on the page for now.
+// pages/services/ServicesSettings.qml — Services.
+// Refresh rates are greyed placeholders until the services read ShellState values.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -9,15 +9,12 @@ import "../../../styles"
 PageScroll {
     id: root
 
-    property string lyricsBackend: "Auto"
-    property string defaultPlayer: "Spotify"
-
-    SectionLabel { text: "Update intervals" }
+    SectionLabel { text: "Refresh rates" }
 
     GroupCard {
         SliderRow {
             label: "Media position"
-            description: "How often the playback position updates"
+            description: "How often the progress bar moves"
             from: 100; to: 2000; stepSize: 100
             value: 500
             unit: " ms"
@@ -26,7 +23,7 @@ PageScroll {
 
         SliderRow {
             label: "System stats"
-            description: "CPU, memory and GPU refresh interval"
+            description: "CPU, memory and GPU readings"
             from: 1; to: 10; stepSize: 1
             value: 1
             unit: " s"
@@ -34,31 +31,12 @@ PageScroll {
         }
 
         SliderRow {
-            label: "Wi-Fi rescan"
-            description: "How often available networks are rescanned"
+            label: "Wi-Fi scan"
+            description: "How often nearby networks are looked up"
             from: 5; to: 60; stepSize: 5
             value: 15
             unit: " s"
             placeholder: true
-            showDivider: false
-        }
-    }
-
-    SectionLabel { text: "Media and lyrics" }
-
-    GroupCard {
-        DropdownRow {
-            label: "Lyrics backend"
-            options: ["Auto", "LRCLIB", "Local files"]
-            selectedValue: root.lyricsBackend
-            onOptionSelected: (value) => root.lyricsBackend = value
-        }
-
-        DropdownRow {
-            label: "Default player"
-            options: ["Spotify", "Firefox", "mpv", "Any"]
-            selectedValue: root.defaultPlayer
-            onOptionSelected: (value) => root.defaultPlayer = value
             showDivider: false
         }
     }

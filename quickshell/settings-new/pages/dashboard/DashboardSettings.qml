@@ -1,6 +1,7 @@
-// pages/dashboard/DashboardSettings.qml — Dashboard.
-// UI only for now: the dashboard module does not exist yet. When it does, add dashboard* properties
-// to ShellState and bind them here.
+// pages/dashboard/DashboardSettings.qml — Dashboard (the status panel).
+// Real: panel width and height (ShellState). Everything else is UI only for now: the dashboard
+// tabs, widgets and opening behaviour live on the page until the module supports them.
+// When wiring, add dashboard* properties to ShellState and bind them here.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -24,6 +25,27 @@ PageScroll {
 
     property bool showOnHover: true
     property int dragThreshold: 50
+
+    SectionLabel { text: "Size" }
+
+    GroupCard {
+        SliderRow {
+            label: "Width"
+            from: 400; to: 800; stepSize: 10
+            value: ShellState.statusPanelWidth
+            unit: " px"
+            onMoved: (val) => ShellState.statusPanelWidth = val
+        }
+
+        SliderRow {
+            label: "Height"
+            from: 140; to: 300; stepSize: 5
+            value: ShellState.statusPanelHeight
+            unit: " px"
+            onMoved: (val) => ShellState.statusPanelHeight = val
+            showDivider: false
+        }
+    }
 
     SectionLabel { text: "Tabs" }
 
