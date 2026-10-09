@@ -95,9 +95,9 @@ Item {
             }
         }
 
-        // Recording Indicator — mirrors the bar clock so it stays visible while a timer is showing
+        // Recording Indicator — follows Clock settings > Recording indicator (timer toast)
         RecordingIndicator {
-            active: RecordingService.enabled
+            active: RecordingService.enabled && ShellState.timerToastShowRecordingIndicator
             dotSize: 6
             dotColor: Colors.red
             Layout.alignment: Qt.AlignVCenter

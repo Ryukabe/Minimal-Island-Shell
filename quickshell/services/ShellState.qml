@@ -26,6 +26,13 @@ QtObject {
         islandCompactWidth: 160,
         islandExpandedHeight: 135,
         islandMinExpandedWidth: 619,
+        // island visibility & scroll gestures
+        islandAlwaysVisible: true,
+        islandRevealOnHover: true,
+        islandRevealZone: 6,
+        islandHideDelayMs: 600,
+        islandScrollVolume: true,
+        islandScrollBrightness: true,
         // module sizing
         launcherWidth: 420,
         launcherMaxRows: 7,
@@ -66,6 +73,23 @@ QtObject {
         notificationPreviewsEnabled: true,
         focusModeEnabled: false,
         activeFocusMode: "Do Not Disturb",
+        notificationAutoHide: true,
+        notificationTimeoutMs: 5000,
+        notificationRespectAppTimeout: true,
+        notificationCriticalBypassFocus: true,
+        notificationCriticalSticky: true,
+        notificationHistoryLimit: 50,
+        notificationMutedApps: [],
+        notificationToastMaxWidth: 260,
+        notificationOverFullscreen: false,
+        notificationGroupExpanded: false,
+        notificationGroupPreviewCount: 3,
+        // event toasts
+        eventToastMs: 2500,
+        eventToastDnd: true,
+        eventToastCharging: true,
+        eventToastAudioOutput: true,
+        eventToastAudioInput: true,
         // typography
         fontSizeBase: 15,
         fontBody: "SF Pro Text",
@@ -98,6 +122,26 @@ QtObject {
     property bool focusModeEnabled: root.defaults.focusModeEnabled
     property string activeFocusMode: root.defaults.activeFocusMode
     property bool notificationPreviewsEnabled: root.defaults.notificationPreviewsEnabled
+    property bool notificationAutoHide: root.defaults.notificationAutoHide
+    property real notificationTimeoutMs: root.defaults.notificationTimeoutMs
+    property bool notificationRespectAppTimeout: root.defaults.notificationRespectAppTimeout
+    property bool notificationCriticalBypassFocus: root.defaults.notificationCriticalBypassFocus
+    property bool notificationCriticalSticky: root.defaults.notificationCriticalSticky
+    property int notificationHistoryLimit: root.defaults.notificationHistoryLimit
+    // Always reassign (never push) so change signals fire.
+    property var notificationMutedApps: root.defaults.notificationMutedApps
+    property real notificationToastMaxWidth: root.defaults.notificationToastMaxWidth
+    property bool notificationOverFullscreen: root.defaults.notificationOverFullscreen
+    // Notification center grouping: groups start fully open, or show this many before collapsing.
+    property bool notificationGroupExpanded: root.defaults.notificationGroupExpanded
+    property int notificationGroupPreviewCount: root.defaults.notificationGroupPreviewCount
+
+    // ================= EVENT TOASTS =================
+    property real eventToastMs: root.defaults.eventToastMs
+    property bool eventToastDnd: root.defaults.eventToastDnd
+    property bool eventToastCharging: root.defaults.eventToastCharging
+    property bool eventToastAudioOutput: root.defaults.eventToastAudioOutput
+    property bool eventToastAudioInput: root.defaults.eventToastAudioInput
 
     // ================= TYPOGRAPHY =================
     // Fonts.qml and Dimens.qml read these; the Typography page writes them.
@@ -121,6 +165,14 @@ QtObject {
     property real islandCompactWidth: root.defaults.islandCompactWidth
     property real islandExpandedHeight: root.defaults.islandExpandedHeight
     property real islandMinExpandedWidth: root.defaults.islandMinExpandedWidth
+
+    // Visibility: off = the island slides away while idle (clock / timer toast showing).
+    property bool islandAlwaysVisible: root.defaults.islandAlwaysVisible
+    property bool islandRevealOnHover: root.defaults.islandRevealOnHover
+    property real islandRevealZone: root.defaults.islandRevealZone
+    property real islandHideDelayMs: root.defaults.islandHideDelayMs
+    property bool islandScrollVolume: root.defaults.islandScrollVolume
+    property bool islandScrollBrightness: root.defaults.islandScrollBrightness
 
     // Radius system: universal on = everything follows islandCornerRadius; off = per-kind radii.
     property bool radiusUniversal: root.defaults.radiusUniversal
@@ -256,20 +308,28 @@ QtObject {
         onTriggered: root.ignoreHover = false
     }
 
+    // Pages that pop up briefly over whatever the user was doing. They never count as the
+    // "previous page" to return to.
+    function _isFlashPage(page) {
+        return page === "notification" || page === "eventtoast"
+    }
+
+    function _returnFromFlash() {
+        if (root.previousPage === "control" || root.previousPage === "clock" || root.previousPage === "timertoast") {
+            root.activePage = root.previousPage
+        } else {
+            root.activePage = (TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock"
+        }
+    }
+
     property Timer flashTimer: Timer {
         interval: 1500
-        onTriggered: {
-            if (root.previousPage === "control" || root.previousPage === "clock" || root.previousPage === "timertoast") {
-                root.activePage = root.previousPage
-            } else {
-                root.activePage = (TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock"
-            }
-        }
+        onTriggered: root._returnFromFlash()
     }
 
     function showPage(page) {
         flashTimer.stop()
-        if (page !== "notification") root.previousPage = page
+        if (!root._isFlashPage(page)) root.previousPage = page
         if (page === "clock" || page === "timertoast") {
             root.ignoreHover = true
             hoverResetTimer.restart()
@@ -278,17 +338,27 @@ QtObject {
     }
 
     function flashPage(page) {
-        if (root.activePage !== "notification" && root.activePage !== page) root.previousPage = root.activePage
+        if (!root._isFlashPage(root.activePage) && root.activePage !== page) root.previousPage = root.activePage
         root.activePage = page
         flashTimer.interval = 1500
         flashTimer.restart()
     }
 
+    // durationMs <= 0 means "stay until dismissFlash() or another showPage()".
     function flashPageFor(page, durationMs) {
-        if (root.activePage !== "notification" && root.activePage !== page) root.previousPage = root.activePage
+        if (!root._isFlashPage(root.activePage) && root.activePage !== page) root.previousPage = root.activePage
         root.activePage = page
-        flashTimer.interval = durationMs
-        flashTimer.restart()
+        if (durationMs > 0) {
+            flashTimer.interval = durationMs
+            flashTimer.restart()
+        } else {
+            flashTimer.stop()
+        }
+    }
+
+    function dismissFlash() {
+        flashTimer.stop()
+        root._returnFromFlash()
     }
 
     function togglePage(page) {

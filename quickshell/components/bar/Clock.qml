@@ -102,9 +102,9 @@ Item {
             }
         }
 
-        // 5. Recording Indicator (Right) — always shown, not user-hideable
+        // 5. Recording Indicator (Right) — follows Clock settings > Recording indicator (clock)
         RecordingIndicator {
-            active: RecordingService.enabled
+            active: RecordingService.enabled && ShellState.clockShowRecordingIndicator
             dotSize: 6
             dotColor: Colors.red
             Layout.alignment: Qt.AlignVCenter

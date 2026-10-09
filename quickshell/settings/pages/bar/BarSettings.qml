@@ -1,6 +1,6 @@
 // pages/bar/BarSettings.qml — the Bar & Island menu itself. Its own options sit here;
 // Workspaces and Clock open from the list at the bottom.
-// Real: everything bound to ShellState. Greyed rows are placeholders until the island supports them.
+// Everything here is bound to ShellState.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -173,26 +173,41 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Always visible"
-            description: "Keep the island on screen at all times"
-            checked: true
-            placeholder: true
+            description: "Off: the island slides away while it is idle and windows get the space back"
+            checked: ShellState.islandAlwaysVisible
+            onToggled: (val) => ShellState.islandAlwaysVisible = val
+            showDivider: !ShellState.islandAlwaysVisible
         }
 
-        ToggleRow {
-            label: "Show on hover"
-            description: "Reveal the island when the pointer reaches the screen edge"
-            checked: true
-            placeholder: true
-        }
+        Reveal {
+            shown: !ShellState.islandAlwaysVisible
 
-        SliderRow {
-            label: "Drag threshold"
-            description: "Pixels dragged from the edge before the island reveals"
-            from: 0; to: 100; stepSize: 5
-            value: 20
-            unit: " px"
-            placeholder: true
-            showDivider: false
+            ToggleRow {
+                label: "Show on hover"
+                description: "Reveal the island when the pointer reaches the top edge. Off: it only appears for panels, toasts and shortcuts"
+                checked: ShellState.islandRevealOnHover
+                onToggled: (val) => ShellState.islandRevealOnHover = val
+            }
+
+            SliderRow {
+                label: "Reveal zone"
+                description: "Height of the edge strip that reveals the island"
+                from: 1; to: 40; stepSize: 1
+                value: ShellState.islandRevealZone
+                unit: " px"
+                enabled: ShellState.islandRevealOnHover
+                onMoved: (val) => ShellState.islandRevealZone = val
+            }
+
+            SliderRow {
+                label: "Hide delay"
+                description: "How long the island waits after the pointer leaves before it slides away"
+                from: 200; to: 3000; stepSize: 100
+                value: ShellState.islandHideDelayMs
+                unit: " ms"
+                onMoved: (val) => ShellState.islandHideDelayMs = val
+                showDivider: false
+            }
         }
     }
 
@@ -200,24 +215,17 @@ PageScroll {
 
     GroupCard {
         ToggleRow {
-            label: "Switch workspaces"
-            description: "Scroll over the workspace indicator"
-            checked: true
-            placeholder: true
-        }
-
-        ToggleRow {
             label: "Adjust volume"
             description: "Scroll on the top half of the island"
-            checked: true
-            placeholder: true
+            checked: ShellState.islandScrollVolume
+            onToggled: (val) => ShellState.islandScrollVolume = val
         }
 
         ToggleRow {
             label: "Adjust brightness"
             description: "Scroll on the bottom half of the island"
-            checked: true
-            placeholder: true
+            checked: ShellState.islandScrollBrightness
+            onToggled: (val) => ShellState.islandScrollBrightness = val
             showDivider: false
         }
     }

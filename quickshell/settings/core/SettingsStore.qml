@@ -27,6 +27,8 @@ Item {
         "customRadiusControl", "customRadiusChip",
         "islandCompactHeight", "islandCompactWidth",
         "islandExpandedHeight", "islandMinExpandedWidth",
+        "islandAlwaysVisible", "islandRevealOnHover", "islandRevealZone",
+        "islandHideDelayMs", "islandScrollVolume", "islandScrollBrightness",
         "launcherWidth", "launcherMaxRows", "clipboardWidth", "clipboardMaxRows",
         "controlCenterWidth", "controlCenterHeight",
         "notificationCenterWidth", "notificationCenterMaxHeight",

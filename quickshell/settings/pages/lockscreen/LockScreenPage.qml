@@ -1,5 +1,6 @@
-// pages/lockscreen/LockScreenPage.qml — Lock Screen. Real: everything bound to LockScreenSettings.
-// The Locking rows are greyed placeholders until the lock service supports them.
+// pages/lockscreen/LockScreenPage.qml — Lock Screen. Real: everything bound to LockScreenSettings,
+// plus the lock timer, which lives in hypridle.conf (LockTimerService).
+// The lid row stays a greyed placeholder: it belongs to logind / a Hyprland bind, not to the shell.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -37,6 +38,13 @@ PageScroll {
             from: 0; to: 0.8; stepSize: 0.01
             value: LockScreenSettings.wallpaperDimOpacity
             onMoved: (val) => LockScreenSettings.wallpaperDimOpacity = val
+        }
+
+        ToggleRow {
+            label: "Entrance animation"
+            description: "Fade and slide the lock screen in. Off: it appears fully drawn"
+            checked: LockScreenSettings.playEntranceAnimation
+            onToggled: (val) => LockScreenSettings.playEntranceAnimation = val
             showDivider: false
         }
     }
@@ -64,6 +72,30 @@ PageScroll {
         }
     }
 
+    SectionLabel { text: "Notifications" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Show notifications on the lock screen"
+            description: "A count and the latest few, under the clock. Respects Show previews"
+            checked: LockScreenSettings.showNotifications
+            onToggled: (val) => LockScreenSettings.showNotifications = val
+            showDivider: LockScreenSettings.showNotifications
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showNotifications
+
+            SliderRow {
+                label: "Notifications shown"
+                from: 1; to: 6; stepSize: 1
+                value: LockScreenSettings.notificationLimit
+                onMoved: (val) => LockScreenSettings.notificationLimit = val
+                showDivider: false
+            }
+        }
+    }
+
     SectionLabel { text: "Password box" }
 
     GroupCard {
@@ -73,6 +105,12 @@ PageScroll {
             value: LockScreenSettings.passwordPlaceholder
             fieldWidth: 220
             onCommitted: (v) => LockScreenSettings.passwordPlaceholder = v
+        }
+
+        ToggleRow {
+            label: "Shake on wrong password"
+            checked: LockScreenSettings.shakeOnWrongPassword
+            onToggled: (val) => LockScreenSettings.shakeOnWrongPassword = val
         }
 
         ToggleRow {
@@ -113,21 +151,19 @@ PageScroll {
     GroupCard {
         SliderRow {
             label: "Lock after idle"
-            description: "Lock the screen when you have not touched anything for a while"
-            from: 1; to: 30; stepSize: 1
-            value: 5
+            description: LockTimerService.available
+                ? "Changes the lock timer in your hypridle.conf and restarts hypridle. Screen-off keeps its delay after locking"
+                : LockTimerService.status
+            from: 1; to: 25; stepSize: 1
+            value: LockTimerService.lockMinutes
             unit: " min"
-            placeholder: true
+            enabled: LockTimerService.available
+            onMoved: (val) => LockTimerService.setLockMinutes(val)
         }
 
         ToggleRow {
             label: "Lock when the lid closes"
             checked: true
-            placeholder: true
-        }
-
-        ToggleRow {
-            label: "Show notifications on the lock screen"
             placeholder: true
             showDivider: false
         }

@@ -9,7 +9,7 @@ Item {
     readonly property var notif: NotificationService.latestNotification
 
     readonly property int iconSpacing: 10
-    readonly property int maxTextWidth: 260
+    readonly property int maxTextWidth: ShellState.notificationToastMaxWidth
 
     implicitWidth: ShellState.islandCompactWidth + 5
     implicitHeight: ShellState.islandCompactHeight 
@@ -43,5 +43,12 @@ Item {
             width: Math.min(implicitWidth, toast.maxTextWidth)
             anchors.verticalCenter: parent.verticalCenter
         }
+    }
+
+    // Click to dismiss. This is how a toast that is set to stay until clicked goes away.
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: ShellState.dismissFlash()
     }
 }

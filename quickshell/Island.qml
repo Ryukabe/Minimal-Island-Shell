@@ -18,7 +18,44 @@ PanelWindow {
 
     readonly property string iconDir: "file://" + Quickshell.shellDir + "/assets/icons/"
 
+    // ---- Idle / toast state ----
+    readonly property bool compactPage: ShellState.activePage === "clock" || ShellState.activePage === "timertoast"
+    readonly property bool toastPage: ShellState.activePage === "notification" || ShellState.activePage === "eventtoast"
+
+    // Auto-hide: the island only slides away while a compact page is showing and the pointer is
+    // away. Any panel, toast or shortcut brings it back (compactPage goes false).
+    property bool revealed: false
+    readonly property bool islandHidden: !ShellState.islandAlwaysVisible && compactPage && !revealed
+    readonly property bool pointerOver: islandTapArea.containsMouse || hoverZoneHover.hovered
+
+    onCompactPageChanged: {
+        if (compactPage) {
+            revealed = true
+            hideTimer.restart()
+        } else {
+            hideTimer.stop()
+        }
+    }
+
+    onPointerOverChanged: {
+        if (pointerOver) {
+            hideTimer.stop()
+            revealed = true
+        } else if (compactPage) {
+            hideTimer.restart()
+        }
+    }
+
+    Timer {
+        id: hideTimer
+        interval: ShellState.islandHideDelayMs
+        repeat: false
+        onTriggered: if (!window.pointerOver) window.revealed = false
+    }
+
     WlrLayershell.namespace: "quickshell:island"
+    // Overlay renders above fullscreen windows; only used while a toast is showing.
+    WlrLayershell.layer: (ShellState.notificationOverFullscreen && window.toastPage) ? WlrLayer.Overlay : WlrLayer.Top
     WlrLayershell.keyboardFocus: (
         ShellState.activePage === "launcher" ||
         ShellState.activePage === "clipboard" ||
@@ -38,7 +75,8 @@ PanelWindow {
     color: "transparent"
 
     exclusionMode: ExclusionMode.Normal
-    exclusiveZone: island.compactHeight + island.anchors.topMargin
+    // Auto-hide gives the space back to windows.
+    exclusiveZone: ShellState.islandAlwaysVisible ? island.compactHeight + island.anchors.topMargin : 0
 
     function getDefaultPage() {
         return (TimerService.running || TimerService.secondsRemaining > 0) ? "timertoast" : "clock"
@@ -54,12 +92,16 @@ PanelWindow {
         BrightnessService.percent
         VolumeService.percent
         NotificationService.trackedNotifications
+        EventToastService.title
         PolkitService.isActive
         Hyprland
         Kitty
         VSCode
         Gtk
         SettingsStore
+        // Show briefly at startup, then let auto-hide take over.
+        window.revealed = true
+        hideTimer.restart()
     }
 
     function brightnessTier(percent) {
@@ -130,8 +172,12 @@ PanelWindow {
         function close() { ShellState.showPage(getDefaultPage()) }
     }
 
+    // Input region. Auto-hide on + compact page: the hover zone (the edge strip while hidden,
+    // the island plus the gap above it while shown). Otherwise exactly as before.
     mask: Region {
-        item: (island.expanded && ShellState.activePage !== "notification" && ShellState.islandClickOutsideDismiss) ? clickCatcher : island
+        item: (island.expanded && ShellState.activePage !== "notification" && ShellState.islandClickOutsideDismiss)
+            ? clickCatcher
+            : ((!ShellState.islandAlwaysVisible && window.compactPage) ? hoverZone : island)
     }
 
     Rectangle {
@@ -146,11 +192,29 @@ PanelWindow {
         }
     }
 
+    // Edge strip that reveals the island, and keeps it revealed while the pointer is in the gap
+    // between the screen edge and the island.
+    Rectangle {
+        id: hoverZone
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        color: "transparent"
+        width: window.islandHidden ? ShellState.islandCompactWidth : island.width
+        height: window.islandHidden
+            ? (ShellState.islandRevealOnHover ? ShellState.islandRevealZone : 0)
+            : island.height + (ShellState.islandNotchMode ? 0 : ShellState.islandTopMargin)
+
+        HoverHandler {
+            id: hoverZoneHover
+            enabled: ShellState.islandRevealOnHover || !window.islandHidden
+        }
+    }
+
     NotchShape {
         id: notchShape
         visible: ShellState.islandNotchMode
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 0
+        y: island.anchors.topMargin
         z: -1
         notchWidth: island.width
         notchHeight: island.height
@@ -200,12 +264,16 @@ PanelWindow {
         id: island
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: ShellState.islandNotchMode ? 0 : ShellState.islandTopMargin
+        // Hidden: parked above the screen edge, far enough that the shadow halo clears it too.
+        anchors.topMargin: window.islandHidden
+            ? -(island.height + ShellState.islandTopMargin + Dimens.paddingLarge * 4)
+            : (ShellState.islandNotchMode ? 0 : ShellState.islandTopMargin)
         clip: true
 
         readonly property bool expanded: ShellState.activePage !== "clock" 
                        && ShellState.activePage !== "timertoast" 
                        && ShellState.activePage !== "notificationtoast" 
+                       && ShellState.activePage !== "eventtoast"
                        && ShellState.activePage !== "volume" 
                        && ShellState.activePage !== "brightness" 
                        && ShellState.activePage !== "settings" 
@@ -298,7 +366,32 @@ PanelWindow {
             id: islandTapArea
             anchors.fill: parent
             enabled: ShellState.activePage === "clock" || ShellState.activePage === "timertoast"
+            // Without this, containsMouse is only true while a button is pressed,
+            // so the hover lift never played on plain hover.
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+
+            // Wheel gestures: top half = volume, bottom half = brightness. Wheel deltas arrive in
+            // units of 120 per notch; touchpads send many small ones, so they are accumulated.
+            property real wheelAccumulator: 0
+            onWheel: (wheel) => {
+                wheelAccumulator += wheel.angleDelta.y
+                var steps = Math.trunc(wheelAccumulator / 120)
+                if (steps === 0) return
+                wheelAccumulator -= steps * 120
+
+                var topHalf = wheel.y < height / 2
+                var up = steps > 0
+                var count = Math.abs(steps)
+                for (var i = 0; i < count; i++) {
+                    if (topHalf && ShellState.islandScrollVolume) {
+                        if (up) VolumeService.increase(); else VolumeService.decrease()
+                    } else if (!topHalf && ShellState.islandScrollBrightness) {
+                        if (up) BrightnessService.increase(); else BrightnessService.decrease()
+                    }
+                }
+            }
+
             onClicked: {
                 if (ShellState.activePage === "timertoast") {
                     ShellState.togglePage("timer")
@@ -409,6 +502,7 @@ PanelWindow {
                     case "volume": return volumePage
                     case "brightness": return brightnessPage
                     case "notification": return notificationPage
+                    case "eventtoast": return eventToastPage
                     case "notificationcenter": return notificationCenterPage
                     case "theme": return themePage
                     case "wallpaper": return wallpaperSwitcherPage
@@ -423,6 +517,7 @@ PanelWindow {
         Component { id: clockPage; Clock {} }
         Component { id: mediaPage; MediaExpanded { color: "transparent" } }
         Component { id: notificationPage; NotificationToast {} }
+        Component { id: eventToastPage; EventToast {} }
         Component { id: launcherPage; AppLauncher {} }
         Component { id: clipboardPage; Clipboard {} }
         Component { id: powerPage; PowerMenu {} }

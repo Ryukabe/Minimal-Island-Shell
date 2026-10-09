@@ -20,6 +20,13 @@ WlSessionLock {
         WlSessionLockSurface {
             id: lockSurface
 
+            // Drives the clock and date. (They used to call new Date() once, so the time froze
+            // for as long as the screen stayed locked.)
+            SystemClock {
+                id: lockClock
+                precision: SystemClock.Minutes
+            }
+
             PamContext {
                 id: pam
                 config: "quickshell"
@@ -38,7 +45,7 @@ WlSessionLock {
                         errorMessage.visible = true
                         passwordInput.text = ""
                         passwordInput.forceActiveFocus()
-                        shakeAnim.start()
+                        if (LockScreenSettings.shakeOnWrongPassword) shakeAnim.start()
                         pam.start()
                     }
                 }
@@ -48,7 +55,7 @@ WlSessionLock {
                     errorMessage.visible = true
                     passwordInput.text = ""
                     passwordInput.forceActiveFocus()
-                    shakeAnim.start()
+                    if (LockScreenSettings.shakeOnWrongPassword) shakeAnim.start()
                     pam.start()
                 }
             }
@@ -65,7 +72,8 @@ WlSessionLock {
             // slow Ken-Burns-style zoom-fade on the wallpaper itself.
             // Respects ShellState.motionReduced via motionDuration() —
             // durations collapse to 0 (i.e. instant) when reduced motion
-            // is on, same convention as the rest of the shell.
+            // is on, same convention as the rest of the shell. Also skipped
+            // entirely when LockScreenSettings.playEntranceAnimation is off.
             ParallelAnimation {
                 id: entranceAnim
 
@@ -156,7 +164,12 @@ WlSessionLock {
                 NumberAnimation { target: authBlockShake; property: "x"; to: 0;   duration: 45; easing.type: Easing.OutCubic }
             }
 
-            Component.onCompleted: entranceAnim.start()
+            Component.onCompleted: {
+                entranceAnim.start()
+                // complete() jumps every animated property to its end value, so the lock screen
+                // simply appears fully drawn.
+                if (!LockScreenSettings.playEntranceAnimation) entranceAnim.complete()
+            }
 
             // Background focus handling
             MouseArea {
@@ -210,7 +223,7 @@ WlSessionLock {
                             : Qt.rgba(1, 1, 1, LockScreenSettings.wallpaperDimOpacity)
                     }
 
-                    // ---- TOP-LEFT: clock ----
+                    // ---- TOP-LEFT: clock (+ notifications) ----
                     Column {
                         id: clockBlock
                         anchors.top: parent.top
@@ -220,13 +233,18 @@ WlSessionLock {
                         spacing: Dimens.spacingSmall
                         opacity: 0
 
+                        // Newest last, same order as the notification service tracks them.
+                        readonly property var notifs: NotificationService.trackedNotifications.values
+                        readonly property int notifTotal: notifs ? notifs.length : 0
+                        readonly property bool showNotifs: LockScreenSettings.showNotifications && notifTotal > 0
+
                         transform: Translate {
                             id: clockBlockTranslate
                             y: 18
                         }
 
                         Text {
-                            text: Qt.formatDateTime(new Date(), LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
+                            text: Qt.formatDateTime(lockClock.date, LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
                             font.family: Fonts.display
                             font.pixelSize: Dimens.fontSizeDisplay
                             font.weight: Font.Bold
@@ -235,11 +253,40 @@ WlSessionLock {
 
                         Text {
                             visible: LockScreenSettings.showDate
-                            text: Qt.formatDateTime(new Date(), "dddd, MMMM d").toUpperCase()
+                            text: Qt.formatDateTime(lockClock.date, "dddd, MMMM d").toUpperCase()
                             font.family: Fonts.text
                             font.pixelSize: Dimens.fontSizeXs
                             font.letterSpacing: 2
                             color: Colors.fgMuted
+                        }
+
+                        Text {
+                            visible: clockBlock.showNotifs
+                            topPadding: Dimens.spacingMedium
+                            text: clockBlock.notifTotal + (clockBlock.notifTotal === 1 ? " NOTIFICATION" : " NOTIFICATIONS")
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.letterSpacing: 2
+                            color: Colors.fgMuted
+                        }
+
+                        Repeater {
+                            model: clockBlock.showNotifs ? Math.min(LockScreenSettings.notificationLimit, clockBlock.notifTotal) : 0
+
+                            Text {
+                                required property int index
+                                readonly property var n: clockBlock.notifs[clockBlock.notifTotal - 1 - index]
+
+                                text: n
+                                    ? (ShellState.notificationPreviewsEnabled ? n.appName + ": " + n.summary : "New notification")
+                                    : ""
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeSm
+                                color: Colors.fg
+                                elide: Text.ElideRight
+                                maximumLineCount: 1
+                                width: Math.min(implicitWidth, lockSurface.width * 0.4)
+                            }
                         }
                     }
 
