@@ -6,72 +6,165 @@ import Quickshell.Io
 QtObject {
     id: root
 
+    // ================= DEFAULTS (single source of truth) =================
+    // Every key here is a persisted setting. Each property below starts from this table,
+    // and SettingsStore reads it for resets and for deciding which keys to save.
+    readonly property var defaults: ({
+        // bar & island
+        islandTopMargin: 5,
+        islandCornerRadius: 12,
+        islandBorderWidth: 0,
+        islandClickOutsideDismiss: true,
+        islandNotchMode: false,
+        islandNotchFlare: 14,
+        islandHoverScale: 1.02,
+        radiusUniversal: true,
+        customRadiusCard: 12,
+        customRadiusControl: 6,
+        customRadiusChip: 3,
+        islandCompactHeight: 36,
+        islandCompactWidth: 160,
+        islandExpandedHeight: 135,
+        islandMinExpandedWidth: 619,
+        // module sizing
+        launcherWidth: 420,
+        launcherMaxRows: 7,
+        clipboardWidth: 420,
+        clipboardMaxRows: 6,
+        controlCenterWidth: 580,
+        controlCenterHeight: 400,
+        notificationCenterWidth: 360,
+        notificationCenterMaxHeight: 480,
+        powerMenuWidth: 320,
+        powerMenuHeight: 76,
+        statusPanelWidth: 520,
+        statusPanelHeight: 172,
+        timerWidth: 320,
+        timerHeight: 180,
+        // motion
+        motionReduced: false,
+        motionMovementMs: 480,
+        motionFadeMs: 220,
+        motionHoverMs: 250,
+        motionBouncePercent: 20,
+        motionExpressiveBouncePercent: 45,
+        motionSpringEnabled: false,
+        motionIconsEnabled: true,
+        motionIconSpeedPercent: 100,
+        motionIconBouncePercent: 50,
+        // clock
+        clockUse24Hour: false,
+        clockShowSeconds: false,
+        clockLeadingZero: true,
+        clockLowercaseAmPm: false,
+        clockDateStyle: 0,
+        clockShowVisualizer: true,
+        clockShowTimerIcon: true,
+        clockShowRecordingIndicator: true,
+        timerToastShowRecordingIndicator: true,
+        // notifications & focus
+        notificationPreviewsEnabled: true,
+        focusModeEnabled: false,
+        activeFocusMode: "Do Not Disturb",
+        // typography
+        fontSizeBase: 15,
+        fontBody: "SF Pro Text",
+        fontDisplay: "SF Pro Display",
+        iconStyle: "Rounded",
+        iconWeight: 400,
+        iconFilled: false,
+        // sound & media
+        volumeStep: 5,
+        volumeMax: 100,
+        lyricsBackend: "Auto",
+        defaultPlayer: "Spotify",
+        // language & region
+        weatherUnit: "°C",
+        systemTempUnit: "°C",
+        // apps (arrays of desktop-entry ids)
+        favouriteApps: [],
+        hiddenApps: [],
+        // about
+        updateAutoCheck: true,
+    })
+
+    // ================= NAVIGATION / TRANSIENT STATE (not persisted) =================
     property string activePage: "clock"
     property string previousPage: "clock"
-    property bool focusModeEnabled: false
-    property string activeFocusMode: "Do Not Disturb"
-    property bool notificationPreviewsEnabled: true
     property bool ignoreHover: false
     property bool settingsOpen: false
 
+    // ================= FOCUS & NOTIFICATIONS =================
+    property bool focusModeEnabled: root.defaults.focusModeEnabled
+    property string activeFocusMode: root.defaults.activeFocusMode
+    property bool notificationPreviewsEnabled: root.defaults.notificationPreviewsEnabled
+
     // ================= TYPOGRAPHY =================
-    // Single source of truth for fonts/icons. Fonts.qml and Dimens.qml
-    // read these; Appearance.qml writes them; SettingsStore persists them.
-    property real fontSizeBase: 15            // 15 = 1.0 scale for Dimens.fontSize*
-    property string fontBody: "SF Pro Text"
-    property string fontDisplay: "SF Pro Display"
-    property string iconStyle: "Rounded"      // "Rounded" | "Outlined" | "Sharp"
-    property int iconWeight: 400
-    property bool iconFilled: false
+    // Fonts.qml and Dimens.qml read these; the Typography page writes them.
+    property real fontSizeBase: root.defaults.fontSizeBase            // 15 = 1.0 scale for Dimens.fontSize*
+    property string fontBody: root.defaults.fontBody
+    property string fontDisplay: root.defaults.fontDisplay
+    property string iconStyle: root.defaults.iconStyle                // "Rounded" | "Outlined" | "Sharp"
+    property int iconWeight: root.defaults.iconWeight
+    property bool iconFilled: root.defaults.iconFilled
 
     // ================= BAR & ISLAND PROPERTIES =================
-    property real islandTopMargin: 5
-    property real islandCornerRadius: 12
-    property real islandBorderWidth: 0
-    property bool islandClickOutsideDismiss: true
-    property bool islandNotchMode: false
-    property real islandNotchFlare: 14
-    property real islandHoverScale: 1.02
+    property real islandTopMargin: root.defaults.islandTopMargin
+    property real islandCornerRadius: root.defaults.islandCornerRadius
+    property real islandBorderWidth: root.defaults.islandBorderWidth
+    property bool islandClickOutsideDismiss: root.defaults.islandClickOutsideDismiss
+    property bool islandNotchMode: root.defaults.islandNotchMode
+    property real islandNotchFlare: root.defaults.islandNotchFlare
+    property real islandHoverScale: root.defaults.islandHoverScale
 
-    property real islandCompactHeight: 36
-    property real islandCompactWidth: 160
-    property real islandExpandedHeight: 135
-    property real islandMinExpandedWidth: 619
+    property real islandCompactHeight: root.defaults.islandCompactHeight
+    property real islandCompactWidth: root.defaults.islandCompactWidth
+    property real islandExpandedHeight: root.defaults.islandExpandedHeight
+    property real islandMinExpandedWidth: root.defaults.islandMinExpandedWidth
+
+    // Radius system: universal on = everything follows islandCornerRadius; off = per-kind radii.
+    property bool radiusUniversal: root.defaults.radiusUniversal
+    property real customRadiusCard: root.defaults.customRadiusCard
+    property real customRadiusControl: root.defaults.customRadiusControl
+    property real customRadiusChip: root.defaults.customRadiusChip
 
     // ================= MODULE SIZING PROPERTIES =================
-    property real launcherWidth: 420
-    property int launcherMaxRows: 7
+    property real launcherWidth: root.defaults.launcherWidth
+    property int launcherMaxRows: root.defaults.launcherMaxRows
 
-    property real clipboardWidth: 420
-    property int clipboardMaxRows: 6
+    property real clipboardWidth: root.defaults.clipboardWidth
+    property int clipboardMaxRows: root.defaults.clipboardMaxRows
 
-    property real controlCenterWidth: 580
-    property real controlCenterHeight: 400
+    property real controlCenterWidth: root.defaults.controlCenterWidth
+    property real controlCenterHeight: root.defaults.controlCenterHeight
 
-    property real notificationCenterWidth: 360
-    property real notificationCenterMaxHeight: 480
+    property real notificationCenterWidth: root.defaults.notificationCenterWidth
+    property real notificationCenterMaxHeight: root.defaults.notificationCenterMaxHeight
 
-    property real powerMenuWidth: 320
-    property real powerMenuHeight: 76
+    property real powerMenuWidth: root.defaults.powerMenuWidth
+    property real powerMenuHeight: root.defaults.powerMenuHeight
 
-    property real statusPanelWidth: 520
-    property real statusPanelHeight: 172
+    property real statusPanelWidth: root.defaults.statusPanelWidth
+    property real statusPanelHeight: root.defaults.statusPanelHeight
 
-    property real timerWidth: 320
-    property real timerHeight: 180
+    property real timerWidth: root.defaults.timerWidth
+    property real timerHeight: root.defaults.timerHeight
+
+    // ================= UPDATES =================
+    property bool updateAutoCheck: root.defaults.updateAutoCheck
 
     // ================= CLOCK =================
     // Single source of truth for the bar clock AND the Clock settings preview.
     // The two format strings below are derived — never persisted, never set by hand.
-    property bool clockUse24Hour: false
-    property bool clockShowSeconds: false
-    property bool clockLeadingZero: true
-    property bool clockLowercaseAmPm: false
-    property int clockDateStyle: 0            // 0 = off, 1 = "ddd d", 2 = "ddd d MMM"
-    property bool clockShowVisualizer: true
-    property bool clockShowTimerIcon: true
-    property bool clockShowRecordingIndicator: true
-    property bool timerToastShowRecordingIndicator: true
+    property bool clockUse24Hour: root.defaults.clockUse24Hour
+    property bool clockShowSeconds: root.defaults.clockShowSeconds
+    property bool clockLeadingZero: root.defaults.clockLeadingZero
+    property bool clockLowercaseAmPm: root.defaults.clockLowercaseAmPm
+    property int clockDateStyle: root.defaults.clockDateStyle            // 0 = off, 1 = "ddd d", 2 = "ddd d MMM"
+    property bool clockShowVisualizer: root.defaults.clockShowVisualizer
+    property bool clockShowTimerIcon: root.defaults.clockShowTimerIcon
+    property bool clockShowRecordingIndicator: root.defaults.clockShowRecordingIndicator
+    property bool timerToastShowRecordingIndicator: root.defaults.timerToastShowRecordingIndicator
 
     // 12-hour mode always includes an AM/PM token, which is what makes h/hh
     // render as 1-12 instead of 0-23.
@@ -87,16 +180,37 @@ QtObject {
     readonly property string clockDateFormat: clockDateStyle === 2 ? "ddd d MMM" : "ddd d"
 
     // ================= MOTION & ANIMATIONS =================
-    property bool motionReduced: false
-    property real motionMovementMs: 480
-    property real motionFadeMs: 220
-    property real motionHoverMs: 250
-    property real motionBouncePercent: 20
+    property bool motionReduced: root.defaults.motionReduced
+    property real motionMovementMs: root.defaults.motionMovementMs
+    property real motionFadeMs: root.defaults.motionFadeMs
+    property real motionHoverMs: root.defaults.motionHoverMs
+    property real motionBouncePercent: root.defaults.motionBouncePercent
     // Bounce amount for the Expressive tier only (Motion.qml). Independent of
     // motionBouncePercent so frequent motion stays subtle while rare,
     // playful moments can bounce more.
-    property real motionExpressiveBouncePercent: 45
-    property bool motionSpringEnabled: false
+    property real motionExpressiveBouncePercent: root.defaults.motionExpressiveBouncePercent
+    property bool motionSpringEnabled: root.defaults.motionSpringEnabled
+
+    // Settings icon animations (SymbolIcon reads these three).
+    property bool motionIconsEnabled: root.defaults.motionIconsEnabled
+    property real motionIconSpeedPercent: root.defaults.motionIconSpeedPercent
+    property real motionIconBouncePercent: root.defaults.motionIconBouncePercent
+
+    // ================= SOUND & MEDIA =================
+    // Stored here so they persist. VolumeService / the media module still have to read them.
+    property int volumeStep: root.defaults.volumeStep
+    property int volumeMax: root.defaults.volumeMax
+    property string lyricsBackend: root.defaults.lyricsBackend            // "Auto" | "LRCLIB" | "Local files"
+    property string defaultPlayer: root.defaults.defaultPlayer            // "Spotify" | "Firefox" | "mpv" | "Any"
+
+    // ================= LANGUAGE & REGION =================
+    property string weatherUnit: root.defaults.weatherUnit                // "°C" | "°F"
+    property string systemTempUnit: root.defaults.systemTempUnit          // "°C" | "°F"
+
+    // ================= APPS =================
+    // Arrays of desktop-entry ids. Always reassign (never push) so change signals fire.
+    property var favouriteApps: root.defaults.favouriteApps
+    property var hiddenApps: root.defaults.hiddenApps
 
     // Keeps Hyprland's own window-manager animations (workspace switches,
     // window open/close, etc.) in sync with the shell's Reduce Motion

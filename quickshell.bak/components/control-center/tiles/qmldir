@@ -1,0 +1,17 @@
+
+module components.controlcenter.tiles
+
+AirplaneModeToggleTile 1.0 AirplaneModeToggleTile.qml
+BluetoothToggleTile 1.0 BluetoothToggleTile.qml
+CaffeineToggleTile 1.0 CaffeineToggleTile.qml
+FocusToggleTile 1.0 FocusToggleTile.qml
+NightLightToggleTile 1.0 NightLightToggleTile.qml
+PowerProfileToggleTile 1.0 PowerProfileToggleTile.qml
+RecordingToggleTile 1.0 RecordingToggleTile.qml
+WifiToggleTile 1.0 WifiToggleTile.qml
+LightModeToggleTile 1.0 LightModeToggleTile.qml
+BrightnessToggleTile 1.0 BrightnessToggleTile.qml
+VolumeToggleTile 1.0 VolumeToggleTile.qml
+MediaToggleTile 1.0 MediaToggleTile.qml
+NotificationToggleTile 1.0 NotificationToggleTile.qml
+SliderTile 1.0 SliderTile.qml

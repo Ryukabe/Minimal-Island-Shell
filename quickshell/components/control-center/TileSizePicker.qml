@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../styles"
 import "../../services"
-import "../../settings/common"
+import "../../settings/components"
 
 RowLayout {
     id: root

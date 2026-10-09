@@ -1,0 +1,152 @@
+// moules/TimerModule.qml
+
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+import "../styles"
+import "../services"
+import "../components/bar"
+
+Item {
+    id: root
+
+    implicitWidth: ShellState.timerWidth
+    implicitHeight: ShellState.timerHeight
+
+    property int selectedMinutes: 5
+
+    // Outer ColumnLayout below sits at a 16px margin off the island's own
+    // bounds, so the minute-picker chips derive off the master with that
+    // real gap.
+    readonly property real _chipRadius: ShellState.islandCornerRadius
+
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 16
+        spacing: 12
+
+        RowLayout {
+            Layout.fillWidth: true
+            Text {
+                text: "Timer"
+                font.family: Fonts.text
+                font.pixelSize: Dimens.fontSizeLg
+                font.bold: true
+                color: Colors.fg
+            }
+            Item { Layout.fillWidth: true }
+            Text {
+                text: "󱎫"
+                font.family: Fonts.icon || "JetBrainsMono Nerd Font"
+                font.pixelSize: Dimens.fontSizeLg
+                color: Colors.accent
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                visible: TimerService.secondsRemaining > 0 || TimerService.running
+                spacing: 8
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: TimerService.formatTime(TimerService.secondsRemaining)
+                    font.family: Fonts.text
+                    font.pixelSize: Dimens.fontSize36
+                    font.bold: true
+                    color: Colors.fg
+                }
+
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: 12
+
+                    Rectangle {
+                        width: 70
+                        height: 32
+                        radius: ShellState.islandCornerRadius
+                        color: Colors.subBgMica
+                        Text {
+                            anchors.centerIn: parent
+                            text: TimerService.running ? "Pause" : "Resume"
+                            color: Colors.fg
+                            font.pixelSize: Dimens.fontSizeSm
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: TimerService.togglePause()
+                        }
+                    }
+
+                    Rectangle {
+                        width: 70
+                        height: 32
+                        radius: ShellState.islandCornerRadius
+                        color: Colors.subBgMica
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Reset"
+                            color: Colors.fg
+                            font.pixelSize: Dimens.fontSizeSm
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: TimerService.reset()
+                        }
+                    }
+                }
+            }
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                visible: TimerService.secondsRemaining === 0 && !TimerService.running
+                spacing: 12
+
+                RowLayout {
+                    spacing: 8
+                    Repeater {
+                        model: [1, 5, 10, 15, 25]
+                        Rectangle {
+                            width: 44
+                            height: 36
+                            radius: root._chipRadius
+                            color: root.selectedMinutes === modelData ? Colors.accent : Colors.subBgMica
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData + "m"
+                                color: root.selectedMinutes === modelData ? Colors.bg : Colors.fg
+                                font.bold: true
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: root.selectedMinutes = modelData
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.alignment: Qt.AlignHCenter
+                    width: 120
+                    height: 36
+                    radius: ShellState.islandCornerRadius
+                    color: Colors.accent
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Start Timer"
+                        color: Colors.bg
+                        font.bold: true
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: TimerService.start(root.selectedMinutes * 60)
+                    }
+                }
+            }
+        }
+    }
+}

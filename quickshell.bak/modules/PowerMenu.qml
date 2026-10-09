@@ -1,0 +1,177 @@
+// modules/PowerMenu.qml
+import QtQuick
+import QtQuick.Layouts
+import Quickshell.Io
+import "../styles"
+import "../services"
+
+Item {
+    id: root
+    implicitWidth: ShellState.powerMenuWidth
+    implicitHeight: ShellState.powerMenuHeight
+    focus: true
+    clip: true
+
+    // No settings-window layer here either — PowerMenu's tiles sit
+    // directly in the island, so they derive straight off the master.
+    // Gap kept small (paddingSmall) since the row is centered with no
+    // large fixed margin defined in this file.
+    readonly property real _tileRadius: ShellState.islandCornerRadius
+
+    readonly property var actions: [
+        {
+            icon: "lock",
+            label: "Lock",
+            page: "lock"
+        },
+        {
+            icon: "bedtime",
+            label: "Sleep",
+            cmd: ["systemctl", "suspend"]
+        },
+        {
+            icon: "restart_alt",
+            label: "Restart",
+            cmd: ["systemctl", "reboot"]
+        },
+        {
+            icon: "logout",
+            label: "Logout",
+            cmd: ["hyprctl", "dispatch", "exit"]
+        },
+        {
+            icon: "power_settings_new",
+            label: "Power Off",
+            cmd: ["systemctl", "poweroff"]
+        }
+    ]
+
+    property int selectedIndex: 0
+
+    Process {
+        id: cmdRunner
+    }
+
+    function runCmd(cmd) {
+        if (!cmd) return
+        cmdRunner.command = cmd
+        cmdRunner.startDetached()
+        ShellState.showPage("clock")
+    }
+
+    function triggerSelected() {
+        var action = actions[selectedIndex]
+        if (!action) return
+
+        if (action.page) {
+            ShellState.showPage(action.page)
+        } else {
+            runCmd(action.cmd)
+        }
+    }
+
+    Timer {
+        id: focusTimer
+        interval: 50
+        repeat: false
+        onTriggered: root.forceActiveFocus()
+    }
+
+    Connections {
+        target: ShellState
+        function onActivePageChanged() {
+            if (ShellState.activePage === "power") {
+                root.selectedIndex = 0
+                focusTimer.restart()
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        if (ShellState.activePage === "power") focusTimer.restart()
+    }
+
+    Keys.onPressed: (event) => {
+        if (event.key === Qt.Key_Left) {
+            root.selectedIndex = Math.max(root.selectedIndex - 1, 0)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right) {
+            root.selectedIndex = Math.min(root.selectedIndex + 1, root.actions.length - 1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            root.triggerSelected()
+            event.accepted = true
+        }
+    }
+
+    RowLayout {
+        id: row
+        anchors.centerIn: parent
+        spacing: 16
+
+        Repeater {
+            model: root.actions
+
+            Rectangle {
+                required property int index
+                required property var modelData
+
+                width: 52
+                height: 52
+                radius: root._tileRadius
+                color: index === root.selectedIndex ? Colors.accent : Colors.subBgMica
+                border.width: 0
+                border.color: Colors.border
+
+                scale: index === root.selectedIndex ? 1.15 : 1.0
+
+                Behavior on color {
+                    ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                }
+
+                // Icon selection is snap tier
+                SpringAnimation {
+                    id: scaleSpringAnim
+                    spring: Motion.snapSpring
+                    damping: Motion.snapDamping
+                    mass: Motion.snapMass
+                    epsilon: Motion.epsilon
+                }
+                NumberAnimation {
+                    id: scaleEaseAnim
+                    duration: ShellState.motionDuration(Motion.snapMs)
+                    easing.type: Easing.OutCubic
+                }
+                Behavior on scale {
+                    animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? scaleSpringAnim : scaleEaseAnim
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: parent.modelData.icon
+                    font.family: Fonts.icon
+                    font.pixelSize: Dimens.fontSizeXl
+                    font.variableAxes: Fonts.iconAxes
+                    font.features: { "liga": 1, "dlig": 1 }
+                    color: parent.index === root.selectedIndex ? Colors.bg : Colors.fg
+                }
+
+                MouseArea {
+                    id: powerMouse
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onEntered: root.selectedIndex = parent.index
+                    onClicked: {
+                        root.selectedIndex = parent.index
+                        if (parent.modelData.page) {
+                            ShellState.showPage(parent.modelData.page)
+                        } else {
+                            root.runCmd(parent.modelData.cmd)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

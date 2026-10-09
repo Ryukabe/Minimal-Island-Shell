@@ -11,7 +11,7 @@ import "styles/adapters"
 import "services"
 import "components/bar"
 import "components/common"
-import "settings-new/core"
+import "settings/core"
 
 PanelWindow {
     id: window
@@ -323,13 +323,12 @@ PanelWindow {
             opacity: 1.0
 
             // hover feedback = snap tier
-            // scaleEpsilon, not epsilon: scale only moves ~0.02, far below the pixel epsilon.
             SpringAnimation {
                 id: hoverSpringAnim
                 spring: Motion.snapSpring
                 damping: Motion.snapDamping
                 mass: Motion.snapMass
-                epsilon: Motion.scaleEpsilon
+                epsilon: Motion.epsilon
             }
             NumberAnimation {
                 id: hoverEaseAnim
@@ -376,9 +375,7 @@ PanelWindow {
                 }
             }
 
-            // Content entrance — real spring variant (spring toggle on).
-            // Expressive tier: the page "pop" is the playful part, so it uses
-            // the separate Playful bounce amount.
+            // Content entrance — real spring variant (spring toggle on)
             ParallelAnimation {
                 id: contentAnimSpring
                 NumberAnimation {
@@ -393,10 +390,10 @@ PanelWindow {
                     target: pageLoader.item
                     property: "scale"
                     to: 1.0
-                    spring: Motion.expressiveSpring
-                    damping: Motion.expressiveDamping
-                    mass: Motion.expressiveMass
-                    epsilon: Motion.scaleEpsilon
+                    spring: Motion.glideSpring
+                    damping: Motion.glideDamping
+                    mass: Motion.glideMass
+                    epsilon: Motion.epsilon
                 }
             }
 

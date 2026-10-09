@@ -1,56 +1,46 @@
-// SettingsApp.qml
+// SettingsApp.qml — settings window: sidebar of menus on the left, a page host on the right.
+// What exists, and where it lives, is defined in core/SettingsRegistry.qml.
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
-import "./services"
-import "./common"
-import "bar"
-import "network"
-import "soundmedia"
-import "display"
-import "focusnotifications"
-import "trackpadmouse"
-import "appearance"
-import "general"
-import "motion" as MotionPage
-import "launcher"
-import "controlcenter"
-import "lockscreen"
-import "keybinds"
-import "about"
+import "./core"
+import "./components"
+import "./pages/about"
 import "../services"
 import "../styles"
 
 Scope {
     id: root
 
+    // Reading SettingsStore here creates it at shell start, so saved settings are applied
+    // even before any page that uses the store is opened (pages now load lazily).
+    readonly property bool storeLoaded: SettingsStore._loaded
+
+    // Shell-wide services. They live here (not in the About page) so update checks keep running
+    // while Settings is closed. A page receives one by declaring a property with the same name
+    // (see the injection in pageLoader.onLoaded below).
+    SystemInfoService { id: systemInfo }
+    UpdateService { id: updateService }
+
+    // Finds every individual option on every page for the search box (no hand-kept list).
+    SearchIndexService {
+        id: searchIndex
+        baseDir: decodeURIComponent(String(Qt.resolvedUrl(".")).replace(/^file:\/\//, "").replace(/\/$/, ""))
+    }
+
+    // Argument and return types must be spelled out or Quickshell does not register the function.
     IpcHandler {
         target: "settings"
 
-        function open() { ShellState.openSettings() }
-        function close() { ShellState.closeSettings() }
-        function toggle() { ShellState.toggleSettings() }
+        function open(): void { ShellState.openSettings() }
+        function close(): void { ShellState.closeSettings() }
+        function toggle(): void { ShellState.toggleSettings() }
 
-        function onMessageReceived(message: string) {
-            let cmd = message.trim().toLowerCase()
-
-            if (cmd === "open" || cmd === "show") open()
-            else if (cmd === "close" || cmd === "hide") close()
-            else if (cmd === "toggle") toggle()
-            else if (cmd.startsWith("section ")) {
-                let targetSection = cmd.substring(8).trim()
-                ShellState.openSettings()
-
-                for (let i = 0; i < allSections.count; i++) {
-                    let name = allSections.get(i).sectionName.toLowerCase()
-                    if (name.includes(targetSection)) {
-                        sectionList.currentIndex = i
-                        break
-                    }
-                }
-            }
+        // qs ipc call settings section appearance   |   ... section appearance/motion
+        function section(name: string): void {
+            ShellState.openSettings()
+            SettingsNav.openByName(name)
         }
     }
 
@@ -65,7 +55,8 @@ Scope {
         onVisibleChanged: {
             if (visible) {
                 focusDelay.start()
-                gearSpinAnim.restart()
+                gearIcon.play()
+                searchIndex.rebuild()
             }
         }
 
@@ -80,18 +71,17 @@ Scope {
             anchors.fill: parent
             focus: true
 
+            // Escape steps back out of a view first, then closes the window.
             Keys.onPressed: (event) => {
-                if (event.key === Qt.Key_Escape) {
-                    ShellState.closeSettings()
+                if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_F) {
+                    searchBox.forceActiveFocus()
                     event.accepted = true
-                } else if (!searchBox.activeFocusInput && event.text.length > 0 
-                           && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
-                    if (event.key !== Qt.Key_Tab && event.key !== Qt.Key_Return 
-                        && event.key !== Qt.Key_Enter && event.key !== Qt.Key_Backspace) {
-                        
-                        searchBox.appendText(event.text)
-                        event.accepted = true
-                    }
+                    return
+                }
+                if (event.key === Qt.Key_Escape) {
+                    if (SettingsNav.canGoBack) SettingsNav.back()
+                    else ShellState.closeSettings()
+                    event.accepted = true
                 }
             }
 
@@ -99,6 +89,7 @@ Scope {
                 anchors.fill: parent
                 spacing: 0
 
+                // ============ SIDEBAR ============
                 Rectangle {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 260
@@ -114,33 +105,24 @@ Scope {
                             spacing: Dimens.spacingSmall
 
                             Rectangle {
-                                width: 40
-                                height: 40
+                                Layout.preferredWidth: 40
+                                Layout.preferredHeight: 40
                                 radius: 20
                                 color: gearMouse.containsMouse ? Colors.elevatedBg : "transparent"
 
-                                Behavior on color { ColorAnimation { duration: 120 } }
+                                Behavior on color {
+                                    ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
+                                }
 
-                                Text {
-                                    id: settingsGearIcon
+                                // The gear turns when Settings opens, on hover and on click.
+                                SymbolIcon {
+                                    id: gearIcon
                                     anchors.centerIn: parent
-                                    text: "settings"
+                                    name: "settings"
+                                    size: Dimens.fontSizeLg
                                     color: Colors.accent
-                                    font.family: Fonts.icon
-                                    font.pixelSize: Dimens.fontSizeLg
-                                    transformOrigin: Item.Center
-                                    scale: gearMouse.pressed ? 0.9 : (gearMouse.containsMouse ? 1.1 : 1.0)
-
-                                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-
-                                    RotationAnimation {
-                                        id: gearSpinAnim
-                                        target: settingsGearIcon
-                                        from: 0
-                                        to: 360
-                                        duration: 500
-                                        easing.type: Easing.OutBack
-                                    }
+                                    animated: true
+                                    hovered: gearMouse.containsMouse
                                 }
 
                                 MouseArea {
@@ -148,16 +130,16 @@ Scope {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: gearSpinAnim.restart()
+                                    onClicked: gearIcon.play()
                                 }
                             }
 
                             ColumnLayout {
-                                spacing: 0
                                 Layout.fillWidth: true
+                                spacing: 0
 
                                 Text {
-                                    text: "Settings"
+                                    text: SettingsRegistry.appTitle
                                     color: Colors.fg
                                     font.family: Fonts.display
                                     font.pixelSize: Dimens.fontSizeLg
@@ -165,7 +147,7 @@ Scope {
                                 }
 
                                 Text {
-                                    text: "Minimal Island Shell"
+                                    text: SettingsRegistry.appSubtitle
                                     color: Colors.subtext
                                     font.family: Fonts.text
                                     font.pixelSize: Dimens.fontSizeXs
@@ -173,120 +155,55 @@ Scope {
                             }
                         }
 
+                        // Search: builds its index from SettingsRegistry. While there is a query it
+                        // fills the sidebar with results and the section list below is hidden.
                         SearchBox {
                             id: searchBox
-                            Layout.fillWidth: true
-                            onOptionSelected: (idx) => {
-                                sectionList.currentIndex = idx
-                                contentRoot.forceActiveFocus()
+                            extraEntries: searchIndex.entries
+                            onResultSelected: (menuId, viewId) => {
+                                if (viewId !== "") SettingsNav.openView(menuId, viewId)
+                                else SettingsNav.openMenu(menuId)
                             }
                         }
 
-                        Item { height: 2 }
-
-                        ListView {
-                            id: sectionList
+                        Flickable {
+                            id: sidebarFlick
+                            visible: !searchBox.searching
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            visible: !searchBox.searching
+                            contentWidth: width
+                            contentHeight: sidebarColumn.implicitHeight
                             clip: true
-                            spacing: 3
+                            boundsBehavior: Flickable.StopAtBounds
 
-                            model: ListModel {
-                                id: allSections
-                                ListElement { sectionName: "Bar & Island"; icon: "dock_to_bottom"; tag: "top margin corner radius border notch mode height" }
-                                ListElement { sectionName: "Wi-Fi & Bluetooth"; icon: "wifi"; tag: "network wireless connect pair devices" }
-                                ListElement { sectionName: "Sound & Media"; icon: "graphic_eq"; tag: "volume output mpris visualizer" }
-                                ListElement { sectionName: "Displays"; icon: "desktop_windows"; tag: "resolution refresh rate scale transparency monitor" }
-                                ListElement { sectionName: "Focus & Notifications"; icon: "notifications"; tag: "peace mode do not disturb previews dnd" }
-                                ListElement { sectionName: "Trackpad & Mouse"; icon: "mouse"; tag: "sensitivity scroll tap click natural scrolling touchpad" }
-                                ListElement { sectionName: "Appearance"; icon: "palette"; tag: "theme fonts color dark mode accent wallpaper" }
-                                ListElement { sectionName: "General"; icon: "tune"; tag: "clock date time seconds startup login items" }
-                                ListElement { sectionName: "Motion"; icon: "speed"; tag: "animations physics springs" }
-                                ListElement { sectionName: "Launcher"; icon: "rocket_launch"; tag: "app search calc clipboard" }
-                                ListElement { sectionName: "Control Center"; icon: "widgets"; tag: "quick settings tiles grid" }
-                                ListElement { sectionName: "Lock Screen"; icon: "lock"; tag: "pam password security" }
-                                ListElement { sectionName: "Keyboard"; icon: "keyboard"; tag: "hyprland shortcuts binds hotkeys rebind" }
-                                ListElement { sectionName: "About"; icon: "info"; tag: "hardware power info sleep battery updates" }
-                            }
+                            ColumnLayout {
+                                id: sidebarColumn
+                                width: sidebarFlick.width
+                                spacing: Dimens.spacingLarge
 
-                            delegate: Item {
-                                width: sectionList.width
-                                height: 40
-                                clip: true
+                                Repeater {
+                                    model: SettingsRegistry.clusters
 
-                                property bool isSelected: sectionList.currentIndex === index
+                                    delegate: ColumnLayout {
+                                        id: cluster
+                                        required property var modelData
 
-                                Item {
-                                    width: parent.width
-                                    height: 36
-                                    anchors.verticalCenter: parent.verticalCenter
+                                        Layout.fillWidth: true
+                                        spacing: 3
 
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius:Dimens.settingsContainerRadius
-                                        color: isSelected 
-                                               ? Colors.accent
-                                               : (itemMouse.containsMouse ? Colors.elevatedBg : "transparent")
-                                        opacity: isSelected ? 0.18 : 1.0
+                                        Repeater {
+                                            model: cluster.modelData.menus
 
-                                        Behavior on color { ColorAnimation { duration: 120 } }
-                                    }
+                                            delegate: SidebarItem {
+                                                required property var modelData
 
-                                    Rectangle {
-                                        width: 3
-                                        height: 16
-                                        radius: 1.5
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: 3
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        color: Colors.accent
-                                        visible: isSelected
-                                    }
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: Dimens.paddingMedium
-                                        anchors.rightMargin: Dimens.paddingSmall
-                                        spacing: Dimens.spacingMedium
-
-                                        Text {
-                                            id: menuIcon
-                                            text: model.icon
-                                            color: isSelected ? Colors.accent : Colors.fg
-                                            font.family: Fonts.icon
-                                            font.pixelSize: Dimens.fontSize15
-                                            transformOrigin: Item.Center
-                                            scale: isSelected ? 1.2 : (itemMouse.containsMouse ? 1.1 : 1.0)
-                                            rotation: itemMouse.pressed ? -15 : 0
-
-                                            Behavior on scale {
-                                                NumberAnimation { duration: 180; easing.type: Easing.OutBack }
-                                            }
-                                            Behavior on rotation {
-                                                NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
-                                            }
-                                            Behavior on color {
-                                                ColorAnimation { duration: 120 }
+                                                icon: modelData.icon
+                                                title: modelData.title
+                                                subtitle: modelData.subtitle
+                                                selected: SettingsNav.menuId === modelData.id
+                                                onClicked: SettingsNav.openMenu(modelData.id)
                                             }
                                         }
-
-                                        Text {
-                                            text: model.sectionName
-                                            color: isSelected ? Colors.accent : Colors.fg
-                                            font.family: Fonts.text
-                                            font.pixelSize: Dimens.fontSizeBase
-                                            font.weight: isSelected ? Font.DemiBold : Font.Normal
-                                            Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                        }
-                                    }
-
-                                    MouseArea {
-                                        id: itemMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onClicked: sectionList.currentIndex = index
                                     }
                                 }
                             }
@@ -301,11 +218,13 @@ Scope {
                     opacity: 0.3
                 }
 
+                // ============ PAGE AREA ============
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     color: "transparent"
 
+                    // Drag the window by its top edge.
                     MouseArea {
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -321,32 +240,38 @@ Scope {
                         anchors.margins: Dimens.paddingLarge
                         spacing: Dimens.spacingMedium
 
-                        SettingsHeader {
-                            icon: allSections.get(sectionList.currentIndex).icon
-                            title: allSections.get(sectionList.currentIndex).sectionName
-                            subtitle: "Configure settings and options for " + allSections.get(sectionList.currentIndex).sectionName
+                        PageTitle {
+                            icon: SettingsNav.icon
+                            title: SettingsNav.title
+                            subtitle: SettingsNav.subtitle
+                            canGoBack: SettingsNav.canGoBack
+                            onBackClicked: SettingsNav.back()
                         }
 
-                        StackLayout {
-                            id: pageStack
+                        Loader {
+                            id: pageLoader
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            currentIndex: sectionList.currentIndex
+                            source: SettingsNav.pageSource !== "" ? Qt.resolvedUrl(SettingsNav.pageSource) : ""
 
-                            Bar {}
-                            WifiBluetooth {}
-                            SoundMedia {}
-                            Display {}
-                            FocusNotifications {}
-                            TrackpadMouse {}
-                            Appearance {}
-                            General {}
-                            MotionPage.Motion {}
-                            Launcher {}
-                            ControlCenter {}
-                            LockScreen {}
-                            Keybinds {}
-                            About {}
+                            // Loader does not reliably size its item inside a layout, so bind it.
+                            onLoaded: {
+                                item.width = Qt.binding(() => pageLoader.width)
+                                item.height = Qt.binding(() => pageLoader.height)
+                                if (item.updateService !== undefined) item.updateService = updateService
+                                if (item.systemInfo !== undefined) item.systemInfo = systemInfo
+                                loadFade.restart()
+                            }
+
+                            NumberAnimation {
+                                id: loadFade
+                                target: pageLoader
+                                property: "opacity"
+                                from: 0
+                                to: 1
+                                duration: ShellState.motionDuration(Motion.fadeMs)
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
                 }

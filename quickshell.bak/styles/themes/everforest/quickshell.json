@@ -1,0 +1,34 @@
+{
+  "dark": {
+    "vscodeTheme": "Everforest Dark",
+    "isLight": false,
+    "background": "#2b3339",
+    "foreground": "#d3c6aa",
+    "fgMuted": "#656d73",
+    "surface": "#363e44",
+    "border": "#3a4248",
+    "accent": "#7393b3",
+    "red": "#e67e80",
+    "green": "#83c092",
+    "yellow": "#dbbc7f",
+    "blue": "#7393b3",
+    "purple": "#d699b6",
+    "cyan": "#95d1c9"
+  },
+  "light": {
+    "vscodeTheme": "Everforest Light",
+    "isLight": true,
+    "background": "#fff9e8",
+    "foreground": "#495157",
+    "fgMuted": "#857F6E",
+    "surface": "#E0DAC9",
+    "border": "#e8e2d1",
+    "accent": "#3a94c5",
+    "red": "#c85552",
+    "green": "#5da111",
+    "yellow": "#dfa000",
+    "blue": "#3a94c5",
+    "purple": "#b67996",
+    "cyan": "#89bfdc"
+  }
+}

@@ -1,4 +1,0 @@
-module settings.services
-
-SearchBox 1.0 SearchBox.qml
-singleton SettingsStore 1.0 SettingsStore.qml

@@ -1,0 +1,41 @@
+{
+  "aliases": {
+    "ff": "Firefox"
+  },
+  "pinned": [],
+  "engines": {
+    "g": {
+      "name": "Google",
+      "url": "https://www.google.com/search?q=%s"
+    },
+    "ddg": {
+      "name": "DuckDuckGo",
+      "url": "https://duckduckgo.com/?q=%s"
+    },
+    "yt": {
+      "name": "YouTube",
+      "url": "https://www.youtube.com/results?search_query=%s"
+    },
+    "gh": {
+      "name": "GitHub",
+      "url": "https://github.com/search?q=%s"
+    },
+    "wiki": {
+      "name": "Wikipedia",
+      "url": "https://en.wikipedia.org/w/index.php?search=%s"
+    },
+    "so": {
+      "name": "Stack Overflow",
+      "url": "https://stackoverflow.com/search?q=%s"
+    },
+    "maps": {
+      "name": "Google Maps",
+      "url": "https://www.google.com/maps/search/%s"
+    }
+  },
+  "defaultEngine": "g",
+  "notesFile": "/home/shiham/Documents/quick-notes.md",
+  "notesFolder": "/home/shiham/Documents/Quick Notes",
+  "notesMode": "running",
+  "snippetsFolder": "/home/shiham/.config/quickshell/snippets"
+}
