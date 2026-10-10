@@ -32,13 +32,16 @@ PageScroll {
         const u = root.updateService
         if (u.shellError) return u.shellError
         if (u.shellJustUpdated) {
-            let t = "Updated" + (u.shellPreviousCommit ? " (was " + u.shellPreviousCommit + ")" : "")
-                + " — restart the shell (pkill -9 -f quickshell && qs) to apply."
-            if (u.shellOutsideConfig) t += " Files outside config/ changed too; run the installer if something breaks."
+            let t = "Updated. Quickshell reloads changed files by itself; restart it only if something looks off."
+            if (u.shellInstallerChanged) t += " The installer changed too: run ./install/install.sh to pick up new packages."
             return t
         }
+        if (u.shellBlocked)
+            return "This copy has " + u.shellCommitsAhead + " local commit(s) that are not on GitHub, so it can't fast-forward. Update it by hand with git."
+        if (u.shellUpdateAvailable && u.shellLocalChanges > 0)
+            return "You have " + u.shellLocalChanges + " uncommitted change(s). If the update touches the same files, it stops and changes nothing."
         if (u.shellCommitsAhead > 0)
-            return "This copy has " + u.shellCommitsAhead + " local commit(s) that are not on GitHub. Updates only fast-forward, so they will not be overwritten."
+            return "This copy has " + u.shellCommitsAhead + " local commit(s) that are not on GitHub. Updates only fast-forward, so they won't be overwritten."
         return ""
     }
 
@@ -55,6 +58,16 @@ PageScroll {
 
     property bool _copied: false
     property bool _confirmReset: false
+    property string _qtVersion: ""
+
+    Process {
+        id: qtVersionProc
+        command: ["qmake6", "-query", "QT_VERSION"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: root._qtVersion = text.trim()
+        }
+    }
 
     // Needs wl-clipboard (wl-copy). If it's missing the button just does nothing.
     Process {
@@ -200,7 +213,7 @@ PageScroll {
     GroupCard {
         InfoRow { label: "Shell"; value: SettingsRegistry.projectName + " " + SettingsRegistry.projectVersion }
         InfoRow { label: "Quickshell"; value: root._v(root.systemInfo.quickshellVersion) }
-        InfoRow { label: "Qt"; value: Qt.version }
+        InfoRow { label: "Qt"; value: root._v(root._qtVersion) }
         InfoRow { label: "Hyprland"; value: root._v(root.systemInfo.hyprlandVersion); showDivider: false }
     }
 
@@ -250,7 +263,8 @@ PageScroll {
         lastCheckedText: root._fmt(root.updateService.systemLastChecked)
         lastUpdatedText: root._fmt(root.updateService.systemLastUpdated)
         noteText: root.updateService.systemError !== "" ? root.updateService.systemError
-            : root.updateService.systemJustUpdated ? "Update ran — some packages may need a reboot to fully apply." : ""
+            : root.updateService.systemJustUpdated ? "Update finished. Some packages may need a reboot."
+            : root.updateService.systemDetail
         onCheckRequested: root.updateService.checkSystemUpdates()
         onActionRequested: root.updateService.runSystemUpdate()
     }
@@ -263,7 +277,7 @@ PageScroll {
             : !root.updateService.shellUpdateAvailable ? "Up to date"
             : root.updateService.shellCommitsBehind + " commit(s) behind"
         checking: !!root.updateService.shellChecking
-        actionEnabled: !!(root.updateService.shellChecked && root.updateService.shellUpdateAvailable)
+        actionEnabled: !!(root.updateService.shellChecked && root.updateService.shellUpdateAvailable && !root.updateService.shellBlocked)
         actionText: "Update Shell"
         busy: !!root.updateService.shellUpdating
         lastCheckedText: root._fmt(root.updateService.shellLastChecked)

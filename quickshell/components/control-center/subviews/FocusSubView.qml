@@ -174,8 +174,8 @@ Item {
                         width: parent.width
                         height: 52
                         radius: ShellState.islandCornerRadius
-                        color: isSelected ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.15) 
-                             : (modeMa.containsMouse ? Colors.bgSurface : Colors.subBgMica)
+                        color: isSelected ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.15)
+                             : (modeMa.containsMouse ? Colors.elevatedBg : Colors.subBgMica)
                         border.width: 1
                         border.color: isSelected ? Colors.accent : Colors.border
 

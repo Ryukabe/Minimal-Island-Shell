@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import "../../../components"
 import "../../../../services"
 import "../../../../styles"
-import "."   // DefaultAppsService lives next to this file
 
 PageScroll {
     id: root

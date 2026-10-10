@@ -19,7 +19,7 @@ QtObject {
 
     // Shown on the About page. Change the version here and nowhere else.
     readonly property string projectName: "Hermit-dots"
-    readonly property string projectVersion: "Beta v1.0.0"
+    readonly property string projectVersion: "v1.0.0"
     readonly property string projectRepo: "https://github.com/Ryukabe/hermit-dots"
 
     readonly property var clusters: [
@@ -142,12 +142,15 @@ QtObject {
             id: "system",
             menus: [
                 {
-                    id: "apps", title: "Apps", subtitle: "Default apps and app library", icon: "apps",
-                    tags: "default applications terminal browser file manager favourites hidden",
+                    id: "apps", title: "Apps", subtitle: "Defaults, startup and app library", icon: "apps",
+                    tags: "default applications terminal browser file manager favourites hidden startup autostart",
                     views: [
                         { id: "defaultapps", title: "Default apps", subtitle: "Terminal, browser, files and more", icon: "app_registration",
                           tags: "terminal browser file manager media player email video music image pdf text editor xdg mime",
                           source: "pages/apps/defaultapps/DefaultAppsSettings.qml" },
+                        { id: "startup", title: "Startup apps", subtitle: "Apps that open when you log in", icon: "play_circle",
+                          tags: "startup login items autostart boot launch open at login command",
+                          source: "pages/apps/startup/StartupAppsSettings.qml" },
                         { id: "allapps", title: "All apps", subtitle: "Favourites and hidden apps", icon: "grid_view",
                           tags: "installed favourites favorites hidden library star",
                           source: "pages/apps/allapps/AllAppsSettings.qml" }
@@ -169,9 +172,6 @@ QtObject {
                 { id: "language", title: "Language & Region", subtitle: "Language, units and clock format", icon: "language",
                   tags: "locale language clock 12 24 hour temperature units weather location",
                   source: "pages/language/LanguageSettings.qml" },
-                { id: "general", title: "General", subtitle: "Startup and everyday options", icon: "tune",
-                  tags: "startup login items autostart light dark mode",
-                  source: "pages/general/GeneralSettings.qml" },
                 { id: "about", title: "About", subtitle: "This setup, system and updates", icon: "info",
                   tags: "hardware info updates hermit version license credits cpu gpu kernel power profile reset",
                   source: "pages/about/About.qml" }

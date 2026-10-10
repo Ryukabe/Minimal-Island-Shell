@@ -24,3 +24,5 @@ TextRow TextRow.qml
 ButtonRow ButtonRow.qml
 KeyCaptureField KeyCaptureField.qml
 KeybindRow KeybindRow.qml
+AppRow AppRow.qml
+DefaultAppsService DefaultAppsService.qml

@@ -34,7 +34,7 @@ Item {
     onActiveChanged: if (!active) snap()
     Component.onCompleted: snap()
 
-    FrameAnimation {
+     FrameAnimation {
         running: root.active
             && (Math.abs(root.target - root.value) > root.restDelta
                 || Math.abs(root.velocity) > root.restDelta)
@@ -50,10 +50,16 @@ Item {
                 x += v * h
                 remaining -= h
             }
+
+            // Settled: land exactly on the target. The running binding turns itself
+            // off after this, so no onRunningChanged handler is needed.
+            if (Math.abs(root.target - x) <= root.restDelta && Math.abs(v) <= root.restDelta) {
+                x = root.target
+                v = 0
+            }
+
             root.velocity = v
             root.value = x
         }
-
-        onRunningChanged: if (!running) root.snap()
     }
 }

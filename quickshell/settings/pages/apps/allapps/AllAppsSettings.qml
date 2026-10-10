@@ -7,7 +7,6 @@ import Quickshell
 import "../../../components"
 import "../../../../services"
 import "../../../../styles"
-import "."   // AppRow lives next to this file
 
 PageScroll {
     id: root
