@@ -293,8 +293,29 @@ PanelWindow {
             return Math.max(pageLoader.item.implicitHeight, floor)
         }
 
-        width: targetWidth
-        height: targetHeight
+        // Spring physics on: width/height follow MorphSpring (velocity-carrying, can overshoot,
+        // retargets mid-flight). Off / Reduce Motion: the old ease Behaviors below take over.
+        readonly property bool springMorph: ShellState.motionSpringEnabled && !ShellState.motionReduced
+
+        MorphSpring {
+            id: widthSpring
+            target: island.targetWidth
+            active: island.springMorph
+            duration: Motion.morphDuration
+            bounce: Motion.morphBounce
+        }
+
+        MorphSpring {
+            id: heightSpring
+            target: island.targetHeight
+            active: island.springMorph
+            duration: Motion.morphDuration
+            bounce: Motion.morphBounce
+        }
+
+        // Rounded so text stays crisp; clamped so overshoot can never go negative.
+        width: springMorph ? Math.max(0, Math.round(widthSpring.value)) : targetWidth
+        height: springMorph ? Math.max(0, Math.round(heightSpring.value)) : targetHeight
 
         // Single source of truth: both compact and expanded states read
         // the same master radius now. (Previously expanded had its own
@@ -305,14 +326,7 @@ PanelWindow {
         border.color: Colors.border
         border.width: ShellState.islandNotchMode ? 0 : ShellState.islandBorderWidth
 
-        // ---- width/height: the "big" morph, gets the full spring/ease toggle ----
-        SpringAnimation {
-            id: widthSpringAnim
-            spring: Motion.glideSpring
-            damping: Motion.glideDamping
-            mass: Motion.glideMass
-            epsilon: Motion.epsilon
-        }
+        // ---- width/height ease path (spring physics off / Reduce Motion) ----
         NumberAnimation {
             id: widthEaseAnim
             duration: ShellState.motionDuration(Motion.glideMs)
@@ -320,16 +334,10 @@ PanelWindow {
             easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
         }
         Behavior on width {
-            animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? widthSpringAnim : widthEaseAnim
+            enabled: !island.springMorph
+            animation: widthEaseAnim
         }
 
-        SpringAnimation {
-            id: heightSpringAnim
-            spring: Motion.glideSpring
-            damping: Motion.glideDamping
-            mass: Motion.glideMass
-            epsilon: Motion.epsilon
-        }
         NumberAnimation {
             id: heightEaseAnim
             duration: ShellState.motionDuration(Motion.glideMs)
@@ -337,7 +345,8 @@ PanelWindow {
             easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
         }
         Behavior on height {
-            animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? heightSpringAnim : heightEaseAnim
+            enabled: !island.springMorph
+            animation: heightEaseAnim
         }
 
         // ---- radius/topMargin/border.width: intentionally short plain eases, never spring ----
@@ -415,13 +424,15 @@ PanelWindow {
             scale: islandTapArea.containsMouse ? ShellState.islandHoverScale : 1.0
             opacity: 1.0
 
-            // hover feedback = snap tier
+            // hover feedback = snap tier. Scale moves only a few percent, so it
+            // needs scaleEpsilon — the pixel epsilon (0.25) is bigger than the whole
+            // travel and would end the spring immediately.
             SpringAnimation {
                 id: hoverSpringAnim
                 spring: Motion.snapSpring
                 damping: Motion.snapDamping
                 mass: Motion.snapMass
-                epsilon: Motion.epsilon
+                epsilon: Motion.scaleEpsilon
             }
             NumberAnimation {
                 id: hoverEaseAnim
@@ -446,47 +457,54 @@ PanelWindow {
                 }
             }
 
-            // Content entrance — ease variant (spring toggle off / reduced motion)
-            ParallelAnimation {
+            // Content entrance — ease variant (spring toggle off / reduced motion).
+            // The container leads; content starts after Motion.contentDelayMs.
+            SequentialAnimation {
                 id: contentAnimEase
-                NumberAnimation {
-                    target: pageLoader.item
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: ShellState.motionDuration(Motion.fadeMs)
-                    easing.type: Easing.OutCubic
-                }
-                NumberAnimation {
-                    target: pageLoader.item
-                    property: "scale"
-                    from: 0.94
-                    to: 1.0
-                    duration: ShellState.motionDuration(Motion.glideMs)
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                PauseAnimation { duration: ShellState.motionDuration(Motion.contentDelayMs) }
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: pageLoader.item
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        duration: ShellState.motionDuration(Motion.fadeMs)
+                        easing.type: Easing.OutCubic
+                    }
+                    NumberAnimation {
+                        target: pageLoader.item
+                        property: "scale"
+                        from: 0.94
+                        to: 1.0
+                        duration: ShellState.motionDuration(Motion.glideMs)
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                    }
                 }
             }
 
-            // Content entrance — real spring variant (spring toggle on)
-            ParallelAnimation {
+            // Content entrance — real spring variant (spring toggle on), same delay
+            SequentialAnimation {
                 id: contentAnimSpring
-                NumberAnimation {
-                    target: pageLoader.item
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: ShellState.motionDuration(Motion.fadeMs)
-                    easing.type: Easing.OutCubic
-                }
-                SpringAnimation {
-                    target: pageLoader.item
-                    property: "scale"
-                    to: 1.0
-                    spring: Motion.glideSpring
-                    damping: Motion.glideDamping
-                    mass: Motion.glideMass
-                    epsilon: Motion.epsilon
+                PauseAnimation { duration: ShellState.motionDuration(Motion.contentDelayMs) }
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: pageLoader.item
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        duration: ShellState.motionDuration(Motion.fadeMs)
+                        easing.type: Easing.OutCubic
+                    }
+                    SpringAnimation {
+                        target: pageLoader.item
+                        property: "scale"
+                        to: 1.0
+                        spring: Motion.glideSpring
+                        damping: Motion.glideDamping
+                        mass: Motion.glideMass
+                        epsilon: Motion.scaleEpsilon
+                    }
                 }
             }
 

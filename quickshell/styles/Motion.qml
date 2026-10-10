@@ -52,11 +52,25 @@ QtObject {
     readonly property real expressiveDamping: ShellState.springDampingFor(0.08, 0.4, ShellState.motionExpressiveBouncePercent)
     readonly property real expressiveMass: 1.0
 
+    // ============ MORPH (island container) ============
+    // Real spring physics for the island's width/height (MorphSpring.qml). Unlike the
+    // SpringAnimation tiers above, these are true SwiftUI-style values: settle time in
+    // seconds and bounce 0-0.5. Both follow the Settings > Motion sliders.
+    readonly property real morphDuration: Math.max(0.2, ShellState.motionMovementMs / 1000)
+    readonly property real morphBounce: Math.max(0, Math.min(0.5, ShellState.motionBouncePercent / 100))
+
     // Rest threshold in the animated property's own units:
     // epsilon for pixel values (x/y/width/height), scaleEpsilon for scale (~0.9–1.1).
     // Using epsilon on a scale spring makes it finish instantly.
     readonly property real epsilon: 0.25
     readonly property real scaleEpsilon: 0.001
+
+    // ============ LAYERED TIMING ============
+    // The container (island) leads; incoming page content starts this long after it
+    // (Apple-style ~60–100 ms stagger). Scales with the Movement slider but is clamped
+    // to 40–100 ms so a slow setting never makes content feel late. Pass through
+    // ShellState.motionDuration() at the call site so Reduce Motion collapses it to 0.
+    readonly property real contentDelayMs: Math.max(40, Math.min(100, ShellState.motionMovementMs * 0.2))
 
     // ============ FADES tier ============
     // Opacity & color only — never springs (clamped 0-1, overshoot clips).
