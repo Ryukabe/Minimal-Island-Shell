@@ -14,44 +14,137 @@ Item {
     property bool isOpen: false
     property bool autoSwitchOnThemeChange: true
 
+    // false = static images, true = animated (GIF + video)
+    property bool animatedMode: false
+
+    // Wallpaper source: theme folders (default) or one custom folder.
+    property bool useCustomFolder: false
+    readonly property string defaultCustomFolder:
+    (Quickshell.env("HOME") || "") + "/Pictures/Wallpapers"
+
+    property string customFolderPath: defaultCustomFolder
+
+    // Bumped whenever video thumbnails finish generating so cards reload them.
+    property int thumbVersion: 0
+
     property bool _lookupFound: false
     property string _lookupThemeName: ""
 
-    // Captured when applyWallpaper() is called so asynchronous processes
-    // always persist the wallpaper that was actually requested.
     property string _pendingPersistTheme: ""
     property string _pendingPersistPath: ""
 
     readonly property string wallpapersRootPath:
         Quickshell.shellDir + "/assets/wallpapers"
 
+    // Folder currently being listed.
     readonly property string wallpapersPath:
-        root.wallpapersRootPath + "/" + ThemeService.currentTheme
+    root.useCustomFolder
+    ? (root.customFolderPath !== "" ? root.customFolderPath : "/nonexistent")
+    : root.wallpapersRootPath + "/" + ThemeService.currentTheme
+
+    readonly property string stateDir:
+        Quickshell.shellDir + "/state"
+
+    readonly property string thumbDir:
+        root.stateDir + "/thumbs"
 
     readonly property string wallpaperStatePath:
-        root.wallpapersRootPath + "/.wallpaper-state"
+        root.stateDir + "/.wallpaper-state"
 
     readonly property string currentWallpaperFile:
-        root.wallpapersRootPath + "/.current-wallpaper"
+        root.stateDir + "/.current-wallpaper"
 
     readonly property string autoSwitchStatePath:
-        root.wallpapersRootPath + "/.autoswitch"
+        root.stateDir + "/.autoswitch"
+
+    readonly property string modeStatePath:
+        root.stateDir + "/.wallpaper-mode"
+
+    readonly property string sourceStatePath:
+        root.stateDir + "/.wallpaper-source"
+
+    readonly property string customFolderStatePath:
+        root.stateDir + "/.custom-folder"
 
     // ------------------------------------------------------------------
-    // Wallpaper folder changes when the active theme changes.
+    // Helpers
+    // ------------------------------------------------------------------
+
+    function isVideoPath(p) {
+        return /\.(mp4|webm|mkv|mov)$/i.test(p)
+    }
+
+    function isGifPath(p) {
+        return /\.gif$/i.test(p)
+    }
+
+    function folderUrl(p) {
+        return "file://" + p.split("/").map(encodeURIComponent).join("/")
+    }
+
+    // Cache name derived from the full path so identical filenames in
+    // different folders never collide.
+    function thumbFor(p) {
+        return root.thumbDir + "/" + p.replace(/[^A-Za-z0-9._-]/g, "_") + ".jpg"
+    }
+
+    function normalizeFolder(p) {
+        var t = (p || "").trim()
+        if (t === "")
+            return ""
+        t = t.replace(/^~(?=\/|$)/, Quickshell.env("HOME") || "")
+        while (t.length > 1 && t.endsWith("/"))
+            t = t.slice(0, -1)
+        return t
+    }
+
+    // Static images and GIFs go through awww (killing mpvpaper first so a
+    // previous video wallpaper disappears). Videos go through mpvpaper,
+    // started detached so it keeps running independently of Quickshell.
+    function buildApplyCommand(p) {
+        if (isVideoPath(p)) {
+            return [
+                "bash",
+                "-c",
+                "pkill -x mpvpaper; sleep 0.1; " +
+                "setsid -f mpvpaper -o 'no-audio loop' ALL \"$1\" >/dev/null 2>&1",
+                "bash",
+                p
+            ]
+        }
+
+        return [
+            "bash",
+            "-c",
+            "pkill -x mpvpaper; awww img \"$1\"",
+            "bash",
+            p
+        ]
+    }
+
+    // Writes a single value to a state file, creating state/ if needed.
+    function saveState(proc, file, value) {
+        proc.running = false
+        proc.command = [
+            "bash",
+            "-c",
+            "mkdir -p \"$1\"; printf '%s' \"$2\" > \"$3\"",
+            "bash",
+            root.stateDir,
+            value,
+            file
+        ]
+        proc.running = true
+    }
+
+    // ------------------------------------------------------------------
+    // Wallpaper folder changes when the theme or source changes.
     // ------------------------------------------------------------------
 
     onWallpapersPathChanged: rescanList()
 
     // ------------------------------------------------------------------
     // STARTUP
-    //
-    // Wallpaper restoration happens independently from ThemeService.
-    //
-    // .current-wallpaper is the authoritative last-selected wallpaper
-    // when Quickshell starts.
-    //
-    // This prevents ThemeService's saved theme from overwriting it.
     // ------------------------------------------------------------------
 
     Component.onCompleted: {
@@ -59,6 +152,15 @@ Item {
 
         loadAutoSwitchProc.running = false
         loadAutoSwitchProc.running = true
+
+        loadModeProc.running = false
+        loadModeProc.running = true
+
+        loadSourceProc.running = false
+        loadSourceProc.running = true
+
+        loadCustomFolderProc.running = false
+        loadCustomFolderProc.running = true
 
         rescanList()
 
@@ -71,13 +173,13 @@ Item {
     // ------------------------------------------------------------------
 
     function rescanList() {
-        folderModel.folder = "file://" + root.wallpapersPath
+        folderModel.folder = root.folderUrl(root.wallpapersPath)
     }
 
     FolderListModel {
         id: folderModel
 
-        folder: "file://" + root.wallpapersPath
+        folder: root.folderUrl(root.wallpapersPath)
 
         showDirs: false
         showFiles: true
@@ -86,7 +188,12 @@ Item {
             "*.jpg",
             "*.jpeg",
             "*.png",
-            "*.webp"
+            "*.webp",
+            "*.gif",
+            "*.mp4",
+            "*.webm",
+            "*.mkv",
+            "*.mov"
         ]
 
         showDotAndDotDot: false
@@ -105,23 +212,84 @@ Item {
         for (var i = 0; i < folderModel.count; i++) {
             var fileName = folderModel.get(i, "fileName")
             var filePath = root.wallpapersPath + "/" + fileName
+            var video = isVideoPath(fileName)
+            var gif = isGifPath(fileName)
 
             list.push({
                 name: fileName,
-                path: filePath
+                path: filePath,
+                video: video,
+                animated: video || gif,
+                thumb: root.thumbFor(filePath)
             })
         }
 
         wallpapersList = list
+
+        generateThumbs()
+    }
+
+    // ------------------------------------------------------------------
+    // Video thumbnails (needs ffmpeg). Generated once, cached in state/thumbs.
+    // The list of (video, output) pairs is built here and passed as arguments.
+    // ------------------------------------------------------------------
+
+    function generateThumbs() {
+        var args = []
+
+        for (var i = 0; i < wallpapersList.length; i++) {
+            if (wallpapersList[i].video) {
+                args.push(wallpapersList[i].path)
+                args.push(wallpapersList[i].thumb)
+            }
+        }
+
+        if (args.length === 0)
+            return
+
+        thumbProc.running = false
+
+        thumbProc.command = [
+            "bash",
+            "-c",
+            "mkdir -p \"$1\"; shift; " +
+            "while [ $# -ge 2 ]; do " +
+            "  f=\"$1\"; o=\"$2\"; shift 2; " +
+            "  [ -s \"$o\" ] && continue; " +
+            "  ffmpeg -y -loglevel error -ss 1 -i \"$f\" -frames:v 1 " +
+            "    -vf scale=290:-2 \"$o.tmp.jpg\" 2>/dev/null; " +
+            "  [ -s \"$o.tmp.jpg\" ] || ffmpeg -y -loglevel error -i \"$f\" " +
+            "    -frames:v 1 -vf scale=290:-2 \"$o.tmp.jpg\"; " +
+            "  [ -s \"$o.tmp.jpg\" ] && mv \"$o.tmp.jpg\" \"$o\"; " +
+            "done",
+            "bash",
+            root.thumbDir
+        ].concat(args)
+
+        thumbProc.running = true
+    }
+
+    Process {
+        id: thumbProc
+
+        stderr: SplitParser {
+            onRead: data => {
+                if (data.trim().length > 0) {
+                    console.log(
+                        "[WallpaperService] thumbnail error:",
+                        data.trim()
+                    )
+                }
+            }
+        }
+
+        onExited: (exitCode, exitStatus) => {
+            root.thumbVersion++
+        }
     }
 
     // ------------------------------------------------------------------
     // STARTUP RESTORE
-    //
-    // Only .current-wallpaper is used here.
-    //
-    // We deliberately DO NOT call switchToThemeWallpaper() during
-    // startup. That function is reserved for an intentional theme change.
     // ------------------------------------------------------------------
 
     Process {
@@ -148,10 +316,6 @@ Item {
                     path
                 )
 
-                // Startup restore.
-                //
-                // Passing an empty theme name prevents this restoration
-                // from changing .wallpaper-state for the current theme.
                 root.restoreWallpaper(path)
             }
         }
@@ -168,12 +332,8 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------------
     // Restore a wallpaper without changing per-theme state.
-    //
-    // This is ONLY used during Quickshell startup.
-    // ------------------------------------------------------------------
-
+    // ONLY used during Quickshell startup.
     function restoreWallpaper(wallpaperPath) {
         if (!wallpaperPath)
             return
@@ -186,13 +346,7 @@ Item {
         )
 
         startupApplyProcess.running = false
-
-        startupApplyProcess.command = [
-            "awww",
-            "img",
-            wallpaperPath
-        ]
-
+        startupApplyProcess.command = root.buildApplyCommand(wallpaperPath)
         startupApplyProcess.running = true
     }
 
@@ -203,7 +357,7 @@ Item {
             onRead: data => {
                 if (data.trim().length > 0) {
                     console.log(
-                        "[WallpaperService] startup awww:",
+                        "[WallpaperService] startup apply:",
                         data.trim()
                     )
                 }
@@ -214,7 +368,7 @@ Item {
             onRead: data => {
                 if (data.trim().length > 0) {
                     console.log(
-                        "[WallpaperService] startup awww error:",
+                        "[WallpaperService] startup apply error:",
                         data.trim()
                     )
                 }
@@ -237,13 +391,20 @@ Item {
 
     // ------------------------------------------------------------------
     // THEME WALLPAPER SWITCH
-    //
-    // This is called ONLY when the user intentionally changes theme.
+    // Called ONLY when the user intentionally changes theme.
+    // Does nothing while a custom folder is in use.
     // ------------------------------------------------------------------
 
     function switchToThemeWallpaper(themeName) {
         if (!themeName)
             return
+
+        if (root.useCustomFolder) {
+            console.log(
+                "[WallpaperService] Custom folder in use, skipping theme wallpaper"
+            )
+            return
+        }
 
         if (!root.autoSwitchOnThemeChange) {
             console.log(
@@ -260,7 +421,6 @@ Item {
             themeName
         )
 
-        // Stop an older lookup before starting a new one.
         lookupProc.running = false
 
         lookupProc._forTheme = themeName
@@ -277,10 +437,6 @@ Item {
 
         lookupProc.running = true
     }
-
-    // ------------------------------------------------------------------
-    // Look up remembered wallpaper for a theme
-    // ------------------------------------------------------------------
 
     Process {
         id: lookupProc
@@ -338,6 +494,7 @@ Item {
                 fallbackFirstProc._forTheme =
                     lookupProc._forTheme
 
+                // Fallback only picks a static image.
                 fallbackFirstProc.command = [
                     "bash",
                     "-c",
@@ -356,10 +513,6 @@ Item {
             }
         }
     }
-
-    // ------------------------------------------------------------------
-    // Fallback wallpaper for a theme that has never been selected before
-    // ------------------------------------------------------------------
 
     Process {
         id: fallbackFirstProc
@@ -407,8 +560,8 @@ Item {
     // ------------------------------------------------------------------
     // APPLY WALLPAPER
     //
-    // This is used for normal wallpaper selection and theme switching.
-    // It updates .current-wallpaper AND .wallpaper-state.
+    // In custom-folder mode only .current-wallpaper is saved; the
+    // per-theme memory is left alone so theme folders stay untouched.
     // ------------------------------------------------------------------
 
     function applyWallpaper(wallpaperPath, themeName) {
@@ -417,10 +570,14 @@ Item {
 
         currentWallpaper = wallpaperPath
 
-        _pendingPersistTheme =
-            (themeName !== undefined && themeName !== "")
-            ? themeName
-            : ThemeService.currentTheme
+        if (root.useCustomFolder) {
+            _pendingPersistTheme = ""
+        } else {
+            _pendingPersistTheme =
+                (themeName !== undefined && themeName !== "")
+                ? themeName
+                : ThemeService.currentTheme
+        }
 
         _pendingPersistPath = wallpaperPath
 
@@ -432,19 +589,9 @@ Item {
         )
 
         applyProcess.running = false
-
-        applyProcess.command = [
-            "awww",
-            "img",
-            wallpaperPath
-        ]
-
+        applyProcess.command = root.buildApplyCommand(wallpaperPath)
         applyProcess.running = true
     }
-
-    // ------------------------------------------------------------------
-    // awww process
-    // ------------------------------------------------------------------
 
     Process {
         id: applyProcess
@@ -453,7 +600,7 @@ Item {
             onRead: data => {
                 if (data.trim().length > 0) {
                     console.log(
-                        "[WallpaperService] awww stdout:",
+                        "[WallpaperService] apply stdout:",
                         data.trim()
                     )
                 }
@@ -464,7 +611,7 @@ Item {
             onRead: data => {
                 if (data.trim().length > 0) {
                     console.log(
-                        "[WallpaperService] awww stderr:",
+                        "[WallpaperService] apply stderr:",
                         data.trim()
                     )
                 }
@@ -474,7 +621,7 @@ Item {
         onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0) {
                 console.log(
-                    "[WallpaperService] awww exited with code:",
+                    "[WallpaperService] apply exited with code:",
                     exitCode,
                     "— wallpaper not persisted"
                 )
@@ -489,45 +636,43 @@ Item {
 
             persistProc.running = false
 
-            // Escape values safely for the shell.
             var escapedTheme =
                 persistTheme.replace(/'/g, "'\\''")
 
             var escapedPath =
                 persistPath.replace(/'/g, "'\\''")
 
-            persistProc.command = [
-                "bash",
-                "-c",
-
-                // 1. Save the actual last selected wallpaper.
+            // 0 + 1: make sure state/ exists, save the last selected wallpaper.
+            var cmd =
+                "mkdir -p " +
+                JSON.stringify(root.stateDir) +
+                "; " +
                 "printf '%s' '" +
                 escapedPath +
                 "' > " +
                 JSON.stringify(root.currentWallpaperFile) +
-                "; " +
+                "; "
 
-                // 2. Save the wallpaper for this theme.
-                "touch " +
-                JSON.stringify(root.wallpaperStatePath) +
-                "; " +
+            // 2-4: per-theme memory, only outside custom-folder mode.
+            if (persistTheme !== "") {
+                cmd +=
+                    "touch " +
+                    JSON.stringify(root.wallpaperStatePath) +
+                    "; " +
+                    "sed -i '/^" +
+                    escapedTheme +
+                    ":/d' " +
+                    JSON.stringify(root.wallpaperStatePath) +
+                    " 2>/dev/null; " +
+                    "printf '%s\\n' '" +
+                    escapedTheme +
+                    ":" +
+                    escapedPath +
+                    "' >> " +
+                    JSON.stringify(root.wallpaperStatePath)
+            }
 
-                // 3. Remove the previous entry for this theme.
-                "sed -i '/^" +
-                escapedTheme +
-                ":/d' " +
-                JSON.stringify(root.wallpaperStatePath) +
-                " 2>/dev/null; " +
-
-                // 4. Save the new theme/path pair.
-                "printf '%s\\n' '" +
-                escapedTheme +
-                ":" +
-                escapedPath +
-                "' >> " +
-                JSON.stringify(root.wallpaperStatePath)
-            ]
-
+            persistProc.command = ["bash", "-c", cmd]
             persistProc.running = true
 
             console.log(
@@ -553,24 +698,151 @@ Item {
     }
 
     // ------------------------------------------------------------------
+    // STATIC / ANIMATED MODE
+    // ------------------------------------------------------------------
+
+    function setAnimatedMode(enabled) {
+        if (root.animatedMode === enabled)
+            return
+
+        root.animatedMode = enabled
+        root.saveState(saveModeProc, root.modeStatePath,
+                       enabled ? "animated" : "static")
+    }
+
+    Process {
+        id: saveModeProc
+
+        stderr: SplitParser {
+            onRead: data => {
+                if (data.trim().length > 0) {
+                    console.log(
+                        "[WallpaperService] Mode save error:",
+                        data.trim()
+                    )
+                }
+            }
+        }
+    }
+
+    Process {
+        id: loadModeProc
+
+        command: [
+            "cat",
+            root.modeStatePath
+        ]
+
+        stdout: SplitParser {
+            onRead: data => {
+                var val = data.trim()
+
+                if (val.length > 0)
+                    root.animatedMode = (val === "animated")
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // WALLPAPER SOURCE (theme folders / custom folder)
+    // ------------------------------------------------------------------
+
+    function setUseCustomFolder(enabled) {
+        if (root.useCustomFolder === enabled)
+            return
+
+        root.useCustomFolder = enabled
+        root.saveState(saveSourceProc, root.sourceStatePath,
+                       enabled ? "custom" : "theme")
+    }
+
+    function setCustomFolderPath(path) {
+        var p = root.normalizeFolder(path)
+    
+        if (p === "")
+            p = root.defaultCustomFolder
+    
+        if (root.customFolderPath === p)
+            return
+    
+        root.customFolderPath = p
+        root.saveState(saveCustomFolderProc, root.customFolderStatePath, p)
+    }
+
+    Process {
+        id: saveSourceProc
+
+        stderr: SplitParser {
+            onRead: data => {
+                if (data.trim().length > 0) {
+                    console.log(
+                        "[WallpaperService] Source save error:",
+                        data.trim()
+                    )
+                }
+            }
+        }
+    }
+
+    Process {
+        id: saveCustomFolderProc
+
+        stderr: SplitParser {
+            onRead: data => {
+                if (data.trim().length > 0) {
+                    console.log(
+                        "[WallpaperService] Custom folder save error:",
+                        data.trim()
+                    )
+                }
+            }
+        }
+    }
+
+    Process {
+        id: loadSourceProc
+
+        command: [
+            "cat",
+            root.sourceStatePath
+        ]
+
+        stdout: SplitParser {
+            onRead: data => {
+                var val = data.trim()
+
+                if (val.length > 0)
+                    root.useCustomFolder = (val === "custom")
+            }
+        }
+    }
+
+    Process {
+        id: loadCustomFolderProc
+
+        command: [
+            "cat",
+            root.customFolderStatePath
+        ]
+
+        stdout: SplitParser {
+            onRead: data => {
+                var val = data.trim()
+
+                if (val.length > 0)
+                    root.customFolderPath = val
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
     // AUTO SWITCH SETTING
     // ------------------------------------------------------------------
 
     function setAutoSwitch(enabled) {
         root.autoSwitchOnThemeChange = enabled
-
-        saveAutoSwitchProc.running = false
-
-        saveAutoSwitchProc.command = [
-            "bash",
-            "-c",
-            "printf '%s' '" +
-            (enabled ? "true" : "false") +
-            "' > " +
-            JSON.stringify(root.autoSwitchStatePath)
-        ]
-
-        saveAutoSwitchProc.running = true
+        root.saveState(saveAutoSwitchProc, root.autoSwitchStatePath,
+                       enabled ? "true" : "false")
     }
 
     Process {
@@ -587,10 +859,6 @@ Item {
             }
         }
     }
-
-    // ------------------------------------------------------------------
-    // LOAD AUTO SWITCH SETTING
-    // ------------------------------------------------------------------
 
     Process {
         id: loadAutoSwitchProc
@@ -617,4 +885,3 @@ Item {
         }
     }
 }
-

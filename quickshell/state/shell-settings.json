@@ -20,7 +20,7 @@
   "islandHideDelayMs": 200,
   "islandScrollVolume": true,
   "islandScrollBrightness": true,
-  "launcherWidth": 500,
+  "launcherWidth": 400,
   "launcherMaxRows": 6,
   "clipboardWidth": 420,
   "clipboardMaxRows": 5,
@@ -35,11 +35,11 @@
   "timerWidth": 320,
   "timerHeight": 180,
   "motionReduced": false,
-  "motionMovementMs": 500,
+  "motionMovementMs": 390,
   "motionFadeMs": 250,
   "motionHoverMs": 150,
   "motionBouncePercent": 15,
-  "motionExpressiveBouncePercent": 100,
+  "motionExpressiveBouncePercent": 24,
   "motionSpringEnabled": true,
   "motionIconsEnabled": true,
   "motionIconSpeedPercent": 100,
@@ -86,5 +86,5 @@
   "systemTempUnit": "°C",
   "favouriteApps": [],
   "hiddenApps": [],
-  "updateAutoCheck": true
+  "updateAutoCheck": false
 }

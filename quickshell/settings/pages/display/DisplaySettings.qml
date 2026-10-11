@@ -10,71 +10,85 @@ import "../../../styles"
 PageScroll {
     id: root
 
-    Repeater {
-        model: MonitorSettingsService.monitors
+    Component.onCompleted: LayoutSettingsService.refresh()
 
-        delegate: ColumnLayout {
-            id: monitorBlock
-            required property var modelData
+Repeater {
+    model: MonitorSettingsService.monitors
 
-            // -1 = not dragging; otherwise the value shown on the slider while a change is pending.
-            property real pendingScale: -1
+    delegate: ColumnLayout {
+        id: monitorBlock
+        required property var modelData
 
-            Layout.fillWidth: true
-            spacing: Dimens.spacingSmall
+        // availableModes entries look like "1366x768@60"
+        readonly property string currentRes: modelData.width + "x" + modelData.height
+        readonly property int currentHz: Math.round(modelData.refreshRate)
 
-            // Applies the scale 300 ms after the last slider movement.
-            Timer {
-                id: applyTimer
-                interval: 300
-                onTriggered: {
-                    MonitorSettingsService.setScale(monitorBlock.modelData.name, monitorBlock.pendingScale)
-                    settleTimer.restart()
+        readonly property var resolutions: {
+            const seen = []
+            for (const m of modelData.availableModes) {
+                const r = m.split("@")[0]
+                if (seen.indexOf(r) < 0) seen.push(r)
+            }
+            return seen
+        }
+
+        // Only the refresh rates the current resolution supports
+        readonly property var refreshRates: {
+            const out = []
+            for (const m of modelData.availableModes) {
+                const parts = m.split("@")
+                if (parts[0] === currentRes && out.indexOf(parts[1]) < 0) out.push(parts[1])
+            }
+            return out
+        }
+
+        readonly property var scalePresets: ["1", "1.25", "1.5", "2"]
+
+        Layout.fillWidth: true
+        spacing: Dimens.spacingSmall
+
+        SectionLabel { text: monitorBlock.modelData.description }
+
+        GroupCard {
+            DropdownRow {
+                label: "Resolution"
+                options: monitorBlock.resolutions
+                selectedValue: monitorBlock.currentRes
+                onOptionSelected: (res) => {
+                    // Keep the current refresh rate if the new resolution supports it, else take the first listed
+                    const modes = monitorBlock.modelData.availableModes
+                    const want = res + "@" + monitorBlock.currentHz
+                    const pick = modes.indexOf(want) >= 0
+                        ? want
+                        : modes.find(m => m.startsWith(res + "@"))
+                    MonitorSettingsService.setMode(monitorBlock.modelData.name, pick)
                 }
             }
 
-            // Keeps showing the chosen value until the monitor has had time to report the new scale.
-            Timer {
-                id: settleTimer
-                interval: 900
-                onTriggered: monitorBlock.pendingScale = -1
+            DropdownRow {
+                label: "Refresh rate"
+                options: monitorBlock.refreshRates
+                selectedValue: String(monitorBlock.currentHz)
+                onOptionSelected: (hz) =>
+                    MonitorSettingsService.setMode(monitorBlock.modelData.name,
+                                                   monitorBlock.currentRes + "@" + hz)
             }
 
-            SectionLabel { text: monitorBlock.modelData.description }
-
-            GroupCard {
-                InfoRow {
-                    label: "Current mode"
-                    value: monitorBlock.modelData.width + "×" + monitorBlock.modelData.height
-                           + " at " + Math.round(monitorBlock.modelData.refreshRate) + " Hz"
-                }
-
-                DropdownRow {
-                    label: "Resolution & refresh rate"
-                    options: monitorBlock.modelData.availableModes
-                    selectedValue: monitorBlock.modelData.width + "x" + monitorBlock.modelData.height
-                                   + "@" + Math.round(monitorBlock.modelData.refreshRate)
-                    onOptionSelected: (value) => MonitorSettingsService.setMode(monitorBlock.modelData.name, value)
-                }
-
-                SliderRow {
-                    label: "Scale"
-                    description: "Makes everything on this screen larger or smaller"
-                    from: 0.5; to: 3.0; stepSize: 0.05
-                    value: monitorBlock.pendingScale >= 0 ? monitorBlock.pendingScale : monitorBlock.modelData.scale
-                    onMoved: (val) => {
-                        monitorBlock.pendingScale = val
-                        settleTimer.stop()
-                        applyTimer.restart()
-                    }
-                }
+            DropdownRow {
+                label: "Scale"
+                description: "Makes everything on this screen larger or smaller"
+                options: monitorBlock.scalePresets
+                // Hyprland reports float noise (1.2000000476...), so round before comparing
+                selectedValue: String(Math.round(monitorBlock.modelData.scale * 100) / 100)
+                onOptionSelected: (val) =>
+                    MonitorSettingsService.setScale(monitorBlock.modelData.name, parseFloat(val))
+            }
 
                 ToggleRow {
                     label: "Variable refresh rate"
                     description: "Match the refresh rate to what is on screen"
                     placeholder: true
-                }
-
+              } 
                 ToggleRow {
                     label: "Primary display"
                     description: "The main screen for new windows"
@@ -82,6 +96,17 @@ PageScroll {
                     showDivider: false
                 }
             }
+            
+            GroupCard {
+                DropdownRow {
+                    label: "Tiling layout"
+                    options: LayoutSettingsService.layouts
+                    selectedValue: LayoutSettingsService.current
+                    onOptionSelected: (value) => LayoutSettingsService.setLayout(value)
+                    showDivider: false
+                }
+            }
+            
         }
     }
 

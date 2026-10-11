@@ -12,6 +12,12 @@ Item {
     property bool isApplied: false
     property bool isSelected: false
     property bool isHovered: false
+
+    // Animated wallpaper support
+    property bool isAnimated: false
+    property bool isVideo: false
+    property string thumbPath: ""
+
     signal clicked()
 
     readonly property bool isRaised: isSelected || isHovered
@@ -26,6 +32,27 @@ Item {
     property real liftYEase: card.liftY
     property real boxScaleSpring: card.boxScale
     property real boxScaleEase: card.boxScale
+
+    // Videos can't be loaded by Image, so they use a cached ffmpeg thumbnail.
+    // The URL is cleared and reassigned to force a reload once it exists.
+    property url thumbUrl: ""
+
+    function refreshThumb() {
+        thumbUrl = ""
+        thumbUrl = card.isVideo
+            ? "file://" + card.thumbPath
+            : "file://" + card.wallpaperPath
+    }
+
+    Component.onCompleted: refreshThumb()
+
+    Connections {
+        target: WallpaperService
+        function onThumbVersionChanged() {
+            if (card.isVideo)
+                card.refreshThumb()
+        }
+    }
 
     implicitWidth: 145
     implicitHeight: 125
@@ -84,18 +111,19 @@ Item {
             Layout.preferredHeight: 90
             radius: card.radius
             color: Colors.subBgMica
-            border.width: card.isApplied ? 2 : (card.isSelected ? 1.5 : 0)
-            border.color: card.isApplied ? (Colors.accent) : Qt.rgba(1, 1, 1, 0.4)
+            border.width: card.isApplied ? 2 : 0
+            border.color: Colors.accent
 
             scale: card.useSpring ? card.boxScaleSpring : card.boxScaleEase
 
-            // Wallpaper Image
+            // Wallpaper image (or first frame of a GIF / video thumbnail)
             Image {
                 id: wallpaperImage
                 anchors.fill: parent
-                source: "file://" + card.wallpaperPath
+                source: card.thumbUrl
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
+                cache: !card.isVideo
                 sourceSize.width: 290
                 sourceSize.height: 180
                 visible: false
@@ -112,6 +140,28 @@ Item {
                 anchors.fill: wallpaperImage
                 source: wallpaperImage
                 maskSource: maskRect
+            }
+
+            // Animated indicator (top-left)
+            Rectangle {
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.margins: 6
+                width: 20
+                height: 20
+                radius: ShellState.islandCornerRadius
+                color: Qt.rgba(0, 0, 0, 0.55)
+                visible: card.isAnimated
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "play_arrow"
+                    font.family: Fonts.icon
+                    font.pixelSize: Dimens.fontSizeBase
+                    font.variableAxes: Fonts.iconAxes
+                    font.features: { "liga": 1 }
+                    color: "#FFFFFF"
+                }
             }
 
             // Active Applied Indicator Badge

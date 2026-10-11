@@ -2,9 +2,10 @@ hl.config({
     input = {
         kb_layout     = "us",
         follow_mouse  = 1,
-        sensitivity   = -0.1499999999999999,
+        sensitivity   = 0,
         scroll_factor = 2.5000000000000004,
         touchpad = {
+            tap_to_click   = true,
             natural_scroll = false,
             scroll_factor  = 2.5,
         },
@@ -29,6 +30,7 @@ hl.device({
     name        = "synps/2-synaptics-touchpad",
     sensitivity = 0,
 })
+
 
 
 

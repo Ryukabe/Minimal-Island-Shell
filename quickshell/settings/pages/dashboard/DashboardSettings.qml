@@ -1,7 +1,5 @@
 // pages/dashboard/DashboardSettings.qml — Dashboard (the status panel).
-// Real: panel width and height (ShellState). Everything else is UI only for now: the dashboard
-// tabs, widgets and opening behaviour live on the page until the module supports them.
-// When wiring, add dashboard* properties to ShellState and bind them here.
+// Every control reads from and writes to ShellState (persisted by SettingsStore).
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -11,20 +9,12 @@ import "../../../styles"
 PageScroll {
     id: root
 
-    property bool tabOverview: true
-    property bool tabMedia: true
-    property bool tabPerformance: true
-    property bool tabWeather: true
-
-    property bool widgetBattery: false
-    property bool widgetGpu: true
-    property bool widgetCpu: true
-    property bool widgetMemory: true
-    property bool widgetStorage: true
-    property bool widgetNetwork: false
-
-    property bool showOnHover: true
-    property int dragThreshold: 50
+    // At least one tab must stay on, or the dashboard would be empty.
+    readonly property int tabCount:
+        (ShellState.dashboardTabOverview ? 1 : 0) +
+        (ShellState.dashboardTabMedia ? 1 : 0) +
+        (ShellState.dashboardTabPerformance ? 1 : 0) +
+        (ShellState.dashboardTabWeather ? 1 : 0)
 
     SectionLabel { text: "Size" }
 
@@ -52,26 +42,30 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Overview"
-            checked: root.tabOverview
-            onToggled: (val) => root.tabOverview = val
+            checked: ShellState.dashboardTabOverview
+            enabled: !checked || root.tabCount > 1
+            onToggled: (val) => ShellState.dashboardTabOverview = val
         }
 
         ToggleRow {
             label: "Media"
-            checked: root.tabMedia
-            onToggled: (val) => root.tabMedia = val
+            checked: ShellState.dashboardTabMedia
+            enabled: !checked || root.tabCount > 1
+            onToggled: (val) => ShellState.dashboardTabMedia = val
         }
 
         ToggleRow {
             label: "Performance"
-            checked: root.tabPerformance
-            onToggled: (val) => root.tabPerformance = val
+            checked: ShellState.dashboardTabPerformance
+            enabled: !checked || root.tabCount > 1
+            onToggled: (val) => ShellState.dashboardTabPerformance = val
         }
 
         ToggleRow {
             label: "Weather"
-            checked: root.tabWeather
-            onToggled: (val) => root.tabWeather = val
+            checked: ShellState.dashboardTabWeather
+            enabled: !checked || root.tabCount > 1
+            onToggled: (val) => ShellState.dashboardTabWeather = val
             showDivider: false
         }
     }
@@ -81,44 +75,44 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Battery"
-            checked: root.widgetBattery
-            enabled: root.tabPerformance
-            onToggled: (val) => root.widgetBattery = val
+            checked: ShellState.dashboardWidgetBattery
+            enabled: ShellState.dashboardTabPerformance
+            onToggled: (val) => ShellState.dashboardWidgetBattery = val
         }
 
         ToggleRow {
             label: "GPU"
-            checked: root.widgetGpu
-            enabled: root.tabPerformance
-            onToggled: (val) => root.widgetGpu = val
+            checked: ShellState.dashboardWidgetGpu
+            enabled: ShellState.dashboardTabPerformance
+            onToggled: (val) => ShellState.dashboardWidgetGpu = val
         }
 
         ToggleRow {
             label: "CPU"
-            checked: root.widgetCpu
-            enabled: root.tabPerformance
-            onToggled: (val) => root.widgetCpu = val
+            checked: ShellState.dashboardWidgetCpu
+            enabled: ShellState.dashboardTabPerformance
+            onToggled: (val) => ShellState.dashboardWidgetCpu = val
         }
 
         ToggleRow {
             label: "Memory"
-            checked: root.widgetMemory
-            enabled: root.tabPerformance
-            onToggled: (val) => root.widgetMemory = val
+            checked: ShellState.dashboardWidgetMemory
+            enabled: ShellState.dashboardTabPerformance
+            onToggled: (val) => ShellState.dashboardWidgetMemory = val
         }
 
         ToggleRow {
             label: "Storage"
-            checked: root.widgetStorage
-            enabled: root.tabPerformance
-            onToggled: (val) => root.widgetStorage = val
+            checked: ShellState.dashboardWidgetStorage
+            enabled: ShellState.dashboardTabPerformance
+            onToggled: (val) => ShellState.dashboardWidgetStorage = val
         }
 
         ToggleRow {
             label: "Network"
-            checked: root.widgetNetwork
-            enabled: root.tabPerformance
-            onToggled: (val) => root.widgetNetwork = val
+            checked: ShellState.dashboardWidgetNetwork
+            enabled: ShellState.dashboardTabPerformance
+            onToggled: (val) => ShellState.dashboardWidgetNetwork = val
             showDivider: false
         }
     }
@@ -129,17 +123,17 @@ PageScroll {
         ToggleRow {
             label: "Open on hover"
             description: "Reveal the dashboard when the pointer reaches the screen edge"
-            checked: root.showOnHover
-            onToggled: (val) => root.showOnHover = val
+            checked: ShellState.dashboardShowOnHover
+            onToggled: (val) => ShellState.dashboardShowOnHover = val
         }
 
         SliderRow {
             label: "Drag threshold"
             description: "Pixels dragged before the dashboard opens"
             from: 0; to: 150; stepSize: 5
-            value: root.dragThreshold
+            value: ShellState.dashboardDragThreshold
             unit: " px"
-            onMoved: (val) => root.dragThreshold = val
+            onMoved: (val) => ShellState.dashboardDragThreshold = Math.round(val)
             showDivider: false
         }
     }
@@ -151,9 +145,9 @@ PageScroll {
             label: "System stats"
             description: "CPU, memory and GPU readings"
             from: 1; to: 10; stepSize: 1
-            value: 1
+            value: ShellState.dashboardStatsIntervalSec
             unit: " s"
-            placeholder: true
+            onMoved: (val) => ShellState.dashboardStatsIntervalSec = val
             showDivider: false
         }
     }

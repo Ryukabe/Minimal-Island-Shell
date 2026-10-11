@@ -48,6 +48,20 @@ QtObject {
         statusPanelHeight: 172,
         timerWidth: 320,
         timerHeight: 180,
+                // dashboard
+        dashboardTabOverview: true,
+        dashboardTabMedia: true,
+        dashboardTabPerformance: true,
+        dashboardTabWeather: true,
+        dashboardWidgetBattery: false,
+        dashboardWidgetGpu: true,
+        dashboardWidgetCpu: true,
+        dashboardWidgetMemory: true,
+        dashboardWidgetStorage: true,
+        dashboardWidgetNetwork: false,
+        dashboardShowOnHover: true,
+        dashboardDragThreshold: 50,
+        dashboardStatsIntervalSec: 1,
         // motion
         motionReduced: false,
         motionMovementMs: 480,
@@ -201,6 +215,21 @@ QtObject {
 
     property real timerWidth: root.defaults.timerWidth
     property real timerHeight: root.defaults.timerHeight
+
+        // ================= DASHBOARD =================
+    property bool dashboardTabOverview: root.defaults.dashboardTabOverview
+    property bool dashboardTabMedia: root.defaults.dashboardTabMedia
+    property bool dashboardTabPerformance: root.defaults.dashboardTabPerformance
+    property bool dashboardTabWeather: root.defaults.dashboardTabWeather
+    property bool dashboardWidgetBattery: root.defaults.dashboardWidgetBattery
+    property bool dashboardWidgetGpu: root.defaults.dashboardWidgetGpu
+    property bool dashboardWidgetCpu: root.defaults.dashboardWidgetCpu
+    property bool dashboardWidgetMemory: root.defaults.dashboardWidgetMemory
+    property bool dashboardWidgetStorage: root.defaults.dashboardWidgetStorage
+    property bool dashboardWidgetNetwork: root.defaults.dashboardWidgetNetwork
+    property bool dashboardShowOnHover: root.defaults.dashboardShowOnHover
+    property int dashboardDragThreshold: root.defaults.dashboardDragThreshold
+    property real dashboardStatsIntervalSec: root.defaults.dashboardStatsIntervalSec
 
     // ================= UPDATES =================
     property bool updateAutoCheck: root.defaults.updateAutoCheck

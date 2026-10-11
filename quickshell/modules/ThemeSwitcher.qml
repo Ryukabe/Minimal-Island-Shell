@@ -83,7 +83,7 @@ FocusScope {
             // [feature: apply selected theme]
             if (selectedIndex >= 0 && filteredThemes[selectedIndex]) {
                 ThemeService.applyTheme(filteredThemes[selectedIndex].name);
-                
+
                 // Fix: Close the switcher when applying via keyboard
                 if (typeof ShellState !== "undefined") {
                     ShellState.showPage("clock");
@@ -142,44 +142,62 @@ FocusScope {
             Item { Layout.fillWidth: true }
 
             Rectangle {
-                id: searchBar
-                visible: switcherRoot.searchActive
-                implicitWidth: switcherRoot.searchActive ? 180 : 0
-                implicitHeight: 30
+                id: searchPill
+
+                readonly property int collapsedW: 30
+                readonly property int expandedW: 220
+                readonly property bool useSpring: ShellState.motionSpringEnabled && !ShellState.motionReduced
+
+                // Mirrored widths, one Behavior each, same pattern as the cards
+                property real widthSpring: switcherRoot.searchActive ? expandedW : collapsedW
+                property real widthEase: switcherRoot.searchActive ? expandedW : collapsedW
+
+                Behavior on widthSpring {
+                    enabled: searchPill.useSpring
+                    SpringAnimation {
+                        spring: Motion.glideSpring
+                        damping: Motion.glideDamping
+                        mass: Motion.glideMass
+                        epsilon: Motion.epsilon
+                    }
+                }
+                Behavior on widthEase {
+                    enabled: !searchPill.useSpring
+                    NumberAnimation {
+                        duration: ShellState.motionDuration(Motion.glideMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Layout.preferredWidth: useSpring ? widthSpring : widthEase
+                Layout.preferredHeight: 30
                 radius: ShellState.islandCornerRadius
-                color: Qt.rgba(1, 1, 1, 0.08)
+                clip: true
+                color: switcherRoot.searchActive ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.08)
                 border.width: searchInput.activeFocus ? 1 : 0
                 border.color: Colors.accent
 
-                SpringAnimation {
-                    id: searchWidthSpring
-                    spring: Motion.glideSpring
-                    damping: Motion.glideDamping
-                    mass: Motion.glideMass
-                    epsilon: Motion.epsilon
-                }
-                NumberAnimation {
-                    id: searchWidthEase
-                    duration: ShellState.motionDuration(Motion.glideMs)
-                    easing.type: Easing.OutCubic
-                }
-                Behavior on implicitWidth {
-                    animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? searchWidthSpring : searchWidthEase
-                }
+                Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
 
+                // Field lives on the left, fades in as the pill grows
                 TextInput {
                     id: searchInput
-                    anchors.fill: parent
+                    anchors.left: parent.left
                     anchors.leftMargin: 12
-                    anchors.rightMargin: 12
+                    anchors.right: iconBox.left
+                    anchors.verticalCenter: parent.verticalCenter
                     verticalAlignment: Text.AlignVCenter
                     color: Colors.fg
                     font.pixelSize: Dimens.fontSizeSm
                     clip: true
+                    enabled: switcherRoot.searchActive
+                    opacity: switcherRoot.searchActive ? 1 : 0
+                    Behavior on opacity {
+                        NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                    }
+
                     onTextChanged: {
-                        if (switcherRoot.searchActive) {
-                            switcherRoot.searchQuery = text;
-                        }
+                        if (switcherRoot.searchActive) switcherRoot.searchQuery = text;
                     }
 
                     Keys.onPressed: (event) => {
@@ -200,35 +218,38 @@ FocusScope {
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
-            }
 
-            Rectangle {
-                implicitWidth: 30
-                implicitHeight: 30
-                radius: ShellState.islandCornerRadius
-                color: switcherRoot.searchActive ? Qt.rgba(1, 1, 1, 0.15) : Qt.rgba(1, 1, 1, 0.08)
+                // Icon pinned to the right end
+                Item {
+                    id: iconBox
+                    width: 30
+                    height: 30
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "search"
-                    font.family: Fonts.icon
-                    font.pixelSize: Dimens.fontSizeLg
-                    font.variableAxes: Fonts.iconAxes
-                    font.features: { "liga": 1 }
-                    color: switcherRoot.searchActive ? Colors.accent : Colors.fg
-                }
+                    Text {
+                        anchors.centerIn: parent
+                        text: "search"
+                        font.family: Fonts.icon
+                        font.pixelSize: Dimens.fontSizeLg
+                        font.variableAxes: Fonts.iconAxes
+                        font.features: { "liga": 1 }
+                        color: switcherRoot.searchActive ? Colors.accent : Colors.fg
+                        Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
+                    }
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        switcherRoot.searchActive = !switcherRoot.searchActive;
-                        if (switcherRoot.searchActive) {
-                            searchInput.forceActiveFocus();
-                        } else {
-                            switcherRoot.searchQuery = "";
-                            searchInput.text = "";
-                            switcherRoot.forceActiveFocus();
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            switcherRoot.searchActive = !switcherRoot.searchActive;
+                            if (switcherRoot.searchActive) {
+                                searchInput.forceActiveFocus();
+                            } else {
+                                switcherRoot.searchQuery = "";
+                                searchInput.text = "";
+                                switcherRoot.forceActiveFocus();
+                            }
                         }
                     }
                 }
@@ -247,11 +268,9 @@ FocusScope {
             flickableDirection: Flickable.HorizontalFlick
             boundsBehavior: Flickable.StopAtBounds
 
-            // Was hardcoded to 0 (hard snap). Now tied to the Movement
-            // slider and Reduce Motion, same as everything else — note
-            // this is a plain duration, not a true spring; ListView's
-            // built-in highlight-follow doesn't support swapping in a
-            // SpringAnimation without replacing the follow mechanism.
+            // Tied to the Movement slider and Reduce Motion. This is a plain
+            // duration, not a true spring; ListView's built-in highlight-follow
+            // doesn't support swapping in a SpringAnimation.
             highlightMoveDuration: ShellState.motionDuration(Motion.glideMs)
 
             highlightRangeMode: ListView.StrictlyEnforceRange
@@ -281,7 +300,7 @@ FocusScope {
                     switcherRoot.selectedIndex = index;
                     listView.currentIndex = index;
                     ThemeService.applyTheme(modelData.name);
-                    
+
                     // Fix: Close the switcher when applying via mouse click
                     if (typeof ShellState !== "undefined") {
                         ShellState.showPage("clock");

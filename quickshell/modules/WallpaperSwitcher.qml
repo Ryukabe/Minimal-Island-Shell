@@ -16,8 +16,12 @@ FocusScope {
     property string searchQuery: ""
     property bool searchActive: false
 
+    // Only show wallpapers matching the current Static / Animated mode.
     readonly property var filteredWallpapers: {
-        var list = WallpaperService.wallpapersList || [];
+        var animated = WallpaperService.animatedMode;
+        var list = (WallpaperService.wallpapersList || []).filter(function(item) {
+            return item.animated === animated;
+        });
         if (!searchQuery.trim()) return list;
         return list.filter(function(item) {
             return item.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -53,6 +57,13 @@ FocusScope {
     Keys.onPressed: event => {
         var count = filteredWallpapers.length;
 
+        // [feature: Tab toggles Static / Animated]
+        if (event.key === Qt.Key_Tab) {
+            WallpaperService.setAnimatedMode(!WallpaperService.animatedMode);
+            event.accepted = true;
+            return;
+        }
+
         // [feature: auto-open search and catch typed character on key press]
         if (!searchActive && event.text.length > 0 && event.text >= " " && event.key !== Qt.Key_Escape && event.key !== Qt.Key_Return && event.key !== Qt.Key_Enter) {
             searchActive = true;
@@ -64,7 +75,21 @@ FocusScope {
             return;
         }
 
-        if (count === 0) return;
+        if (count === 0) {
+            if (event.key === Qt.Key_Escape) {
+                if (searchActive) {
+                    searchActive = false;
+                    searchQuery = "";
+                    searchInput.text = "";
+                    switcherRoot.forceActiveFocus();
+                } else if (typeof ShellState !== "undefined") {
+                    WallpaperService.isOpen = false;
+                    ShellState.showPage("clock");
+                }
+                event.accepted = true;
+            }
+            return;
+        }
 
         // [feature: directional navigation controls]
         if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
@@ -83,7 +108,7 @@ FocusScope {
             // [feature: apply selected wallpaper]
             if (selectedIndex >= 0 && filteredWallpapers[selectedIndex]) {
                 WallpaperService.applyWallpaper(filteredWallpapers[selectedIndex].path);
-                
+
                 // Close the switcher and sync state with Island
                 WallpaperService.isOpen = false;
                 if (typeof ShellState !== "undefined") {
@@ -111,7 +136,7 @@ FocusScope {
         anchors.margins: 16
         spacing: 12
 
-        // [layout: header row containing title, item count badge, and search controls]
+        // [layout: header row containing title, count badge, mode toggle and search]
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
@@ -142,45 +167,138 @@ FocusScope {
 
             Item { Layout.fillWidth: true }
 
+            // Static / Animated toggle
             Rectangle {
-                id: searchBar
-                visible: switcherRoot.searchActive
-                implicitWidth: switcherRoot.searchActive ? 180 : 0
-                implicitHeight: 30
+                id: modeToggle
+
+                readonly property bool animated: WallpaperService.animatedMode
+
+                Layout.preferredWidth: 150
+                Layout.preferredHeight: 30
                 radius: ShellState.islandCornerRadius
                 color: Qt.rgba(1, 1, 1, 0.08)
+
+                // Sliding highlight
+                Rectangle {
+                    width: modeToggle.width / 2 - 3
+                    height: modeToggle.height - 6
+                    y: 3
+                    x: modeToggle.animated ? modeToggle.width / 2 : 3
+                    radius: ShellState.islandCornerRadius
+                    color: Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.22)
+
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: ShellState.motionDuration(Motion.glideMs)
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+
+                Row {
+                    anchors.fill: parent
+
+                    Item {
+                        width: modeToggle.width / 2
+                        height: modeToggle.height
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Static"
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeSm
+                            font.bold: !modeToggle.animated
+                            color: !modeToggle.animated ? Colors.accent : Colors.fgMuted
+                            Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: WallpaperService.setAnimatedMode(false)
+                        }
+                    }
+
+                    Item {
+                        width: modeToggle.width / 2
+                        height: modeToggle.height
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Animated"
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeSm
+                            font.bold: modeToggle.animated
+                            color: modeToggle.animated ? Colors.accent : Colors.fgMuted
+                            Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: WallpaperService.setAnimatedMode(true)
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                id: searchPill
+
+                readonly property int collapsedW: 30
+                readonly property int expandedW: 220
+                readonly property bool useSpring: ShellState.motionSpringEnabled && !ShellState.motionReduced
+
+                // Mirrored widths, one Behavior each, same pattern as the cards
+                property real widthSpring: switcherRoot.searchActive ? expandedW : collapsedW
+                property real widthEase: switcherRoot.searchActive ? expandedW : collapsedW
+
+                Behavior on widthSpring {
+                    enabled: searchPill.useSpring
+                    SpringAnimation {
+                        spring: Motion.glideSpring
+                        damping: Motion.glideDamping
+                        mass: Motion.glideMass
+                        epsilon: Motion.epsilon
+                    }
+                }
+                Behavior on widthEase {
+                    enabled: !searchPill.useSpring
+                    NumberAnimation {
+                        duration: ShellState.motionDuration(Motion.glideMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Layout.preferredWidth: useSpring ? widthSpring : widthEase
+                Layout.preferredHeight: 30
+                radius: ShellState.islandCornerRadius
+                clip: true
+                color: switcherRoot.searchActive ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.08)
                 border.width: searchInput.activeFocus ? 1 : 0
                 border.color: Colors.accent
 
-                SpringAnimation {
-                    id: searchWidthSpring
-                    spring: Motion.glideSpring
-                    damping: Motion.glideDamping
-                    mass: Motion.glideMass
-                    epsilon: Motion.epsilon
-                }
-                NumberAnimation {
-                    id: searchWidthEase
-                    duration: ShellState.motionDuration(Motion.glideMs)
-                    easing.type: Easing.OutCubic
-                }
-                Behavior on implicitWidth {
-                    animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? searchWidthSpring : searchWidthEase
-                }
+                Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
 
+                // Field lives on the left, fades in as the pill grows
                 TextInput {
                     id: searchInput
-                    anchors.fill: parent
+                    anchors.left: parent.left
                     anchors.leftMargin: 12
-                    anchors.rightMargin: 12
+                    anchors.right: iconBox.left
+                    anchors.verticalCenter: parent.verticalCenter
                     verticalAlignment: Text.AlignVCenter
                     color: Colors.fg
                     font.pixelSize: Dimens.fontSizeSm
                     clip: true
+                    enabled: switcherRoot.searchActive
+                    opacity: switcherRoot.searchActive ? 1 : 0
+                    Behavior on opacity {
+                        NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                    }
+
                     onTextChanged: {
-                        if (switcherRoot.searchActive) {
-                            switcherRoot.searchQuery = text;
-                        }
+                        if (switcherRoot.searchActive) switcherRoot.searchQuery = text;
                     }
 
                     Keys.onPressed: (event) => {
@@ -201,35 +319,38 @@ FocusScope {
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
-            }
 
-            Rectangle {
-                implicitWidth: 30
-                implicitHeight: 30
-                radius: ShellState.islandCornerRadius
-                color: switcherRoot.searchActive ? Qt.rgba(1, 1, 1, 0.15) : Qt.rgba(1, 1, 1, 0.08)
+                // Icon pinned to the right end
+                Item {
+                    id: iconBox
+                    width: 30
+                    height: 30
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "search"
-                    font.family: Fonts.icon
-                    font.pixelSize: Dimens.fontSizeLg
-                    font.variableAxes: Fonts.iconAxes
-                    font.features: { "liga": 1 }
-                    color: switcherRoot.searchActive ? Colors.accent : Colors.fg
-                }
+                    Text {
+                        anchors.centerIn: parent
+                        text: "search"
+                        font.family: Fonts.icon
+                        font.pixelSize: Dimens.fontSizeLg
+                        font.variableAxes: Fonts.iconAxes
+                        font.features: { "liga": 1 }
+                        color: switcherRoot.searchActive ? Colors.accent : Colors.fg
+                        Behavior on color { ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) } }
+                    }
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        switcherRoot.searchActive = !switcherRoot.searchActive;
-                        if (switcherRoot.searchActive) {
-                            searchInput.forceActiveFocus();
-                        } else {
-                            switcherRoot.searchQuery = "";
-                            searchInput.text = "";
-                            switcherRoot.forceActiveFocus();
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            switcherRoot.searchActive = !switcherRoot.searchActive;
+                            if (switcherRoot.searchActive) {
+                                searchInput.forceActiveFocus();
+                            } else {
+                                switcherRoot.searchQuery = "";
+                                searchInput.text = "";
+                                switcherRoot.forceActiveFocus();
+                            }
                         }
                     }
                 }
@@ -267,6 +388,9 @@ FocusScope {
 
                 wallpaperPath: modelData.path
                 wallpaperName: modelData.name
+                isAnimated: modelData.animated
+                isVideo: modelData.video
+                thumbPath: modelData.thumb
                 isApplied: WallpaperService.currentWallpaper === modelData.path
                 isSelected: switcherRoot.selectedIndex === index
 
@@ -277,7 +401,7 @@ FocusScope {
                     switcherRoot.selectedIndex = index;
                     listView.currentIndex = index;
                     WallpaperService.applyWallpaper(modelData.path);
-                    
+
                     // Close the switcher and sync state with Island
                     WallpaperService.isOpen = false;
                     if (typeof ShellState !== "undefined") {

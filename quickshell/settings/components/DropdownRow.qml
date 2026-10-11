@@ -10,6 +10,7 @@ Item {
     id: root
 
     property string label: ""
+    property string description: ""
     property var options: []
     property string selectedValue: ""
     property bool showDivider: true
@@ -39,13 +40,28 @@ Item {
         anchors.rightMargin: Dimens.paddingMedium
         spacing: Dimens.spacingMedium
 
-        Text {
+        ColumnLayout {
             Layout.fillWidth: true
-            text: root.label
-            color: Colors.fg
-            font.family: Fonts.text
-            font.pixelSize: Dimens.fontSizeBase
-            elide: Text.ElideRight
+            spacing: 2
+
+            Text {
+                Layout.fillWidth: true
+                text: root.label
+                color: Colors.fg
+                font.family: Fonts.text
+                font.pixelSize: Dimens.fontSizeBase
+                elide: Text.ElideRight
+            }
+
+            Text {
+                visible: root.description !== ""
+                Layout.fillWidth: true
+                text: root.description
+                color: Colors.fgMuted
+                font.family: Fonts.text
+                font.pixelSize: Dimens.fontSizeSm
+                elide: Text.ElideRight
+            }
         }
 
         Rectangle {

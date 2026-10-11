@@ -3,12 +3,321 @@
 // The lid row stays a greyed placeholder: it belongs to logind / a Hyprland bind, not to the shell.
 import QtQuick
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import Quickshell
 import "../../components"
 import "../../../services"
 import "../../../styles"
+import "../../../components/theme"
 
 PageScroll {
     id: root
+
+    readonly property var sampleNotifs: [
+        "Messages: hey, are you free?",
+        "Mail: Your order has shipped",
+        "Calendar: Study block at 8"
+    ]
+
+    Component.onCompleted: if (!KnowledgeSettings.current) KnowledgeSettings.pickNext()
+
+    SystemClock {
+        id: previewClock
+        enabled: root.visible
+        precision: SystemClock.Minutes
+    }
+
+    SectionLabel { text: "Preview" }
+
+    GroupCard {
+        Item {
+            Layout.fillWidth: true
+            implicitHeight: 282
+
+            Rectangle {
+                id: frame
+                height: 260
+                width: height * 16 / 9
+                anchors.centerIn: parent
+                color: Colors.mainBgMica
+                border.width: 1
+                border.color: Colors.border
+                clip: true
+
+                // Drawn at 1366x768, then scaled down to fit the frame.
+                Item {
+                    id: stage
+                    width: 1366
+                    height: 768
+                    scale: frame.width / 1366
+                    transformOrigin: Item.TopLeft
+
+                    Image {
+                        id: previewWall
+                        anchors.fill: parent
+                        source: LockScreenSettings.effectiveWallpaper
+                            ? LockScreenSettings.folderUrl(LockScreenSettings.effectiveWallpaper) : ""
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        sourceSize.width: 1366
+                        visible: !LockScreenSettings.frostedBlurEnabled
+                    }
+
+                    FastBlur {
+                        anchors.fill: previewWall
+                        source: previewWall
+                        radius: LockScreenSettings.frostedBlurRadius
+                        visible: LockScreenSettings.frostedBlurEnabled
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: Colors.darkMode
+                            ? Qt.rgba(0, 0, 0, LockScreenSettings.wallpaperDimOpacity)
+                            : Qt.rgba(1, 1, 1, LockScreenSettings.wallpaperDimOpacity)
+                    }
+
+                    // Top-left: clock, date, notifications
+                    Column {
+                        x: stage.width * 0.05
+                        y: stage.height * 0.06
+                        spacing: Dimens.spacingSmall
+
+                        Text {
+                            text: Qt.formatDateTime(previewClock.date, LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
+                            font.family: Fonts.display
+                            font.pixelSize: Dimens.fontSizeDisplay
+                            font.weight: Font.Bold
+                            color: Colors.fg
+                        }
+
+                        Text {
+                            visible: LockScreenSettings.showDate
+                            text: Qt.formatDateTime(previewClock.date, "dddd, MMMM d").toUpperCase()
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.letterSpacing: 2
+                            color: Colors.fgMuted
+                        }
+
+                        Text {
+                            visible: LockScreenSettings.showNotifications
+                            topPadding: Dimens.spacingMedium
+                            text: "3 NOTIFICATIONS"
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.letterSpacing: 2
+                            color: Colors.fgMuted
+                        }
+
+                        Repeater {
+                            model: LockScreenSettings.showNotifications
+                                ? Math.min(LockScreenSettings.notificationLimit, root.sampleNotifs.length) : 0
+
+                            Text {
+                                required property int index
+                                text: root.sampleNotifs[index]
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeSm
+                                color: Colors.fg
+                            }
+                        }
+                    }
+
+                    // Bottom-left: Hyprland
+                    Text {
+                        visible: LockScreenSettings.showHyprlandAction
+                        x: stage.width * 0.05
+                        y: stage.height * 0.94 - height
+                        text: "HYPRLAND"
+                        font.family: Fonts.mono
+                        font.pixelSize: Dimens.fontSizeXs
+                        font.letterSpacing: 1.5
+                        color: Colors.fgMuted
+                    }
+
+                    // Bottom-centre: knowledge slide
+                    Column {
+                        id: previewSlide
+                        readonly property var entry: KnowledgeSettings.current
+                        visible: KnowledgeSettings.slideEnabled && !!entry
+                        width: Math.min(520, stage.width * 0.36)
+                        x: (stage.width - width) / 2
+                        y: stage.height * 0.94 - height
+                        spacing: Dimens.spacingSmall
+
+                        Text {
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                            text: previewSlide.entry ? (previewSlide.entry.kind === "word" ? "WORD" : "DID YOU KNOW") : ""
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.letterSpacing: 2
+                            color: Colors.fgMuted
+                        }
+
+                        Text {
+                            visible: previewSlide.entry && previewSlide.entry.kind === "fact"
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                            text: previewSlide.entry && previewSlide.entry.kind === "fact" ? previewSlide.entry.text : ""
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeMd
+                            color: Colors.fg
+                        }
+
+                        Text {
+                            visible: previewSlide.entry && previewSlide.entry.kind === "word"
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                            text: previewSlide.entry && previewSlide.entry.kind === "word"
+                                ? previewSlide.entry.word + "  ·  " + previewSlide.entry.pos : ""
+                            font.family: Fonts.display
+                            font.pixelSize: Dimens.fontSizeLg
+                            font.weight: Font.Bold
+                            color: Colors.fg
+                        }
+
+                        Text {
+                            visible: previewSlide.entry && previewSlide.entry.kind === "word"
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                            text: previewSlide.entry && previewSlide.entry.kind === "word" ? previewSlide.entry.meaning : ""
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeSm
+                            color: Colors.fg
+                        }
+
+                        Text {
+                            visible: previewSlide.entry && previewSlide.entry.kind === "word"
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                            text: previewSlide.entry && previewSlide.entry.kind === "word" ? "\"" + previewSlide.entry.example + "\"" : ""
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.italic: true
+                            color: Colors.fgMuted
+                        }
+                    }
+
+                    // Bottom-right: username, password box, buttons
+                    Column {
+                        x: stage.width * 0.95 - width
+                        y: stage.height * 0.94 - height
+                        spacing: Dimens.spacingSmall
+
+                        Text {
+                            visible: LockScreenSettings.showUsername
+                            anchors.right: parent.right
+                            text: (Quickshell.env("USER") || "user").toUpperCase()
+                            font.family: Fonts.display
+                            font.pixelSize: Dimens.fontSizeMd
+                            font.weight: Font.Bold
+                            font.letterSpacing: 3
+                            color: Colors.fg
+                        }
+
+                        Item {
+                            width: 220
+                            height: 30 + Dimens.spacingMedium
+
+                            Text {
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 8
+                                text: LockScreenSettings.passwordPlaceholder.toUpperCase()
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeXs
+                                font.letterSpacing: 1.5
+                                color: Colors.fgMuted
+                                opacity: 0.7
+                            }
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                height: 1
+                                color: Colors.border
+                                opacity: 0.4
+                            }
+                        }
+
+                        Row {
+                            anchors.right: parent.right
+                            spacing: Dimens.spacingLg
+
+                            Text {
+                                visible: LockScreenSettings.showRebootAction
+                                text: "RESTART"
+                                font.family: Fonts.mono
+                                font.pixelSize: Dimens.fontSizeXs
+                                font.letterSpacing: 1.5
+                                color: Colors.fgMuted
+                            }
+
+                            Text {
+                                visible: LockScreenSettings.showPowerAction
+                                text: "SHUT DOWN"
+                                font.family: Fonts.mono
+                                font.pixelSize: Dimens.fontSizeXs
+                                font.letterSpacing: 1.5
+                                color: Colors.fgMuted
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    SectionLabel { text: "Wallpaper source" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Use its own wallpaper"
+            description: "Pick a lock screen wallpaper separate from the desktop one"
+            checked: LockScreenSettings.useOwnWallpaper
+            onToggled: (val) => LockScreenSettings.useOwnWallpaper = val
+            showDivider: LockScreenSettings.useOwnWallpaper
+        }
+
+        TextRow {
+            visible: LockScreenSettings.useOwnWallpaper
+            label: "Lock screen folder"
+            description: LockScreenSettings.wallpaperList.length === 0
+                ? "No images found in this folder"
+                : "Press Enter to apply. Example: ~/Pictures/Wallpapers"
+            placeholderText: "~/Pictures/Wallpapers"
+            monospace: true
+            fieldWidth: 280
+            value: LockScreenSettings.wallpaperFolder
+            showDivider: false
+            onCommitted: (v) => LockScreenSettings.setWallpaperFolder(v)
+        }
+    }
+
+    CardCarousel {
+        id: lockWallpaperCarousel
+        enabled: LockScreenSettings.useOwnWallpaper
+        opacity: enabled ? 1.0 : 0.4
+        model: LockScreenSettings.wallpaperList
+        cardDelegate: Component {
+            WallpaperCard {
+                required property var modelData
+                required property int index
+
+                wallpaperPath: modelData.path
+                wallpaperName: modelData.name
+                isApplied: LockScreenSettings.effectiveWallpaper === modelData.path
+                isSelected: LockScreenSettings.effectiveWallpaper === modelData.path
+                onClicked: LockScreenSettings.wallpaperFile = modelData.path
+            }
+        }
+    }
 
     SectionLabel { text: "Wallpaper" }
 

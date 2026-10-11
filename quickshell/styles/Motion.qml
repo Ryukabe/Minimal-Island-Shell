@@ -54,9 +54,11 @@ QtObject {
 
     // ============ MORPH (island container) ============
     // Real spring physics for the island's width/height (MorphSpring.qml). Unlike the
-    // SpringAnimation tiers above, these are true SwiftUI-style values: settle time in
-    // seconds and bounce 0-0.5. Both follow the Settings > Motion sliders.
-    readonly property real morphDuration: Math.max(0.2, ShellState.motionMovementMs / 1000)
+    // SpringAnimation tiers above, these are true SwiftUI-style values: spring period in
+    // seconds and bounce 0-0.5. The spring is ~90% of the way after ~0.6x its duration, so
+    // the island morph runs at 70% of the Movement slider (floor 150 ms) to feel brisk.
+    // Bounce follows the Settings > Motion Bounce slider.
+    readonly property real morphDuration: Math.max(0.15, ShellState.motionMovementMs / 1000 * 0.7)
     readonly property real morphBounce: Math.max(0, Math.min(0.5, ShellState.motionBouncePercent / 100))
 
     // Rest threshold in the animated property's own units:

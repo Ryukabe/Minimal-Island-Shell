@@ -32,3 +32,5 @@ singleton LauncherSearch 1.0 LauncherSearch.qml
 singleton LauncherData 1.0 LauncherData.qml
 singleton EventToastService 1.0 EventToastService.qml
 singleton LockTimerService 1.0 LockTimerService.qml
+singleton LayoutSettingsService 1.0 LayoutSettingsService.qml
+singleton KnowledgeSettings KnowledgeSettings.qml

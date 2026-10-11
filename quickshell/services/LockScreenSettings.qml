@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Qt.labs.folderlistmodel
 
 Item {
     id: root
@@ -11,7 +12,6 @@ Item {
     readonly property string configPath: root._home + "/.config/quickshell/state/lockscreen.json"
 
     property bool _configLoaded: false
-    property bool _newConfigLoaded: false
     property bool _applyingConfig: false
 
     // Clock
@@ -23,19 +23,73 @@ Item {
 
     // Password field
     property string passwordPlaceholder: "password"
+    property bool shakeOnWrongPassword: true
+    property bool errorUsesAccent: false
 
     // Background
     property real wallpaperDimOpacity: 0.35
     property bool frostedBlurEnabled: false
     property real frostedBlurRadius: 32
+    property bool playEntranceAnimation: true
+
+    // Notifications
+    property bool showNotifications: true
+    property int notificationLimit: 3
 
     // Nav actions
     property bool showHyprlandAction: true
     property bool showRebootAction: true
     property bool showPowerAction: true
 
-    // Error/accent
-    property bool errorUsesAccent: false
+    // Lock screen wallpaper
+    property bool useOwnWallpaper: false
+    property string wallpaperFolder: root._home + "/Pictures/Wallpapers"
+    property string wallpaperFile: ""
+    property var wallpaperList: []
+
+    function folderUrl(p) {
+        return "file://" + p.split("/").map(encodeURIComponent).join("/")
+    }
+
+    function normalizeFolder(p) {
+        var t = (p || "").trim()
+        if (t === "") return root._home + "/Pictures/Wallpapers"
+        t = t.replace(/^~(?=\/|$)/, root._home)
+        while (t.length > 1 && t.endsWith("/")) t = t.slice(0, -1)
+        return t
+    }
+
+    function setWallpaperFolder(p) {
+        root.wallpaperFolder = root.normalizeFolder(p)
+    }
+
+    // What the lock screen actually draws.
+    readonly property string effectiveWallpaper: {
+        if (!root.useOwnWallpaper) return WallpaperService.currentWallpaper
+        var list = root.wallpaperList
+        for (var i = 0; i < list.length; i++)
+            if (list[i].path === root.wallpaperFile) return root.wallpaperFile
+        return list.length > 0 ? list[0].path : WallpaperService.currentWallpaper
+    }
+
+    function _rebuildWallpapers() {
+        var list = []
+        for (var i = 0; i < lockFolderModel.count; i++) {
+            var n = lockFolderModel.get(i, "fileName")
+            list.push({ name: n, path: root.wallpaperFolder + "/" + n })
+        }
+        root.wallpaperList = list
+    }
+
+    FolderListModel {
+        id: lockFolderModel
+        folder: root.folderUrl(root.wallpaperFolder)
+        showDirs: false
+        showDotAndDotDot: false
+        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp"]
+        onCountChanged: root._rebuildWallpapers()
+        onStatusChanged: if (status === FolderListModel.Ready) root._rebuildWallpapers()
+    }
 
     function _apply(data) {
         root._applyingConfig = true
@@ -43,13 +97,20 @@ Item {
         if (data.showDate !== undefined) root.showDate = data.showDate;
         if (data.showUsername !== undefined) root.showUsername = data.showUsername;
         if (data.passwordPlaceholder !== undefined) root.passwordPlaceholder = data.passwordPlaceholder;
+        if (data.shakeOnWrongPassword !== undefined) root.shakeOnWrongPassword = data.shakeOnWrongPassword;
+        if (data.errorUsesAccent !== undefined) root.errorUsesAccent = data.errorUsesAccent;
         if (data.wallpaperDimOpacity !== undefined) root.wallpaperDimOpacity = data.wallpaperDimOpacity;
         if (data.frostedBlurEnabled !== undefined) root.frostedBlurEnabled = data.frostedBlurEnabled;
         if (data.frostedBlurRadius !== undefined) root.frostedBlurRadius = data.frostedBlurRadius;
+        if (data.playEntranceAnimation !== undefined) root.playEntranceAnimation = data.playEntranceAnimation;
+        if (data.showNotifications !== undefined) root.showNotifications = data.showNotifications;
+        if (data.notificationLimit !== undefined) root.notificationLimit = data.notificationLimit;
         if (data.showHyprlandAction !== undefined) root.showHyprlandAction = data.showHyprlandAction;
         if (data.showRebootAction !== undefined) root.showRebootAction = data.showRebootAction;
         if (data.showPowerAction !== undefined) root.showPowerAction = data.showPowerAction;
-        if (data.errorUsesAccent !== undefined) root.errorUsesAccent = data.errorUsesAccent;
+        if (data.useOwnWallpaper !== undefined) root.useOwnWallpaper = data.useOwnWallpaper;
+        if (data.wallpaperFolder !== undefined) root.wallpaperFolder = data.wallpaperFolder;
+        if (data.wallpaperFile !== undefined) root.wallpaperFile = data.wallpaperFile;
         root._applyingConfig = false
     }
 
@@ -58,7 +119,6 @@ Item {
         path: root.configPath
         watchChanges: true
         onLoaded: {
-            root._newConfigLoaded = true
             try {
                 root._apply(JSON.parse(text()));
             } catch (e) {
@@ -66,14 +126,12 @@ Item {
             }
             root._configLoaded = true
         }
+        // First run: no file yet. Without this, save() would never be allowed.
+        onLoadFailed: root._configLoaded = true
     }
 
     Process { id: saveProcess }
 
-    // Unchanged from before: this builds the save command as a shell string
-    // with the JSON wrapped in single quotes. If any value ever contains a
-    // literal single quote, the command breaks. Not something you asked me
-    // to fix, just flagging it since we're already in this file.
     function save() {
         if (!root._configLoaded || root._applyingConfig) return;
         var data = {
@@ -81,15 +139,25 @@ Item {
             "showDate": root.showDate,
             "showUsername": root.showUsername,
             "passwordPlaceholder": root.passwordPlaceholder,
+            "shakeOnWrongPassword": root.shakeOnWrongPassword,
+            "errorUsesAccent": root.errorUsesAccent,
             "wallpaperDimOpacity": root.wallpaperDimOpacity,
             "frostedBlurEnabled": root.frostedBlurEnabled,
             "frostedBlurRadius": root.frostedBlurRadius,
+            "playEntranceAnimation": root.playEntranceAnimation,
+            "showNotifications": root.showNotifications,
+            "notificationLimit": root.notificationLimit,
             "showHyprlandAction": root.showHyprlandAction,
             "showRebootAction": root.showRebootAction,
             "showPowerAction": root.showPowerAction,
-            "errorUsesAccent": root.errorUsesAccent
+            "useOwnWallpaper": root.useOwnWallpaper,
+            "wallpaperFolder": root.wallpaperFolder,
+            "wallpaperFile": root.wallpaperFile
         };
-        saveProcess.command = ["sh", "-c", "mkdir -p ~/.config/quickshell/state && echo '" + JSON.stringify(data) + "' > " + root.configPath];
+        // Values are passed as arguments, so quotes in a path can't break the command.
+        saveProcess.command = ["sh", "-c",
+            "mkdir -p \"$(dirname \"$2\")\"; printf '%s' \"$1\" > \"$2\"",
+            "sh", JSON.stringify(data), root.configPath];
         saveProcess.running = true;
     }
 
@@ -97,11 +165,18 @@ Item {
     onShowDateChanged: save()
     onShowUsernameChanged: save()
     onPasswordPlaceholderChanged: save()
+    onShakeOnWrongPasswordChanged: save()
+    onErrorUsesAccentChanged: save()
     onWallpaperDimOpacityChanged: save()
     onFrostedBlurEnabledChanged: save()
     onFrostedBlurRadiusChanged: save()
+    onPlayEntranceAnimationChanged: save()
+    onShowNotificationsChanged: save()
+    onNotificationLimitChanged: save()
     onShowHyprlandActionChanged: save()
     onShowRebootActionChanged: save()
     onShowPowerActionChanged: save()
-    onErrorUsesAccentChanged: save()
+    onUseOwnWallpaperChanged: save()
+    onWallpaperFolderChanged: save()
+    onWallpaperFileChanged: save()
 }

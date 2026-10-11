@@ -1,17 +1,15 @@
 // services/InputSettingsService.qml — reads/writes ~/.config/hypr/modules/input.lua.
-// Uses the same bracket-depth-scoping technique as
-// HyprlandKeybindsService._parse (for hl.bind calls) to isolate the
-// "touchpad = { ... }" object and the "hl.device({ ... })" object before
-// doing any field regex — this matters because "sensitivity" and
-// "scroll_factor" each appear in more than one place in the file (global
-// vs touchpad vs per-device override), so a naive whole-file regex would
-// risk editing the wrong occurrence. Rewrite-then-reload pattern matches
-// the other Hyprland-config services in this project.
+// Uses bracket-depth scoping to isolate the "touchpad = { ... }" object and the
+// "hl.device({ ... })" object before doing any field regex, because "sensitivity" and
+// "scroll_factor" each appear in more than one place in the file (global vs touchpad
+// vs per-device override). A naive whole-file regex could edit the wrong occurrence.
 //
-// Slider drags fire many rapid value changes; writing the Lua file +
-// hyprctl reload on every single one caused visible stutter. All writes
-// go through _debouncedWrite() so only the last value in a drag burst
-// actually gets written, ~150ms after the user stops moving the slider.
+// Slider drags fire many rapid value changes, so slider writes go through
+// _debouncedWrite(): only the last value in a drag burst is written, ~150 ms after
+// the user stops moving the slider.
+//
+// _write() saves the file and reloads Hyprland in ONE shell command, so the reload
+// can never run before the file is written.
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -32,20 +30,9 @@ Item {
     // Touchpad-specific
     property bool touchpadNaturalScroll: false
     property real touchpadScrollFactor: 1.0
-    // FLAGGED ASSUMPTION: parsed/written as `tap_to_click` (underscore,
-    // matching this file's existing natural_scroll/scroll_factor naming).
-    // Hyprland's real config key for this is hyphenated (`tap-to-click`),
-    // so if input.lua embeds actual Hyprland keys rather than this
-    // underscored abstraction, the regex below won't match — check after
-    // a restart. Also: this only *replaces* an existing line, it doesn't
-    // insert one — if your touchpad block doesn't have this key at all
-    // yet, toggling will silently do nothing. Paste the touchpad block if
-    // either of those turns out to be true and I'll fix the regex/add an
-    // insert-if-missing path.
     property bool touchpadTapToClick: true
 
-    // Per-device override (targets the confirmed real touchpad device
-    // name via hl.device({ name = "synps/2-synaptics-touchpad", ... }))
+    // Per-device override (hl.device({ name = "synps/2-synaptics-touchpad", ... }))
     property real touchpadSensitivity: 0
 
     function refresh() { readProc.running = true }
@@ -62,7 +49,6 @@ Item {
         }
     }
 
-    Process { id: reloadProc }
     Process { id: writeProc }
 
     // ---- debounce ----
@@ -85,9 +71,12 @@ Item {
         writeDebounce.restart()
     }
 
+    // Two decimals is plenty for these sliders and avoids float noise
+    // like -0.1499999999999999 ending up in the file.
+    function _round(val) { return Math.round(val * 100) / 100 }
+
     // ---- bracket-depth scoping helpers ----
-    function _touchpadBounds(t) {
-        let key = "touchpad = {"
+    function _boundsAfter(t, key) {
         let start = t.indexOf(key)
         if (start === -1) return null
         let braceOpen = start + key.length - 1
@@ -101,20 +90,8 @@ Item {
         return { innerStart: braceOpen + 1, innerEnd: pos - 1 }
     }
 
-    function _deviceBounds(t) {
-        let key = "hl.device({"
-        let start = t.indexOf(key)
-        if (start === -1) return null
-        let braceOpen = start + key.length - 1
-        let depth = 1
-        let pos = braceOpen + 1
-        while (pos < t.length && depth > 0) {
-            if (t[pos] === "{") depth++
-            else if (t[pos] === "}") depth--
-            pos++
-        }
-        return { innerStart: braceOpen + 1, innerEnd: pos - 1 }
-    }
+    function _touchpadBounds(t) { return root._boundsAfter(t, "touchpad = {") }
+    function _deviceBounds(t)   { return root._boundsAfter(t, "hl.device({") }
 
     function _parse() {
         let t = root.rawText
@@ -146,7 +123,9 @@ Item {
         }
     }
 
+    // ---- setters: sliders (debounced, rounded) ----
     function setSensitivity(val) {
+        val = root._round(val)
         root._debouncedWrite(() => {
             let t = root.rawText
             let touchpadIdx = t.indexOf("touchpad = {")
@@ -158,6 +137,7 @@ Item {
     }
 
     function setScrollFactor(val) {
+        val = root._round(val)
         root._debouncedWrite(() => {
             let t = root.rawText
             let touchpadIdx = t.indexOf("touchpad = {")
@@ -168,18 +148,8 @@ Item {
         })
     }
 
-    function setTouchpadNaturalScroll(val) {
-        // Discrete toggle click, not a drag — writes immediately, no
-        // debounce needed.
-        let t = root.rawText
-        let b = root._touchpadBounds(t)
-        if (!b) return
-        let inner = t.substring(b.innerStart, b.innerEnd)
-        let newInner = inner.replace(/natural_scroll(\s*)=(\s*)(true|false)/, "natural_scroll$1=$2" + (val ? "true" : "false"))
-        root._write(t.substring(0, b.innerStart) + newInner + t.substring(b.innerEnd))
-    }
-
     function setTouchpadScrollFactor(val) {
+        val = root._round(val)
         root._debouncedWrite(() => {
             let t = root.rawText
             let b = root._touchpadBounds(t)
@@ -190,19 +160,8 @@ Item {
         })
     }
 
-    function setTouchpadTapToClick(val) {
-        // Discrete toggle click, not a drag — writes immediately, no
-        // debounce needed. See the FLAGGED comment on touchpadTapToClick
-        // above before trusting this in production.
-        let t = root.rawText
-        let b = root._touchpadBounds(t)
-        if (!b) return
-        let inner = t.substring(b.innerStart, b.innerEnd)
-        let newInner = inner.replace(/tap_to_click(\s*)=(\s*)(true|false)/, "tap_to_click$1=$2" + (val ? "true" : "false"))
-        root._write(t.substring(0, b.innerStart) + newInner + t.substring(b.innerEnd))
-    }
-
     function setTouchpadSensitivity(val) {
+        val = root._round(val)
         root._debouncedWrite(() => {
             let t = root.rawText
             let b = root._deviceBounds(t)
@@ -213,15 +172,41 @@ Item {
         })
     }
 
+    // ---- setters: toggles (discrete clicks, written immediately) ----
+    function setTouchpadNaturalScroll(val) {
+        let t = root.rawText
+        let b = root._touchpadBounds(t)
+        if (!b) return
+        const v = val ? "true" : "false"
+        let inner = t.substring(b.innerStart, b.innerEnd)
+        let newInner = /natural_scroll\s*=/.test(inner)
+            ? inner.replace(/natural_scroll(\s*)=(\s*)(true|false)/, "natural_scroll$1=$2" + v)
+            : "\n            natural_scroll = " + v + "," + inner
+        root._write(t.substring(0, b.innerStart) + newInner + t.substring(b.innerEnd))
+    }
+
+    function setTouchpadTapToClick(val) {
+        let t = root.rawText
+        let b = root._touchpadBounds(t)
+        if (!b) return
+        const v = val ? "true" : "false"
+        let inner = t.substring(b.innerStart, b.innerEnd)
+        // Replace the line if it exists, insert it at the top of the block if it doesn't.
+        let newInner = /tap_to_click\s*=/.test(inner)
+            ? inner.replace(/tap_to_click(\s*)=(\s*)(true|false)/, "tap_to_click$1=$2" + v)
+            : "\n            tap_to_click   = " + v + "," + inner
+        root._write(t.substring(0, b.innerStart) + newInner + t.substring(b.innerEnd))
+    }
+
+    // Save the file, THEN reload, in one shell command so they can't run out of order.
     function _write(newText) {
-        let marker = "QS_INPUT_EOF_" + Date.now()
-        writeProc.command = ["sh", "-c",
-            "cat > " + root.inputPath + " << '" + marker + "'\n" + newText + "\n" + marker]
-        writeProc.running = true
-        reloadProc.command = ["hyprctl", "reload"]
-        reloadProc.running = true
         root.rawText = newText
         root._parse()
+        const marker = "QS_INPUT_EOF_" + Date.now()
+        writeProc.command = ["sh", "-c",
+            "cat > " + root.inputPath + " << '" + marker + "'\n" + newText + "\n" + marker +
+            "\nhyprctl reload"]
+        writeProc.running = true
     }
 
     Component.onCompleted: refresh()

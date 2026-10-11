@@ -57,6 +57,7 @@ Scope {
                 focusDelay.start()
                 gearIcon.play()
                 searchIndex.rebuild()
+                LayoutSettingsService.refresh()
             }
         }
 

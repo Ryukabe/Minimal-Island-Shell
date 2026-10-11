@@ -134,9 +134,9 @@ readonly property color previewFg: pick("foreground", Colors.fg || "#ffffff")
             Layout.preferredHeight: 90
             radius: ShellState.islandCornerRadius
             color: card.previewBg
-
-            border.width: card.isApplied ? 2 : (card.isSelected ? 1.5 : 0)
-            border.color: card.isApplied ? card.previewAccent : Qt.rgba(1, 1, 1, 0.4)
+                        
+            border.width: card.isApplied ? 2 : 0
+            border.color: card.previewAccent
 
             scale: card.useSpring ? card.boxScaleSpring : card.boxScaleEase
 

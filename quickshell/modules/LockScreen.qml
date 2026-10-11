@@ -15,6 +15,7 @@ WlSessionLock {
     id: sessionLock
 
     locked: typeof ShellState !== "undefined" && ShellState.activePage === "lock"
+    onLockedChanged: if (locked) KnowledgeSettings.pickNext()
 
     surface: Component {
         WlSessionLockSurface {
@@ -22,9 +23,14 @@ WlSessionLock {
 
             // Drives the clock and date. (They used to call new Date() once, so the time froze
             // for as long as the screen stayed locked.)
-            SystemClock {
-                id: lockClock
-                precision: SystemClock.Minutes
+// Plain timer clock: refreshes every second while the screen is locked.
+            property var now: new Date()
+
+            Timer {
+                interval: 1000
+                running: true
+                repeat: true
+                onTriggered: lockSurface.now = new Date()
             }
 
             PamContext {
@@ -244,7 +250,7 @@ WlSessionLock {
                         }
 
                         Text {
-                            text: Qt.formatDateTime(lockClock.date, LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
+                            text: Qt.formatDateTime(lockSurface.now, LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
                             font.family: Fonts.display
                             font.pixelSize: Dimens.fontSizeDisplay
                             font.weight: Font.Bold
@@ -253,7 +259,7 @@ WlSessionLock {
 
                         Text {
                             visible: LockScreenSettings.showDate
-                            text: Qt.formatDateTime(lockClock.date, "dddd, MMMM d").toUpperCase()
+                            text: Qt.formatDateTime(lockSurface.now, "dddd, MMMM d").toUpperCase()
                             font.family: Fonts.text
                             font.pixelSize: Dimens.fontSizeXs
                             font.letterSpacing: 2
@@ -286,6 +292,101 @@ WlSessionLock {
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
                                 width: Math.min(implicitWidth, lockSurface.width * 0.4)
+                            }
+                        }
+                    }
+
+                    // ---- BOTTOM-CENTER: knowledge slide ----
+                    Item {
+                        id: knowledgeCard
+                        readonly property var entry: KnowledgeSettings.current
+                        visible: KnowledgeSettings.slideEnabled && !!entry
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: parent.height * 0.06
+                        width: Math.min(520, lockSurface.width * 0.36)
+                        height: knowledgeColumn.implicitHeight
+                        opacity: 0
+                    
+                        transform: Translate { id: knowledgeTranslate; y: 18 }
+                    
+                        Component.onCompleted: {
+                            if (LockScreenSettings.playEntranceAnimation) {
+                                knowledgeAnim.start()
+                            } else {
+                                knowledgeCard.opacity = 1
+                                knowledgeTranslate.y = 0
+                            }
+                        }
+                    
+                        SequentialAnimation {
+                            id: knowledgeAnim
+                            PauseAnimation { duration: ShellState.motionDuration(520) }
+                            ParallelAnimation {
+                                NumberAnimation { target: knowledgeCard; property: "opacity"; from: 0; to: 1; duration: ShellState.motionDuration(450); easing.type: Easing.OutCubic }
+                                NumberAnimation { target: knowledgeTranslate; property: "y"; from: 18; to: 0; duration: ShellState.motionDuration(520); easing.type: Easing.OutCubic }
+                            }
+                        }
+                    
+                        Column {
+                            id: knowledgeColumn
+                            width: parent.width
+                            spacing: Dimens.spacingSmall
+                    
+                            Text {
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                text: knowledgeCard.entry ? (knowledgeCard.entry.kind === "word" ? "WORD" : "DID YOU KNOW") : ""
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeXs
+                                font.letterSpacing: 2
+                                color: Colors.fgMuted
+                            }
+                    
+                            Text {
+                                visible: knowledgeCard.entry && knowledgeCard.entry.kind === "fact"
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                wrapMode: Text.WordWrap
+                                text: knowledgeCard.entry && knowledgeCard.entry.kind === "fact" ? knowledgeCard.entry.text : ""
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeMd
+                                color: Colors.fg
+                            }
+                    
+                            Text {
+                                visible: knowledgeCard.entry && knowledgeCard.entry.kind === "word"
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                text: knowledgeCard.entry && knowledgeCard.entry.kind === "word"
+                                    ? knowledgeCard.entry.word + "  ·  " + knowledgeCard.entry.pos : ""
+                                font.family: Fonts.display
+                                font.pixelSize: Dimens.fontSizeLg
+                                font.weight: Font.Bold
+                                color: Colors.fg
+                            }
+                    
+                            Text {
+                                visible: knowledgeCard.entry && knowledgeCard.entry.kind === "word"
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                wrapMode: Text.WordWrap
+                                text: knowledgeCard.entry && knowledgeCard.entry.kind === "word" ? knowledgeCard.entry.meaning : ""
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeSm
+                                color: Colors.fg
+                            }
+                    
+                            Text {
+                                visible: knowledgeCard.entry && knowledgeCard.entry.kind === "word"
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                wrapMode: Text.WordWrap
+                                text: knowledgeCard.entry && knowledgeCard.entry.kind === "word" ? "\"" + knowledgeCard.entry.example + "\"" : ""
+                                font.family: Fonts.text
+                                font.pixelSize: Dimens.fontSizeXs
+                                font.italic: true
+                                color: Colors.fgMuted
                             }
                         }
                     }
