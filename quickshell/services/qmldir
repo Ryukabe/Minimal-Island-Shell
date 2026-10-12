@@ -35,3 +35,5 @@ singleton LockTimerService 1.0 LockTimerService.qml
 singleton LayoutSettingsService 1.0 LayoutSettingsService.qml
 singleton KnowledgeSettings KnowledgeSettings.qml
 singleton WeatherService 1.0 WeatherService.qml
+singleton IconThemeService 1.0 IconThemeService.qml
+singleton LocationService 1.0 LocationService.qml

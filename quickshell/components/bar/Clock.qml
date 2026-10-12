@@ -16,6 +16,9 @@ Item {
         precision: ShellState.clockShowSeconds ? SystemClock.Seconds : SystemClock.Minutes
     }
 
+    // Wall time at the picked location (system time when none is picked).
+    readonly property var shownDate: LocationService.localize(clock.date)
+
     RowLayout {
         id: layout
         anchors.centerIn: parent
@@ -25,8 +28,8 @@ Item {
         Workspaces {
             Layout.alignment: Qt.AlignVCenter
         }
-        
-        // 1. Music Visualizer (Left)
+
+        // 1. Music Visualizer
         RowLayout {
             spacing: 3
             visible: ShellState.clockShowVisualizer && AudioService.isPlaying
@@ -67,7 +70,7 @@ Item {
         // 2. Date (optional, before the time)
         Text {
             visible: ShellState.clockDateStyle > 0
-            text: Qt.formatDateTime(clock.date, ShellState.clockDateFormat)
+            text: Qt.formatDateTime(root.shownDate, ShellState.clockDateFormat)
             color: Colors.fgMuted
             Layout.alignment: Qt.AlignVCenter
             font {
@@ -79,7 +82,7 @@ Item {
 
         // 3. Clock Display (Middle)
         Text {
-            text: Qt.formatDateTime(clock.date, ShellState.clockTimeFormat)
+            text: Qt.formatDateTime(root.shownDate, ShellState.clockTimeFormat)
             color: Colors.fg
             font {
                 family: Fonts.display

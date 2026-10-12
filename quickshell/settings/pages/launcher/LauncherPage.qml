@@ -100,6 +100,19 @@ PageScroll {
             onToggled: (val) => LauncherSettings.showIcons = val
         }
 
+        PickerRow {
+            label: "Icon theme"
+            description: "Icon set used for apps in the launcher"
+            pickerTitle: "Icon Theme"
+            searchHint: "Search icon themes..."
+            hint: "System default"
+            items: IconThemeService.pickerItems
+            value: ShellState.appIconTheme
+            strict: true
+            enabled: LauncherSettings.showIcons
+            onCommitted: (v) => ShellState.appIconTheme = v
+        }
+
         ToggleRow {
             label: "Animate results"
             checked: LauncherSettings.animateResults

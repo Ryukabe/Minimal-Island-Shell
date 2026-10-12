@@ -1,6 +1,6 @@
 // pages/appearance/theme/ThemeSettings.qml — Appearance > Theme.
-// Theme picker, light/dark and theme tracking, and the manual palette colours (the old
-// separate Colors page lives here now).
+// Theme picker, light/dark mode (with Auto schedule), palette source, and the manual
+// palette colours (the old separate Colors page lives here now).
 import QtQuick
 import QtQuick.Layouts
 import "../../../components"
@@ -26,6 +26,9 @@ PageScroll {
         { key: "cyan", label: "Cyan" }
     ]
 
+    readonly property bool autoOn: Colors.themeMode === "Auto"
+    readonly property bool autoCustom: root.autoOn && Colors.autoSource === "Custom"
+
     SectionLabel { text: "Theme" }
 
     CardCarousel {
@@ -50,27 +53,68 @@ PageScroll {
     SectionLabel { text: "Mode" }
 
     GroupCard {
-        ToggleRow {
-            label: "Light mode"
-            description: "Switch the whole shell between dark and light"
-            checked: Colors.lightModeEnabled
-            onToggled: (val) => {
-                if (val !== Colors.lightModeEnabled) Colors.toggleLightMode()
+        SegmentRow {
+            label: "Theme Mode"
+            description: "Choose dark, light, or auto based on time of day"
+            options: ["Dark", "Light", "Auto"]
+            selectedValue: Colors.themeMode
+            onOptionSelected: (name) => Colors.themeMode = name
+        }
+
+        Reveal {
+            shown: root.autoOn
+
+            SegmentRow {
+                label: "Auto Schedule"
+                description: ShellState.locationLabel === ""
+                    ? "No location set, using custom times until you pick one in Language & Region"
+                    : "Location: light while the sun is up in " + ShellState.locationLabel
+                options: ["Location", "Custom"]
+                selectedValue: Colors.autoSource
+                onOptionSelected: (name) => Colors.autoSource = name
             }
         }
 
-        ToggleRow {
-            label: "Colors follow theme"
-            description: "Use the selected theme's colours instead of the manual palette below"
-            checked: Colors.colorsFollowTheme
-            onToggled: (val) => Colors.colorsFollowTheme = val
+        Reveal {
+            shown: root.autoCustom || (root.autoOn && ShellState.locationLabel === "")
+
+            TimeRow {
+                label: "Light starts"
+                description: "Switch to light mode at this time"
+                minutes: Colors.autoLightStartMin
+                onCommitted: (m) => Colors.autoLightStartMin = m
+            }
+        }
+
+        Reveal {
+            shown: root.autoCustom || (root.autoOn && ShellState.locationLabel === "")
+
+            TimeRow {
+                label: "Dark starts"
+                description: "Switch back to dark mode at this time"
+                minutes: Colors.autoLightEndMin
+                onCommitted: (m) => Colors.autoLightEndMin = m
+            }
+        }
+
+        SegmentRow {
+            label: "Palette Source"
+            description: "Where to derive the color palette from"
+            options: ["Prebuilt", "Dynamic", "Custom"]
+            selectedValue: Colors.paletteSource
+            onOptionSelected: (name) => Colors.paletteSource = name
             showDivider: false
         }
     }
 
-    SectionLabel { text: "Custom colors: dark" }
+    SectionLabel {
+        text: "Custom colors: dark"
+        visible: Colors.paletteSource === "Custom"
+    }
 
     GroupCard {
+        visible: Colors.paletteSource === "Custom"
+
         Repeater {
             model: root.colorKeys
 
@@ -86,9 +130,14 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Custom colors: light" }
+    SectionLabel {
+        text: "Custom colors: light"
+        visible: Colors.paletteSource === "Custom"
+    }
 
     GroupCard {
+        visible: Colors.paletteSource === "Custom"
+
         Repeater {
             model: root.colorKeys
 

@@ -1,6 +1,7 @@
 // pages/language/LanguageSettings.qml — Language & Region.
-// System language is a readout. Clock format and both temperature units live on ShellState,
-// so they persist and every module reads the same value.
+// System language is a readout. Location is one picked place that feeds both weather and the
+// time on every clock (LocationService). Clock format and both temperature units live on
+// ShellState, so they persist and every module reads the same value.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -20,12 +21,37 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Weather" }
+    SectionLabel { text: "Location" }
 
     GroupCard {
-        InfoRow {
+        PickerRow {
             label: "Location"
-            value: "Location picker coming soon"
+            description: "Every clock shows this place's time, and weather uses it"
+            pickerTitle: "Location"
+            searchHint: "Search for a city..."
+            hint: "Search for a city"
+            searchable: true
+            value: ShellState.locationLabel
+            searchHandler: (query, done) => LocationService.search(query, done)
+            onCommitted: (v) => LocationService.choose(v)
+        }
+
+        Reveal {
+            shown: LocationService.hasLocation
+
+            ButtonRow {
+                label: "Use system time and no weather location"
+                buttonText: "Clear"
+                onClicked: LocationService.clear()
+            }
+        }
+
+        InfoRow {
+            label: "Time zone"
+            value: ShellState.locationTimezone === ""
+                ? "System default"
+                : ShellState.locationTimezone
+                  + (LocationService.offsetLabel !== "" ? " (" + LocationService.offsetLabel + ")" : "")
             showDivider: false
         }
     }
@@ -35,6 +61,7 @@ PageScroll {
     GroupCard {
         SegmentRow {
             label: "Weather temperature"
+            description: "Temperature for weather forecasts"
             options: ["°C", "°F"]
             selectedValue: ShellState.weatherUnit
             onOptionSelected: (name) => ShellState.weatherUnit = name
@@ -42,6 +69,7 @@ PageScroll {
 
         SegmentRow {
             label: "CPU and GPU temperature"
+            description: "Temperature for system monitoring"
             options: ["°C", "°F"]
             selectedValue: ShellState.systemTempUnit
             onOptionSelected: (name) => ShellState.systemTempUnit = name

@@ -10,8 +10,61 @@ Item {
 
     property var palette: ({})
     property bool loaded: false
-    property bool lightModeEnabled: false
 
+    // ================= THEME MODE =================
+    // "Dark" | "Light" | "Auto". lightModeEnabled below is derived from this.
+    property string themeMode: "Dark"
+
+    // Auto schedule. "Location" = light while the sun is up at the location picked
+    // in Language & Region. "Custom" = light between the two times below.
+    property string autoSource: "Location"
+    property int autoLightStartMin: 360     // minutes after midnight (06:00)
+    property int autoLightEndMin: 1080      // 18:00
+
+    property real _nowMs: Date.now()
+    readonly property bool _hasLocation: LocationService.hasLocation
+
+    // True when the sun is above the horizon at (latDeg, lonDeg) at time ms.
+    // Plain solar-position maths, no timezone needed.
+    function _sunIsUp(ms, latDeg, lonDeg) {
+        var rad = Math.PI / 180;
+        var n = ms / 86400000 - 10957.5;                       // days since J2000.0
+        var L = (280.460 + 0.9856474 * n) % 360;
+        var g = (357.528 + 0.9856003 * n) * rad;
+        var lambda = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * rad;
+        var eps = (23.439 - 0.0000004 * n) * rad;
+        var dec = Math.asin(Math.sin(eps) * Math.sin(lambda));
+        var ra = Math.atan2(Math.cos(eps) * Math.sin(lambda), Math.cos(lambda));
+        var gmst = (280.46061837 + 360.98564736629 * n) * rad;
+        var ha = gmst + lonDeg * rad - ra;
+        var lat = latDeg * rad;
+        var sinAlt = Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(ha);
+        return Math.asin(sinAlt) > -0.833 * rad;               // standard sunrise/sunset horizon
+    }
+
+    readonly property bool _autoIsLight: {
+        if (root.autoSource === "Location" && LocationService.hasLocation)
+            return root._sunIsUp(root._nowMs, LocationService.latitude, LocationService.longitude);
+        // Wall time at the picked location (system time if none is picked).
+        var d = LocationService.localize(new Date(root._nowMs));
+        var m = d.getHours() * 60 + d.getMinutes();
+        if (root.autoLightStartMin <= root.autoLightEndMin)
+            return m >= root.autoLightStartMin && m < root.autoLightEndMin;
+        return m >= root.autoLightStartMin || m < root.autoLightEndMin;   // window crosses midnight
+    }
+
+    readonly property bool lightModeEnabled:
+        themeMode === "Light" || (themeMode === "Auto" && _autoIsLight)
+
+    Timer {
+        interval: 60000
+        repeat: true
+        running: root.themeMode === "Auto"
+        triggeredOnStart: true
+        onTriggered: root._nowMs = Date.now()
+    }
+
+    // ================= TRANSPARENCY & SHADOW =================
     property real micaAlpha: 1.0
     property real micaBeta: 0.80
 
@@ -28,12 +81,16 @@ Item {
     property real shadowScale: 1.25
     property real shadowVerticalOffset: 6
 
-    // When true (default), every pick()-based color tracks the active
-    // theme as usual. When false, pick() reads from hardcodedPalette
-    // instead — still split by light/dark, so toggling Light Mode while
-    // frozen still swaps to a sane hardcoded pair rather than one fixed
-    // set for both modes.
-    property bool colorsFollowTheme: true
+    // ================= PALETTE SOURCE =================
+    // "Prebuilt" | "Dynamic" | "Custom".
+    // Custom reads hardcodedPalette (still split by light/dark, so Light mode
+    // while on Custom swaps to a sane hardcoded pair). Prebuilt and Dynamic
+    // read the active theme file.
+    // TODO(dynamic): Dynamic currently behaves exactly like Prebuilt. When the
+    // wallpaper palette generator exists, point the theme loader / activePalette
+    // at its output whenever paletteSource === "Dynamic".
+    property string paletteSource: "Prebuilt"
+    readonly property bool colorsFollowTheme: paletteSource !== "Custom"
 
     property var hardcodedPalette: ({
         dark: {
@@ -102,9 +159,15 @@ Item {
                 var data = JSON.parse(text());
                 if (data.micaAlpha !== undefined) root.micaAlpha = data.micaAlpha;
                 if (data.micaBeta !== undefined) root.micaBeta = data.micaBeta;
-                if (data.lightModeEnabled !== undefined) root.lightModeEnabled = data.lightModeEnabled;
+                // New keys win; old keys migrate existing saved configs.
+                if (data.themeMode !== undefined) root.themeMode = data.themeMode;
+                else if (data.lightModeEnabled !== undefined) root.themeMode = data.lightModeEnabled ? "Light" : "Dark";
+                if (data.autoSource !== undefined) root.autoSource = data.autoSource;
+                if (data.autoLightStartMin !== undefined) root.autoLightStartMin = data.autoLightStartMin;
+                if (data.autoLightEndMin !== undefined) root.autoLightEndMin = data.autoLightEndMin;
                 if (data.reduceTransparency !== undefined) root.reduceTransparency = data.reduceTransparency;
-                if (data.colorsFollowTheme !== undefined) root.colorsFollowTheme = data.colorsFollowTheme;
+                if (data.paletteSource !== undefined) root.paletteSource = data.paletteSource;
+                else if (data.colorsFollowTheme !== undefined) root.paletteSource = data.colorsFollowTheme ? "Prebuilt" : "Custom";
                 if (data.hardcodedPalette !== undefined) root.hardcodedPalette = data.hardcodedPalette;
                 if (data.islandShadowEnabled !== undefined) root.islandShadowEnabled = data.islandShadowEnabled;
                 if (data.shadowColor !== undefined) root.shadowColor = data.shadowColor;
@@ -134,9 +197,12 @@ Item {
         var data = {
             "micaAlpha": root.micaAlpha,
             "micaBeta": root.micaBeta,
-            "lightModeEnabled": root.lightModeEnabled,
+            "themeMode": root.themeMode,
+            "autoSource": root.autoSource,
+            "autoLightStartMin": root.autoLightStartMin,
+            "autoLightEndMin": root.autoLightEndMin,
             "reduceTransparency": root.reduceTransparency,
-            "colorsFollowTheme": root.colorsFollowTheme,
+            "paletteSource": root.paletteSource,
             "hardcodedPalette": root.hardcodedPalette,
             "islandShadowEnabled": root.islandShadowEnabled,
             "shadowColor": root.toHex(root.shadowColor),
@@ -153,9 +219,12 @@ Item {
 
     onMicaAlphaChanged: saveAppearanceConfig()
     onMicaBetaChanged: saveAppearanceConfig()
-    onLightModeEnabledChanged: saveAppearanceConfig()
+    onThemeModeChanged: saveAppearanceConfig()
+    onAutoSourceChanged: saveAppearanceConfig()
+    onAutoLightStartMinChanged: saveAppearanceConfig()
+    onAutoLightEndMinChanged: saveAppearanceConfig()
     onReduceTransparencyChanged: saveAppearanceConfig()
-    onColorsFollowThemeChanged: saveAppearanceConfig()
+    onPaletteSourceChanged: saveAppearanceConfig()
     onHardcodedPaletteChanged: saveAppearanceConfig()
     onIslandShadowEnabledChanged: saveAppearanceConfig()
     onShadowColorChanged: saveAppearanceConfig()
@@ -218,7 +287,7 @@ Item {
         return root.palette;
     }
 
-    // Single gate for every color below. When colorsFollowTheme is off,
+    // Single gate for every color below. When paletteSource is "Custom",
     // reads from hardcodedPalette[mode] first; falls through to the
     // theme/safety palette only if that key is missing there too.
     function pick(key) {
@@ -238,7 +307,7 @@ Item {
     // "bright" block in the active theme's quickshell.json — e.g.
     // "bright": { "black": "#...", "red": "#...", ... "white": "#..." }
     // — and only falls back to a computed lighten of the matching base
-    // color when colorsFollowTheme is off (hardcoded palette has no
+    // color when paletteSource is Custom (hardcoded palette has no
     // bright entries) or the current theme hasn't defined its own set yet.
     function pickBright(key, baseColor) {
         if (root.colorsFollowTheme) {
@@ -248,9 +317,11 @@ Item {
         return Qt.lighter(baseColor, 1.4);
     }
 
+    // Switches between fixed Dark and Light. If called while in Auto, it
+    // leaves Auto and pins the opposite of whatever is showing right now.
     function toggleLightMode() {
         if (root.themeHasBothVariants) {
-            root.lightModeEnabled = !root.lightModeEnabled;
+            root.themeMode = root.lightModeEnabled ? "Dark" : "Light";
         }
     }
 
@@ -258,8 +329,8 @@ Item {
 
     readonly property color elevatedBg: root.lightModeEnabled ? Qt.darker(bgsur, 1.18) : Qt.lighter(bgsur, 1.25)
 
-    // All of these already route through pick(), so the colorsFollowTheme
-    // toggle applies to every one of them automatically — no per-property
+    // All of these already route through pick(), so the palette source
+    // applies to every one of them automatically — no per-property
     // changes needed below this line.
     readonly property color bg: pick("background")
     readonly property color bgsur: pick("surface")

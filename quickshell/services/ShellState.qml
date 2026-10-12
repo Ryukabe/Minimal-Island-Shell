@@ -48,7 +48,7 @@ QtObject {
         statusPanelHeight: 172,
         timerWidth: 320,
         timerHeight: 180,
-                // dashboard
+        // dashboard
         dashboardTabOverview: true,
         dashboardTabMedia: true,
         dashboardTabPerformance: true,
@@ -128,9 +128,16 @@ QtObject {
         // language & region
         weatherUnit: "°C",
         systemTempUnit: "°C",
+        // location (weather + clock time zone)
+        locationLabel: "",
+        locationLatitude: 0,
+        locationLongitude: 0,
+        locationTimezone: "",
         // apps (arrays of desktop-entry ids)
         favouriteApps: [],
         hiddenApps: [],
+        // icons
+        appIconTheme: "",
         // about
         updateAutoCheck: true,
     })
@@ -306,6 +313,11 @@ QtObject {
     // ================= LANGUAGE & REGION =================
     property string weatherUnit: root.defaults.weatherUnit                // "°C" | "°F"
     property string systemTempUnit: root.defaults.systemTempUnit          // "°C" | "°F"
+    // Picked in Settings > Language & Region. Only LocationService.choose()/clear() writes these.
+    property string locationLabel: root.defaults.locationLabel
+    property real locationLatitude: root.defaults.locationLatitude
+    property real locationLongitude: root.defaults.locationLongitude
+    property string locationTimezone: root.defaults.locationTimezone
 
     // ================= APPS =================
     // Arrays of desktop-entry ids. Always reassign (never push) so change signals fire.
@@ -355,6 +367,10 @@ QtObject {
         repeat: false
         onTriggered: root.ignoreHover = false
     }
+
+    // ================= ICONS =================
+    // "" = follow the Qt platform theme. Resolved by services/IconThemeService.qml.
+    property string appIconTheme: root.defaults.appIconTheme
 
     // Pages that pop up briefly over whatever the user was doing. They never count as the
     // "previous page" to return to.

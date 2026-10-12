@@ -69,7 +69,7 @@
   "workspaceShownCount": 5,
   "workspaceActiveIndicator": true,
   "workspaceUseAccent": true,
-  "workspaceActiveTrail": true,
+  "workspaceActiveTrail": false,
   "workspaceOccupiedBackground": true,
   "workspaceBounce": true,
   "workspaceDotSize": 5,
@@ -105,7 +105,12 @@
   "defaultPlayer": "Spotify",
   "weatherUnit": "°C",
   "systemTempUnit": "°C",
+  "locationLabel": "Pabna Sadar, Rajshahi Division, Bangladesh",
+  "locationLatitude": 24.00339,
+  "locationLongitude": 89.24932,
+  "locationTimezone": "Asia/Dhaka",
   "favouriteApps": [],
   "hiddenApps": [],
-  "updateAutoCheck": false
+  "appIconTheme": "Papirus",
+  "updateAutoCheck": true
 }

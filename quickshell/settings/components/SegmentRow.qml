@@ -10,11 +10,12 @@ Item {
     property string label: ""
     property var options: []
     property string selectedValue: ""
+    property string description: ""
     property bool showDivider: true
     signal optionSelected(string name)
 
     Layout.fillWidth: true
-    implicitHeight: 54
+    implicitHeight: description !== "" ? 64 : 54
 
     RowLayout {
         anchors.fill: parent
@@ -22,13 +23,29 @@ Item {
         anchors.rightMargin: Dimens.paddingMedium
         spacing: Dimens.spacingMedium
 
-        Text {
+        ColumnLayout {
             Layout.fillWidth: true
-            text: root.label
-            color: Colors.fg
-            font.family: Fonts.text
-            font.pixelSize: Dimens.fontSizeBase
-            elide: Text.ElideRight
+            spacing: 2
+        
+            Text {
+                Layout.fillWidth: true
+                text: root.label
+                color: Colors.fg
+                font.family: Fonts.text
+                font.pixelSize: Dimens.fontSizeBase
+                font.weight: Font.DemiBold
+                elide: Text.ElideRight
+            }
+        
+            Text {
+                visible: root.description !== ""
+                Layout.fillWidth: true
+                text: root.description
+                color: Colors.fgMuted
+                font.family: Fonts.text
+                font.pixelSize: Dimens.fontSizeSm
+                elide: Text.ElideRight
+            }
         }
 
         Rectangle {

@@ -26,3 +26,6 @@ KeyCaptureField KeyCaptureField.qml
 KeybindRow KeybindRow.qml
 AppRow AppRow.qml
 DefaultAppsService DefaultAppsService.qml
+PickerSheet PickerSheet.qml
+PickerRow PickerRow.qml
+TimeRow TimeRow.qml

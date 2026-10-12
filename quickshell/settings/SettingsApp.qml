@@ -57,6 +57,7 @@ Scope {
                 focusDelay.start()
                 gearIcon.play()
                 searchIndex.rebuild()
+                IconThemeService.refreshThemes()
                 LayoutSettingsService.refresh()
             }
         }
@@ -276,6 +277,11 @@ Scope {
                         }
                     }
                 }
+            }
+
+            PickerSheet {
+                anchors.fill: parent
+                z: 100
             }
         }
     }

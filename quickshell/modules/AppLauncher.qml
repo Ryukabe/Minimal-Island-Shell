@@ -216,15 +216,10 @@ Item {
                         id: appIcon
                         anchors.fill: parent
                         fillMode: Image.PreserveAspectFit
-                        source: {
-                            if (delegateRoot.isAction) return ""
-                            if (!delegateRoot.modelData.icon) return ""
-                            if (delegateRoot.modelData.icon.startsWith("/")) {
-                                return "file://" + delegateRoot.modelData.icon
-                            }
-                            var resolved = Quickshell.iconPath(delegateRoot.modelData.icon, "Papirus-Dark")
-                            return resolved !== "" ? resolved : "image://icon/" + delegateRoot.modelData.icon
-                        }
+                        // Theme-folder SVGs render at this size, so ask for 2x to stay crisp.
+                        sourceSize.width: width * 2
+                        sourceSize.height: height * 2
+                        source: delegateRoot.isAction ? "" : IconThemeService.resolve(delegateRoot.modelData.icon)
                         visible: status === Image.Ready
                     }
 
