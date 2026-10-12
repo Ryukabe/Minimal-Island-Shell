@@ -41,6 +41,18 @@ Item {
     property bool showRebootAction: true
     property bool showPowerAction: true
 
+    // Weather
+    property bool showWeather: true
+    property bool weatherFahrenheit: false
+    property bool weatherShowHourly: true
+    property bool weatherShowFeelsLike: true
+
+    // Media
+property bool showMedia: true
+property bool mediaBlurBackdrop: true
+property bool mediaShowProgress: true
+property bool mediaHideDetails: false
+
     // Lock screen wallpaper
     property bool useOwnWallpaper: false
     property string wallpaperFolder: root._home + "/Pictures/Wallpapers"
@@ -111,6 +123,14 @@ Item {
         if (data.useOwnWallpaper !== undefined) root.useOwnWallpaper = data.useOwnWallpaper;
         if (data.wallpaperFolder !== undefined) root.wallpaperFolder = data.wallpaperFolder;
         if (data.wallpaperFile !== undefined) root.wallpaperFile = data.wallpaperFile;
+        if (data.showWeather !== undefined) root.showWeather = data.showWeather;
+        if (data.weatherFahrenheit !== undefined) root.weatherFahrenheit = data.weatherFahrenheit;
+        if (data.weatherShowHourly !== undefined) root.weatherShowHourly = data.weatherShowHourly;
+        if (data.weatherShowFeelsLike !== undefined) root.weatherShowFeelsLike = data.weatherShowFeelsLike;
+        if (data.showMedia !== undefined) root.showMedia = data.showMedia;
+if (data.mediaBlurBackdrop !== undefined) root.mediaBlurBackdrop = data.mediaBlurBackdrop;
+if (data.mediaShowProgress !== undefined) root.mediaShowProgress = data.mediaShowProgress;
+if (data.mediaHideDetails !== undefined) root.mediaHideDetails = data.mediaHideDetails;
         root._applyingConfig = false
     }
 
@@ -152,7 +172,15 @@ Item {
             "showPowerAction": root.showPowerAction,
             "useOwnWallpaper": root.useOwnWallpaper,
             "wallpaperFolder": root.wallpaperFolder,
-            "wallpaperFile": root.wallpaperFile
+            "wallpaperFile": root.wallpaperFile,
+            "showWeather": root.showWeather,
+            "weatherFahrenheit": root.weatherFahrenheit,
+            "weatherShowHourly": root.weatherShowHourly,
+            "weatherShowFeelsLike": root.weatherShowFeelsLike,
+            "showMedia": root.showMedia,
+"mediaBlurBackdrop": root.mediaBlurBackdrop,
+"mediaShowProgress": root.mediaShowProgress,
+"mediaHideDetails": root.mediaHideDetails
         };
         // Values are passed as arguments, so quotes in a path can't break the command.
         saveProcess.command = ["sh", "-c",
@@ -179,4 +207,12 @@ Item {
     onUseOwnWallpaperChanged: save()
     onWallpaperFolderChanged: save()
     onWallpaperFileChanged: save()
+    onShowWeatherChanged: save()
+    onWeatherFahrenheitChanged: save()
+    onWeatherShowHourlyChanged: save()
+    onWeatherShowFeelsLikeChanged: save()
+    onShowMediaChanged: save()
+onMediaBlurBackdropChanged: save()
+onMediaShowProgressChanged: save()
+onMediaHideDetailsChanged: save()
 }

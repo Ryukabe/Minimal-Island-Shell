@@ -1,5 +1,6 @@
 // pages/lockscreen/LockScreenPage.qml — Lock Screen. Real: everything bound to LockScreenSettings,
-// plus the lock timer, which lives in hypridle.conf (LockTimerService).
+// plus the lock timer, which lives in hypridle.conf (LockTimerService), and the weather city,
+// which lives in WeatherService.
 // The lid row stays a greyed placeholder: it belongs to logind / a Hyprland bind, not to the shell.
 import QtQuick
 import QtQuick.Layouts
@@ -124,8 +125,140 @@ PageScroll {
                         }
                     }
 
+                    // Top-right: weather
+                    Column {
+                        visible: LockScreenSettings.showWeather
+                        x: stage.width * 0.95 - width
+                        y: stage.height * 0.06
+                        spacing: Dimens.spacingSmall
+
+                        Text {
+                            anchors.right: parent.right
+                            text: WeatherService.hasData ? WeatherService.fmt(WeatherService.tempC)
+                                : (LockScreenSettings.weatherFahrenheit ? "82°" : "28°")
+                            font.family: Fonts.display
+                            font.pixelSize: Dimens.fontSizeDisplay
+                            font.weight: Font.Light
+                            color: Colors.fg
+                        }
+
+                        Text {
+                            anchors.right: parent.right
+                            text: (WeatherService.hasData
+                                ? WeatherService.conditionText + "  ·  " + WeatherService.placeName
+                                : "Partly cloudy  ·  Your city").toUpperCase()
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.letterSpacing: 2
+                            color: Colors.fgMuted
+                        }
+
+                        Text {
+                            anchors.right: parent.right
+                            text: WeatherService.hasData
+                                ? ("H " + WeatherService.fmt(WeatherService.highC) + "  L " + WeatherService.fmt(WeatherService.lowC)
+                                   + (LockScreenSettings.weatherShowFeelsLike ? "  ·  FEELS " + WeatherService.fmt(WeatherService.feelsC) : ""))
+                                : "H 31°  L 24°" + (LockScreenSettings.weatherShowFeelsLike ? "  ·  FEELS 33°" : "")
+                            font.family: Fonts.mono
+                            font.pixelSize: Dimens.fontSizeXs
+                            font.letterSpacing: 1.5
+                            color: Colors.fgMuted
+                        }
+
+                        Row {
+                            visible: LockScreenSettings.weatherShowHourly
+                            anchors.right: parent.right
+                            topPadding: Dimens.spacingMedium
+                            spacing: 44
+
+                            Repeater {
+                                model: 6
+                                Rectangle {
+                                    required property int index
+                                    width: 5; height: 5; radius: 2.5
+                                    color: Colors.fg
+                                    // a gentle arc so it reads as a curve
+                                    y: Math.abs(index - 2.5) * 4
+                                }
+                            }
+                        }
+                    }
+
+                    // Bottom-left: media card (sits above Hyprland when that is shown)
+                    Rectangle {
+                        visible: LockScreenSettings.showMedia
+                        x: stage.width * 0.05
+                        y: stage.height * 0.94 - height
+                            - (previewHyprland.visible ? previewHyprland.height + Dimens.spacingLg : 0)
+                        width: 340
+                        height: 96
+                        radius: ShellState.islandCornerRadius
+                        color: Colors.darkMode ? Qt.rgba(0, 0, 0, 0.35) : Qt.rgba(1, 1, 1, 0.35)
+                        border.width: 1
+                        border.color: Qt.rgba(Colors.border.r, Colors.border.g, Colors.border.b, 0.5)
+
+                        Row {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 14
+
+                            Rectangle {
+                                width: 72; height: 72
+                                radius: Math.max(4, ShellState.islandCornerRadius - 12)
+                                color: Colors.subBgMica
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "music_note"
+                                    font.family: Fonts.icon
+                                    font.pixelSize: Dimens.fontSizeHuge
+                                    font.variableAxes: Fonts.iconAxes
+                                    color: Colors.fgMuted
+                                }
+                            }
+
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 2
+
+                                Text {
+                                    text: "NOW PLAYING"
+                                    font.family: Fonts.text
+                                    font.pixelSize: Dimens.fontSizeXs
+                                    font.letterSpacing: 2
+                                    color: Colors.fgMuted
+                                }
+
+                                Text {
+                                    text: LockScreenSettings.mediaHideDetails ? "Hidden while locked" : "Song title"
+                                    font.family: Fonts.text
+                                    font.pixelSize: Dimens.fontSizeBase
+                                    font.bold: true
+                                    color: Colors.fg
+                                }
+
+                                Text {
+                                    visible: !LockScreenSettings.mediaHideDetails
+                                    text: "Artist"
+                                    font.family: Fonts.text
+                                    font.pixelSize: Dimens.fontSizeSm
+                                    color: Colors.fgMuted
+                                }
+
+                                Rectangle {
+                                    visible: LockScreenSettings.mediaShowProgress
+                                    width: 200; height: 2; radius: 1
+                                    color: Colors.fg
+                                    opacity: 0.15
+                                    Rectangle { width: parent.width * 0.4; height: 2; radius: 1; color: Colors.accent }
+                                }
+                            }
+                        }
+                    }
+
                     // Bottom-left: Hyprland
                     Text {
+                        id: previewHyprland
                         visible: LockScreenSettings.showHyprlandAction
                         x: stage.width * 0.05
                         y: stage.height * 0.94 - height
@@ -405,6 +538,172 @@ PageScroll {
         }
     }
 
+    SectionLabel { text: "Weather" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Show weather"
+            description: "Temperature and forecast in the top-right corner"
+            checked: LockScreenSettings.showWeather
+            onToggled: (val) => LockScreenSettings.showWeather = val
+            showDivider: LockScreenSettings.showWeather
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showWeather
+
+            TextRow {
+                label: "City"
+                description: WeatherService.searchStatus === "searching" ? "Searching..."
+                    : WeatherService.searchStatus === "none" ? "No city found. Try a different spelling"
+                    : WeatherService.searchStatus === "error" ? "Couldn't reach the search service. Check your connection"
+                    : WeatherService.hasPlace
+                        ? WeatherService.placeName + (WeatherService.placeRegion !== "" ? ", " + WeatherService.placeRegion : "")
+                          + ". Type another city and press Enter to change it"
+                        : "Type a city name and press Enter"
+                placeholderText: "Dhaka"
+                fieldWidth: 220
+                value: WeatherService.placeName
+                onCommitted: (v) => WeatherService.search(v)
+            }
+        }
+
+        // Search results: pick the right place when several cities share a name.
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 0
+            visible: LockScreenSettings.showWeather && WeatherService.results.length > 0
+
+            Repeater {
+                model: WeatherService.results
+
+                Item {
+                    id: resultRow
+                    required property var modelData
+                    required property int index
+                    Layout.fillWidth: true
+                    implicitHeight: 40
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        radius: Dimens.settingsControlRadius
+                        color: Colors.fg
+                        opacity: resultArea.containsMouse ? 0.08 : 0
+                    }
+
+                    Row {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.leftMargin: Dimens.spacingLg
+                        spacing: Dimens.spacingSmall
+
+                        Text {
+                            text: resultRow.modelData.name
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeSm
+                            font.bold: true
+                            color: Colors.fg
+                        }
+
+                        Text {
+                            text: resultRow.modelData.region
+                            font.family: Fonts.text
+                            font.pixelSize: Dimens.fontSizeSm
+                            color: Colors.fgMuted
+                        }
+                    }
+
+                    MouseArea {
+                        id: resultArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: WeatherService.choose(resultRow.index)
+                    }
+                }
+            }
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showWeather
+
+            ToggleRow {
+                label: "Use Fahrenheit"
+                description: "Off: Celsius"
+                checked: LockScreenSettings.weatherFahrenheit
+                onToggled: (val) => LockScreenSettings.weatherFahrenheit = val
+            }
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showWeather
+
+            ToggleRow {
+                label: "Hourly forecast"
+                description: "The next few hours as a small curve"
+                checked: LockScreenSettings.weatherShowHourly
+                onToggled: (val) => LockScreenSettings.weatherShowHourly = val
+            }
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showWeather
+
+            ToggleRow {
+                label: "Show feels-like"
+                checked: LockScreenSettings.weatherShowFeelsLike
+                onToggled: (val) => LockScreenSettings.weatherShowFeelsLike = val
+                showDivider: false
+            }
+        }
+    }
+
+    SectionLabel { text: "Media" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Show now playing"
+            description: "A card above the Hyprland button while something is playing"
+            checked: LockScreenSettings.showMedia
+            onToggled: (val) => LockScreenSettings.showMedia = val
+            showDivider: LockScreenSettings.showMedia
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showMedia
+
+            ToggleRow {
+                label: "Blurred album art background"
+                checked: LockScreenSettings.mediaBlurBackdrop
+                onToggled: (val) => LockScreenSettings.mediaBlurBackdrop = val
+            }
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showMedia
+
+            ToggleRow {
+                label: "Progress line"
+                description: "Only appears if the player reports its position"
+                checked: LockScreenSettings.mediaShowProgress
+                onToggled: (val) => LockScreenSettings.mediaShowProgress = val
+            }
+        }
+
+        Reveal {
+            shown: LockScreenSettings.showMedia
+
+            ToggleRow {
+                label: "Hide track details"
+                description: "Hides the title, artist and cover, so anyone near your screen can't see what you're playing"
+                checked: LockScreenSettings.mediaHideDetails
+                onToggled: (val) => LockScreenSettings.mediaHideDetails = val
+                showDivider: false
+            }
+        }
+    }
+
     SectionLabel { text: "Password box" }
 
     GroupCard {
@@ -477,4 +776,8 @@ PageScroll {
             showDivider: false
         }
     }
+
+    SectionLabel { text: "Parts of the lock screen" }
+
+    ViewList {}
 }

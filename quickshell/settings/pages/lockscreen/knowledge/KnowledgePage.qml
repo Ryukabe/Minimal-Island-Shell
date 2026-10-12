@@ -1,9 +1,9 @@
 // pages/knowledge/KnowledgePage.qml — Knowledge: the fact / word slide on the lock screen.
 import QtQuick
 import QtQuick.Layouts
-import "../../components"
-import "../../../services"
-import "../../../styles"
+import "../../../components"
+import "../../../../services"
+import "../../../../styles"
 
 PageScroll {
     id: root

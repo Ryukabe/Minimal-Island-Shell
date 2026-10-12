@@ -10,12 +10,13 @@ import Quickshell.Services.Pam
 import Quickshell.Io
 import "../services"
 import "../styles"
+import "lockscreen"
 
 WlSessionLock {
     id: sessionLock
 
     locked: typeof ShellState !== "undefined" && ShellState.activePage === "lock"
-    onLockedChanged: if (locked) KnowledgeSettings.pickNext()
+    onLockedChanged: if (locked) { KnowledgeSettings.pickNext(); WeatherService.refreshIfStale() }
 
     surface: Component {
         WlSessionLockSurface {
@@ -23,7 +24,7 @@ WlSessionLock {
 
             // Drives the clock and date. (They used to call new Date() once, so the time froze
             // for as long as the screen stayed locked.)
-// Plain timer clock: refreshes every second while the screen is locked.
+            // Plain timer clock: refreshes every second while the screen is locked.
             property var now: new Date()
 
             Timer {
@@ -80,6 +81,7 @@ WlSessionLock {
             // durations collapse to 0 (i.e. instant) when reduced motion
             // is on, same convention as the rest of the shell. Also skipped
             // entirely when LockScreenSettings.playEntranceAnimation is off.
+            // (WeatherBlock, MediaCard and the knowledge card run their own entrance.)
             ParallelAnimation {
                 id: entranceAnim
 
@@ -229,6 +231,16 @@ WlSessionLock {
                             : Qt.rgba(1, 1, 1, LockScreenSettings.wallpaperDimOpacity)
                     }
 
+                    // ---- TOP-RIGHT: weather ----
+                    WeatherBlock {
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.topMargin: parent.height * 0.06
+                        anchors.rightMargin: parent.width * 0.05
+                        now: lockSurface.now
+                        entrance: LockScreenSettings.playEntranceAnimation
+                    }
+
                     // ---- TOP-LEFT: clock (+ notifications) ----
                     Column {
                         id: clockBlock
@@ -307,9 +319,9 @@ WlSessionLock {
                         width: Math.min(520, lockSurface.width * 0.36)
                         height: knowledgeColumn.implicitHeight
                         opacity: 0
-                    
+
                         transform: Translate { id: knowledgeTranslate; y: 18 }
-                    
+
                         Component.onCompleted: {
                             if (LockScreenSettings.playEntranceAnimation) {
                                 knowledgeAnim.start()
@@ -318,7 +330,7 @@ WlSessionLock {
                                 knowledgeTranslate.y = 0
                             }
                         }
-                    
+
                         SequentialAnimation {
                             id: knowledgeAnim
                             PauseAnimation { duration: ShellState.motionDuration(520) }
@@ -327,12 +339,12 @@ WlSessionLock {
                                 NumberAnimation { target: knowledgeTranslate; property: "y"; from: 18; to: 0; duration: ShellState.motionDuration(520); easing.type: Easing.OutCubic }
                             }
                         }
-                    
+
                         Column {
                             id: knowledgeColumn
                             width: parent.width
                             spacing: Dimens.spacingSmall
-                    
+
                             Text {
                                 width: parent.width
                                 horizontalAlignment: Text.AlignHCenter
@@ -342,7 +354,7 @@ WlSessionLock {
                                 font.letterSpacing: 2
                                 color: Colors.fgMuted
                             }
-                    
+
                             Text {
                                 visible: knowledgeCard.entry && knowledgeCard.entry.kind === "fact"
                                 width: parent.width
@@ -353,7 +365,7 @@ WlSessionLock {
                                 font.pixelSize: Dimens.fontSizeMd
                                 color: Colors.fg
                             }
-                    
+
                             Text {
                                 visible: knowledgeCard.entry && knowledgeCard.entry.kind === "word"
                                 width: parent.width
@@ -365,7 +377,7 @@ WlSessionLock {
                                 font.weight: Font.Bold
                                 color: Colors.fg
                             }
-                    
+
                             Text {
                                 visible: knowledgeCard.entry && knowledgeCard.entry.kind === "word"
                                 width: parent.width
@@ -376,7 +388,7 @@ WlSessionLock {
                                 font.pixelSize: Dimens.fontSizeSm
                                 color: Colors.fg
                             }
-                    
+
                             Text {
                                 visible: knowledgeCard.entry && knowledgeCard.entry.kind === "word"
                                 width: parent.width
@@ -389,6 +401,16 @@ WlSessionLock {
                                 color: Colors.fgMuted
                             }
                         }
+                    }
+
+                    // ---- BOTTOM-LEFT (above Hyprland): media ----
+                    MediaCard {
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: parent.width * 0.05
+                        anchors.bottomMargin: parent.height * 0.06
+                            + (hyprlandBtn.visible ? hyprlandBtn.height + Dimens.spacingLg : 0)
+                        entrance: LockScreenSettings.playEntranceAnimation
                     }
 
                     // ---- BOTTOM-LEFT: hyprland action ----

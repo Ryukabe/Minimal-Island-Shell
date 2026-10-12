@@ -34,3 +34,4 @@ singleton EventToastService 1.0 EventToastService.qml
 singleton LockTimerService 1.0 LockTimerService.qml
 singleton LayoutSettingsService 1.0 LayoutSettingsService.qml
 singleton KnowledgeSettings KnowledgeSettings.qml
+singleton WeatherService 1.0 WeatherService.qml

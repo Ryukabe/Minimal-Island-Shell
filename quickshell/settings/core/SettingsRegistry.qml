@@ -61,9 +61,16 @@ QtObject {
                 { id: "controlcenter", title: "Control Center", subtitle: "Tiles and layout", icon: "widgets",
                   tags: "quick settings tiles grid columns layout edit add remove resize move tidy undo reset",
                   source: "pages/controlcenter/ControlCenterSettings.qml" },
-                { id: "lockscreen", title: "Lock Screen", subtitle: "Look and unlock behaviour", icon: "lock",
-                  tags: "pam password security idle lid clock blur dim username hint text nav actions reboot power hyprland notifications",
-                  source: "pages/lockscreen/LockScreenPage.qml" },
+                {
+                  id: "lockscreen", title: "Lock Screen", subtitle: "Look and unlock behaviour", icon: "lock",
+                  tags: "pam password security idle lid clock blur dim username hint text nav actions reboot power hyprland notifications wallpaper preview folder weather city temperature celsius fahrenheit forecast hourly feels like media now playing album art progress cover hide track",
+                  source: "pages/lockscreen/LockScreenPage.qml",
+                  views: [
+                      { id: "knowledge", title: "Knowledge", subtitle: "Facts and words on the lock screen", icon: "lightbulb",
+                        tags: "fact word meaning vocabulary slide interesting did you know learn",
+                        source: "pages/knowledge/KnowledgePage.qml" }
+                  ]
+                },
             ]
         },
         {

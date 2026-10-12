@@ -83,6 +83,15 @@ QtObject {
         clockShowTimerIcon: true,
         clockShowRecordingIndicator: true,
         timerToastShowRecordingIndicator: true,
+        // workspaces
+        workspaceShownCount: 5,
+        workspaceActiveIndicator: true,
+        workspaceUseAccent: true,
+        workspaceActiveTrail: false,
+        workspaceOccupiedBackground: false,
+        workspaceBounce: true,
+        workspaceDotSize: 6,
+        workspaceActiveWidth: 20,
         // notifications & focus
         notificationPreviewsEnabled: true,
         focusModeEnabled: false,
@@ -259,6 +268,16 @@ QtObject {
     }
 
     readonly property string clockDateFormat: clockDateStyle === 2 ? "ddd d MMM" : "ddd d"
+
+    // ================= WORKSPACES =================
+    property int workspaceShownCount: root.defaults.workspaceShownCount
+    property bool workspaceActiveIndicator: root.defaults.workspaceActiveIndicator
+    property bool workspaceUseAccent: root.defaults.workspaceUseAccent
+    property bool workspaceActiveTrail: root.defaults.workspaceActiveTrail
+    property bool workspaceOccupiedBackground: root.defaults.workspaceOccupiedBackground
+    property bool workspaceBounce: root.defaults.workspaceBounce
+    property real workspaceDotSize: root.defaults.workspaceDotSize
+    property real workspaceActiveWidth: root.defaults.workspaceActiveWidth
 
     // ================= MOTION & ANIMATIONS =================
     property bool motionReduced: root.defaults.motionReduced

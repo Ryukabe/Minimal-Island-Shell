@@ -21,6 +21,11 @@ Item {
         anchors.centerIn: parent
         spacing: 14 // Increased overall spacing between items
 
+        // 0. Workspaces (Left)
+        Workspaces {
+            Layout.alignment: Qt.AlignVCenter
+        }
+        
         // 1. Music Visualizer (Left)
         RowLayout {
             spacing: 3
