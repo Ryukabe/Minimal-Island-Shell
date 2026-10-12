@@ -68,7 +68,7 @@ QtObject {
                   views: [
                       { id: "knowledge", title: "Knowledge", subtitle: "Facts and words on the lock screen", icon: "lightbulb",
                         tags: "fact word meaning vocabulary slide interesting did you know learn",
-                        source: "pages/knowledge/KnowledgePage.qml" }
+                        source: "pages/lockscreen/knowledge/KnowledgePage.qml" }
                   ]
                 },
             ]
