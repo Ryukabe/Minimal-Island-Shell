@@ -57,7 +57,7 @@
   "motionIconsEnabled": true,
   "motionIconSpeedPercent": 100,
   "motionIconBouncePercent": 25,
-  "clockUse24Hour": false,
+  "clockUse24Hour": true,
   "clockShowSeconds": false,
   "clockLeadingZero": false,
   "clockLowercaseAmPm": false,

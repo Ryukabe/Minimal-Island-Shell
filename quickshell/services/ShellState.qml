@@ -120,6 +120,14 @@ QtObject {
         iconStyle: "Rounded",
         iconWeight: 400,
         iconFilled: false,
+        // templates
+        templatesEnabled: true,
+        templateGtk3: true,
+        templateGtk4: true,
+        templateGtk: true,
+        templateKitty: true,
+        templateHyprland: true,
+        templateVSCode: true,
         // sound & media
         volumeStep: 5,
         volumeMax: 100,
@@ -181,6 +189,14 @@ QtObject {
     property string iconStyle: root.defaults.iconStyle                // "Rounded" | "Outlined" | "Sharp"
     property int iconWeight: root.defaults.iconWeight
     property bool iconFilled: root.defaults.iconFilled
+    // ====================== TEMPLATES ======================
+    property bool templateGtk: root.defaults.templateGtk
+    property bool templatesEnabled: root.defaults.templatesEnabled
+    property bool templateGtk3: root.defaults.templateGtk3
+    property bool templateGtk4: root.defaults.templateGtk4
+    property bool templateKitty: root.defaults.templateKitty
+    property bool templateHyprland: root.defaults.templateHyprland
+    property bool templateVSCode: root.defaults.templateVSCode
 
     // ================= BAR & ISLAND PROPERTIES =================
     property real islandTopMargin: root.defaults.islandTopMargin

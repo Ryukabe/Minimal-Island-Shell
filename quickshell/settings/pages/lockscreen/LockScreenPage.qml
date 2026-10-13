@@ -9,6 +9,7 @@ import Quickshell
 import "../../components"
 import "../../../services"
 import "../../../styles"
+import "../../core"
 import "../../../components/theme"
 
 PageScroll {
@@ -135,7 +136,7 @@ PageScroll {
                         Text {
                             anchors.right: parent.right
                             text: WeatherService.hasData ? WeatherService.fmt(WeatherService.tempC)
-                                : (LockScreenSettings.weatherFahrenheit ? "82°" : "28°")
+                                : (ShellState.weatherUnit === "°F" ? "82°" : "28°")
                             font.family: Fonts.display
                             font.pixelSize: Dimens.fontSizeDisplay
                             font.weight: Font.Light
@@ -538,7 +539,7 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Weather" }
+       SectionLabel { text: "Weather" }
 
     GroupCard {
         ToggleRow {
@@ -552,87 +553,13 @@ PageScroll {
         Reveal {
             shown: LockScreenSettings.showWeather
 
-            TextRow {
-                label: "City"
-                description: WeatherService.searchStatus === "searching" ? "Searching..."
-                    : WeatherService.searchStatus === "none" ? "No city found. Try a different spelling"
-                    : WeatherService.searchStatus === "error" ? "Couldn't reach the search service. Check your connection"
-                    : WeatherService.hasPlace
-                        ? WeatherService.placeName + (WeatherService.placeRegion !== "" ? ", " + WeatherService.placeRegion : "")
-                          + ". Type another city and press Enter to change it"
-                        : "Type a city name and press Enter"
-                placeholderText: "Dhaka"
-                fieldWidth: 220
-                value: WeatherService.placeName
-                onCommitted: (v) => WeatherService.search(v)
-            }
-        }
-
-        // Search results: pick the right place when several cities share a name.
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 0
-            visible: LockScreenSettings.showWeather && WeatherService.results.length > 0
-
-            Repeater {
-                model: WeatherService.results
-
-                Item {
-                    id: resultRow
-                    required property var modelData
-                    required property int index
-                    Layout.fillWidth: true
-                    implicitHeight: 40
-
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: 4
-                        radius: Dimens.settingsControlRadius
-                        color: Colors.fg
-                        opacity: resultArea.containsMouse ? 0.08 : 0
-                    }
-
-                    Row {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: Dimens.spacingLg
-                        spacing: Dimens.spacingSmall
-
-                        Text {
-                            text: resultRow.modelData.name
-                            font.family: Fonts.text
-                            font.pixelSize: Dimens.fontSizeSm
-                            font.bold: true
-                            color: Colors.fg
-                        }
-
-                        Text {
-                            text: resultRow.modelData.region
-                            font.family: Fonts.text
-                            font.pixelSize: Dimens.fontSizeSm
-                            color: Colors.fgMuted
-                        }
-                    }
-
-                    MouseArea {
-                        id: resultArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: WeatherService.choose(resultRow.index)
-                    }
-                }
-            }
-        }
-
-        Reveal {
-            shown: LockScreenSettings.showWeather
-
-            ToggleRow {
-                label: "Use Fahrenheit"
-                description: "Off: Celsius"
-                checked: LockScreenSettings.weatherFahrenheit
-                onToggled: (val) => LockScreenSettings.weatherFahrenheit = val
+            ButtonRow {
+                label: "Location"
+                description: LocationService.hasLocation
+                    ? LocationService.label
+                    : "Not set. Pick or detect one in Language & Region"
+                buttonText: "Change"
+                onClicked: SettingsNav.openMenu("language")
             }
         }
 

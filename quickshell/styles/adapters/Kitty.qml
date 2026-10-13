@@ -2,16 +2,17 @@ pragma Singleton
 import QtQuick
 import Quickshell.Io
 import ".."
+import "../../services"
 
 Item {
     id: root
     Process { id: kittyProc }
 
-    Connections {
-        target: Colors
-        function onActivePaletteChanged() {
-            if (!Colors.loaded) return;
-            kittyProc.command = [
+    readonly property bool active: ShellState.templatesEnabled && ShellState.templateKitty
+
+    function apply() {
+        if (!Colors.loaded || !root.active) return;
+        kittyProc.command = [
                 "kitty", "@", "--to", "unix:/tmp/kitty-theme-socket", "set-colors", "-a",
                 "background=" + Colors.toHex(Colors.bg),
                 "foreground=" + Colors.toHex(Colors.fg),
@@ -34,8 +35,15 @@ Item {
                 "color13=" + Colors.toHex(Colors.brightPurple),
                 "color14=" + Colors.toHex(Colors.brightCyan),
                 "color15=" + Colors.toHex(Colors.brightWhite)
-            ]
-            kittyProc.running = true
-        }
+        ]
+        kittyProc.running = true
     }
+
+    Connections {
+        target: Colors
+        function onActivePaletteChanged() { root.apply() }
+    }
+
+    // Apply right away when the switch is turned on.
+    onActiveChanged: root.apply()
 }

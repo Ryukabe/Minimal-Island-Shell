@@ -140,7 +140,10 @@ QtObject {
                           source: "pages/appearance/motion/MotionSettings.qml" },
                         { id: "opacity", title: "Opacity", subtitle: "Mica, spacing and shadows", icon: "opacity",
                           tags: "mica transparency shadow depth",
-                          source: "pages/appearance/opacity/OpacitySettings.qml" }
+                          source: "pages/appearance/opacity/OpacitySettings.qml" },
+                        { id: "templates", title: "Templates", subtitle: "Re-theme other apps when your theme changes", icon: "dashboard_customize",
+                          tags: "templates apps gtk qt kitty terminal vscode hyprland sync colors adapters",
+                          source: "pages/appearance/templates/TemplatesSettings.qml" },
                     ]
                 }
             ]

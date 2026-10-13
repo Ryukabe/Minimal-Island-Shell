@@ -1,4 +1,6 @@
-// services/WeatherService.qml
+// services/WeatherService.qml — forecast for the one picked location (LocationService).
+// There is no city search here any more: pick or detect a location in Language & Region
+// and the forecast follows by itself.
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -10,12 +12,20 @@ Item {
     readonly property string statePath: Quickshell.env("HOME") + "/.config/quickshell/state/weather.json"
     property bool _loaded: false
 
-    // Chosen place
-    property string placeName: ""
-    property string placeRegion: ""
-    property real latitude: 0
-    property real longitude: 0
-    readonly property bool hasPlace: root.placeName !== ""
+    // The place, taken from LocationService ("City, Region, Country").
+    readonly property bool hasPlace: LocationService.hasLocation
+    readonly property real latitude: LocationService.latitude
+    readonly property real longitude: LocationService.longitude
+    readonly property string placeName: {
+        var l = LocationService.label
+        var i = l.indexOf(",")
+        return i < 0 ? l : l.slice(0, i).trim()
+    }
+    readonly property string placeRegion: {
+        var l = LocationService.label
+        var i = l.indexOf(",")
+        return i < 0 ? "" : l.slice(i + 1).trim()
+    }
 
     // Last forecast (cached so an offline start still shows something)
     property bool hasData: false
@@ -27,11 +37,12 @@ Item {
     property var hourly: []          // [{ hour: 15, tempC: 31.2, code: 2 }]
     property real updatedAt: 0       // ms since epoch
 
-    readonly property string conditionText: root.describe(root.code)
+    // Coordinates the stored forecast belongs to, so another place's data is never shown.
+    property real _cacheLat: 0
+    property real _cacheLon: 0
+    property bool _again: false      // the place changed while a request was running
 
-    // City search (the settings page will use these)
-    property var results: []         // [{ name, region, lat, lon }]
-    property string searchStatus: "" // "", "searching", "none", "error"
+    readonly property string conditionText: root.describe(root.code)
 
     function describe(c) {
         if (c === 0) return "Clear"
@@ -49,37 +60,21 @@ Item {
     }
 
     // Reads LockScreenSettings.weatherFahrenheit, so bindings using this update when the unit changes.
+    // Follows Language & Region > Weather temperature (ShellState.weatherUnit), so bindings
+    // using this update when the unit changes.
     function fmt(c) {
-        var v = LockScreenSettings.weatherFahrenheit ? c * 9 / 5 + 32 : c
+        var v = ShellState.weatherUnit === "°F" ? c * 9 / 5 + 32 : c
         return Math.round(v) + "°"
     }
 
-    function search(query) {
-        var q = (query || "").trim()
-        if (q === "" || geoProc.running) return
-        root.searchStatus = "searching"
-        geoProc.command = ["curl", "-sf", "--max-time", "15",
-            "https://geocoding-api.open-meteo.com/v1/search?count=5&language=en&format=json&name="
-            + encodeURIComponent(q)]
-        geoProc.running = true
-    }
-
-    function choose(i) {
-        var r = root.results[i]
-        if (!r) return
-        root.placeName = r.name
-        root.placeRegion = r.region
-        root.latitude = r.lat
-        root.longitude = r.lon
-        root.hasData = false
-        root.results = []
-        root.searchStatus = ""
-        root.save()
-        root.refresh()
+    function _matchesCache() {
+        return Math.abs(root._cacheLat - root.latitude) < 0.0001
+            && Math.abs(root._cacheLon - root.longitude) < 0.0001
     }
 
     function refresh() {
-        if (!root.hasPlace || forecastProc.running) return
+        if (!root.hasPlace) return
+        if (forecastProc.running) { root._again = true; return }
         forecastProc.command = ["curl", "-sf", "--max-time", "15",
             "https://api.open-meteo.com/v1/forecast?latitude=" + root.latitude
             + "&longitude=" + root.longitude
@@ -91,25 +86,30 @@ Item {
     }
 
     function refreshIfStale() {
-        if (root.hasPlace && Date.now() - root.updatedAt > 10 * 60 * 1000) root.refresh()
+        if (!root.hasPlace) return
+        if (!root.hasData || Date.now() - root.updatedAt > 10 * 60 * 1000) root.refresh()
     }
 
-    function _onGeo(txt) {
-        var list
-        try { list = JSON.parse(txt).results || [] }
-        catch (e) { root.searchStatus = "error"; return }
-        root.results = list.map(function (x) {
-            return {
-                name: x.name,
-                region: [x.admin1, x.country].filter(Boolean).join(", "),
-                lat: x.latitude,
-                lon: x.longitude
-            }
-        })
-        root.searchStatus = list.length > 0 ? "" : "none"
+    // The location was picked, detected or cleared.
+    function _placeChanged() {
+        if (!root._loaded) return
+        if (!root.hasPlace) {
+            root.hasData = false
+            root.hourly = []
+            root.save()
+            return
+        }
+        if (!root._matchesCache()) root.hasData = false
+        root.refresh()
     }
 
     function _onForecast(txt) {
+        if (root._again) {                      // answer is for the old place: drop it, ask again
+            root._again = false
+            retryTimer.restart()
+            return
+        }
+
         var d
         try { d = JSON.parse(txt) } catch (e) { return }   // offline: keep the cache
         if (!d || !d.current || !d.hourly || !d.daily) return
@@ -131,17 +131,17 @@ Item {
                 })
         }
         root.hourly = out
+        root._cacheLat = root.latitude
+        root._cacheLon = root.longitude
         root.updatedAt = Date.now()
         root.hasData = true
         root.save()
     }
 
+    // "latitude"/"longitude" in the file are the coordinates of the saved forecast.
     function _apply(d) {
-        if (d.placeName !== undefined) root.placeName = d.placeName
-        if (d.placeRegion !== undefined) root.placeRegion = d.placeRegion
-        if (d.latitude !== undefined) root.latitude = d.latitude
-        if (d.longitude !== undefined) root.longitude = d.longitude
-        if (d.hasData !== undefined) root.hasData = d.hasData
+        if (d.latitude !== undefined) root._cacheLat = d.latitude
+        if (d.longitude !== undefined) root._cacheLon = d.longitude
         if (d.tempC !== undefined) root.tempC = d.tempC
         if (d.feelsC !== undefined) root.feelsC = d.feelsC
         if (d.highC !== undefined) root.highC = d.highC
@@ -149,13 +149,14 @@ Item {
         if (d.code !== undefined) root.code = d.code
         if (d.hourly !== undefined) root.hourly = d.hourly
         if (d.updatedAt !== undefined) root.updatedAt = d.updatedAt
+        // Only trust the saved forecast if it was for the place that is picked now.
+        root.hasData = d.hasData === true && root.hasPlace && root._matchesCache()
     }
 
     function save() {
         if (!root._loaded) return
         var data = {
-            placeName: root.placeName, placeRegion: root.placeRegion,
-            latitude: root.latitude, longitude: root.longitude,
+            latitude: root._cacheLat, longitude: root._cacheLon,
             hasData: root.hasData, tempC: root.tempC, feelsC: root.feelsC,
             highC: root.highC, lowC: root.lowC, code: root.code,
             hourly: root.hourly, updatedAt: root.updatedAt
@@ -174,7 +175,30 @@ Item {
             root._loaded = true
             root.refreshIfStale()
         }
-        onLoadFailed: root._loaded = true
+        onLoadFailed: {
+            root._loaded = true
+            root.refreshIfStale()
+        }
+    }
+
+    // Choosing a city sets latitude and longitude one after the other; wait for both.
+    Timer {
+        id: placeDebounce
+        interval: 300
+        onTriggered: root._placeChanged()
+    }
+
+    Connections {
+        target: LocationService
+        function onLatitudeChanged() { placeDebounce.restart() }
+        function onLongitudeChanged() { placeDebounce.restart() }
+        function onHasLocationChanged() { placeDebounce.restart() }
+    }
+
+    Timer {
+        id: retryTimer
+        interval: 300
+        onTriggered: root.refresh()
     }
 
     Timer {
@@ -182,11 +206,6 @@ Item {
         repeat: true
         running: root.hasPlace
         onTriggered: root.refresh()
-    }
-
-    Process {
-        id: geoProc
-        stdout: StdioCollector { onStreamFinished: root._onGeo(text) }
     }
 
     Process {

@@ -36,6 +36,16 @@ PageScroll {
             onCommitted: (v) => LocationService.choose(v)
         }
 
+        ButtonRow {
+            label: "Detect automatically"
+            description: LocationService.detectStatus !== ""
+                ? LocationService.detectStatus
+                : "Guesses your city from your internet connection. A VPN can make it wrong"
+            buttonText: LocationService.detecting ? "Detecting..." : "Detect"
+            enabled: !LocationService.detecting
+            onClicked: LocationService.detect()
+        }
+
         Reveal {
             shown: LocationService.hasLocation
 

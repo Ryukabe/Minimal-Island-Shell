@@ -3,12 +3,15 @@ pragma Singleton
 import QtQuick
 import Quickshell.Io
 import ".."
+import "../../services"
 
 Item {
     id: root
 
     readonly property string gtk3CssPath: "$HOME/.config/gtk-3.0/gtk.css"
     readonly property string gtk4CssPath: "$HOME/.config/gtk-4.0/gtk.css"
+    readonly property bool gtk3Active: ShellState.templatesEnabled && ShellState.templateGtk3
+    readonly property bool gtk4Active: ShellState.templatesEnabled && ShellState.templateGtk4
 
     Process {
         id: gtk3Proc
@@ -23,7 +26,6 @@ Item {
         }
     }
 
-    // GTK3 / legacy-Adwaita symbolic names.
     function buildGtk3Css() {
         return "@define-color theme_bg_color " + Colors.toHex(Colors.bg) + ";\n" +
                "@define-color theme_fg_color " + Colors.toHex(Colors.fg) + ";\n" +
@@ -44,7 +46,6 @@ Item {
                "@define-color wm_unfocused_bg " + Colors.toHex(Colors.bg) + ";\n"
     }
 
-    // GTK4 / libadwaita named-color scheme — different vocabulary entirely.
     function buildGtk4Css() {
         return "@define-color window_bg_color " + Colors.toHex(Colors.bg) + ";\n" +
                "@define-color window_fg_color " + Colors.toHex(Colors.fg) + ";\n" +
@@ -67,18 +68,27 @@ Item {
                "@define-color sidebar_backdrop_color " + Colors.toHex(Colors.bg) + ";\n"
     }
 
-    Connections {
-        target: Colors
-        function onActivePaletteChanged() {
-            if (!Colors.loaded) return;
+    function apply() {
+        if (!Colors.loaded) return;
 
+        if (root.gtk3Active) {
             gtk3Proc.command = ["bash", "-c",
                 'mkdir -p "$HOME/.config/gtk-3.0" && printf "%s" \'' + root.buildGtk3Css() + '\' > /tmp/gtk3-theme.css.tmp && mv /tmp/gtk3-theme.css.tmp "' + root.gtk3CssPath + '"']
             gtk3Proc.running = true
+        }
 
+        if (root.gtk4Active) {
             gtk4Proc.command = ["bash", "-c",
                 'mkdir -p "$HOME/.config/gtk-4.0" && printf "%s" \'' + root.buildGtk4Css() + '\' > /tmp/gtk4-theme.css.tmp && mv /tmp/gtk4-theme.css.tmp "' + root.gtk4CssPath + '"']
             gtk4Proc.running = true
         }
     }
+
+    Connections {
+        target: Colors
+        function onActivePaletteChanged() { root.apply() }
+    }
+
+    onGtk3ActiveChanged: if (gtk3Active) root.apply()
+    onGtk4ActiveChanged: if (gtk4Active) root.apply()
 }

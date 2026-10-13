@@ -1,6 +1,6 @@
 // services/LocationService.qml — the one picked location: weather coordinates + clock time zone.
 // The choice lives in ShellState.location* (persisted); this service searches cities,
-// writes the choice, and converts times for every clock.
+// detects the computer's location from its IP, writes the choice, and converts times for every clock.
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -10,8 +10,10 @@ Singleton {
     id: root
 
     readonly property string geocodingUrl: "https://geocoding-api.open-meteo.com/v1/search"
+    readonly property string ipLookupUrl: "https://ipwho.is/"
     readonly property int searchResultCount: 10
     readonly property int searchDebounceMs: 350
+    readonly property int detectTimeoutMs: 20000
     readonly property int offsetRefreshMs: 60000
 
     // ---- The picked location (read these from weather and clock code) ----
@@ -139,10 +141,7 @@ Singleton {
             var items = []
             for (var i = 0; i < found.length; i++) {
                 var r = found[i]
-                var parts = [r.name]
-                if (r.admin1 && r.admin1 !== r.name) parts.push(r.admin1)
-                if (r.country) parts.push(r.country)
-                var text = parts.join(", ")
+                var text = root._makeLabel(r.name, r.admin1, r.country)
                 var key = r.latitude.toFixed(4) + "," + r.longitude.toFixed(4)
                 if (map[key]) continue
                 map[key] = {
@@ -161,21 +160,88 @@ Singleton {
         xhr.send()
     }
 
+    // "City, Region, Country" (region skipped when it repeats the city name).
+    function _makeLabel(city, region, country) {
+        var parts = [city]
+        if (region && region !== city) parts.push(region)
+        if (country) parts.push(country)
+        return parts.join(", ")
+    }
+
+    // ---- Automatic detection (from this computer's public IP) ----
+    // City-level only, and a VPN shows the VPN's city. Runs only when asked.
+    property bool detecting: false
+    property string detectStatus: ""
+    property int _detectSeq: 0
+
+    function detect() {
+        if (detecting) return
+        detecting = true
+        detectStatus = "Looking up your location..."
+        var seq = ++_detectSeq
+        detectTimeout.restart()
+
+        var xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState !== XMLHttpRequest.DONE) return
+            if (seq !== root._detectSeq) return     // timed out already
+            detectTimeout.stop()
+            root.detecting = false
+
+            if (xhr.status !== 200) {
+                root.detectStatus = "Couldn't reach the lookup service. Check your internet connection"
+                return
+            }
+
+            var d
+            try { d = JSON.parse(xhr.responseText) }
+            catch (e) { root.detectStatus = "The lookup service sent something unexpected"; return }
+
+            if (!d || d.latitude === undefined || d.longitude === undefined || !d.city) {
+                root.detectStatus = "Couldn't work out your location. Pick a city instead"
+                return
+            }
+
+            var text = root._makeLabel(d.city, d.region, d.country)
+            root._write(text, d.latitude, d.longitude, (d.timezone && d.timezone.id) ? d.timezone.id : "")
+            root.detectStatus = "Detected: " + text
+        }
+
+        xhr.open("GET", root.ipLookupUrl)
+        xhr.send()
+    }
+
+    Timer {
+        id: detectTimeout
+        interval: root.detectTimeoutMs
+        onTriggered: {
+            root._detectSeq++                       // ignore a late answer
+            root.detecting = false
+            root.detectStatus = "The lookup took too long. Try again"
+        }
+    }
+
     // ---- Writing the choice ----
+    function _write(text, lat, lon, tz) {
+        ShellState.locationLabel = text
+        ShellState.locationLatitude = lat
+        ShellState.locationLongitude = lon
+        ShellState.locationTimezone = tz
+    }
+
     function choose(key) {
         if (key === "") { clear(); return }
         var r = _byKey[key]
         if (!r) return
-        ShellState.locationLabel = r.label
-        ShellState.locationLatitude = r.latitude
-        ShellState.locationLongitude = r.longitude
-        ShellState.locationTimezone = r.timezone
+        detectStatus = ""
+        _write(r.label, r.latitude, r.longitude, r.timezone)
     }
 
     function clear() {
-        ShellState.locationLabel = ShellState.defaults.locationLabel
-        ShellState.locationLatitude = ShellState.defaults.locationLatitude
-        ShellState.locationLongitude = ShellState.defaults.locationLongitude
-        ShellState.locationTimezone = ShellState.defaults.locationTimezone
+        detectStatus = ""
+        _write(ShellState.defaults.locationLabel,
+               ShellState.defaults.locationLatitude,
+               ShellState.defaults.locationLongitude,
+               ShellState.defaults.locationTimezone)
     }
 }
