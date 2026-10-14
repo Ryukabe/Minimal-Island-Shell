@@ -124,10 +124,17 @@ QtObject {
         templatesEnabled: true,
         templateGtk3: true,
         templateGtk4: true,
-        templateGtk: true,
         templateKitty: true,
         templateHyprland: true,
         templateVSCode: true,
+        templateAlacritty: false,
+        templateBtop: false,
+        templateFirefox: false,
+        templateHelix: false,
+        templateObsidian: false,
+        templateQt5ct: false,
+        templateQt6ct: false,
+        templateStarship: false,
         // sound & media
         volumeStep: 5,
         volumeMax: 100,
@@ -190,13 +197,20 @@ QtObject {
     property int iconWeight: root.defaults.iconWeight
     property bool iconFilled: root.defaults.iconFilled
     // ====================== TEMPLATES ======================
-    property bool templateGtk: root.defaults.templateGtk
     property bool templatesEnabled: root.defaults.templatesEnabled
     property bool templateGtk3: root.defaults.templateGtk3
     property bool templateGtk4: root.defaults.templateGtk4
     property bool templateKitty: root.defaults.templateKitty
     property bool templateHyprland: root.defaults.templateHyprland
     property bool templateVSCode: root.defaults.templateVSCode
+    property bool templateAlacritty: root.defaults.templateAlacritty
+    property bool templateBtop: root.defaults.templateBtop
+    property bool templateFirefox: root.defaults.templateFirefox
+    property bool templateHelix: root.defaults.templateHelix
+    property bool templateObsidian: root.defaults.templateObsidian
+    property bool templateQt5ct: root.defaults.templateQt5ct
+    property bool templateQt6ct: root.defaults.templateQt6ct
+    property bool templateStarship: root.defaults.templateStarship
 
     // ================= BAR & ISLAND PROPERTIES =================
     property real islandTopMargin: root.defaults.islandTopMargin

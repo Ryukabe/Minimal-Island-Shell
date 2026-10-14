@@ -97,7 +97,16 @@ PanelWindow {
         Hyprland
         Kitty
         VSCode
-        Gtk
+        Gtk3
+        Gtk4
+        Alacritty
+        Btop
+        Firefox
+        Helix
+        Obsidian
+        Qt5ct
+        Qt6ct
+        Starship
         SettingsStore
         // Show briefly at startup, then let auto-hide take over.
         window.revealed = true
