@@ -7,3 +7,6 @@ TimerToast 1.0 TimerToast.qml
 NotchShape 1.0 NotchShape.qml
 EventToast 1.0 EventToast.qml
 Workspaces 1.0 Workspaces.qml
+ClockVisualizer 1.0 ClockVisualizer.qml
+PrivacyIndicator 1.0 PrivacyIndicator.qml
+AppToast 1.0 AppToast.qml

@@ -4,7 +4,11 @@
   "searchDescriptions": false,
   "showRecentsFirst": false,
   "recentLimit": 10,
-  "recentIds": [],
+  "recentIds": [
+    "zen",
+    "btop",
+    "htop"
+  ],
   "showIcons": true,
   "animateResults": true,
   "launcherWidth": "Normal",

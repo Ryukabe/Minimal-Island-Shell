@@ -44,7 +44,12 @@ Item {
                "@define-color hm_surface " + Colors.toHex(Colors.bgsur) + ";\n" +
                "@define-color hm_accent " + Colors.toHex(Colors.accent) + ";\n" +
                "@define-color hm_accent_light " + Colors.toHex(Qt.lighter(Colors.accent, 1.2)) + ";\n" +
-               "@define-color hm_select mix(@hm_surface, @hm_accent, 0.30);\n"
+               "@define-color hm_select mix(@hm_surface, @hm_accent, 0.30);\n" +
+               "@define-color hm_muted " + Colors.toHex(Colors.fgMuted) + ";\n" +
+               "@define-color hm_border " + Colors.toHex(Colors.border) + ";\n" +
+               "@define-color hm_red " + Colors.toHex(Colors.red) + ";\n" +
+               "@define-color hm_green " + Colors.toHex(Colors.green) + ";\n" +
+               "@define-color hm_yellow " + Colors.toHex(Colors.yellow) + ";\n"
     }
 
     function apply() {

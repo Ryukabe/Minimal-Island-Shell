@@ -8,8 +8,53 @@ import "../../services"
 Item {
     id: root
 
-    implicitWidth: ShellState.islandCompactWidth + 5
-    implicitHeight: ShellState.islandCompactHeight 
+    readonly property bool paused: !TimerService.running && TimerService.secondsRemaining > 0
+
+    // Grows with the content; never narrower than the old fixed toast.
+    implicitWidth: Math.max(ShellState.islandCompactWidth + 5,
+                            contentRow.implicitWidth + Dimens.paddingLarge * 2)
+    implicitHeight: ShellState.islandCompactHeight
+
+    // One small square icon button, used for all four controls.
+    component ToastButton: Rectangle {
+        id: btn
+
+        property string glyph: ""
+        property color glyphColor: Colors.fg
+
+        signal clicked()
+
+        width: 24
+        height: 24
+        radius: ShellState.islandCornerRadius
+        color: btnMouse.containsMouse && btn.enabled ? Colors.elevatedBg : Colors.subBgMica
+        opacity: btn.enabled ? 1.0 : 0.4
+
+        Behavior on color {
+            ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+        }
+        Behavior on opacity {
+            NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: btn.glyph
+            font.family: Fonts.icon
+            font.pixelSize: Dimens.fontSizeMd
+            font.variableAxes: Fonts.iconAxes
+            color: btn.glyphColor
+        }
+
+        MouseArea {
+            id: btnMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: btn.enabled
+            cursorShape: Qt.PointingHandCursor
+            onClicked: btn.clicked()
+        }
+    }
 
     RowLayout {
         id: contentRow
@@ -21,10 +66,10 @@ Item {
 
             Text {
                 text: "timer"
-                font.family: Fonts.icon 
+                font.family: Fonts.icon
                 font.pixelSize: Dimens.fontSizeMd
                 font.variableAxes: Fonts.iconAxes
-                color: Colors.accent
+                color: root.paused ? Colors.fgMuted : Colors.accent
             }
 
             Text {
@@ -32,66 +77,35 @@ Item {
                 font.family: Fonts.text
                 font.pixelSize: Dimens.fontSizeBase
                 font.bold: true
-                color: Colors.fg
+                // Muted while paused, so a stopped clock is obvious at a glance.
+                color: root.paused ? Colors.fgMuted : Colors.fg
             }
         }
 
         RowLayout {
             spacing: 6
 
-            // -5m button
-            Rectangle {
-                width: 24
-                height: 24
-                color: Colors.subBgMica
-                radius: ShellState.islandCornerRadius
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "replay_5"
-                    font.family: Fonts.icon
-                    font.pixelSize: Dimens.fontSizeMd
-                    font.variableAxes: Fonts.iconAxes
-                    color: Colors.fg
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        var newSeconds = Math.max(0, TimerService.secondsRemaining - 300)
-                        if (newSeconds === 0) {
-                            TimerService.reset()
-                        } else {
-                            TimerService.start(newSeconds)
-                        }
-                    }
-                }
+            ToastButton {
+                glyph: "replay_5"
+                onClicked: TimerService.adjust(-300)
             }
 
-            // +5m button
-            Rectangle {
-                width: 24
-                height: 24
-                color: Colors.subBgMica
-                radius: ShellState.islandCornerRadius
+            ToastButton {
+                glyph: "forward_5"
+                onClicked: TimerService.adjust(300)
+            }
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "forward_5"
-                    font.family: Fonts.icon
-                    font.pixelSize: Dimens.fontSizeMd
-                    font.variableAxes: Fonts.iconAxes
-                    color: Colors.fg
-                }
+            ToastButton {
+                glyph: TimerService.running ? "pause" : "play_arrow"
+                glyphColor: Colors.accent
+                enabled: TimerService.secondsRemaining > 0
+                onClicked: TimerService.togglePause()
+            }
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        TimerService.start(TimerService.secondsRemaining + 300)
-                    }
-                }
+            ToastButton {
+                glyph: "restart_alt"
+                enabled: TimerService.initialSeconds > 0
+                onClicked: TimerService.restart()
             }
         }
 
@@ -106,7 +120,7 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        z: -1 
+        z: -1
         cursorShape: Qt.PointingHandCursor
         onClicked: ShellState.togglePage("clock")
     }

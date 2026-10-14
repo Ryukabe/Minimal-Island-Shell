@@ -37,3 +37,6 @@ singleton KnowledgeSettings KnowledgeSettings.qml
 singleton WeatherService 1.0 WeatherService.qml
 singleton IconThemeService 1.0 IconThemeService.qml
 singleton LocationService 1.0 LocationService.qml
+singleton ClockLayoutService 1.0 ClockLayoutService.qml
+singleton PrivacyService 1.0 PrivacyService.qml
+singleton AppLaunchToastService 1.0 AppLaunchToastService.qml

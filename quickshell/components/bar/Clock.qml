@@ -19,68 +19,127 @@ Item {
     // Wall time at the picked location (system time when none is picked).
     readonly property var shownDate: LocationService.localize(clock.date)
 
+    // Dots fade out on their own; their slot stays in the row until the fade ends.
+    readonly property bool recordingActive: RecordingService.enabled && ShellState.clockShowRecordingIndicator
+    property bool recordingFading: false
+
+    onRecordingActiveChanged: {
+        if (recordingActive) {
+            recordingFading = false
+            recordingFadeTimer.stop()
+        } else {
+            recordingFading = true
+            recordingFadeTimer.restart()
+        }
+    }
+
+    Timer {
+        id: recordingFadeTimer
+        interval: Motion.fadeMs + 40
+        repeat: false
+        onTriggered: root.recordingFading = false
+    }
+
+    readonly property bool privacyActive: ShellState.clockShowPrivacyIndicator && PrivacyService.active
+    property bool privacyFading: false
+
+    onPrivacyActiveChanged: {
+        if (privacyActive) {
+            privacyFading = false
+            privacyFadeTimer.stop()
+        } else {
+            privacyFading = true
+            privacyFadeTimer.restart()
+        }
+    }
+
+    Timer {
+        id: privacyFadeTimer
+        interval: Motion.fadeMs + 40
+        repeat: false
+        onTriggered: root.privacyFading = false
+    }
+
+    // Whether an item takes up space right now. Hidden items leave no gap.
+    function itemShown(type) {
+        switch (type) {
+            case "workspaces": return ShellState.clockShowWorkspaces
+            case "visualizer": return ShellState.clockShowVisualizer && AudioService.isPlaying
+            case "date": return ShellState.clockDateStyle > 0
+            case "time": return true
+            case "timer": return ShellState.clockShowTimerIcon && (TimerService.secondsRemaining > 0 || TimerService.running)
+            case "privacy": return root.privacyActive || root.privacyFading
+            case "recording": return root.recordingActive || root.recordingFading
+            default: return false
+        }
+    }
+
+    function componentFor(type) {
+        switch (type) {
+            case "workspaces": return workspacesItem
+            case "visualizer": return visualizerItem
+            case "date": return dateItem
+            case "time": return timeItem
+            case "timer": return timerItem
+            case "privacy": return privacyItem
+            case "recording": return recordingItem
+            default: return null
+        }
+    }
+
     RowLayout {
         id: layout
         anchors.centerIn: parent
-        spacing: 14 // Increased overall spacing between items
+        spacing: 14
 
-        // 0. Workspaces (Left)
-        Workspaces {
-            Layout.alignment: Qt.AlignVCenter
-        }
+        // Order comes from ClockLayoutService (Settings > Bar & Island > Clock).
+        Repeater {
+            model: ClockLayoutService.layoutModel
 
-        // 1. Music Visualizer
-        RowLayout {
-            spacing: 3
-            visible: ShellState.clockShowVisualizer && AudioService.isPlaying
-            Layout.alignment: Qt.AlignVCenter
+            delegate: Loader {
+                id: slot
+                required property string itemId
 
-            Repeater {
-                model: 4
-                Item {
-                    implicitWidth: 3
-                    implicitHeight: 10
-
-                    Rectangle {
-                        width: parent.implicitWidth
-                        color: Colors.accent
-                        radius: ShellState.islandCornerRadius
-                        anchors.bottom: parent.bottom
-
-                        SequentialAnimation on height {
-                            running: ShellState.clockShowVisualizer && AudioService.isPlaying
-                            loops: Animation.Infinite
-
-                            NumberAnimation {
-                                to: 3 + ((index % 3) * 2)
-                                duration: 420 + (index * 110)
-                                easing.type: Easing.InOutSine
-                            }
-                            NumberAnimation {
-                                to: 10 - ((index % 2) * 3)
-                                duration: 480 + (index * 90)
-                                easing.type: Easing.InOutSine
-                            }
-                        }
-                    }
-                }
+                Layout.alignment: Qt.AlignVCenter
+                visible: root.itemShown(slot.itemId)
+                sourceComponent: root.componentFor(slot.itemId)
             }
         }
+    }
 
-        // 2. Date (optional, before the time)
+    // ---------------- item types ----------------
+
+    Component {
+        id: workspacesItem
+        Workspaces {}
+    }
+
+    // Looks: Settings > Bar & Island > Clock > Visualizer.
+    Component {
+        id: visualizerItem
+
+        ClockVisualizer {
+            running: ShellState.clockShowVisualizer && AudioService.isPlaying
+        }
+    }
+
+    Component {
+        id: dateItem
+
         Text {
-            visible: ShellState.clockDateStyle > 0
             text: Qt.formatDateTime(root.shownDate, ShellState.clockDateFormat)
             color: Colors.fgMuted
-            Layout.alignment: Qt.AlignVCenter
             font {
                 family: Fonts.display
                 pixelSize: Dimens.fontSizeBase
                 weight: 500
             }
         }
+    }
 
-        // 3. Clock Display (Middle)
+    Component {
+        id: timeItem
+
         Text {
             text: Qt.formatDateTime(root.shownDate, ShellState.clockTimeFormat)
             color: Colors.fg
@@ -90,32 +149,46 @@ Item {
                 weight: 700
             }
         }
+    }
 
-        // 4. Timer Quick Icon (Right Side - Click toggles global timer page)
+    // Click toggles the global timer page.
+    Component {
+        id: timerItem
+
         Text {
             text: "timer"
             font.family: Fonts.icon
             font.pixelSize: Dimens.fontSizeMd
             color: TimerService.running || TimerService.secondsRemaining > 0 ? Colors.accent : Colors.fgMuted
-            Layout.alignment: Qt.AlignVCenter
-            visible: ShellState.clockShowTimerIcon && (TimerService.secondsRemaining > 0 || TimerService.running)
 
             MouseArea {
                 anchors.fill: parent
                 anchors.margins: -4
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    ShellState.togglePage("timertoast")
-                }
+                onClicked: ShellState.togglePage("timertoast")
             }
         }
+    }
 
-        // 5. Recording Indicator (Right) — follows Clock settings > Recording indicator (clock)
+    // Camera = green, microphone = yellow (the theme has no orange). Camera wins over mic.
+    Component {
+        id: privacyItem
+
+        PrivacyIndicator {
+            active: root.privacyActive
+            dotSize: 6
+            dotColor: PrivacyService.lastColor
+        }
+    }
+
+    // Follows Clock settings > Recording indicator (clock)
+    Component {
+        id: recordingItem
+
         RecordingIndicator {
-            active: RecordingService.enabled && ShellState.clockShowRecordingIndicator
+            active: root.recordingActive
             dotSize: 6
             dotColor: Colors.red
-            Layout.alignment: Qt.AlignVCenter
         }
     }
 }

@@ -1,5 +1,6 @@
 // pages/focusnotifications/ToastsSettings.qml — Focus & Notifications > Toasts.
-// Everything here is bound to ShellState and read by the island / EventToastService.
+// Everything here is bound to ShellState and read by the island / EventToastService /
+// AppLaunchToastService.
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
@@ -30,6 +31,15 @@ PageScroll {
             onMoved: (val) => ShellState.eventToastMs = val
         }
 
+        SliderRow {
+            label: "App launch toast duration"
+            description: "How long the app name and icon stay up when an app opens"
+            from: 1000; to: 6000; stepSize: 250
+            value: ShellState.appToastMs
+            unit: " ms"
+            onMoved: (val) => ShellState.appToastMs = val
+        }
+
         ToggleRow {
             label: "Show over fullscreen apps"
             description: "Lifts the island above fullscreen windows while a toast is showing"
@@ -42,6 +52,13 @@ PageScroll {
     SectionLabel { text: "Show a toast when" }
 
     GroupCard {
+        ToggleRow {
+            label: "An app opens"
+            description: "Shows the app's name and icon the first time it opens a window"
+            checked: ShellState.appToastEnabled
+            onToggled: (val) => ShellState.appToastEnabled = val
+        }
+
         ToggleRow {
             label: "Charging starts or stops"
             checked: ShellState.eventToastCharging

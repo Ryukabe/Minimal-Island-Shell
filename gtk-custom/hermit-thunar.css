@@ -1,21 +1,14 @@
 /* =============================================================================
-   hermit-thunar.css  -  self-contained Thunar theme (palette: hermit v2.0.0)
-   Needs only this one line at the END of ~/.config/gtk-3.0/gtk.css:
-       @import "hermit-thunar.css";
-   Edit the six colors below to recolor everything.
+   hermit-thunar.css  -  Thunar theme
+   Colors come from the shell (Gtk3.qml writes them into gtk.css), so this file
+   follows the active theme:
+     hm_bg  hm_fg  hm_surface  hm_accent  hm_accent_light  hm_select
+     hm_muted  hm_border  hm_red  hm_green  hm_yellow
+   Sections 10-13 (menus, tooltips, popup entries, dialogs) affect ALL GTK3 apps.
    ============================================================================= */
 
-@define-color hm_bg #101010;                 /* base.default: window */
-@define-color hm_fg #F6F1EA;                 /* text.primary */
-@define-color hm_surface #1C1C1C;            /* base.surface: file card, status bar, menus */
-@define-color hm_accent #77B0A8;             /* accent.primary */
-@define-color hm_accent_light #8FC8BF;       /* accent.light: selected text */
-@define-color hm_select mix(@hm_surface, @hm_accent, 0.30);  /* solid selection fill */
-
-/* Thunar theme */
-
 /* =============================================================================
-   Global Resets
+   1. Window & titlebar
    ============================================================================= */
 
 .thunar * {
@@ -23,127 +16,127 @@
     border: none;
 }
 
-/* =============================================================================
-   Window & Background
-   ============================================================================= */
-
 .thunar.background {
-    background: @hm_bg;
+    background-color: @hm_bg;
+    color: @hm_fg;
 }
 
+.thunar headerbar,
 .thunar .titlebar {
-    background: inherit;
+    background-color: @hm_bg;
+    background-image: none;
+    box-shadow: none;
+    padding: 4px 0 2px 0;
+    min-height: 0;
+}
+
+.thunar .titlebutton {
+    border-radius: 8px;
+    background: none;
+    box-shadow: none;
 }
 
 .thunar .titlebutton.close {
     margin: 0 15px 0 0;
 }
 
+.thunar .titlebutton.close:hover {
+    background-color: alpha(@hm_red, 0.8);
+    color: @hm_bg;
+}
+
 /* =============================================================================
-   Layout Containers
+   2. Header buttons (back / forward / menu)
    ============================================================================= */
 
-/* Paned separator between sidebar and main view */
-.thunar paned > separator {
-    min-width: 4px;
-    margin-right: -7px;
-    margin-left: -7px;
-    background: none;
+.thunar headerbar button,
+.thunar .titlebar button,
+.thunar toolbar button {
+    background-color: transparent;
     background-image: none;
     box-shadow: none;
+    color: @hm_fg;
+    border-radius: 8px;
+    padding: 5px;
+    min-height: 0;
+    min-width: 0;
+    transition: all ease 0.3s;
 }
 
-
-/* Main file view frame */
-.thunar .frame.standard-view {
-    padding: 4px;
-    margin: 4px 8px 0 0;
-    border-radius: 12px;
-    background-color: @hm_surface;
-}
-
-.thunar .frame.standard-view .view:not(.rubberband),
-.thunar .frame.standard-view .view *:not(.rubberband) {
-    background-color: transparent;
-}
-
-.thunar .frame.standard-view .view *:selected {
+.thunar headerbar button:hover,
+.thunar .titlebar button:hover,
+.thunar toolbar button:hover {
+    background-color: alpha(@hm_accent, 0.12);
     color: @hm_accent_light;
 }
 
-/* solid highlight on selected files (the old rule left it transparent) */
-.thunar .frame.standard-view .view:selected,
-.thunar .frame.standard-view .view.cell:selected,
-.thunar .frame.standard-view iconview:selected,
-.thunar .frame.standard-view .view *:selected {
+.thunar headerbar button:active,
+.thunar headerbar button:checked,
+.thunar .titlebar button:active,
+.thunar .titlebar button:checked,
+.thunar toolbar button:active,
+.thunar toolbar button:checked {
     background-color: @hm_select;
     color: @hm_accent_light;
-    border-radius: 8px;
 }
 
-.thunar .rubberband {
-    background-color: alpha(@hm_accent, 0.25);
-    border: 1px solid alpha(@hm_accent, 0.6);
+.thunar headerbar button:disabled,
+.thunar .titlebar button:disabled,
+.thunar toolbar button:disabled {
+    opacity: 0.35;
 }
 
-
-/*  Tabs */
-.thunar header.top {
-    background: none;
-    padding: 0 10px 0 0;
-    margin: 3px 0 -3px -2px;
+.thunar .image-button {
+    padding: 5px;
+    margin: 0 0 0 4px;
+    transition: all ease 0.4s;
 }
 
-.thunar header.top tabs .reorderable-page {
-    margin: 0;
-    transition: all ease 300ms;
-}
-.thunar header.top tabs .reorderable-page + .reorderable-page {
-    margin: 0 0 0 10px;
-}
-
-.thunar header.top tabs .reorderable-page:hover {
-    background-color: alpha(@hm_accent, 0.08);
-
-}
-.thunar header.top tabs .reorderable-page:checked {
+.thunar button.toggle:checked {
     color: @hm_accent;
-    background-color: alpha(@hm_accent, 0.15);
-
 }
 
 /* =============================================================================
-   Sidebar Navigation
+   3. Location bar (text box and path buttons)
    ============================================================================= */
 
-.thunar .sidebar {
-    padding: 0 6px;
-    background: none;
-}
-
-.thunar .sidebar .view {
-    padding: 3px 4px;
+.thunar entry {
+    background-image: none;
+    background-color: @hm_surface;
+    color: @hm_fg;
+    caret-color: @hm_accent;
+    border: none;
+    box-shadow: none;
     border-radius: 8px;
-    background: none;
-    transition: all ease 300ms;
+    padding: 4px 10px;
+    min-height: 0;
 }
 
-.thunar .sidebar .view:hover {
-    background: alpha(@hm_fg, 0.1);
+.thunar entry:focus {
+    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.6);
 }
 
-.thunar .sidebar .view:selected {
-    background: @hm_select;
+.thunar entry:disabled {
+    opacity: 0.5;
+}
+
+.thunar entry.error {
+    box-shadow: inset 0 0 0 1px @hm_red;
+}
+
+.thunar entry image {
+    color: @hm_muted;
+}
+
+.thunar entry selection {
+    background-color: @hm_select;
     color: @hm_accent_light;
 }
-
-/* =============================================================================
-   Path Bar & Location Buttons
-   ============================================================================= */
 
 .thunar .path-bar-button {
     margin: 0;
     padding: 4px 5px;
+    border-radius: 8px;
     transition: all ease 0.4s;
 }
 
@@ -164,31 +157,173 @@
     color: alpha(@hm_accent, 0.8);
 }
 
-.thunar .location-button.toggle+.location-button.toggle:checked {
+.thunar .location-button.toggle + .location-button.toggle:checked {
     margin-left: 0px;
     padding: 0 18px;
 }
 
-.thunar .titlebar {
-    padding: 4px 0 2px 0;
-}
-
 /* =============================================================================
-   Buttons
+   4. Sidebar
    ============================================================================= */
 
-.thunar button.toggle:checked {
-    color: @hm_accent;
+.thunar paned > separator {
+    min-width: 4px;
+    margin-right: -7px;
+    margin-left: -7px;
+    background: none;
+    background-image: none;
+    box-shadow: none;
 }
 
-.thunar .image-button {
-    padding: 5px;
-    margin: 0 0 0 4px;
-    transition: all ease 0.4s;
+.thunar .sidebar {
+    padding: 0 6px;
+    background: none;
+}
+
+.thunar .sidebar .view {
+    padding: 3px 4px;
+    border-radius: 8px;
+    background: none;
+    color: @hm_fg;
+    transition: all ease 300ms;
+}
+
+.thunar .sidebar .view:hover {
+    background: alpha(@hm_fg, 0.1);
+}
+
+.thunar .sidebar .view:selected {
+    background: @hm_select;
+    color: @hm_accent_light;
 }
 
 /* =============================================================================
-   Status Bar
+   5. File view (icons and list)
+   ============================================================================= */
+
+.thunar .frame.standard-view {
+    padding: 4px;
+    margin: 4px 8px 0 0;
+    border-radius: 12px;
+    background-color: @hm_surface;
+}
+
+.thunar .frame.standard-view .view:not(.rubberband),
+.thunar .frame.standard-view .view *:not(.rubberband) {
+    background-color: transparent;
+}
+
+.thunar .frame.standard-view .view {
+    color: @hm_fg;
+}
+
+/* row hover in list view (not on the selected row) */
+.thunar .frame.standard-view treeview.view:hover:not(:selected) {
+    background-color: alpha(@hm_fg, 0.05);
+}
+
+/* solid highlight on selected files */
+.thunar .frame.standard-view .view:selected,
+.thunar .frame.standard-view .view.cell:selected,
+.thunar .frame.standard-view iconview:selected,
+.thunar .frame.standard-view .view *:selected {
+    background-color: @hm_select;
+    color: @hm_accent_light;
+    border-radius: 8px;
+}
+
+/* one continuous highlight per row in list view */
+.thunar .frame.standard-view treeview.view:selected,
+.thunar .frame.standard-view treeview.view.cell:selected,
+.thunar .frame.standard-view treeview.view *:selected {
+    border-radius: 0;
+}
+
+/* column headers */
+.thunar .frame.standard-view treeview.view header button {
+    background-image: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    padding: 4px 8px;
+    color: @hm_muted;
+    font-weight: 600;
+}
+
+.thunar .frame.standard-view treeview.view header button:hover {
+    background-color: alpha(@hm_fg, 0.06);
+    color: @hm_fg;
+}
+
+.thunar .frame.standard-view treeview.view header button:active {
+    background-color: alpha(@hm_accent, 0.15);
+    color: @hm_accent_light;
+}
+
+/* folder expand arrows in list/tree views */
+.thunar treeview.view.expander {
+    color: @hm_muted;
+}
+
+.thunar treeview.view.expander:hover {
+    color: @hm_fg;
+}
+
+.thunar rubberband,
+.thunar .rubberband {
+    background-color: alpha(@hm_accent, 0.25);
+    border: 1px solid alpha(@hm_accent, 0.6);
+}
+
+/* =============================================================================
+   6. Tabs
+   ============================================================================= */
+
+.thunar header.top {
+    background: none;
+    box-shadow: none;
+    padding: 0 10px 0 0;
+    margin: 3px 0 -3px -2px;
+}
+
+.thunar header.top tabs tab,
+.thunar header.top tabs .reorderable-page {
+    margin: 0;
+    padding: 4px 12px;
+    border-radius: 8px;
+    color: @hm_muted;
+    background: none;
+    transition: all ease 300ms;
+}
+
+.thunar header.top tabs .reorderable-page + .reorderable-page {
+    margin: 0 0 0 10px;
+}
+
+.thunar header.top tabs .reorderable-page:hover {
+    background-color: alpha(@hm_accent, 0.08);
+    color: @hm_fg;
+}
+
+.thunar header.top tabs .reorderable-page:checked {
+    color: @hm_accent;
+    background-color: alpha(@hm_accent, 0.15);
+}
+
+.thunar header.top tabs tab button {
+    padding: 2px;
+    border-radius: 6px;
+    background: none;
+    color: @hm_muted;
+}
+
+.thunar header.top tabs tab button:hover {
+    background-color: alpha(@hm_red, 0.25);
+    color: @hm_red;
+}
+
+/* =============================================================================
+   7. Status bar
    ============================================================================= */
 
 .thunar statusbar {
@@ -199,27 +334,37 @@
     color: @hm_fg;
 }
 
-
 /* =============================================================================
-   Image preview
+   8. Info bars and image preview
    ============================================================================= */
+
+.thunar infobar {
+    background-color: @hm_surface;
+    border-radius: 10px;
+    margin: 4px 8px 0 0;
+}
+
+.thunar infobar.warning {
+    box-shadow: inset 0 0 0 1px alpha(@hm_yellow, 0.7);
+}
+
+.thunar infobar.error {
+    box-shadow: inset 0 0 0 1px alpha(@hm_red, 0.7);
+}
+
+.thunar infobar.info,
+.thunar infobar.question {
+    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.5);
+}
 
 .thunar box.vertical .image {
     margin: 15px;
 }
 
 /* =============================================================================
-   Detail (list) view fixes
+   9. Scrollbars
    ============================================================================= */
 
-/* one continuous highlight per row (rounding every cell left gaps between columns) */
-.thunar .frame.standard-view treeview.view:selected,
-.thunar .frame.standard-view treeview.view.cell:selected,
-.thunar .frame.standard-view treeview.view *:selected {
-    border-radius: 0;
-}
-
-/* slim scrollbar that doesn't fight the highlight */
 .thunar scrollbar,
 .thunar scrollbar trough {
     background: none;
@@ -242,8 +387,12 @@
     background-color: alpha(@hm_fg, 0.45);
 }
 
+.thunar scrollbar slider:active {
+    background-color: alpha(@hm_accent, 0.7);
+}
+
 /* =============================================================================
-   Right-click / 3-dot menus: solid, palette colors (affects all GTK3 apps)
+   10. Right-click / 3-dot menus and popovers   (affects all GTK3 apps)
    ============================================================================= */
 
 menu,
@@ -252,7 +401,7 @@ menu,
 popover.background {
     background-color: @hm_surface;
     color: @hm_fg;
-    border: 1px solid alpha(#8C8C8C, 0.12);
+    border: 1px solid alpha(@hm_fg, 0.12);
     border-radius: 10px;
     padding: 4px;
 }
@@ -270,4 +419,183 @@ popover modelbutton:hover,
 popover modelbutton:focus {
     background-color: @hm_select;
     color: @hm_accent_light;
+}
+
+menu menuitem:disabled,
+.menu menuitem:disabled,
+popover modelbutton:disabled {
+    color: alpha(@hm_fg, 0.4);
+}
+
+menu menuitem accelerator,
+.menu menuitem accelerator {
+    color: @hm_muted;
+}
+
+menu menuitem arrow,
+menu menuitem check,
+menu menuitem radio {
+    color: @hm_muted;
+}
+
+menu menuitem:hover arrow,
+menu menuitem:hover check,
+menu menuitem:hover radio {
+    color: @hm_accent_light;
+}
+
+menu separator,
+.menu separator,
+popover separator {
+    background-color: alpha(@hm_fg, 0.1);
+    min-height: 1px;
+    margin: 4px 6px;
+}
+
+/* =============================================================================
+   11. Tooltips   (affects all GTK3 apps)
+   ============================================================================= */
+
+tooltip,
+tooltip.background {
+    background-color: @hm_surface;
+    color: @hm_fg;
+    border: 1px solid alpha(@hm_fg, 0.12);
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+tooltip label {
+    color: @hm_fg;
+}
+
+/* =============================================================================
+   12. Typeahead / popup entries   (affects all GTK3 apps)
+   ============================================================================= */
+
+window.popup entry {
+    background-image: none;
+    background-color: @hm_surface;
+    color: @hm_fg;
+    caret-color: @hm_accent;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.6);
+}
+
+/* =============================================================================
+   13. Dialogs: Properties, Rename, file operations   (affects all GTK3 dialogs)
+   ============================================================================= */
+
+window.dialog,
+window.dialog.background {
+    background-color: @hm_bg;
+    color: @hm_fg;
+}
+
+window.dialog headerbar {
+    background-color: @hm_bg;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+}
+
+window.dialog entry,
+window.dialog spinbutton {
+    background-image: none;
+    background-color: @hm_surface;
+    color: @hm_fg;
+    caret-color: @hm_accent;
+    border: none;
+    box-shadow: none;
+    border-radius: 8px;
+}
+
+window.dialog entry:focus,
+window.dialog spinbutton:focus {
+    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.6);
+}
+
+window.dialog button {
+    background-image: none;
+    background-color: @hm_surface;
+    color: @hm_fg;
+    border: 1px solid alpha(@hm_fg, 0.08);
+    box-shadow: none;
+    border-radius: 8px;
+    padding: 5px 12px;
+    transition: all ease 0.3s;
+}
+
+window.dialog button:hover {
+    background-color: alpha(@hm_accent, 0.15);
+    color: @hm_accent_light;
+}
+
+window.dialog button:disabled {
+    opacity: 0.4;
+}
+
+window.dialog button.suggested-action {
+    background-color: @hm_accent;
+    color: @hm_bg;
+}
+
+window.dialog button.destructive-action {
+    background-color: @hm_red;
+    color: @hm_bg;
+}
+
+window.dialog notebook > header {
+    background: none;
+    box-shadow: none;
+}
+
+window.dialog notebook > header tab {
+    border-radius: 8px;
+    padding: 4px 12px;
+    color: @hm_muted;
+}
+
+window.dialog notebook > header tab:checked {
+    background-color: alpha(@hm_accent, 0.15);
+    color: @hm_accent;
+}
+
+window.dialog progressbar trough {
+    background-color: @hm_surface;
+    border-radius: 6px;
+    min-height: 6px;
+}
+
+window.dialog progressbar progress {
+    background-color: @hm_accent;
+    border-radius: 6px;
+    min-height: 6px;
+}
+
+window.dialog switch {
+    background-color: @hm_surface;
+    border: 1px solid alpha(@hm_fg, 0.12);
+    border-radius: 12px;
+}
+
+window.dialog switch:checked {
+    background-color: @hm_accent;
+}
+
+window.dialog switch slider {
+    background-color: @hm_fg;
+    border-radius: 12px;
+}
+
+window.dialog check,
+window.dialog radio {
+    background-color: @hm_surface;
+    border: 1px solid alpha(@hm_fg, 0.3);
+}
+
+window.dialog check:checked,
+window.dialog radio:checked {
+    background-color: @hm_accent;
+    color: @hm_bg;
 }

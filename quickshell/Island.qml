@@ -20,7 +20,7 @@ PanelWindow {
 
     // ---- Idle / toast state ----
     readonly property bool compactPage: ShellState.activePage === "clock" || ShellState.activePage === "timertoast"
-    readonly property bool toastPage: ShellState.activePage === "notification" || ShellState.activePage === "eventtoast"
+    readonly property bool toastPage: ShellState.activePage === "notification" || ShellState.activePage === "eventtoast" || ShellState.activePage === "apptoast"
 
     // Auto-hide: the island only slides away while a compact page is showing and the pointer is
     // away. Any panel, toast or shortcut brings it back (compactPage goes false).
@@ -184,7 +184,7 @@ PanelWindow {
     // Input region. Auto-hide on + compact page: the hover zone (the edge strip while hidden,
     // the island plus the gap above it while shown). Otherwise exactly as before.
     mask: Region {
-        item: (island.expanded && ShellState.activePage !== "notification" && ShellState.islandClickOutsideDismiss)
+        item: (island.expanded && ShellState.activePage !== "notification" && ShellState.islandClickOutsideDismiss && ShellState.activePage !== "apptoast")
             ? clickCatcher
             : ((!ShellState.islandAlwaysVisible && window.compactPage) ? hoverZone : island)
     }
@@ -536,6 +536,7 @@ PanelWindow {
                     case "polkit": return polkitPage
                     case "timer": return timerPage
                     case "timertoast": return timerToastPage
+                    case "apptoast": return appToastPage
                     default: return clockPage
                 }
             }
@@ -556,6 +557,7 @@ PanelWindow {
         Component { id: timerToastPage; TimerToast {} }
         Component { id: timerPage; TimerModule {} }
         Component { id: statusPage; StatusPanel {} }
+        Component { id: appToastPage; AppToast {} }        
 
         Component {
             id: brightnessPage

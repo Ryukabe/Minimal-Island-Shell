@@ -80,6 +80,14 @@ QtObject {
         clockLowercaseAmPm: false,
         clockDateStyle: 0,
         clockShowVisualizer: true,
+        clockShowWorkspaces: true,
+        clockVisualizerBars: 4,
+        clockVisualizerBarWidth: 3,
+        clockVisualizerGap: 3,
+        clockVisualizerMaxHeight: 10,
+        clockVisualizerSpeedPercent: 100,
+        clockVisualizerColor: "Accent",
+        clockShowPrivacyIndicator: true,
         clockShowTimerIcon: true,
         clockShowRecordingIndicator: true,
         timerToastShowRecordingIndicator: true,
@@ -113,6 +121,8 @@ QtObject {
         eventToastCharging: true,
         eventToastAudioOutput: true,
         eventToastAudioInput: true,
+        appToastEnabled: true,
+        appToastMs: 2000,
         // typography
         fontSizeBase: 15,
         fontBody: "SF Pro Text",
@@ -187,7 +197,9 @@ QtObject {
     property bool eventToastCharging: root.defaults.eventToastCharging
     property bool eventToastAudioOutput: root.defaults.eventToastAudioOutput
     property bool eventToastAudioInput: root.defaults.eventToastAudioInput
-
+    property bool appToastEnabled: root.defaults.appToastEnabled
+    property real appToastMs: root.defaults.appToastMs
+    
     // ================= TYPOGRAPHY =================
     // Fonts.qml and Dimens.qml read these; the Typography page writes them.
     property real fontSizeBase: root.defaults.fontSizeBase            // 15 = 1.0 scale for Dimens.fontSize*
@@ -289,6 +301,14 @@ QtObject {
     property bool clockLowercaseAmPm: root.defaults.clockLowercaseAmPm
     property int clockDateStyle: root.defaults.clockDateStyle            // 0 = off, 1 = "ddd d", 2 = "ddd d MMM"
     property bool clockShowVisualizer: root.defaults.clockShowVisualizer
+    property bool clockShowWorkspaces: root.defaults.clockShowWorkspaces
+    property int clockVisualizerBars: root.defaults.clockVisualizerBars
+    property real clockVisualizerBarWidth: root.defaults.clockVisualizerBarWidth
+    property real clockVisualizerGap: root.defaults.clockVisualizerGap
+    property real clockVisualizerMaxHeight: root.defaults.clockVisualizerMaxHeight
+    property real clockVisualizerSpeedPercent: root.defaults.clockVisualizerSpeedPercent
+    property string clockVisualizerColor: root.defaults.clockVisualizerColor
+    property bool clockShowPrivacyIndicator: root.defaults.clockShowPrivacyIndicator
     property bool clockShowTimerIcon: root.defaults.clockShowTimerIcon
     property bool clockShowRecordingIndicator: root.defaults.clockShowRecordingIndicator
     property bool timerToastShowRecordingIndicator: root.defaults.timerToastShowRecordingIndicator

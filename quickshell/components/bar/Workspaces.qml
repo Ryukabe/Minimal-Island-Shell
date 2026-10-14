@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Io
 import Quickshell.Hyprland as QsHypr
 import "../../services"
 import "../../styles"
@@ -20,6 +21,19 @@ Item {
             if (list[i].id === id) return true
         }
         return false
+    }
+
+    // Hyprland runs a Lua config, so the command is a Lua expression, not "workspace N".
+    // Runs `hyprctl dispatch`, which is the form your terminal test showed Hyprland accepts.
+    Process {
+        id: switcher
+    }
+
+    function switchTo(id) {
+        console.log("Workspaces: clicked dot for workspace", id)
+        if (switcher.running) return
+        switcher.command = ["hyprctl", "dispatch", "hl.dsp.focus({ workspace = " + id + " })"]
+        switcher.running = true
     }
 
     // Height is only the dot height, so the pill never makes the island taller.
@@ -78,7 +92,7 @@ Item {
                     anchors.topMargin: -Dimens.paddingSmall
                     anchors.bottomMargin: -Dimens.paddingSmall
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: QsHypr.Hyprland.dispatch("workspace " + dot.wsId)
+                    onClicked: root.switchTo(dot.wsId)
                 }
             }
         }

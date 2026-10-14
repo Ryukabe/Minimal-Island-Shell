@@ -36,6 +36,25 @@ QtObject {
         }
     }
 
+    // Start over from the length the timer was last started (or adjusted) with.
+    function restart() {
+        if (initialSeconds > 0) start(initialSeconds)
+    }
+
+    // +/- buttons. Keeps a paused timer paused (start() would resume it).
+    // An idle timer with a positive delta starts, like the old +5m button did.
+    function adjust(deltaSeconds) {
+        var idle = secondsRemaining <= 0
+        var next = Math.max(0, secondsRemaining + deltaSeconds)
+        if (next === 0) {
+            reset()
+            return
+        }
+        initialSeconds = next
+        secondsRemaining = next
+        if (idle) running = true
+    }
+
     function reset() {
         running = false
         secondsRemaining = 0

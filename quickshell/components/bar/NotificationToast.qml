@@ -12,7 +12,17 @@ Item {
     readonly property int maxTextWidth: ShellState.notificationToastMaxWidth
 
     implicitWidth: ShellState.islandCompactWidth + 5
-    implicitHeight: ShellState.islandCompactHeight 
+    implicitHeight: ShellState.islandCompactHeight
+
+    // Ring on first show, and again when a newer notification replaces this one.
+    Component.onCompleted: toast.ring()
+    onNotifChanged: toast.ring()
+
+    function ring() {
+        bellRing.stop()
+        iconText.rotation = 0
+        if (!ShellState.motionReduced) bellRing.start()
+    }
 
     Row {
         id: contentRow
@@ -26,6 +36,8 @@ Item {
             font.pixelSize: Dimens.fontSizeMd
             color: Colors.accent
             anchors.verticalCenter: parent.verticalCenter
+            // The bell hangs from its top edge.
+            transformOrigin: Item.Top
         }
 
         Text {
@@ -43,6 +55,20 @@ Item {
             width: Math.min(implicitWidth, toast.maxTextWidth)
             anchors.verticalCenter: parent.verticalCenter
         }
+    }
+
+    // Decaying swing: each step is smaller and opposite to the last, then it rests at 0.
+    SequentialAnimation {
+        id: bellRing
+
+        PauseAnimation { duration: ShellState.motionDuration(Motion.contentDelayMs) }
+
+        NumberAnimation { target: iconText; property: "rotation"; to: 22;  duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.OutCubic }
+        NumberAnimation { target: iconText; property: "rotation"; to: -18; duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.InOutSine }
+        NumberAnimation { target: iconText; property: "rotation"; to: 13;  duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.InOutSine }
+        NumberAnimation { target: iconText; property: "rotation"; to: -8;  duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.InOutSine }
+        NumberAnimation { target: iconText; property: "rotation"; to: 4;   duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.InOutSine }
+        NumberAnimation { target: iconText; property: "rotation"; to: 0;   duration: ShellState.motionDuration(Motion.snapMs); easing.type: Easing.InOutSine }
     }
 
     // Click to dismiss. This is how a toast that is set to stay until clicked goes away.
