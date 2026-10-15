@@ -1,0 +1,2 @@
+module features.recording
+singleton RecordingService 1.0 RecordingService.qml

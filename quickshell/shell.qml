@@ -2,10 +2,9 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "services"
-import "modules"
-import "settings"
 import "core/state"
+import "features/lockscreen"
+import "features/settings"
 
 ShellRoot {
     Island {}

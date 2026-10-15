@@ -1,0 +1,6 @@
+module features.apps
+AllAppsSettings 1.0 AllAppsSettings.qml
+singleton AutostartService 1.0 AutostartService.qml
+DefaultAppsService 1.0 DefaultAppsService.qml
+DefaultAppsSettings 1.0 DefaultAppsSettings.qml
+StartupAppsSettings 1.0 StartupAppsSettings.qml

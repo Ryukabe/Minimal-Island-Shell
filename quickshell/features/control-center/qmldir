@@ -1,0 +1,4 @@
+module features.controlcenter
+ControlCenter 1.0 ControlCenter.qml
+ControlCenterSettings 1.0 ControlCenterSettings.qml
+singleton ControlCenterLayoutService 1.0 ControlCenterLayoutService.qml

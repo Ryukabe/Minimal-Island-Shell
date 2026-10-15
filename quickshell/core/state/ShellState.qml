@@ -1,8 +1,14 @@
-// services/ShellState.qml
+// core/state/ShellState.qml
 pragma Singleton
 import QtQuick
 import Quickshell.Io
-import "../../services"
+import "../../features/hyprland"
+import "../../features/lockscreen"
+import "../../features/notifications"
+import "../../features/sound"
+import "../../features/theme"
+import "../../features/timer"
+import "."
 
 QtObject {
     id: root
@@ -420,7 +426,7 @@ QtObject {
     }
 
     // ================= ICONS =================
-    // "" = follow the Qt platform theme. Resolved by services/IconThemeService.qml.
+    // "" = follow the Qt platform theme. Resolved by features/theme/IconThemeService.qml.
     property string appIconTheme: root.defaults.appIconTheme
 
     // Pages that pop up briefly over whatever the user was doing. They never count as the

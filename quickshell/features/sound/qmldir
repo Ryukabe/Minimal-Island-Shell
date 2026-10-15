@@ -1,0 +1,5 @@
+module features.sound
+singleton AudioService 1.0 AudioService.qml
+MediaExpanded 1.0 MediaExpanded.qml
+SoundMediaSettings 1.0 SoundMediaSettings.qml
+singleton VolumeService 1.0 VolumeService.qml

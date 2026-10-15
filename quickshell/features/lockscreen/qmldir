@@ -1,0 +1,13 @@
+module features.lockscreen
+KnowledgePage 1.0 KnowledgePage.qml
+singleton KnowledgeSettings 1.0 KnowledgeSettings.qml
+singleton LocationService 1.0 LocationService.qml
+LockScreen 1.0 LockScreen.qml
+LockScreenPage 1.0 LockScreenPage.qml
+singleton LockScreenSettings 1.0 LockScreenSettings.qml
+singleton LockTimerService 1.0 LockTimerService.qml
+MediaCard 1.0 MediaCard.qml
+PolkitAgent 1.0 PolkitAgent.qml
+singleton PolkitService 1.0 PolkitService.qml
+WeatherBlock 1.0 WeatherBlock.qml
+singleton WeatherService 1.0 WeatherService.qml

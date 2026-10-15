@@ -1,0 +1,5 @@
+module features.power
+singleton CaffeineService 1.0 CaffeineService.qml
+PowerMenu 1.0 PowerMenu.qml
+singleton PowerProfileService 1.0 PowerProfileService.qml
+singleton PowerService 1.0 PowerService.qml

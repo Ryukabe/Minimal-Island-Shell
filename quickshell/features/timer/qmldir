@@ -1,0 +1,3 @@
+module features.timer
+TimerModule 1.0 TimerModule.qml
+singleton TimerService 1.0 TimerService.qml

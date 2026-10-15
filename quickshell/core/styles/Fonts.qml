@@ -1,7 +1,6 @@
 // styles/Fonts.qml
 pragma Singleton
 import QtQuick
-import "../../services"
 import "../state"
 
 // Read-only view of the typography state. The source of truth is

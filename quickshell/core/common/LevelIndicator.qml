@@ -1,7 +1,6 @@
 import QtQuick
-import "../../services"
-import "../styles"
 import "../state"
+import "../styles"
 
 Rectangle {
     id: root

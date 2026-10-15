@@ -1,0 +1,4 @@
+module features.clipboard
+Clipboard 1.0 Clipboard.qml
+ClipboardPage 1.0 ClipboardPage.qml
+singleton ClipboardService 1.0 ClipboardService.qml

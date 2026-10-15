@@ -1,0 +1,5 @@
+module features.settings.pages.about
+About 1.0 About.qml
+SystemInfoService 1.0 SystemInfoService.qml
+UpdateCard 1.0 UpdateCard.qml
+UpdateService 1.0 UpdateService.qml

@@ -1,0 +1,8 @@
+module features.bar
+singleton AppLaunchToastService 1.0 AppLaunchToastService.qml
+singleton ClockLayoutService 1.0 ClockLayoutService.qml
+singleton PrivacyService 1.0 PrivacyService.qml
+StatusPanel 1.0 StatusPanel.qml
+BarSettings 1.0 BarSettings.qml
+ClockSettings 1.0 ClockSettings.qml
+WorkspacesSettings 1.0 WorkspacesSettings.qml

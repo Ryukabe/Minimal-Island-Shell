@@ -1,0 +1,7 @@
+module features.notifications
+AlertsSettings 1.0 AlertsSettings.qml
+singleton EventToastService 1.0 EventToastService.qml
+FocusNotificationsSettings 1.0 FocusNotificationsSettings.qml
+NotificationCenter 1.0 NotificationCenter.qml
+singleton NotificationService 1.0 NotificationService.qml
+ToastsSettings 1.0 ToastsSettings.qml

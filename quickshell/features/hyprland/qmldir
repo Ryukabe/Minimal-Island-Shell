@@ -1,0 +1,9 @@
+module features.hyprland
+singleton HyprlandAnimationsService 1.0 HyprlandAnimationsService.qml
+singleton HyprlandDecorationService 1.0 HyprlandDecorationService.qml
+KeybindListPage 1.0 KeybindListPage.qml
+KeybindsPage 1.0 KeybindsPage.qml
+singleton HyprlandKeybindsService 1.0 HyprlandKeybindsService.qml
+singleton InputSettingsService 1.0 InputSettingsService.qml
+singleton LayoutSettingsService 1.0 LayoutSettingsService.qml
+TrackpadMouseSettings 1.0 TrackpadMouseSettings.qml
