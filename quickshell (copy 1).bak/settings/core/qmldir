@@ -1,0 +1,4 @@
+singleton SettingsRegistry SettingsRegistry.qml
+singleton SettingsNav SettingsNav.qml
+singleton SettingsStore SettingsStore.qml
+singleton SettingsPicker SettingsPicker.qml

@@ -1,0 +1,34 @@
+{
+  "dark": {
+    "vscodeTheme": "Rosé Pine",
+    "isLight": false,
+    "background": "#1f1d2e",
+    "foreground": "#e0def4",
+    "fgMuted": "#908caa",
+    "surface": "#26233a",
+    "border": "#2f2c40",
+    "accent": "#c4a7e7",
+    "red": "#eb6f92",
+    "green": "#31748f",
+    "yellow": "#f6c177",
+    "blue": "#9ccfd8",
+    "purple": "#c4a7e7",
+    "cyan": "#ebbcba"
+  },
+  "light": {
+    "vscodeTheme": "Rosé Pine Dawn",
+    "isLight": true,
+    "background": "#fffaf3",
+    "foreground": "#575279",
+    "fgMuted": "#797593",
+    "surface": "#f2e9e1",
+    "border": "#f3eeea",
+    "accent": "#907aa9",
+    "red": "#b4637a",
+    "green": "#286983",
+    "yellow": "#ea9d34",
+    "blue": "#56949f",
+    "purple": "#907aa9",
+    "cyan": "#d7827e"
+  }
+}

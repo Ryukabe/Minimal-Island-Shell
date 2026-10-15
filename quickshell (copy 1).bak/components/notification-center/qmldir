@@ -1,0 +1,2 @@
+module components.notificationcenter
+NotificationRow 1.0 NotificationRow.qml

@@ -1,0 +1,34 @@
+{
+  "dark": {
+    "vscodeTheme": "Ayu Dark",
+    "isLight": false,
+    "background": "#0B0E14",
+    "foreground": "#c9c7be",
+    "fgMuted": "#54575d",
+    "surface": "#1c1f25",
+    "border": "#24272d",
+    "accent": "#56c3f9",
+    "red": "#F07178",
+    "green": "#AAD84C",
+    "yellow": "#E7C547",
+    "blue": "#36A3D9",
+    "purple": "#c79bf4",
+    "cyan": "#95E6CB"
+  },
+  "light": {
+    "vscodeTheme": "Ayu Light",
+    "isLight": true,
+    "background": "#fafafa",
+    "foreground": "#5C6166",
+    "fgMuted": "#a0a0a0",
+    "surface": "#f0f0f0",
+    "border": "#e1e1e1",
+    "accent": "#399EE6",
+    "red": "#E65050",
+    "green": "#6CBF43",
+    "yellow": "#E6BA7E",
+    "blue": "#399EE6",
+    "purple": "#9F40FF",
+    "cyan": "#95E6CB"
+  }
+}

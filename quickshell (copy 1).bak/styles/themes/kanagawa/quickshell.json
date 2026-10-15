@@ -1,0 +1,34 @@
+{
+  "dark": {
+    "vscodeTheme": "Kanagawa Wave",
+    "isLight": false,
+    "background": "#1f1f28",
+    "foreground": "#dcd7ba",
+    "fgMuted": "#727169",
+    "surface": "#16161d",
+    "border": "#2d4f67",
+    "accent": "#7e9cd8",
+    "red": "#c34043",
+    "green": "#76946a",
+    "yellow": "#c0a36e",
+    "blue": "#7e9cd8",
+    "purple": "#957fb8",
+    "cyan": "#6a9589"
+  },
+  "light": {
+    "vscodeTheme": "Kanagawa Lotus",
+    "isLight": true,
+    "background": "#f2ecbc",
+    "foreground": "#545464",
+    "fgMuted": "#8a8980",
+    "surface": "#545464",
+    "border": "#c9cbd1",
+    "accent": "#4d699b",
+    "red": "#c84053",
+    "green": "#6f894e",
+    "yellow": "#77713f",
+    "blue": "#4d699b",
+    "purple": "#b35b79",
+    "cyan": "#597b75"
+  }
+}
