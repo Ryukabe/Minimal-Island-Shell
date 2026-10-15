@@ -1,6 +1,6 @@
 // components/ComingSoonTag.qml — small pill shown on anything that is still a placeholder.
 import QtQuick
-import "../../styles"
+import "../../core/styles"
 
 Rectangle {
     id: root

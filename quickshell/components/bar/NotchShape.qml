@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick.Shapes
 import "../../services"
-import "../../styles"
+import "../../core/styles"
+import "../../core/state"
 
 Shape {
     id: root

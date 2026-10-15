@@ -3,7 +3,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../components"
-import "../../../styles"
+import "../../../core/styles"
 
 Rectangle {
     id: root

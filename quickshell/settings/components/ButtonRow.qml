@@ -1,8 +1,9 @@
 // components/ButtonRow.qml — label (+ optional description) with a button on the right.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

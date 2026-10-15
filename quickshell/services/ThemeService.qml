@@ -12,7 +12,7 @@ Item {
     property string currentTheme: "hermit"
     property var themesList: []
 
-    readonly property string themesPath: Quickshell.shellDir + "/styles/themes"
+    readonly property string themesPath: Quickshell.shellDir + "/core/styles/themes"
     readonly property string currentThemeFile: root.themesPath + "/.current-theme"
     readonly property string currentThemeJsonPath:
         root.themesPath + "/" + root.currentTheme + "/quickshell.json"

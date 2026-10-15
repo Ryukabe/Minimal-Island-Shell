@@ -1,0 +1,2 @@
+module core.state
+singleton ShellState 1.0 ShellState.qml

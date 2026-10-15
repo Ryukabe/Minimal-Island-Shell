@@ -2,8 +2,9 @@ import QtQuick
 import Quickshell.Io
 import Quickshell.Hyprland as QsHypr
 import "../../services"
-import "../../styles"
-import "../common"
+import "../../core/styles"
+import "../../core/common"
+import "../../core/state"
 
 Item {
     id: root

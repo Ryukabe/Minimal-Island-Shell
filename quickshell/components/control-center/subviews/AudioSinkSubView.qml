@@ -1,8 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import "../../../styles"
+import "../../../core/styles"
 import "../../../services"
+import "../../../core/state"
 
 Item {
     id: root

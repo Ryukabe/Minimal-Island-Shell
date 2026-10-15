@@ -1,7 +1,8 @@
 // components/bar/PrivacyIndicator.qml — steady colored dot (mic / camera). Fades in and out.
 import QtQuick
 import "../../services"
-import "../../styles"
+import "../../core/styles"
+import "../../core/state"
 
 Item {
     id: root

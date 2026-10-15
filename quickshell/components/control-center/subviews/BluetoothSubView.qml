@@ -3,8 +3,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import "../../../styles"
+import "../../../core/styles"
 import "../../../services"
+import "../../../core/state"
 
 Item {
     id: root

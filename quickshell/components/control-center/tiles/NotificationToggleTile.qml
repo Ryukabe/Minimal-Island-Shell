@@ -2,8 +2,9 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import "../../../styles"
+import "../../../core/styles"
 import "../../../services"
+import "../../../core/state"
 
 Rectangle {
     id: tile

@@ -12,7 +12,6 @@ singleton PolkitService 1.0 PolkitService.qml
 singleton PowerService 1.0 PowerService.qml
 singleton PowerProfileService 1.0 PowerProfileService.qml
 singleton RecordingService 1.0 RecordingService.qml
-singleton ShellState 1.0 ShellState.qml
 singleton ThemeService 1.0 ThemeService.qml
 singleton VolumeService 1.0 VolumeService.qml
 singleton WallpaperService 1.0 WallpaperService.qml

@@ -11,8 +11,9 @@
 // Every duration goes through ShellState.motionDuration, so the Motion page speed sliders apply
 // and Reduce motion turns the icons completely still.
 import QtQuick
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Text {
     id: root

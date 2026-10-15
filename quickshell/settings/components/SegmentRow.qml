@@ -1,8 +1,9 @@
 // components/SegmentRow.qml — label with a pill of mutually exclusive options (e.g. power profile).
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

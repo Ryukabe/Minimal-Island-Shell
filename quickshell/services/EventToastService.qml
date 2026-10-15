@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import "../services"
+import "../core/state"
 
 Singleton {
     id: root

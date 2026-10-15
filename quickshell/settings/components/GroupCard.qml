@@ -1,7 +1,7 @@
 // components/GroupCard.qml — rounded card that stacks rows. Not collapsible: views replace accordions.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 
 Rectangle {
     id: root

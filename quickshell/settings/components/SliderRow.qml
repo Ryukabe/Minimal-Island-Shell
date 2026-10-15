@@ -2,8 +2,9 @@
 // `value` is only displayed; the page writes the new value in onMoved, so there is one source of truth.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

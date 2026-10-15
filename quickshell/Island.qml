@@ -6,12 +6,13 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import "modules"
-import "styles"
-import "styles/adapters"
+import "core/styles"
+import "core/styles/adapters"
 import "services"
 import "components/bar"
-import "components/common"
+import "core/common"
 import "settings/core"
+import "core/state"
 
 PanelWindow {
     id: window

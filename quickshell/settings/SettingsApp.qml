@@ -8,7 +8,8 @@ import "./core"
 import "./components"
 import "./pages/about"
 import "../services"
-import "../styles"
+import "../core/styles"
+import "../core/state"
 
 Scope {
     id: root

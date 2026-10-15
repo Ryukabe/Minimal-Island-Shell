@@ -3,7 +3,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 import "../../services"
-import "../../styles"
+import "../../core/styles"
+import "../../core/state"
 
 Item {
     id: card

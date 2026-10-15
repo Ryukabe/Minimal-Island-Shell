@@ -1,8 +1,9 @@
 // components/SidebarItem.qml — one menu entry in the sidebar: icon, title, one-line subtitle.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

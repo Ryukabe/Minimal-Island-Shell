@@ -6,7 +6,8 @@
 // Theme/Wallpaper cards.
 import QtQuick
 import "../../services"
-import "../../styles"
+import "../../core/styles"
+import "../../core/state"
 
 Rectangle {
     id: root

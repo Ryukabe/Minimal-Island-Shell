@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Polkit
 import "../services"
+import "../core/state"
 
 Singleton {
     id: root

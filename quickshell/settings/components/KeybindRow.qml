@@ -4,8 +4,9 @@
 // Conflict warning, Flatten for multi-line binds, Remove for custom-added binds.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

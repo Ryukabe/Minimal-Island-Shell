@@ -3,8 +3,9 @@
 // Long lists scroll: at most `maxVisibleOptions` rows are shown at once.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

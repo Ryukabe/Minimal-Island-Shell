@@ -6,7 +6,8 @@
 // Bounce sliders lower it. The numbers are starting points — tune by feel.
 pragma Singleton
 import QtQuick
-import "../services"
+import "../../services"
+import "../state"
 
 QtObject {
     id: motion

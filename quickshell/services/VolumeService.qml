@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 import "../services"
+import "../core/state"
 
 Singleton {
     id: root

@@ -1,7 +1,7 @@
 // components/SectionLabel.qml — small muted heading above a GroupCard.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 
 Text {
     Layout.fillWidth: true

@@ -1,10 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import "../styles"
+import "../core/styles"
 import "../services"
 import "../components/control-center"
 import "../components/control-center/subviews"
+import "../core/state"
 
 Item {
     id: root

@@ -1,7 +1,7 @@
 import QtQuick
 import "../"
 import "../../../services"
-import "../../../styles"
+import "../../../core/styles"
 
 ToggleTile {
     title: "Night Light"

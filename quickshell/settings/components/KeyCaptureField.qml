@@ -9,7 +9,7 @@
 // Mouse-button binds can't be captured this way.
 import QtQuick
 import Quickshell.Io
-import "../../styles"
+import "../../core/styles"
 
 Rectangle {
     id: root

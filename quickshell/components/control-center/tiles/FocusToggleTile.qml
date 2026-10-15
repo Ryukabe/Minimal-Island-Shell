@@ -1,7 +1,8 @@
 import QtQuick
 import "../"
-import "../../../styles"
+import "../../../core/styles"
 import "../../../services"
+import "../../../core/state"
 
 ToggleTile {
     title: "Focus"

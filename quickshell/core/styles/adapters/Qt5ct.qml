@@ -2,12 +2,13 @@ pragma Singleton
 import QtQuick
 import Quickshell.Io
 import ".."
-import "../../services"
+import "../../../services"
+import "../../state"
 
 Item {
     id: root
-    readonly property string path: "$HOME/.config/qt6ct/colors/hermit.conf"
-    readonly property bool active: ShellState.templatesEnabled && ShellState.templateQt6ct
+    readonly property string path: "$HOME/.config/qt5ct/colors/hermit.conf"
+    readonly property bool active: ShellState.templatesEnabled && ShellState.templateQt5ct
     Process { id: proc }
 
     // 21 roles, in Qt's QPalette order.
@@ -32,7 +33,7 @@ Item {
     function apply() {
         if (!Colors.loaded || !root.active) return;
         proc.command = ["bash", "-c",
-            'mkdir -p "$HOME/.config/qt6ct/colors" && printf "%s" \'' + root.buildConf() + '\' > /tmp/qt6ct-theme.tmp && mv /tmp/qt6ct-theme.tmp "' + root.path + '"']
+            'mkdir -p "$HOME/.config/qt5ct/colors" && printf "%s" \'' + root.buildConf() + '\' > /tmp/qt5ct-theme.tmp && mv /tmp/qt5ct-theme.tmp "' + root.path + '"']
         proc.running = true
     }
 

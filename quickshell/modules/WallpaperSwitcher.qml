@@ -3,7 +3,8 @@ import QtQuick
 import QtQuick.Layouts
 import "../services"
 import "../components/theme"
-import "../styles"
+import "../core/styles"
+import "../core/state"
 
 FocusScope {
     id: switcherRoot

@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland as QsHypr
 import "../services"
+import "../core/state"
 
 Singleton {
     id: root

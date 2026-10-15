@@ -9,8 +9,9 @@ import Quickshell.Wayland
 import Quickshell.Services.Pam
 import Quickshell.Io
 import "../services"
-import "../styles"
+import "../core/styles"
 import "lockscreen"
+import "../core/state"
 
 WlSessionLock {
     id: sessionLock

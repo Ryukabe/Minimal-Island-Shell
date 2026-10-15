@@ -3,8 +3,9 @@
 // clearOnCommit: for "add" fields. The text is cleared after it is applied and empty text is ignored.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

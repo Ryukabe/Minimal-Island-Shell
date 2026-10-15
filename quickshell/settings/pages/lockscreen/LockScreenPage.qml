@@ -8,9 +8,10 @@ import Qt5Compat.GraphicalEffects
 import Quickshell
 import "../../components"
 import "../../../services"
-import "../../../styles"
+import "../../../core/styles"
 import "../../core"
 import "../../../components/theme"
+import "../../../core/state"
 
 PageScroll {
     id: root

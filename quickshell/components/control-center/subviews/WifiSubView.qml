@@ -1,7 +1,8 @@
 // components/control-center/subviews/WifiSubView.qml
 import QtQuick
-import "../../../styles"
+import "../../../core/styles"
 import "../../../services"
+import "../../../core/state"
 
 Item {
     id: root

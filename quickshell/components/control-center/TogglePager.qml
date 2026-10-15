@@ -1,7 +1,8 @@
 import QtQuick
 import "../../services"
-import "../../styles"
+import "../../core/styles"
 import "tiles"
+import "../../core/state"
 
 Item {
     id: root

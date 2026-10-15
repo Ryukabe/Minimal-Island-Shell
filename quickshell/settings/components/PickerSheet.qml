@@ -7,7 +7,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../core"
 import "../../services"
-import "../../styles"
+import "../../core/styles"
+import "../../core/state"
 
 Item {
     id: root

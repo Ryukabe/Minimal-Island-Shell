@@ -3,7 +3,7 @@
 // `currentIndex` is the card the user last clicked (-1 = none), for the selected outline.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 
 Flickable {
     id: root

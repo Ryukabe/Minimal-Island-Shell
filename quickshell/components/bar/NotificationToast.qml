@@ -1,7 +1,8 @@
 // components/bar/NotificationToast.qml
 import QtQuick
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: toast

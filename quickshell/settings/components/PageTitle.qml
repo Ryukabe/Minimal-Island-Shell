@@ -3,8 +3,9 @@
 // The badge icon plays its own motion whenever the page changes; the back arrow nudges on hover.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Rectangle {
     id: root

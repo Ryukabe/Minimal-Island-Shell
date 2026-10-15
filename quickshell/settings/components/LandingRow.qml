@@ -2,8 +2,9 @@
 // The row icon plays its own motion on hover, and the chevron nudges right.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

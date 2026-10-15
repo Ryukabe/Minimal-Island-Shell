@@ -5,6 +5,7 @@ import Quickshell.Io
 import "services"
 import "modules"
 import "settings"
+import "core/state"
 
 ShellRoot {
     Island {}

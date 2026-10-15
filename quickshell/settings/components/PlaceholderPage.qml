@@ -1,7 +1,7 @@
 // components/PlaceholderPage.qml — shown for any menu or view that has no real page yet.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../core"
 
 PageScroll {

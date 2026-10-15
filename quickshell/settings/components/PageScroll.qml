@@ -2,7 +2,7 @@
 // The root is a plain Item (not the Flickable) so layouts can size it safely.
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 
 Item {
     id: root

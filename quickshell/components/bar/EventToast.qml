@@ -1,8 +1,9 @@
 // components/bar/EventToast.qml — island page shown by EventToastService
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
+import "../../core/state"
 
 Item {
     id: root

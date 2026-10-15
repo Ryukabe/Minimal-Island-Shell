@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../../styles"
+import "../../core/styles"
 import "../../services"
 
 ColumnLayout {

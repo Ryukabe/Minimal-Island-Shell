@@ -2,8 +2,9 @@
 import QtQuick
 import QtQuick.Effects
 import Qt5Compat.GraphicalEffects
-import "../../../styles"
+import "../../../core/styles"
 import "../../../services"
+import "../../../core/state"
 
 Rectangle {
     id: tile

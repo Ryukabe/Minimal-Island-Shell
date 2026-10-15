@@ -1,7 +1,8 @@
 // styles/Dimens.qml
 pragma Singleton
 import QtQuick
-import "../services"
+import "../../services"
+import "../state"
 
 QtObject {
 

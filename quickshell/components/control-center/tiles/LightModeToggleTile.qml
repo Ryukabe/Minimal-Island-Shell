@@ -1,6 +1,6 @@
 import QtQuick
 import "../"
-import "../../../styles"
+import "../../../core/styles"
 import "../../../services"
 
 ToggleTile {
