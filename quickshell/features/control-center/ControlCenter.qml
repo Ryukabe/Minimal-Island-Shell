@@ -2,9 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import "../../core/styles"
-import "../../core/state"
-import "components/control-center"
-import "components/control-center/subviews"
+import "../../core/shell"
+import "components"
+import "components/subviews"
 
 Item {
     id: root

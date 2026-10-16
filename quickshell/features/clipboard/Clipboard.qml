@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
 import "."
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 
 Item {

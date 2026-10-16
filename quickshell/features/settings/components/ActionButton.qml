@@ -1,7 +1,7 @@
 // components/ActionButton.qml — small button. `primary` = accent fill. `busy` shows "…" and ignores clicks.
 import QtQuick
 import "../../../core/styles"
-import "../../../core/state"
+import "../../../core/shell"
 
 Rectangle {
     id: root

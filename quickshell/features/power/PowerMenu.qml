@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 import "../../core/styles"
-import "../../core/state"
+import "../../core/shell"
 
 Item {
     id: root

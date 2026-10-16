@@ -5,7 +5,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../../core/styles"
-import "../../../core/state"
+import "../../../core/shell"
 
 Item {
     id: root

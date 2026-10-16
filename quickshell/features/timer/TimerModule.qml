@@ -5,8 +5,8 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import "../../core/styles"
 import "."
-import "../../core/state"
-import "../bar/components/bar"
+import "../../core/shell"
+import "../bar/components"
 
 Item {
     id: root

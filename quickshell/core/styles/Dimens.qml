@@ -1,7 +1,7 @@
 // styles/Dimens.qml
 pragma Singleton
 import QtQuick
-import "../state"
+import "../shell"
 
 QtObject {
 

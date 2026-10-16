@@ -7,7 +7,7 @@ import Quickshell.Io
 import Quickshell.Hyprland as QsHypr
 import "."
 import "../notifications"
-import "../../core/state"
+import "../../core/shell"
 
 Singleton {
     id: root

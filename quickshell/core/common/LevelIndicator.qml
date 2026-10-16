@@ -1,5 +1,5 @@
 import QtQuick
-import "../state"
+import "../shell"
 import "../styles"
 
 Rectangle {

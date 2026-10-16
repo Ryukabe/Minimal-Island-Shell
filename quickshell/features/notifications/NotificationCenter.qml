@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import "."
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 import "components/notification-center"
 

@@ -4,7 +4,7 @@ pragma ComponentBehavior: Bound
 import "../clipboard"
 import "."
 import "../theme"
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 import QtQuick
 import QtQuick.Controls

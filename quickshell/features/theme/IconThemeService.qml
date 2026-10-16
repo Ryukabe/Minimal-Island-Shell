@@ -6,7 +6,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../../core/state"
+import "../../core/shell"
 
 Singleton {
     id: root

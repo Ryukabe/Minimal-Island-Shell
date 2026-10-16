@@ -2,8 +2,8 @@
 import QtQuick
 import QtQuick.Layouts
 import "."
-import "../../core/state"
-import "components/theme"
+import "../../core/shell"
+import "components"
 import "../../core/styles"
 
 FocusScope {

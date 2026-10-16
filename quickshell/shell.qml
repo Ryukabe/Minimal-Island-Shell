@@ -2,7 +2,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "core/state"
+import "core/shell"
 import "features/lockscreen"
 import "features/settings"
 

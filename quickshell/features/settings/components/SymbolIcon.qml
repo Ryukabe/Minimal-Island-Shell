@@ -12,7 +12,7 @@
 // and Reduce motion turns the icons completely still.
 import QtQuick
 import "../../../core/styles"
-import "../../../core/state"
+import "../../../core/shell"
 
 Text {
     id: root

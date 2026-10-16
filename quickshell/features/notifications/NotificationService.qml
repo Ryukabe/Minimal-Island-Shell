@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
 import "."
-import "../../core/state"
+import "../../core/shell"
 
 Singleton {
     id: root

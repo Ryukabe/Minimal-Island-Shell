@@ -9,7 +9,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../core"
 import "../../../core/styles"
-import "../../../core/state"
+import "../../../core/shell"
 
 ColumnLayout {
     id: root

@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import "../settings/components"
 import "."
 import "../../core/styles"
-import "components/theme"
+import "components"
 
 PageScroll {
     id: root

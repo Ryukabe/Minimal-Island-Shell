@@ -1,7 +1,7 @@
 // styles/Fonts.qml
 pragma Singleton
 import QtQuick
-import "../state"
+import "../shell"
 
 // Read-only view of the typography state. The source of truth is
 // ShellState (persisted by SettingsStore) — write there, never here.

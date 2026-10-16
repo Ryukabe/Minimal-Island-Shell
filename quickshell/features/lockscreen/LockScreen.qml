@@ -11,7 +11,7 @@ import Quickshell.Io
 import "."
 import "../notifications"
 import "../theme"
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 
 WlSessionLock {

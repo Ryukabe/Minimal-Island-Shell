@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import "."
 import "../sound"
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 
 Item {

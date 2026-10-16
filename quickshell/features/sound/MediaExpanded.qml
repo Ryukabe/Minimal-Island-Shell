@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import "../../core/styles"
 import "."
-import "../../core/state"
+import "../../core/shell"
 
 Rectangle {
     id: root

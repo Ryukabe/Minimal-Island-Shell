@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
-import "../../core/state"
+import "../../core/shell"
 
 Singleton {
     id: root

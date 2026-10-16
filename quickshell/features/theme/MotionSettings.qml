@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
 import "../hyprland"
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
-import "components/theme"
+import "components"
 
 PageScroll {
     id: root

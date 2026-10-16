@@ -3,9 +3,9 @@
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
-import "../control-center/components/control-center/subviews"
+import "../control-center/components/subviews"
 
 PageScroll {
     id: root

@@ -1,6 +1,6 @@
 pragma Singleton
 import QtQuick
-import "../../core/state"
+import "../../core/shell"
 
 QtObject {
     id: root

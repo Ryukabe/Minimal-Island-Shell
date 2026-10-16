@@ -6,7 +6,7 @@ import Quickshell.Io
 import "../../components"
 import "../../core"
 import "../../../power"
-import "../../../../core/state"
+import "../../../../core/shell"
 import "../../../../core/styles"
 
 PageScroll {

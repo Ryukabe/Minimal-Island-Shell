@@ -6,7 +6,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
 import "."
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 
 PageScroll {

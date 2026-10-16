@@ -9,7 +9,7 @@ import "components"
 import "pages/about"
 import "../hyprland"
 import "../theme"
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 
 Scope {

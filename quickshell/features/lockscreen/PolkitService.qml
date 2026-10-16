@@ -2,7 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Services.Polkit
-import "../../core/state"
+import "../../core/shell"
 
 Singleton {
     id: root

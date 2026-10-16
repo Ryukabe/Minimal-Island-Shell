@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import "../../features/lockscreen"
 import "../../features/theme"
-import "../state"
+import "../shell"
 
 Item {
     id: root

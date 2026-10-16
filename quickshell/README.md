@@ -18,6 +18,7 @@ This is the Quickshell half of [hermit-dots](https://github.com/Ryukabe/hermit-d
 - [Themes and wallpapers](#themes-and-wallpapers)
 - [Directory guide](#directory-guide)
 - [Development notes](#development-notes)
+- [Migration inventory](MIGRATION.md)
 - [Troubleshooting](#troubleshooting)
 - [License and credits](#license-and-credits)
 
@@ -95,7 +96,7 @@ Place or link this directory at:
 ~/.config/quickshell
 ```
 
-The shell expects the entry point (`shell.qml`), `Island.qml`, and the sibling `modules/`, `services/`, `settings/`, `styles/`, `components/`, `assets/`, and `state/` paths to remain together. A symlink to a checkout is suitable; avoid copying only the entry QML file.
+The shell expects the entry point (`shell.qml`), `Island.qml`, and the sibling `core/`, `features/`, `assets/`, `state/`, and `snippets/` paths to remain together. A symlink to a checkout is suitable; avoid copying only the entry QML file.
 
 ## Starting and restarting
 
@@ -166,14 +167,14 @@ The `settings section` function accepts a menu or view name understood by the se
 
 ## Settings and persistence
 
-The Settings UI is implemented in `settings/`. Its single registry, `settings/core/SettingsRegistry.qml`, defines the menus and page paths. Current areas include:
+The Settings UI is implemented in `features/settings/`. Its single registry, `features/settings/core/SettingsRegistry.qml`, defines the menus and page paths. Current areas include:
 
 - **Shell:** Bar & Island, workspace indicators, clock, dashboard, launcher, clipboard/search tools, Control Center, lock screen, and lock-screen knowledge.
 - **Devices:** Wi-Fi, Bluetooth, sound and media, displays, trackpad/mouse, and Hyprland/Quickshell/media keybinds.
 - **Looks:** wallpaper, theme and palette, typography, motion, opacity, and application theme templates.
 - **System:** default/startup/all apps, focus and notifications, language and region, About/system information, and update checks.
 
-Most shell preferences are saved in `state/shell-settings.json`. Other features use additional state files in `state/`, including appearance, launcher, lock-screen, weather, Control Center layout, and knowledge data. Theme selection is stored under `styles/themes/`; wallpaper selection and related options use hidden state files in `state/`.
+Most shell preferences are saved in `state/shell-settings.json`. Other features use additional state files in `state/`, including appearance, launcher, lock-screen, weather, Control Center layout, and knowledge data. Theme selection is stored under `core/styles/themes/`; wallpaper selection and related options use hidden state files in `state/`.
 
 These files are part of the running configuration, not disposable cache. Back them up before manually editing or replacing them. Prefer the Settings UI for changing preferences, because it applies validation, migration/loading logic, and live updates where implemented. Do not commit personal settings or sensitive local data when maintaining a public fork.
 
@@ -181,11 +182,11 @@ These files are part of the running configuration, not disposable cache. Back th
 
 ### Themes
 
-Theme palettes are JSON files under `styles/themes/<theme>/quickshell.json`. Current theme directories include:
+Theme palettes are JSON files under `core/styles/themes/<theme>/quickshell.json`. Current theme directories include:
 
 `ayu`, `catppuccin`, `everforest`, `gruvbox`, `hermit`, `kanagawa`, `monochrome`, `nightfox`, `rosepine`, and `tokyonight`.
 
-The theme files provide dark and light palettes. Use **Settings → Looks → Appearance → Theme** (or the theme switcher) to select and customize a palette. The `styles/adapters/` directory contains optional synchronization adapters for Hyprland, GTK, Kitty, and VS Code; an adapter may require additional tools and configuration.
+The theme files provide dark and light palettes. Use **Settings → Looks → Appearance → Theme** (or the theme switcher) to select and customize a palette. The `core/styles/adapters/` directory contains optional synchronization adapters for Hyprland, GTK, Kitty, and VS Code; an adapter may require additional tools and configuration.
 
 ### Wallpapers
 
@@ -196,27 +197,30 @@ Bundled wallpapers are grouped by theme in `assets/wallpapers/`. The wallpaper p
 ```text
 shell.qml                    Quickshell root; creates Island, Settings, LockScreen, and lock IPC
 Island.qml                   Top-edge PanelWindow, page router, compact bar, and island IPC
-modules/                     Island pages: launcher, clipboard, Control Center, power, lock, etc.
-components/                  Reusable bar, Control Center, notification, and theme UI
-services/                    QML singletons for system integrations and shared shell state
-settings/                    Floating Settings app, navigation, components, and settings pages
-styles/                      Colors, dimensions, fonts, motion, and app/theme adapters
-styles/themes/               Theme palette JSON files and selected-theme state
+core/                        Shared shell state, common controls, styles, and theme data
+core/common/                 Reusable controls shared by shell features
+core/shell/                  Shared shell state singleton
+core/styles/                 Colors, dimensions, fonts, motion, adapters, and theme data
+features/                    Feature-oriented QML modules, services, and settings pages
+features/bar/                Bar and island UI, settings, and related services
+features/control-center/     Control Center UI, components, layout service, and settings
+features/settings/           Floating Settings app, navigation, components, and About pages
 assets/icons/                Small shell status and media icons
 assets/wallpapers/           Bundled wallpapers organized by theme
 state/                       Persisted preferences and feature-specific runtime state
+snippets/                    User-facing notes and snippet resources
 ```
 
-The exact file list changes as development continues. Each QML module directory has a `qmldir` file where required; module declarations and paths must stay consistent with their imports.
+Each feature keeps its QML types together under `features/<name>/`; component subfolders remain nested where needed. QML type directories have a `qmldir` file, and module declarations and paths must stay consistent with their imports.
 
 ## Development notes
 
-- **Keep values centralized.** Use `styles/Dimens.qml` for sizing and spacing, `styles/Colors.qml` for palette values, and `styles/Motion.qml` for animation tiers rather than introducing unrelated literals.
+- **Keep values centralized.** Use `core/styles/Dimens.qml` for sizing and spacing, `core/styles/Colors.qml` for palette values, and `core/styles/Motion.qml` for animation tiers rather than introducing unrelated literals.
 - **Respect the layer-shell geometry.** `Island.qml` keeps the `PanelWindow` surface at a stable screen-covering size; the inner island rectangle changes size and position. Preserve this arrangement when changing morphing or input behavior.
 - **Register QML modules.** When adding a QML file to an imported module, update the appropriate `qmldir`. Restart Quickshell after adding a file or editing a registration.
-- **Use shared services.** System state and actions belong in the relevant singleton under `services/`; pages and reusable components should consume that service instead of creating competing sources of truth.
+- **Use feature services.** System state and actions belong in the relevant feature singleton; shared shell state belongs in `core/shell/`. Pages and reusable components should consume those services instead of creating competing sources of truth.
 - **Persist settings consistently.** Follow the existing `FileView`/settings-store patterns, including load guards and debounced writes where appropriate. Keep one source of truth per setting.
-- **Keep Settings discoverable.** For a new settings page, add its entry and page path to `settings/core/SettingsRegistry.qml`, and follow the existing page/component conventions.
+- **Keep Settings discoverable.** For a new settings page, add its entry and page path to `features/settings/core/SettingsRegistry.qml`, and follow the existing page/component conventions.
 - **Avoid assuming optional commands exist.** Check for tool availability and report actionable failures when adding new external integrations.
 - **Review both display modes.** Theme palettes provide dark and light variants; check reduced-motion behavior when changing animations.
 

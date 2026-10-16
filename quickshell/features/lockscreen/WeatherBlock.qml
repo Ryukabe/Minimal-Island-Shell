@@ -2,7 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "."
-import "../../core/state"
+import "../../core/shell"
 import "../../core/styles"
 
 Item {
