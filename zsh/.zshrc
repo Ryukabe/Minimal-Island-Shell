@@ -22,3 +22,4 @@ source "$HOME/powerlevel10k/powerlevel10k.zsh-theme"
 # Load P10k configuration preferences
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+export PATH=$PATH:/home/shiham/.spicetify

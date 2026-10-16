@@ -5,9 +5,9 @@
   "showRecentsFirst": false,
   "recentLimit": 10,
   "recentIds": [
-    "zen",
     "btop",
-    "htop"
+    "htop",
+    "zen"
   ],
   "showIcons": true,
   "animateResults": true,

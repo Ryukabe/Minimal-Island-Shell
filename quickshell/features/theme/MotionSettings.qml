@@ -1,4 +1,4 @@
-// pages/appearance/motion/MotionSettings.qml — Appearance > Motion.
+// features/theme/MotionSettings.qml — Appearance > Motion.
 // Every control binds straight to ShellState (the single source of truth); SettingsStore persists it.
 import QtQuick
 import QtQuick.Layouts
@@ -18,6 +18,41 @@ PageScroll {
             checked: ShellState.motionReduced
             onToggled: (val) => ShellState.motionReduced = val
             showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Presets" }
+
+    Flickable {
+        id: presetFlick
+
+        Layout.fillWidth: true
+        implicitHeight: presetRow.height
+        contentWidth: presetRow.width
+        contentHeight: presetRow.height
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        flickableDirection: Flickable.HorizontalFlick
+
+        Row {
+            id: presetRow
+            spacing: Dimens.spacingMedium
+
+            Repeater {
+                model: Motion.presets
+
+                delegate: MotionPresetCard {
+                    required property var modelData
+
+                    presetName: modelData.name
+                    description: modelData.description
+                    detail: modelData.movementMs + " ms · " + modelData.bouncePercent + " % bounce"
+                    detailExtra: "Icons " + modelData.iconSpeedPercent + " % · bounce " + modelData.iconBouncePercent + " %"
+                    isActive: Motion.activePreset === modelData.name
+                    enabled: !ShellState.motionReduced
+                    onClicked: Motion.applyPreset(modelData.name)
+                }
+            }
         }
     }
 

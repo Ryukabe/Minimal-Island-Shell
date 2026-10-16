@@ -16,6 +16,18 @@ Singleton {
     property bool connecting: false
     property string lastError: ""
     property string _pendingConnectSsid: ""
+    property bool _pendingUsedPassword: false
+
+    // Names of saved Wi-Fi profiles (nmcli names them after the SSID).
+    property var savedProfiles: []
+    // Set when connecting to a saved network failed because NetworkManager had no usable
+    // password for it. WifiSubView watches this and opens the password sheet.
+    property bool needsPassword: false
+    property string needsPasswordSsid: ""
+
+    function isSaved(ssid) {
+        return root.savedProfiles.indexOf(ssid) !== -1
+    }
 
     // Radio power state (nmcli's equivalent of iwctl's "Powered on/off")
     Process {
@@ -55,9 +67,21 @@ Singleton {
         }
     }
 
+    // Saved Wi-Fi profiles (so a known network reconnects without asking for a password again)
+    Process {
+        id: savedProc
+        command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"]
+        property var _lines: []
+        stdout: SplitParser { onRead: data => savedProc._lines.push(data) }
+        onExited: (code, status) => {
+            if (code === 0) root._parseSaved(savedProc._lines)
+            savedProc._lines = []
+        }
+    }
+
     Process { id: radioToggleProc }
-    Process { id: cleanupProc }
-    Process { id: forgetProc }
+    Process { id: cleanupProc; onExited: root.refreshSaved() }
+    Process { id: forgetProc; onExited: root.refreshSaved() }
     Process { id: disconnectProc }
 
     Process {
@@ -65,19 +89,37 @@ Singleton {
         property var _stderrLines: []
         stderr: SplitParser { onRead: data => connectProc._stderrLines.push(data) }
         onExited: (code, status) => {
-            root.connecting = false
+            const message = connectProc._stderrLines.join(" ").replace(/^\s*Error:\s*/, "").trim()
+            // NetworkManager words a rejected/wrong password and a missing saved password
+            // the same way, so both land here.
+            const secretsProblem = /secrets were required|no secrets|password.*(required|invalid)/i.test(message)
+            const ssid = root._pendingConnectSsid
+
             if (code === 0) {
                 root.lastError = ""
+                root.needsPassword = false
+            } else if (!root._pendingUsedPassword) {
+                // Reconnect attempt without a typed password: never delete the saved
+                // profile here - the failure may be temporary (out of range, etc).
+                if (secretsProblem) {
+                    root.lastError = ""
+                    root.needsPasswordSsid = ssid
+                    root.needsPassword = true
+                } else {
+                    root.lastError = message.length > 0 ? message : ("Couldn't connect to " + ssid)
+                }
             } else {
-                const message = connectProc._stderrLines.join(" ").trim()
-                root.lastError = message.length > 0 ? message : ("Couldn't connect to " + root._pendingConnectSsid)
-                // nmcli reuses an existing saved profile's secrets rather than
-                // applying a newly-typed password to it if a profile with this
-                // name already exists - delete it so the next attempt starts clean.
-                cleanupProc.command = ["nmcli", "connection", "delete", root._pendingConnectSsid]
+                root.lastError = secretsProblem
+                    ? "Wrong password for " + ssid + " - check it and try again."
+                    : (message.length > 0 ? message : ("Couldn't connect to " + ssid))
+                // Remove only the profile this attempt just created, so a bad password
+                // doesn't linger and get reused on the next try.
+                cleanupProc.command = ["nmcli", "connection", "delete", "id", ssid]
                 cleanupProc.running = true
             }
+            root.connecting = false
             connectProc._stderrLines = []
+            root.refreshSaved()
             root.refresh()
         }
     }
@@ -111,6 +153,7 @@ Singleton {
         }
         onExited: (code, status) => {
             root._parseNetworksOutput(scanListProc._lines)
+            root.refreshSaved()
             scanListProc._lines = []
             root.scanning = false
         }
@@ -133,11 +176,26 @@ Singleton {
 
     Component.onCompleted: {
         root.refresh()
+        root.refreshSaved()
     }
 
     function refresh() {
         if (!radioProc.running) radioProc.running = true
         if (!statusProc.running) statusProc.running = true
+    }
+
+    function refreshSaved() {
+        if (!savedProc.running) savedProc.running = true
+    }
+
+    function _parseSaved(lines) {
+        const names = []
+        for (const raw of lines) {
+            if (!raw || !raw.trim()) continue
+            const f = root._splitTerse(raw)
+            if (f.length >= 2 && f[1].trim() === "802-11-wireless") names.push(f[0])
+        }
+        root.savedProfiles = names
     }
 
     function scanNetworks() {
@@ -246,13 +304,23 @@ Singleton {
         verifyTimer.restart()
     }
 
+    // password empty  -> reconnect: saved profile if there is one, otherwise an open network
+    // password typed  -> any old profile with this name is replaced, so the new password is
+    //                    really used (nmcli would otherwise silently reuse the old secrets).
+    // ssid/password go to sh as positional args, never spliced into the command string.
     function connectToNetwork(ssid, password) {
         root.lastError = ""
+        root.needsPassword = false
         root.connecting = true
         root._pendingConnectSsid = ssid
+        root._pendingUsedPassword = !!(password && password.length > 0)
         connectProc._stderrLines = []
-        if (password && password.length > 0) {
-            connectProc.command = ["nmcli", "device", "wifi", "connect", ssid, "password", password, "ifname", root.device]
+        if (root._pendingUsedPassword) {
+            connectProc.command = ["sh", "-c",
+                "nmcli connection delete id \"$1\" >/dev/null 2>&1; exec nmcli device wifi connect \"$1\" password \"$2\" ifname \"$3\"",
+                "sh", ssid, password, root.device]
+        } else if (root.isSaved(ssid)) {
+            connectProc.command = ["nmcli", "connection", "up", "id", ssid, "ifname", root.device]
         } else {
             connectProc.command = ["nmcli", "device", "wifi", "connect", ssid, "ifname", root.device]
         }
@@ -262,6 +330,7 @@ Singleton {
 
     function clearError() {
         root.lastError = ""
+        root.needsPassword = false
     }
 
     function disconnect() {
@@ -274,7 +343,7 @@ Singleton {
 
     function forgetNetwork(ssid) {
         if (!ssid) return
-        forgetProc.command = ["nmcli", "connection", "delete", ssid]
+        forgetProc.command = ["nmcli", "connection", "delete", "id", ssid]
         forgetProc.running = true
         if (ssid === root.ssid) {
             root.ssid = ""

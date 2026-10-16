@@ -4,10 +4,10 @@
 // ShellState, so they persist and every module reads the same value.
 import QtQuick
 import QtQuick.Layouts
-import "components"
-import "../lockscreen"
-import "../../core/shell"
-import "../../core/styles"
+import "../../components"
+import "../../../lockscreen"
+import "../../../../core/shell"
+import "../../../../core/styles"
 
 PageScroll {
     id: root

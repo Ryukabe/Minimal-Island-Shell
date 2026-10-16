@@ -181,7 +181,7 @@ QtObject {
                 },
                 { id: "language", title: "Language & Region", subtitle: "Language, units and clock format", icon: "language",
                   tags: "locale language clock 12 24 hour temperature units weather location",
-                  source: "LanguageSettings.qml" },
+                  source: "pages/language/LanguageSettings.qml" },
                 { id: "about", title: "About", subtitle: "This setup, system and updates", icon: "info",
                   tags: "hardware info updates hermit version license credits cpu gpu kernel power profile reset",
                   source: "pages/about/About.qml" }

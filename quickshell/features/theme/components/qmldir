@@ -2,3 +2,4 @@ module features.theme.components
 ThemeCard 1.0 ThemeCard.qml
 WallpaperCard 1.0 WallpaperCard.qml
 AnimationCard 1.0 AnimationCard.qml
+MotionPresetCard 1.0 MotionPresetCard.qml

@@ -14,6 +14,8 @@ Item {
     property bool showBackButton: true
     property string selectedSsid: ""
     property bool showingPasswordInput: false
+    // true when the sheet was opened because a saved network had no usable password
+    property bool resumedFromSaved: false
     readonly property var availableNetworks: WifiService.networks.filter(function(n) { return n.ssid !== WifiService.ssid })
     readonly property var connectedNetworkInfo: {
         for (const n of WifiService.networks) {
@@ -28,8 +30,17 @@ Item {
     Connections {
         target: WifiService
         function onConnectingChanged() {
-            if (!WifiService.connecting && WifiService.lastError === "") {
+            if (!WifiService.connecting && WifiService.lastError === "" && !WifiService.needsPassword) {
                 root.showingPasswordInput = false
+            }
+        }
+        function onNeedsPasswordChanged() {
+            if (WifiService.needsPassword) {
+                root.selectedSsid = WifiService.needsPasswordSsid
+                root.resumedFromSaved = true
+                passwordInput.text = ""
+                root.showingPasswordInput = true
+                passwordInput.forceActiveFocus()
             }
         }
     }
@@ -356,7 +367,8 @@ Item {
                                             onClicked: {
                                                 WifiService.clearError()
                                                 root.selectedSsid = modelData.ssid
-                                                if (modelData.secured) {
+                                                root.resumedFromSaved = false
+                                                if (modelData.secured && !WifiService.isSaved(modelData.ssid)) {
                                                     passwordInput.text = ""
                                                     root.showingPasswordInput = true
                                                     passwordInput.forceActiveFocus()
@@ -390,7 +402,11 @@ Item {
             spacing: 12
 
             Text {
-                text: "Enter Wi-Fi Password"
+                text: root.resumedFromSaved
+                      ? "The saved password for this network didn't work - enter it again"
+                      : "Enter Wi-Fi Password"
+                width: parent.width
+                wrapMode: Text.Wrap
                 font.family: Fonts.text
                 font.pixelSize: Dimens.fontSizeSm
                 color: Colors.fgMuted

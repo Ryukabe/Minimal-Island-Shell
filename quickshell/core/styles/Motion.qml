@@ -44,7 +44,7 @@ QtObject {
     readonly property real glideMass: 1.0
 
     // ============ EXPRESSIVE tier ============
-    // Rare, playful moments (page pop-in, Control Center tile reflow/resize/drop,
+    // Rare, playful moments (island page pop-in, Control Center tile reflow/resize/drop,
     // pager snap). Livelier than glide, with its OWN bounce amount
     // (ShellState.motionExpressiveBouncePercent). expressiveMs is the non-spring fallback.
     readonly property real expressiveMs: ShellState.motionMovementMs * 0.5
@@ -55,11 +55,12 @@ QtObject {
     // ============ MORPH (island container) ============
     // Real spring physics for the island's width/height (MorphSpring.qml). Unlike the
     // SpringAnimation tiers above, these are true SwiftUI-style values: spring period in
-    // seconds and bounce 0-0.5. The spring is ~90% of the way after ~0.6x its duration, so
+    // seconds and bounce 0-1. The spring is ~90% of the way after ~0.6x its duration, so
     // the island morph runs at 70% of the Movement slider (floor 150 ms) to feel brisk.
-    // Bounce follows the Settings > Motion Bounce slider.
+    // Bounce follows the Settings > Motion Bounce slider 1:1 (20 % = 0.2) up to 0.8, which is
+    // already very wobbly; the slider is not dead above 50 % any more.
     readonly property real morphDuration: Math.max(0.15, ShellState.motionMovementMs / 1000 * 0.7)
-    readonly property real morphBounce: Math.max(0, Math.min(0.5, ShellState.motionBouncePercent / 100))
+    readonly property real morphBounce: Math.max(0, Math.min(0.8, ShellState.motionBouncePercent / 100))
 
     // Rest threshold in the animated property's own units:
     // epsilon for pixel values (x/y/width/height), scaleEpsilon for scale (~0.9–1.1).
@@ -77,4 +78,52 @@ QtObject {
     // ============ FADES tier ============
     // Opacity & color only — never springs (clamped 0-1, overshoot clips).
     readonly property real fadeMs: ShellState.motionFadeMs
+
+    // ============ PRESETS ============
+    // Each preset sets the three spring sliders and the two icon sliders together, and turns
+    // spring physics on. Fade and hover timing and the "Animated icons" switch are left alone.
+    // Balanced equals the shipped slider defaults. Settings > Motion highlights a preset only
+    // while every one of its sliders still matches exactly.
+    readonly property var presets: [
+        { name: "Calm", description: "Slow and soft, barely any bounce",
+          movementMs: 620, bouncePercent: 8, expressiveBouncePercent: 20,
+          iconSpeedPercent: 80, iconBouncePercent: 15 },
+        { name: "Balanced", description: "The default feel",
+          movementMs: 480, bouncePercent: 20, expressiveBouncePercent: 45,
+          iconSpeedPercent: 100, iconBouncePercent: 50 },
+        { name: "Lively", description: "Quick, with visible overshoot",
+          movementMs: 440, bouncePercent: 38, expressiveBouncePercent: 70,
+          iconSpeedPercent: 120, iconBouncePercent: 75 },
+        { name: "Snappy", description: "Fast and tight, little bounce",
+          movementMs: 280, bouncePercent: 12, expressiveBouncePercent: 30,
+          iconSpeedPercent: 140, iconBouncePercent: 25 }
+    ]
+
+    readonly property string activePreset: {
+        if (!ShellState.motionSpringEnabled) return ""
+        for (var i = 0; i < motion.presets.length; i++) {
+            var p = motion.presets[i]
+            if (ShellState.motionMovementMs === p.movementMs
+                    && ShellState.motionBouncePercent === p.bouncePercent
+                    && ShellState.motionExpressiveBouncePercent === p.expressiveBouncePercent
+                    && ShellState.motionIconSpeedPercent === p.iconSpeedPercent
+                    && ShellState.motionIconBouncePercent === p.iconBouncePercent)
+                return p.name
+        }
+        return ""
+    }
+
+    function applyPreset(name) {
+        for (var i = 0; i < motion.presets.length; i++) {
+            var p = motion.presets[i]
+            if (p.name !== name) continue
+            ShellState.motionSpringEnabled = true
+            ShellState.motionMovementMs = p.movementMs
+            ShellState.motionBouncePercent = p.bouncePercent
+            ShellState.motionExpressiveBouncePercent = p.expressiveBouncePercent
+            ShellState.motionIconSpeedPercent = p.iconSpeedPercent
+            ShellState.motionIconBouncePercent = p.iconBouncePercent
+            return
+        }
+    }
 }

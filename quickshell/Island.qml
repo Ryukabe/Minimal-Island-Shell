@@ -104,6 +104,9 @@ PanelWindow {
         VolumeService.percent
         NotificationService.trackedNotifications
         EventToastService.title
+        // Singleton: must be touched here or it never starts listening for new windows
+        // (its only other user, AppToast, only loads after the service itself opens the page).
+        AppLaunchToastService.appName
         PolkitService.isActive
         Hyprland
         Kitty
@@ -290,13 +293,14 @@ PanelWindow {
             : (ShellState.islandNotchMode ? 0 : ShellState.islandTopMargin)
         clip: true
 
-        readonly property bool expanded: ShellState.activePage !== "clock" 
-                       && ShellState.activePage !== "timertoast" 
-                       && ShellState.activePage !== "notificationtoast" 
+        readonly property bool expanded: ShellState.activePage !== "clock"
+                       && ShellState.activePage !== "timertoast"
+                       && ShellState.activePage !== "notificationtoast"
                        && ShellState.activePage !== "eventtoast"
-                       && ShellState.activePage !== "volume" 
-                       && ShellState.activePage !== "brightness" 
-                       && ShellState.activePage !== "settings" 
+                       && ShellState.activePage !== "apptoast"
+                       && ShellState.activePage !== "volume"
+                       && ShellState.activePage !== "brightness"
+                       && ShellState.activePage !== "settings"
                        && ShellState.activePage !== "lock"
                        && ShellState.activePage !== "polkit"
         readonly property int compactHeight: ShellState.islandCompactHeight
@@ -520,9 +524,9 @@ PanelWindow {
                         target: pageLoader.item
                         property: "scale"
                         to: 1.0
-                        spring: Motion.glideSpring
-                        damping: Motion.glideDamping
-                        mass: Motion.glideMass
+                        spring: Motion.expressiveSpring
+                        damping: Motion.expressiveDamping
+                        mass: Motion.expressiveMass
                         epsilon: Motion.scaleEpsilon
                     }
                 }
