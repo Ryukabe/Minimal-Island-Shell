@@ -38,11 +38,18 @@ hl.window_rule({
 -- File picker
 hl.window_rule({
     name   = "file-picker",
-    match  = { title = "^(Open File|Open Folder|Open|Save|Save As|Export|Choose File|Rename|script%-fu)$" },
+    match  = { title = "^(Open File|Open Folder|Open|Save|Save As|Export|Choose File|Rename|script%-fu|Rename .*|File Operation Progress|Confirm to replace files)$" },
     float  = true,
     center = true,
     size   = "600 300",
 })
+
+-- .lua
+--hl.window_rule({
+--  match  = { class = "^([Tt]hunar)$", title = "^(Rename .*|File Operation Progress|Confirm to replace files)$" },
+--  float  = true,
+--  center = true,
+--})
 
 -- xdg-desktop-portal-gtk
 hl.window_rule({
@@ -123,6 +130,9 @@ hl.window_rule({
     --size        = "1000 575",
     border_size = 0,
 })
+
+-- .lua
+--hl.window_rule({ match = { class = "^([Tt]hunar)$" }, opacity = "0.92 0.85", rounding = 16 })
 
 -- Code editors
 hl.window_rule({
