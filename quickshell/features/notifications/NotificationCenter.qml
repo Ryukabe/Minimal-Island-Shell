@@ -5,7 +5,7 @@ import QtQuick
 import "."
 import "../../core/shell"
 import "../../core/styles"
-import "components/notification-center"
+import "components/"
 
 Item {
     id: root

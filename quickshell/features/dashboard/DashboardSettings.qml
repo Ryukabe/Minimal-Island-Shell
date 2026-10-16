@@ -2,7 +2,7 @@
 // Every control reads from and writes to ShellState (persisted by SettingsStore).
 import QtQuick
 import QtQuick.Layouts
-import "components"
+import "../settings/components"
 import "../../core/shell"
 import "../../core/styles"
 

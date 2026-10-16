@@ -1,6 +1,6 @@
 import QtQuick
-import "../../services"
-import "../../styles"
+import "../../../core/shell"
+import "../../../core/styles"
 
 Rectangle {
     id: row

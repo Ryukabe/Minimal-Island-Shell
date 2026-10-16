@@ -8,6 +8,7 @@ import Quickshell.Io
 import "features/bar"
 import "features/clipboard"
 import "features/control-center"
+import "features/dashboard"
 import "features/launcher"
 import "features/lockscreen"
 import "features/notifications"
