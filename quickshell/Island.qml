@@ -567,7 +567,7 @@ PanelWindow {
         Component { id: polkitPage; PolkitAgent {} }
         Component { id: timerToastPage; TimerToast {} }
         Component { id: timerPage; TimerModule {} }
-        Component { id: statusPage; StatusPanel {} }
+        Component { id: statusPage; Dashboard {} }
         Component { id: appToastPage; AppToast {} }        
 
         Component {
