@@ -50,15 +50,15 @@ hl.bind("XF86AudioPrev",                     hl.dsp.exec_cmd("playerctl previous
 --- Apps ---
 
 -- Terminal
-hl.bind(mainMod .. " + RETURN",              hl.dsp.exec_cmd("kitty"))
+hl.bind(mainMod .. " + RETURN",              hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/open-default.sh terminal"))
 hl.bind(mainMod .. " + ALT + RETURN",        hl.dsp.exec_cmd("alacritty"))
 
 -- File manager
 hl.bind("SUPER + ALT + F",                   hl.dsp.exec_cmd("nautilus"))
-hl.bind("SUPER + F",             hl.dsp.exec_cmd("thunar"))
+hl.bind("SUPER + F",                         hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/open-default.sh files"))
 
 -- Browser
-hl.bind(mainMod .. " + B",                   hl.dsp.exec_cmd("zen-browser"))
+hl.bind(mainMod .. " + B",                   hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/open-default.sh browser"))
 hl.bind(mainMod .. " + ALT + B",             hl.dsp.exec_cmd("helium-browser"))
 
 -- Editor

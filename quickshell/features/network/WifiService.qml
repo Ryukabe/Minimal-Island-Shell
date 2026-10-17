@@ -6,7 +6,10 @@ import Quickshell.Io
 
 Singleton {
     id: root
-    readonly property string device: "wlan0"
+    // The Wi-Fi interface NetworkManager reports (wlan0, wlp2s0, wlx..., whatever this machine uses).
+    // Found at startup and again whenever it goes missing, so nothing here assumes a name.
+    // "" while no Wi-Fi adapter is found.
+    property string device: ""
     property bool enabled: false
     property bool adapterMissing: false
     property string ssid: ""
@@ -29,11 +32,24 @@ Singleton {
         return root.savedProfiles.indexOf(ssid) !== -1
     }
 
-    // Radio power state (nmcli's equivalent of iwctl's "Powered on/off")
+    // Radio power state (one switch for all Wi-Fi adapters, so it needs no device name)
     Process {
         id: radioProc
         command: ["nmcli", "radio", "wifi"]
         stdout: SplitParser { onRead: data => root._parseRadioLine(data) }
+    }
+
+    // Finds the Wi-Fi interface: keeps the current one while it still exists, otherwise prefers a
+    // connected adapter, otherwise the first one NetworkManager lists. Type "wifi" only (not wifi-p2p).
+    Process {
+        id: deviceProc
+        command: ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE", "device", "status"]
+        property var _lines: []
+        stdout: SplitParser { onRead: data => deviceProc._lines.push(data) }
+        onExited: (code, status) => {
+            if (code === 0) root._pickDevice(deviceProc._lines)
+            deviceProc._lines = []
+        }
     }
 
     // Connection state for this specific device: state word + active profile name.
@@ -51,6 +67,7 @@ Singleton {
                 root.adapterMissing = true
                 root.ssid = ""
                 root.hasInternet = false
+                root.detectDevice()   // the adapter may have been unplugged or renamed
             } else {
                 root.adapterMissing = false
                 root._parseStatusLines(statusProc._lines)
@@ -179,8 +196,39 @@ Singleton {
         root.refreshSaved()
     }
 
+    function detectDevice() {
+        if (!deviceProc.running) deviceProc.running = true
+    }
+
+    function _pickDevice(lines) {
+        const wifi = []
+        for (const raw of lines) {
+            if (!raw || !raw.trim()) continue
+            const f = root._splitTerse(raw)
+            if (f.length >= 3 && f[1] === "wifi") wifi.push({ name: f[0], state: f[2] })
+        }
+
+        let pick = ""
+        if (wifi.some(d => d.name === root.device)) {
+            pick = root.device
+        } else {
+            const live = wifi.find(d => d.state.startsWith("connected"))
+            pick = live ? live.name : (wifi.length > 0 ? wifi[0].name : "")
+        }
+
+        if (pick !== root.device) root.device = pick
+        if (pick === "") {
+            root.adapterMissing = true
+            root.ssid = ""
+            root.hasInternet = false
+        } else {
+            root.refresh()
+        }
+    }
+
     function refresh() {
         if (!radioProc.running) radioProc.running = true
+        if (root.device === "") { root.detectDevice(); return }
         if (!statusProc.running) statusProc.running = true
     }
 
@@ -199,7 +247,7 @@ Singleton {
     }
 
     function scanNetworks() {
-        if (!root.enabled || triggerScanProc.running || scanListProc.running) return
+        if (!root.enabled || root.device === "" || triggerScanProc.running || scanListProc.running) return
         root.scanning = true
         triggerScanProc.running = true
     }
@@ -309,6 +357,10 @@ Singleton {
     //                    really used (nmcli would otherwise silently reuse the old secrets).
     // ssid/password go to sh as positional args, never spliced into the command string.
     function connectToNetwork(ssid, password) {
+        if (root.device === "") {
+            root.lastError = "No Wi-Fi adapter found"
+            return
+        }
         root.lastError = ""
         root.needsPassword = false
         root.connecting = true
@@ -334,6 +386,7 @@ Singleton {
     }
 
     function disconnect() {
+        if (root.device === "") return
         disconnectProc.command = ["nmcli", "device", "disconnect", root.device]
         disconnectProc.running = true
         root.ssid = ""

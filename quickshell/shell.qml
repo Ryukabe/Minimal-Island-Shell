@@ -9,12 +9,12 @@ import "features/settings"
 ShellRoot {
     Island {}
     SettingsApp {}
-    LockScreen {}
+    LockScreen { id: lockScreen }
 
     IpcHandler {
         target: "lock"
         function lock() { ShellState.showPage("lock") }
-        function unlock() { if (ShellState.activePage === "lock") ShellState.showPage("clock") }
-        function toggle() { ShellState.activePage === "lock" ? ShellState.showPage("clock") : ShellState.showPage("lock") }
+        function unlock() { if (ShellState.activePage === "lock") lockScreen.unlock() }
+        function toggle() { ShellState.activePage === "lock" ? lockScreen.unlock() : ShellState.showPage("lock") }
     }
 }

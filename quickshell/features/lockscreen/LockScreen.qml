@@ -17,8 +17,18 @@ import "../../core/styles"
 WlSessionLock {
     id: sessionLock
 
+    property Item activePasswordInput: null
+
     locked: typeof ShellState !== "undefined" && ShellState.activePage === "lock"
     onLockedChanged: if (locked) { KnowledgeSettings.pickNext(); WeatherService.refreshIfStale() }
+
+    function unlock() {
+        if (activePasswordInput) {
+            activePasswordInput.focus = false
+            activePasswordInput = null
+        }
+        if (typeof ShellState !== "undefined") ShellState.showPage("clock")
+    }
 
     surface: Component {
         WlSessionLockSurface {
@@ -46,9 +56,7 @@ WlSessionLock {
                     if (result === PamResult.Success) {
                         errorMessage.visible = false
                         passwordInput.text = ""
-                        if (typeof ShellState !== "undefined") {
-                            ShellState.showPage("clock")
-                        }
+                        sessionLock.unlock()
                     } else {
                         errorMessage.text = "incorrect password"
                         errorMessage.visible = true
@@ -503,7 +511,15 @@ WlSessionLock {
                                 color: Colors.fg
                                 focus: true
 
-                                Component.onCompleted: passwordInput.forceActiveFocus()
+                                Component.onCompleted: {
+                                    sessionLock.activePasswordInput = passwordInput
+                                    passwordInput.forceActiveFocus()
+                                }
+                                Component.onDestruction: {
+                                    if (sessionLock.activePasswordInput === passwordInput) {
+                                        sessionLock.activePasswordInput = null
+                                    }
+                                }
 
                                 onTextChanged: {
                                     if (errorMessage.visible) errorMessage.visible = false

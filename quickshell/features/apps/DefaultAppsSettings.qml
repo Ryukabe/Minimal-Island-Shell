@@ -1,4 +1,4 @@
-// pages/apps/defaultapps/DefaultAppsSettings.qml — Apps > Default apps.
+// features/apps/DefaultAppsSettings.qml — Apps > Default apps.
 // Real system defaults through xdg-mime (see DefaultAppsService.qml). Needs xdg-utils installed.
 import QtQuick
 import QtQuick.Layouts
@@ -37,6 +37,18 @@ PageScroll {
             options: svc.optionsFor("files")
             selectedValue: svc.currentName("files")
             onOptionSelected: (name) => svc.choose("files", name)
+            showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Terminal" }
+
+    GroupCard {
+        DropdownRow {
+            label: "Terminal"
+            options: svc.optionsFor("terminal")
+            selectedValue: svc.currentName("terminal")
+            onOptionSelected: (name) => svc.choose("terminal", name)
             showDivider: false
         }
     }

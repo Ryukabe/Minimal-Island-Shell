@@ -1,9 +1,9 @@
-// pages/apps/allapps/AllAppsSettings.qml — Apps > All apps.
+// features/apps/AllAppsSettings.qml — Apps > All apps.
 // Lists every installed app (from the .desktop entries) with a favourite star and a hide eye.
 // Favourites and hidden live on ShellState (arrays of app ids) and are saved by SettingsStore.
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
+import "."
 import "../settings/components"
 import "../../core/shell"
 import "../../core/styles"
@@ -16,18 +16,8 @@ PageScroll {
     property string showFilter: "All"
     property string query: ""
 
-    // Every app that is meant to appear in menus, A to Z.
-    readonly property var allApps: {
-        const out = []
-        const list = DesktopEntries.applications.values
-        for (let i = 0; i < list.length; i++) {
-            const e = list[i]
-            if (e.noDisplay) continue
-            out.push({ id: e.id, name: e.name, comment: e.comment || e.genericName || "", icon: e.icon })
-        }
-        out.sort((a, b) => a.name.localeCompare(b.name))
-        return out
-    }
+    // Every app that is meant to appear in menus, A to Z (see InstalledApps.qml).
+    readonly property var allApps: InstalledApps.apps
 
     readonly property var shownApps: {
         const q = root.query.toLowerCase().trim()

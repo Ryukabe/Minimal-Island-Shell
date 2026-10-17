@@ -5,3 +5,4 @@ MainToggleView 1.0 MainToggleView.qml
 TileSizePicker 1.0 TileSizePicker.qml
 AddControlTray 1.0 AddControlTray.qml
 SliderControl 1.0 SliderControl.qml
+TogglePager 1.0 TogglePager.qml

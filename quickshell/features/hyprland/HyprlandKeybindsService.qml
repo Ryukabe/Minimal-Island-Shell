@@ -296,6 +296,12 @@ Item {
         if (/switch-shell\.sh qs/.test(action)) return "Shell: Toggle Quickshell"
         if (/switch-shell\.sh ags/.test(action)) return "Shell: Toggle AGS"
 
+        m = action.match(/open-default\.sh\s+(\w+)/)
+        if (m) {
+            const defaultNames = { browser: "Open Default Browser", terminal: "Open Default Terminal", files: "Open Default File Manager" }
+            return defaultNames[m[1]] || ("Open Default: " + m[1])
+        }
+
         if (/playerctl next/.test(action)) return "Next Track"
         if (/playerctl previous/.test(action)) return "Previous Track"
         if (/playerctl play-pause/.test(action)) return "Play / Pause"

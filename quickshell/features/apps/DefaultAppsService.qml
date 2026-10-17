@@ -1,11 +1,14 @@
-// pages/apps/defaultapps/DefaultAppsService.qml — reads and sets the default app for each kind of file.
+// features/apps/DefaultAppsService.qml — reads and sets the default app for each kind of file.
 // Everything goes through xdg-mime (package xdg-utils), the same store other desktop apps read, so a
 // change here is a real system change, not a shell-only setting. Candidates come from the installed
 // .desktop entries (Quickshell DesktopEntries), filtered by their Categories. Not a singleton:
 // DefaultAppsSettings.qml creates one while the page is open.
+// "terminal" has no official xdg entry, so it uses x-scheme-handler/terminal as our own convention;
+// hypr/scripts/open-default.sh reads the same key for the terminal keybind.
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "."
 
 Item {
     id: root
@@ -18,6 +21,7 @@ Item {
           mimes: ["x-scheme-handler/https", "x-scheme-handler/http", "text/html"] },
         { key: "email", categories: ["Email"], mimes: ["x-scheme-handler/mailto"] },
         { key: "files", categories: ["FileManager"], mimes: ["inode/directory"] },
+        { key: "terminal", categories: ["TerminalEmulator"], mimes: ["x-scheme-handler/terminal"] },
         { key: "video", categories: ["Video"],
           mimes: ["video/mp4", "video/x-matroska", "video/webm", "video/mpeg"] },
         { key: "music", categories: ["Audio", "Music"],
@@ -28,18 +32,8 @@ Item {
         { key: "pdf", categories: ["Viewer", "Office"], mimes: ["application/pdf"] }
     ]
 
-    // Installed apps that are meant to be shown in menus: [{ id, name, categories }]
-    readonly property var apps: {
-        const out = []
-        const list = DesktopEntries.applications.values
-        for (let i = 0; i < list.length; i++) {
-            const e = list[i]
-            if (e.noDisplay) continue
-            out.push({ id: e.id, name: e.name, categories: Array.from(e.categories || []) })
-        }
-        out.sort((a, b) => a.name.localeCompare(b.name))
-        return out
-    }
+    // Installed apps that are meant to be shown in menus: [{ id, name, categories, ... }] (see InstalledApps.qml)
+    readonly property var apps: InstalledApps.apps
 
     // key -> desktop id (without ".desktop"), as last read from the system
     property var current: ({})
