@@ -24,6 +24,23 @@ Item {
         return null
     }
 
+    // Tells WifiService a Wi-Fi list is on screen. While at least one is, the service scans right
+    // away and then every "Wi-Fi scan" seconds (Settings > Wi-Fi). Hidden or closed lists cost nothing.
+    property bool _counted: false
+
+    function _syncViewer() {
+        if (root.visible === root._counted) return
+        root._counted = root.visible
+        if (root._counted) WifiService.viewOpened()
+        else WifiService.viewClosed()
+    }
+
+    onVisibleChanged: root._syncViewer()
+    Component.onCompleted: root._syncViewer()
+    Component.onDestruction: {
+        if (root._counted) WifiService.viewClosed()
+    }
+
     // Auto-close the password sheet once a connect attempt finishes
     // successfully; on failure it stays open so the error text (bound to
     // WifiService.lastError) is visible right where the user is.

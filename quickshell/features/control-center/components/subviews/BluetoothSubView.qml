@@ -37,7 +37,8 @@ Item {
             anchors.right: parent.right
             anchors.margins: 16
             spacing: 12
-Item {
+
+            Item {
                 width: parent.width
                 height: 32
 
@@ -160,7 +161,7 @@ Item {
                             width: parent.width
                             height: 52
                             radius: ShellState.islandCornerRadius
-                            color: Colors.bgSurface
+                            color: Colors.subBgMica
                             border.width: 1
                             border.color: Colors.border
 
@@ -193,8 +194,14 @@ Item {
                                         width: parent.width
                                     }
 
+                                    // "Connected", or "Connected · 80%" when the setting is on and the device reports a charge
                                     Text {
-                                        text: "Connected"
+                                        text: {
+                                            const level = BluetoothService.batteryLevels[modelData.mac]
+                                            return (ShellState.bluetoothShowBattery && level !== undefined)
+                                                ? "Connected · " + level + "%"
+                                                : "Connected"
+                                        }
                                         font.pixelSize: Dimens.fontSizeXSm
                                         color: Colors.accent
                                     }

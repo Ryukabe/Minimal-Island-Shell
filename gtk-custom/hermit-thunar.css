@@ -4,8 +4,56 @@
    follows the active theme:
      hm_bg  hm_fg  hm_surface  hm_accent  hm_accent_light  hm_select
      hm_muted  hm_border  hm_red  hm_green  hm_yellow
-   Sections 10-13 (menus, tooltips, popup entries, dialogs) affect ALL GTK3 apps.
+   Sections 0 and 10-15 (palette, menus, tooltips, popup entries, dialogs, progress)
+   affect ALL GTK3 apps.
    ============================================================================= */
+
+/* =============================================================================
+   0. Palette for adw-gtk3
+   adw-gtk3 colors every window, dialog, checkbox, list and progress bar from
+   these named colors. They were missing, so dialogs fell back to the default
+   gray (#222226) and blue (#3584e4). Defining them here fixes all of it at once.
+   ============================================================================= */
+
+@define-color theme_bg_color @hm_bg;
+@define-color theme_fg_color @hm_fg;
+@define-color theme_base_color @hm_surface;
+@define-color theme_text_color @hm_fg;
+@define-color theme_selected_bg_color @hm_accent;
+@define-color theme_selected_fg_color @hm_bg;
+@define-color window_bg_color @hm_bg;
+@define-color window_fg_color @hm_fg;
+@define-color dialog_bg_color @hm_bg;
+@define-color dialog_fg_color @hm_fg;
+@define-color view_bg_color @hm_surface;
+@define-color view_fg_color @hm_fg;
+@define-color card_bg_color @hm_surface;
+@define-color card_fg_color @hm_fg;
+@define-color popover_bg_color @hm_surface;
+@define-color popover_fg_color @hm_fg;
+@define-color headerbar_bg_color @hm_bg;
+@define-color headerbar_fg_color @hm_fg;
+@define-color headerbar_border_color @hm_bg;
+@define-color headerbar_backdrop_color @hm_bg;
+@define-color sidebar_bg_color @hm_bg;
+@define-color sidebar_fg_color @hm_fg;
+@define-color sidebar_backdrop_color @hm_bg;
+@define-color sidebar_border_color @hm_bg;
+@define-color accent_bg_color @hm_accent;
+@define-color accent_fg_color @hm_bg;
+@define-color accent_color @hm_accent_light;
+@define-color destructive_bg_color @hm_red;
+@define-color destructive_fg_color @hm_bg;
+@define-color destructive_color @hm_red;
+@define-color error_bg_color @hm_red;
+@define-color error_fg_color @hm_bg;
+@define-color error_color @hm_red;
+@define-color success_bg_color @hm_green;
+@define-color success_fg_color @hm_bg;
+@define-color success_color @hm_green;
+@define-color warning_bg_color @hm_yellow;
+@define-color warning_fg_color @hm_bg;
+@define-color warning_color @hm_yellow;
 
 /* =============================================================================
    1. Window & titlebar
@@ -26,6 +74,7 @@
     background-color: @hm_bg;
     background-image: none;
     box-shadow: none;
+    border: none;
     padding: 4px 0 2px 0;
     min-height: 0;
 }
@@ -34,6 +83,7 @@
     border-radius: 8px;
     background: none;
     box-shadow: none;
+    border: none;
 }
 
 .thunar .titlebutton.close {
@@ -55,6 +105,7 @@
     background-color: transparent;
     background-image: none;
     box-shadow: none;
+    border: none;
     color: @hm_fg;
     border-radius: 8px;
     padding: 5px;
@@ -107,13 +158,14 @@
     caret-color: @hm_accent;
     border: none;
     box-shadow: none;
-    border-radius: 8px;
-    padding: 4px 10px;
-    min-height: 0;
+    border-radius: 10px;
+    padding: 8px 8px;
+    min-height: 20px;
 }
 
 .thunar entry:focus {
-    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.6);
+    box-shadow: none;
+    border: none;
 }
 
 .thunar entry:disabled {
@@ -121,7 +173,8 @@
 }
 
 .thunar entry.error {
-    box-shadow: inset 0 0 0 1px @hm_red;
+    box-shadow: none;
+    border: none;
 }
 
 .thunar entry image {
@@ -137,6 +190,7 @@
     margin: 0;
     padding: 4px 5px;
     border-radius: 8px;
+    border: none;
     transition: all ease 0.4s;
 }
 
@@ -146,6 +200,7 @@
     background: @hm_select;
     color: @hm_accent_light;
     box-shadow: none;
+    border: none;
 }
 
 .thunar .location-button.path-bar-button:not(:checked) {
@@ -173,6 +228,7 @@
     background: none;
     background-image: none;
     box-shadow: none;
+    border: none;
 }
 
 .thunar .sidebar {
@@ -206,6 +262,7 @@
     margin: 4px 8px 0 0;
     border-radius: 12px;
     background-color: @hm_surface;
+    border: none;
 }
 
 .thunar .frame.standard-view .view:not(.rubberband),
@@ -217,12 +274,10 @@
     color: @hm_fg;
 }
 
-/* row hover in list view (not on the selected row) */
 .thunar .frame.standard-view treeview.view:hover:not(:selected) {
     background-color: alpha(@hm_fg, 0.05);
 }
 
-/* solid highlight on selected files */
 .thunar .frame.standard-view .view:selected,
 .thunar .frame.standard-view .view.cell:selected,
 .thunar .frame.standard-view iconview:selected,
@@ -232,14 +287,12 @@
     border-radius: 8px;
 }
 
-/* one continuous highlight per row in list view */
 .thunar .frame.standard-view treeview.view:selected,
 .thunar .frame.standard-view treeview.view.cell:selected,
 .thunar .frame.standard-view treeview.view *:selected {
     border-radius: 0;
 }
 
-/* column headers */
 .thunar .frame.standard-view treeview.view header button {
     background-image: none;
     box-shadow: none;
@@ -260,7 +313,6 @@
     color: @hm_accent_light;
 }
 
-/* folder expand arrows in list/tree views */
 .thunar treeview.view.expander {
     color: @hm_muted;
 }
@@ -272,7 +324,7 @@
 .thunar rubberband,
 .thunar .rubberband {
     background-color: alpha(@hm_accent, 0.25);
-    border: 1px solid alpha(@hm_accent, 0.6);
+    border: none;
 }
 
 /* =============================================================================
@@ -282,8 +334,20 @@
 .thunar header.top {
     background: none;
     box-shadow: none;
+    border: none;
     padding: 0 10px 0 0;
-    margin: 3px 0 -3px -2px;
+    margin: 0 0 4px 0;
+}
+
+.thunar notebook {
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.thunar notebook stack {
+    background: none;
+    border-radius: 12px;
 }
 
 .thunar header.top tabs tab,
@@ -293,6 +357,7 @@
     border-radius: 8px;
     color: @hm_muted;
     background: none;
+    border: none;
     transition: all ease 300ms;
 }
 
@@ -314,6 +379,7 @@
     padding: 2px;
     border-radius: 6px;
     background: none;
+    border: none;
     color: @hm_muted;
 }
 
@@ -329,6 +395,7 @@
 .thunar statusbar {
     background-color: @hm_surface;
     border-radius: 12px;
+    border: none;
     padding: 3px 10px;
     margin: 6px -2px 6px -10px;
     color: @hm_fg;
@@ -341,20 +408,24 @@
 .thunar infobar {
     background-color: @hm_surface;
     border-radius: 10px;
+    border: none;
     margin: 4px 8px 0 0;
 }
 
 .thunar infobar.warning {
-    box-shadow: inset 0 0 0 1px alpha(@hm_yellow, 0.7);
+    box-shadow: none;
+    border: none;
 }
 
 .thunar infobar.error {
-    box-shadow: inset 0 0 0 1px alpha(@hm_red, 0.7);
+    box-shadow: none;
+    border: none;
 }
 
 .thunar infobar.info,
 .thunar infobar.question {
-    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.5);
+    box-shadow: none;
+    border: none;
 }
 
 .thunar box.vertical .image {
@@ -368,6 +439,7 @@
 .thunar scrollbar,
 .thunar scrollbar trough {
     background: none;
+    border: none;
 }
 
 .thunar scrollbar.vertical slider {
@@ -381,6 +453,7 @@
 .thunar scrollbar slider {
     border-radius: 4px;
     background-color: alpha(@hm_fg, 0.25);
+    border: none;
 }
 
 .thunar scrollbar slider:hover {
@@ -392,7 +465,7 @@
 }
 
 /* =============================================================================
-   10. Right-click / 3-dot menus and popovers   (affects all GTK3 apps)
+   10. Right-click / 3-dot menus and popovers
    ============================================================================= */
 
 menu,
@@ -401,7 +474,8 @@ menu,
 popover.background {
     background-color: @hm_surface;
     color: @hm_fg;
-    border: 1px solid alpha(@hm_fg, 0.12);
+    border: none;
+    box-shadow: none;
     border-radius: 10px;
     padding: 4px;
 }
@@ -411,6 +485,7 @@ menu menuitem,
 popover modelbutton {
     border-radius: 6px;
     padding: 5px 10px;
+    border: none;
 }
 
 menu menuitem:hover,
@@ -450,17 +525,18 @@ popover separator {
     background-color: alpha(@hm_fg, 0.1);
     min-height: 1px;
     margin: 4px 6px;
+    border: none;
 }
 
 /* =============================================================================
-   11. Tooltips   (affects all GTK3 apps)
+   11. Tooltips
    ============================================================================= */
 
 tooltip,
 tooltip.background {
     background-color: @hm_surface;
     color: @hm_fg;
-    border: 1px solid alpha(@hm_fg, 0.12);
+    border: none;
     border-radius: 8px;
     box-shadow: none;
 }
@@ -470,7 +546,7 @@ tooltip label {
 }
 
 /* =============================================================================
-   12. Typeahead / popup entries   (affects all GTK3 apps)
+   12. Typeahead / popup entries
    ============================================================================= */
 
 window.popup entry {
@@ -479,28 +555,56 @@ window.popup entry {
     color: @hm_fg;
     caret-color: @hm_accent;
     border-radius: 8px;
-    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.6);
+    border: none;
+    box-shadow: none;
 }
 
 /* =============================================================================
-   13. Dialogs: Properties, Rename, file operations   (affects all GTK3 dialogs)
+   13. Dialogs & Configure / Preferences Pages
    ============================================================================= */
 
-window.dialog,
-window.dialog.background {
+dialog,
+dialog.background {
     background-color: @hm_bg;
     color: @hm_fg;
+    border: none;
+    box-shadow: none;
 }
 
-window.dialog headerbar {
+dialog headerbar {
     background-color: @hm_bg;
     background-image: none;
     box-shadow: none;
     border: none;
 }
 
-window.dialog entry,
-window.dialog spinbutton {
+/* Lists inside the toolbar editor / column editor.
+   The rounded surface is drawn by the scrolled window; the tree on top is
+   transparent, and selection is square and continuous across the row (GTK3
+   draws it once per cell, so rounding it left a broken pill). */
+dialog scrolledwindow,
+dialog list {
+    background-color: @hm_surface;
+    border-radius: 10px;
+    border: none;
+    box-shadow: none;
+}
+
+dialog treeview.view {
+    background-color: transparent;
+    border-radius: 0;
+}
+
+dialog treeview.view:selected,
+dialog treeview.view:selected:focus,
+dialog list row:selected {
+    background-color: @hm_select;
+    color: @hm_accent_light;
+    border-radius: 0;
+}
+
+dialog entry,
+dialog spinbutton {
     background-image: none;
     background-color: @hm_surface;
     color: @hm_fg;
@@ -510,92 +614,272 @@ window.dialog spinbutton {
     border-radius: 8px;
 }
 
-window.dialog entry:focus,
-window.dialog spinbutton:focus {
-    box-shadow: inset 0 0 0 1px alpha(@hm_accent, 0.6);
+dialog entry:focus,
+dialog spinbutton:focus {
+    box-shadow: none;
+    border: none;
 }
 
-window.dialog button {
+dialog button {
     background-image: none;
     background-color: @hm_surface;
     color: @hm_fg;
-    border: 1px solid alpha(@hm_fg, 0.08);
+    border: none;
     box-shadow: none;
     border-radius: 8px;
-    padding: 5px 12px;
+    padding: 6px 12px;
     transition: all ease 0.3s;
 }
 
-window.dialog button:hover {
+dialog button:hover {
     background-color: alpha(@hm_accent, 0.15);
     color: @hm_accent_light;
 }
 
-window.dialog button:disabled {
+dialog button:disabled {
     opacity: 0.4;
 }
 
-window.dialog button.suggested-action {
+dialog button.suggested-action {
     background-color: @hm_accent;
     color: @hm_bg;
 }
 
-window.dialog button.destructive-action {
+dialog button.destructive-action {
     background-color: @hm_red;
     color: @hm_bg;
 }
 
-window.dialog notebook > header {
+dialog notebook > header {
     background: none;
     box-shadow: none;
+    border: none;
 }
 
-window.dialog notebook > header tab {
+dialog notebook > header tab {
     border-radius: 8px;
     padding: 4px 12px;
     color: @hm_muted;
+    border: none;
 }
 
-window.dialog notebook > header tab:checked {
+dialog notebook > header tab:checked {
     background-color: alpha(@hm_accent, 0.15);
     color: @hm_accent;
 }
 
-window.dialog progressbar trough {
+dialog progressbar trough {
     background-color: @hm_surface;
     border-radius: 6px;
+    border: none;
     min-height: 6px;
 }
 
-window.dialog progressbar progress {
+dialog progressbar progress {
     background-color: @hm_accent;
     border-radius: 6px;
+    border: none;
     min-height: 6px;
 }
 
-window.dialog switch {
+dialog switch {
     background-color: @hm_surface;
-    border: 1px solid alpha(@hm_fg, 0.12);
+    border: none;
     border-radius: 12px;
 }
 
-window.dialog switch:checked {
+dialog switch:checked {
     background-color: @hm_accent;
 }
 
-window.dialog switch slider {
+dialog switch slider {
     background-color: @hm_fg;
     border-radius: 12px;
 }
 
-window.dialog check,
-window.dialog radio {
+dialog check,
+dialog radio {
     background-color: @hm_surface;
-    border: 1px solid alpha(@hm_fg, 0.3);
+    border: none;
 }
 
-window.dialog check:checked,
-window.dialog radio:checked {
+dialog check:checked,
+dialog radio:checked {
     background-color: @hm_accent;
     color: @hm_bg;
+}
+
+/* Notebook pages (Preferences, Properties): flat page, pill tabs without the underline */
+dialog notebook,
+dialog notebook > stack {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+dialog notebook > header,
+dialog notebook > header tab,
+dialog notebook > header tab:checked {
+    box-shadow: none;
+}
+
+/* =============================================================================
+   14. Delete & Message Dialogs
+   ============================================================================= */
+
+messagedialog,
+messagedialog.background,
+messagedialog.csd,
+messagedialog decoration,
+messagedialog windowhandle,
+messagedialog box,
+messagedialog .dialog-vbox,
+messagedialog .dialog-action-area {
+    background-color: @hm_bg;
+    background-image: none;
+    color: @hm_fg;
+    border: none;
+    box-shadow: none;
+}
+
+messagedialog,
+messagedialog.background,
+messagedialog decoration {
+    border-radius: 14px;
+}
+
+messagedialog headerbar,
+messagedialog .titlebar {
+    background-color: @hm_bg;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 14px 14px 0 0;
+    min-height: 0;
+    padding: 10px 0 0 0;
+}
+
+messagedialog label {
+    color: @hm_fg;
+}
+
+messagedialog button {
+    background-image: none;
+    background-color: @hm_surface;
+    color: @hm_fg;
+    border: none;
+    box-shadow: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    min-height: 0;
+    transition: all ease 0.3s;
+}
+
+messagedialog button:hover {
+    background-color: alpha(@hm_accent, 0.15);
+    color: @hm_accent_light;
+}
+
+messagedialog button:focus {
+    box-shadow: none;
+    border: none;
+}
+
+messagedialog button.destructive-action,
+messagedialog button:last-child:not(:only-child) {
+    background-color: alpha(@hm_red, 0.85);
+    color: @hm_bg;
+}
+
+messagedialog button.destructive-action:hover,
+messagedialog button:last-child:not(:only-child):hover {
+    background-color: @hm_red;
+    color: @hm_bg;
+}
+
+messagedialog button.suggested-action {
+    background-color: @hm_accent;
+    color: @hm_bg;
+}
+
+/* =============================================================================
+   15. Copy / move progress window
+   The progress window is a plain GtkWindow: css node "window.background", no
+   Thunar class and no "dialog" class. Its colors come from the named colors in
+   section 0; only the shapes are set here (affects ALL GTK3 progress bars).
+   ============================================================================= */
+
+window.background:not(.thunar) progressbar trough {
+    background-color: @hm_surface;
+    border-radius: 6px;
+    border: none;
+    min-height: 6px;
+}
+
+window.background:not(.thunar) progressbar progress {
+    background-color: @hm_accent;
+    border-radius: 6px;
+    border: none;
+    min-height: 6px;
+}
+
+window.background:not(.thunar) button.flat:hover {
+    background-color: alpha(@hm_accent, 0.15);
+    color: @hm_accent_light;
+}
+
+/* =============================================================================
+   16. Extras (newer Thunar: disk usage bars, split view, preview pane, SSH badge)
+   Selectors come straight from Thunar's source.
+   ============================================================================= */
+
+/* Sidebar disk usage bar under drives (Preferences > Side Pane) */
+.thunar .sidebar .view.trough {
+    background-color: alpha(@hm_fg, 0.12);
+    background-image: none;
+    border: none;
+    border-radius: 3px;
+    min-height: 4px;
+}
+
+.thunar .sidebar .view.disk-space-usage-bar {
+    background-color: @hm_accent;
+    background-image: none;
+    border: none;
+    border-radius: 3px;
+    min-height: 4px;
+}
+
+.thunar .sidebar .view.disk-space-usage-bar--warning {
+    background-color: @hm_yellow;
+}
+
+.thunar .sidebar .view.disk-space-usage-bar--error {
+    background-color: @hm_red;
+}
+
+/* Split view: dim the pane that is not active */
+.thunar .split-view-inactive-pane .frame.standard-view {
+    opacity: 0.65;
+}
+
+/* Right preview pane: same card look as the file area */
+.thunar .preview-pane {
+    background-color: @hm_surface;
+    border: none;
+    border-radius: 12px;
+    margin: 4px 8px 0 0;
+}
+
+.thunar .preview-pane viewport {
+    background-color: transparent;
+}
+
+/* "SSH" badge of the built-in terminal */
+label#ssh-indicator {
+    background-color: @hm_accent;
+    color: @hm_bg;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-weight: bold;
 }

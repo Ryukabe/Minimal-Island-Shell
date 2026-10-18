@@ -16,11 +16,12 @@ Scope {
     id: root
 
     // Reading SettingsStore here creates it at shell start, so saved settings are applied
-    // even before any page that uses the store is opened (pages now load lazily).
+    // even before any page that uses the store is opened (pages load lazily).
     readonly property bool storeLoaded: SettingsStore._loaded
 
-    // Shell-wide services. They live here (not in the About page) so update checks keep running
-    // while Settings is closed. A page receives one by declaring a property with the same name
+    // ── Shell-wide services ────────────────────────────────────
+    // They live here (not in the About page) so update checks keep running while Settings is
+    // closed. A page receives one by declaring a property with the same name
     // (see the injection in pageLoader.onLoaded below).
     SystemInfoService { id: systemInfo }
     UpdateService { id: updateService }
@@ -31,6 +32,7 @@ Scope {
         baseDir: decodeURIComponent(String(Qt.resolvedUrl(".")).replace(/^file:\/\//, "").replace(/\/$/, ""))
     }
 
+    // ── IPC ────────────────────────────────────────────────────
     // Argument and return types must be spelled out or Quickshell does not register the function.
     IpcHandler {
         target: "settings"
@@ -46,6 +48,7 @@ Scope {
         }
     }
 
+    // ── Window ─────────────────────────────────────────────────
     FloatingWindow {
         id: window
         title: "Settings"
@@ -75,7 +78,108 @@ Scope {
             anchors.fill: parent
             focus: true
 
-            // Escape steps back out of a view first, then closes the window.
+            // ── Search: jump to a picked option ────────────────
+            // Title of the option picked in search; scrolled to and flashed once its page is up.
+            property string pendingOption: ""
+
+            // Retries a few times because the page loads a moment after the navigation.
+            Timer {
+                id: jumpTimer
+                interval: 120
+                property int attempts: 0
+                onTriggered: {
+                    if (contentRoot.jumpToOption(contentRoot.pendingOption)) {
+                        contentRoot.pendingOption = ""
+                        return
+                    }
+                    attempts++
+                    if (attempts < 8) restart()
+                    else contentRoot.pendingOption = ""
+                }
+            }
+
+            NumberAnimation {
+                id: scrollAnim
+                property: "contentY"
+                duration: ShellState.motionDuration(Motion.fadeMs)
+                easing.type: Easing.OutCubic
+            }
+
+            // Highlight laid over the found row; blinks twice, then removes itself.
+            Component {
+                id: flashComp
+
+                Rectangle {
+                    id: flash
+                    anchors.fill: parent
+                    z: 50
+                    radius: Dimens.settingsContainerRadius
+                    color: Colors.accent
+                    opacity: 0
+
+                    SequentialAnimation {
+                        running: true
+                        NumberAnimation { target: flash; property: "opacity"; to: 0.35; duration: 180 }
+                        NumberAnimation { target: flash; property: "opacity"; to: 0.0; duration: 450 }
+                        NumberAnimation { target: flash; property: "opacity"; to: 0.35; duration: 180 }
+                        NumberAnimation { target: flash; property: "opacity"; to: 0.0; duration: 600 }
+                        ScriptAction { script: flash.destroy() }
+                    }
+                }
+            }
+
+            // First visible item whose label/title (pass 0) or text (pass 1, section headings) matches.
+            function _findOption(node, target, pass) {
+                if (!node || node.visible === false) return null
+                if (node.height > 0) {
+                    if (pass === 0) {
+                        if (node.label !== undefined && String(node.label).trim() === target) return node
+                        if (typeof node.title === "string" && node.title.trim() === target) return node
+                    } else if (typeof node.text === "string" && node.text.trim() === target) {
+                        return node
+                    }
+                }
+                const kids = node.children
+                if (!kids) return null
+                for (let i = 0; i < kids.length; i++) {
+                    const r = contentRoot._findOption(kids[i], target, pass)
+                    if (r) return r
+                }
+                return null
+            }
+
+            // Scrolls the page to the option and flashes it. Returns false until the row exists.
+            function jumpToOption(target) {
+                const page = pageLoader.item
+                if (!page || target === "") return false
+                const want = String(target).trim()
+                const row = contentRoot._findOption(page, want, 0) || contentRoot._findOption(page, want, 1)
+                if (!row) return false
+
+                let fl = row.parent
+                while (fl && !(fl.contentY !== undefined && fl.contentHeight !== undefined)) fl = fl.parent
+                if (fl) {
+                    const y = row.mapToItem(fl.contentItem, 0, 0).y
+                    const maxY = Math.max(0, fl.contentHeight - fl.height)
+                    scrollAnim.stop()
+                    scrollAnim.target = fl
+                    scrollAnim.to = Math.max(0, Math.min(y - fl.height / 3, maxY))
+                    scrollAnim.start()
+                }
+                flashComp.createObject(row)
+                return true
+            }
+
+            // ── Input ──────────────────────────────────────────
+            // Click anywhere outside the search box to give focus back (closes the suggestions).
+            TapHandler {
+                onTapped: (eventPoint) => {
+                    const p = searchBox.mapFromItem(contentRoot, eventPoint.position)
+                    if (!searchBox.contains(p)) contentRoot.forceActiveFocus()
+                }
+            }
+
+            // Ctrl+F focuses search. Escape steps back out of a view first, then closes the window.
             Keys.onPressed: (event) => {
                 if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_F) {
                     searchBox.forceActiveFocus()
@@ -97,13 +201,14 @@ Scope {
                 Rectangle {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 260
-                    color: Colors.mainBgMica
+                    color: "transparent"
 
                     ColumnLayout {
                         anchors.fill: parent
                         anchors.margins: Dimens.paddingMedium
                         spacing: Dimens.spacingMedium
 
+                        // Header: gear + app title
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: Dimens.spacingSmall
@@ -159,20 +264,26 @@ Scope {
                             }
                         }
 
-                        // Search: builds its index from SettingsRegistry. While there is a query it
-                        // fills the sidebar with results and the section list below is hidden.
+                        // Search: while there is a query (or the box is focused and empty) it fills
+                        // the sidebar with results and the section list below is hidden.
                         SearchBox {
                             id: searchBox
                             extraEntries: searchIndex.entries
-                            onResultSelected: (menuId, viewId) => {
+
+                            onResultSelected: (menuId, viewId, optionTitle) => {
                                 if (viewId !== "") SettingsNav.openView(menuId, viewId)
                                 else SettingsNav.openMenu(menuId)
+                                contentRoot.pendingOption = optionTitle
+                                jumpTimer.attempts = 0
+                                if (optionTitle !== "") jumpTimer.restart()
                             }
+                            onDismissed: contentRoot.forceActiveFocus()
                         }
 
+                        // Section list
                         Flickable {
                             id: sidebarFlick
-                            visible: !searchBox.searching
+                            visible: !searchBox.searching && !searchBox.suggesting
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             contentWidth: width
@@ -213,13 +324,6 @@ Scope {
                             }
                         }
                     }
-                }
-
-                Rectangle {
-                    Layout.fillHeight: true
-                    width: 1
-                    color: Colors.border
-                    opacity: 0.3
                 }
 
                 // ============ PAGE AREA ============

@@ -1,8 +1,10 @@
-// pages/network/BluetoothPage.qml — Bluetooth. Embeds the Control Center Bluetooth view.
-// The Options rows are greyed placeholders.
+// features/network/BluetoothPage.qml — Bluetooth. Embeds the Control Center Bluetooth view.
+// Battery and reconnect are ShellState settings; "visible" is read from and written to BlueZ.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
+import "."
+import "../../core/shell"
 import "../../core/styles"
 import "../control-center/components/subviews"
 
@@ -24,21 +26,26 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Show battery level"
-            description: "Display the charge of connected devices"
-            checked: true
-            placeholder: true
+            description: "Display the charge of connected devices that report one"
+            checked: ShellState.bluetoothShowBattery
+            onToggled: (val) => ShellState.bluetoothShowBattery = val
         }
 
         ToggleRow {
             label: "Visible to nearby devices"
-            description: "Let other devices find this computer"
-            placeholder: true
+            description: BluetoothService.enabled
+                ? "Let other devices find this computer for a few minutes"
+                : "Turn Bluetooth on first"
+            checked: BluetoothService.discoverable
+            enabled: BluetoothService.enabled
+            onToggled: (val) => BluetoothService.setDiscoverable(val)
         }
 
         ToggleRow {
             label: "Reconnect at startup"
             description: "Connect to the last device when the shell starts"
-            placeholder: true
+            checked: ShellState.bluetoothReconnectAtStartup
+            onToggled: (val) => ShellState.bluetoothReconnectAtStartup = val
             showDivider: false
         }
     }

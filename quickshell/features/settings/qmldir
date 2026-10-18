@@ -1,5 +1,3 @@
 module features.settings
-DashboardSettings 1.0 DashboardSettings.qml
-LanguageSettings 1.0 LanguageSettings.qml
 SearchIndexService 1.0 SearchIndexService.qml
 SettingsApp 1.0 SettingsApp.qml

@@ -41,7 +41,7 @@ QtObject {
                 },
                 { id: "dashboard", title: "Dashboard", subtitle: "Tabs, widgets and opening", icon: "dashboard",
                   tags: "status panel width height size tabs media performance weather widgets battery gpu cpu memory storage drag threshold hover",
-                  source: "DashboardSettings.qml" },
+                  source: "../dashboard/DashboardSettings.qml" },
                 {
                     id: "launcher", title: "Launcher", subtitle: "App search, tools and clipboard", icon: "rocket_launch",
                     tags: "app search width rows results match fuzzy prefix recent apps icons animate shrink preset",

@@ -172,6 +172,11 @@ QtObject {
         appIconTheme: "",
         // about
         updateAutoCheck: true,
+        // network
+        wifiScanIntervalSec: 15,
+        bluetoothShowBattery: true,
+        bluetoothReconnectAtStartup: false,
+        bluetoothLastDevice: "",
     })
 
     // ================= NAVIGATION / TRANSIENT STATE (not persisted) =================
@@ -298,6 +303,14 @@ QtObject {
 
     // ================= UPDATES =================
     property bool updateAutoCheck: root.defaults.updateAutoCheck
+
+    // ================= NETWORK =================
+    // WifiService rescans this often, but only while a Wi-Fi view is open.
+    property real wifiScanIntervalSec: root.defaults.wifiScanIntervalSec
+    property bool bluetoothShowBattery: root.defaults.bluetoothShowBattery
+    property bool bluetoothReconnectAtStartup: root.defaults.bluetoothReconnectAtStartup
+    // MAC of the last device BluetoothService saw connected. Only BluetoothService writes it.
+    property string bluetoothLastDevice: root.defaults.bluetoothLastDevice
 
     // ================= CLOCK =================
     // Single source of truth for the bar clock AND the Clock settings preview.

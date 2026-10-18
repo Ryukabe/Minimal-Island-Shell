@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+
+  <!-- Open a terminal in the folder (or in the folder you right-clicked) -->
+  <action>
+    <icon>utilities-terminal</icon>
+    <name>Open Terminal Here</name>
+    <unique-id>1760600000000000-1</unique-id>
+    <command>kitty --directory %f</command>
+    <description>Open a terminal in this folder</description>
+    <patterns>*</patterns>
+    <startup-notify/>
+    <directories/>
+  </action>
+
+  <!-- Open the selected files or folders in VS Code -->
+  <action>
+    <icon>visual-studio-code</icon>
+    <name>Open in VS Code</name>
+    <unique-id>1760600000000000-2</unique-id>
+    <command>code %F</command>
+    <description>Open the selection in VS Code</description>
+    <patterns>*</patterns>
+    <startup-notify/>
+    <directories/>
+    <audio-files/>
+    <image-files/>
+    <other-files/>
+    <text-files/>
+    <video-files/>
+  </action>
+
+  <!-- Put the full path on the Wayland clipboard -->
+  <action>
+    <icon>edit-copy</icon>
+    <name>Copy Path</name>
+    <unique-id>1760600000000000-3</unique-id>
+    <command>wl-copy %f</command>
+    <description>Copy the full path to the clipboard</description>
+    <patterns>*</patterns>
+    <directories/>
+    <audio-files/>
+    <image-files/>
+    <other-files/>
+    <text-files/>
+    <video-files/>
+  </action>
+
+  <!-- Put just the file name on the clipboard -->
+  <action>
+    <icon>edit-copy</icon>
+    <name>Copy Name</name>
+    <unique-id>1760600000000000-4</unique-id>
+    <command>wl-copy %n</command>
+    <description>Copy the file name to the clipboard</description>
+    <patterns>*</patterns>
+    <directories/>
+    <audio-files/>
+    <image-files/>
+    <other-files/>
+    <text-files/>
+    <video-files/>
+  </action>
+
+</actions>

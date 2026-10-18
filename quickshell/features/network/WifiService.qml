@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../../core/shell"
 
 Singleton {
     id: root
@@ -23,6 +24,12 @@ Singleton {
 
     // Names of saved Wi-Fi profiles (nmcli names them after the SSID).
     property var savedProfiles: []
+    // The same profiles with their auto-connect flag: [{ name, autoconnect }]
+    property var savedNetworks: []
+    // "Metered connection" flag of the profile that is connected right now
+    property bool meteredActive: false
+    // How many Wi-Fi views are on screen. Scanning on a timer only happens while this is above 0.
+    property int _viewers: 0
     // Set when connecting to a saved network failed because NetworkManager had no usable
     // password for it. WifiSubView watches this and opens the password sheet.
     property bool needsPassword: false
@@ -31,6 +38,13 @@ Singleton {
     function isSaved(ssid) {
         return root.savedProfiles.indexOf(ssid) !== -1
     }
+
+    onSsidChanged: root.refreshMetered()
+
+    // Wi-Fi views call these while they are visible. The first one starts the timer below, which
+    // scans straight away and then every Settings > Wi-Fi > "Wi-Fi scan" seconds.
+    function viewOpened() { root._viewers++ }
+    function viewClosed() { root._viewers = Math.max(0, root._viewers - 1) }
 
     // Radio power state (one switch for all Wi-Fi adapters, so it needs no device name)
     Process {
@@ -87,7 +101,7 @@ Singleton {
     // Saved Wi-Fi profiles (so a known network reconnects without asking for a password again)
     Process {
         id: savedProc
-        command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"]
+        command: ["nmcli", "-t", "-f", "NAME,TYPE,AUTOCONNECT", "connection", "show"]
         property var _lines: []
         stdout: SplitParser { onRead: data => savedProc._lines.push(data) }
         onExited: (code, status) => {
@@ -96,7 +110,16 @@ Singleton {
         }
     }
 
+    // Metered flag of the connected network (connection.metered is yes / no / unknown)
+    Process {
+        id: meteredProc
+        command: ["nmcli", "-g", "connection.metered", "connection", "show", "id", root.ssid]
+        stdout: SplitParser { onRead: data => root.meteredActive = (data.trim().toLowerCase() === "yes") }
+    }
+
     Process { id: radioToggleProc }
+    Process { id: autoconnectProc; onExited: root.refreshSaved() }
+    Process { id: setMeteredProc; onExited: root.refreshMetered() }
     Process { id: cleanupProc; onExited: root.refreshSaved() }
     Process { id: forgetProc; onExited: root.refreshSaved() }
     Process { id: disconnectProc }
@@ -184,6 +207,17 @@ Singleton {
         onTriggered: root.refresh()
     }
 
+    // Rescans while a Wi-Fi view is open. NetworkManager scans on its own the rest of the time, so
+    // nothing runs in the background when nobody is looking at the list.
+    Timer {
+        id: autoScanTimer
+        interval: Math.max(5, ShellState.wifiScanIntervalSec) * 1000
+        running: root._viewers > 0 && root.enabled && root.device !== ""
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.scanNetworks()
+    }
+
     Timer {
         id: verifyTimer
         interval: 800
@@ -238,12 +272,43 @@ Singleton {
 
     function _parseSaved(lines) {
         const names = []
+        const networks = []
         for (const raw of lines) {
             if (!raw || !raw.trim()) continue
             const f = root._splitTerse(raw)
-            if (f.length >= 2 && f[1].trim() === "802-11-wireless") names.push(f[0])
+            if (f.length >= 2 && f[1].trim() === "802-11-wireless") {
+                names.push(f[0])
+                networks.push({ name: f[0], autoconnect: (f.length > 2 ? f[2] : "yes").trim() === "yes" })
+            }
         }
         root.savedProfiles = names
+        root.savedNetworks = networks
+    }
+
+    function setAutoconnect(name, on) {
+        if (!name) return
+        autoconnectProc.command = ["nmcli", "connection", "modify", "id", name, "connection.autoconnect", on ? "yes" : "no"]
+        autoconnectProc.running = true
+        root.savedNetworks = root.savedNetworks.map(n => n.name === name ? ({ name: n.name, autoconnect: on }) : n)
+    }
+
+    function refreshMetered() {
+        if (root.ssid === "") {
+            root.meteredActive = false
+            return
+        }
+        if (!meteredProc.running) meteredProc.running = true
+    }
+
+    // Applies to the network that is connected now. `device reapply` makes NetworkManager use the
+    // new value without dropping the connection; if that step is refused the setting is still saved.
+    function setMetered(on) {
+        if (root.ssid === "" || root.device === "") return
+        setMeteredProc.command = ["sh", "-c",
+            'nmcli connection modify id "$1" connection.metered "$2" && { nmcli device reapply "$3" >/dev/null 2>&1; true; }',
+            "sh", root.ssid, on ? "yes" : "no", root.device]
+        setMeteredProc.running = true
+        root.meteredActive = on
     }
 
     function scanNetworks() {
@@ -336,13 +401,12 @@ Singleton {
         })
     }
 
-    function toggle() {
-        const newState = root.enabled ? "off" : "on"
-        radioToggleProc.command = ["nmcli", "radio", "wifi", newState]
+    function setRadio(on) {
+        radioToggleProc.command = ["nmcli", "radio", "wifi", on ? "on" : "off"]
         radioToggleProc.running = true
 
-        root.enabled = !root.enabled
-        if (!root.enabled) {
+        root.enabled = on
+        if (!on) {
             root.ssid = ""
             root.hasInternet = false
             root.networks = []
@@ -350,6 +414,10 @@ Singleton {
             scanNetworks()
         }
         verifyTimer.restart()
+    }
+
+    function toggle() {
+        root.setRadio(!root.enabled)
     }
 
     // password empty  -> reconnect: saved profile if there is one, otherwise an open network
