@@ -70,5 +70,13 @@
     "row": 0,
     "colSpan": 1,
     "rowSpan": 4
+  },
+  {
+    "tileId": "shades",
+    "type": "shades",
+    "col": 0,
+    "row": 4,
+    "colSpan": 1,
+    "rowSpan": 1
   }
 ]

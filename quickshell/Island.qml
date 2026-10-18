@@ -2,7 +2,6 @@
 
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
@@ -97,8 +96,8 @@ PanelWindow {
 
     Shortcut {
         sequence: "Escape"
-        enabled: ShellState.activePage !== getDefaultPage()
-        onActivated: ShellState.showPage(getDefaultPage())
+        enabled: ShellState.activePage !== window.getDefaultPage()
+        onActivated: ShellState.showPage(window.getDefaultPage())
     }
 
     Component.onCompleted: {
@@ -136,46 +135,46 @@ PanelWindow {
 
     IpcHandler {
         target: "launcher"
-        function toggle() { ShellState.activePage = ShellState.activePage === "launcher" ? getDefaultPage() : "launcher" }
+        function toggle() { ShellState.activePage = ShellState.activePage === "launcher" ? window.getDefaultPage() : "launcher" }
         function open() { ShellState.showPage("launcher") }
-        function close() { ShellState.showPage(getDefaultPage()) }
+        function close() { ShellState.showPage(window.getDefaultPage()) }
     }
 
     IpcHandler {
         target: "clipboard"
         function toggle(): void {
-            ShellState.activePage === "clipboard" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("clipboard")
+            ShellState.activePage === "clipboard" ? ShellState.showPage(window.getDefaultPage()) : ShellState.showPage("clipboard")
         }
         function open(): void { ShellState.showPage("clipboard") }
-        function close() { ShellState.showPage(getDefaultPage()) }
+        function close() { ShellState.showPage(window.getDefaultPage()) }
     }
 
     IpcHandler {
         target: "power"
-        function toggle() { ShellState.activePage === "power" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("power") }
+        function toggle() { ShellState.activePage === "power" ? ShellState.showPage(window.getDefaultPage()) : ShellState.showPage("power") }
         function open() { ShellState.showPage("power") }
-        function close() { ShellState.showPage(getDefaultPage()) }
+        function close() { ShellState.showPage(window.getDefaultPage()) }
     }
 
     IpcHandler {
         target: "controlcenter"
-        function toggle(): void { ShellState.activePage === "control" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("control") }
+        function toggle(): void { ShellState.activePage === "control" ? ShellState.showPage(window.getDefaultPage()) : ShellState.showPage("control") }
         function open() { ShellState.showPage("control") }
-        function close() { ShellState.showPage(getDefaultPage()) }
+        function close() { ShellState.showPage(window.getDefaultPage()) }
     }
 
     IpcHandler {
         target: "notificationcenter"
-        function toggle(): void { ShellState.activePage === "notificationcenter" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("notificationcenter") }
+        function toggle(): void { ShellState.activePage === "notificationcenter" ? ShellState.showPage(window.getDefaultPage()) : ShellState.showPage("notificationcenter") }
         function open() { ShellState.showPage("notificationcenter") }
-        function close() { ShellState.showPage(getDefaultPage()) }
+        function close() { ShellState.showPage(window.getDefaultPage()) }
     }
 
     IpcHandler {
         target: "themeswitcher"
-        function toggle() { ShellState.activePage === "theme" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("theme") }
+        function toggle() { ShellState.activePage === "theme" ? ShellState.showPage(window.getDefaultPage()) : ShellState.showPage("theme") }
         function open() { ShellState.showPage("theme") }
-        function close() { ShellState.showPage(getDefaultPage()) }
+        function close() { ShellState.showPage(window.getDefaultPage()) }
     }
 
     IpcHandler {
@@ -185,16 +184,16 @@ PanelWindow {
             if (WallpaperService.isOpen) {
                 ShellState.showPage("wallpaper")
             } else {
-                ShellState.showPage(getDefaultPage())
+                ShellState.showPage(window.getDefaultPage())
             }
         }
     }
 
     IpcHandler {
         target: "timer"
-        function toggle() { ShellState.activePage === "timer" ? ShellState.showPage(getDefaultPage()) : ShellState.showPage("timer") }
+        function toggle() { ShellState.activePage === "timer" ? ShellState.showPage(window.getDefaultPage()) : ShellState.showPage("timer") }
         function open() { ShellState.showPage("timer") }
-        function close() { ShellState.showPage(getDefaultPage()) }
+        function close() { ShellState.showPage(window.getDefaultPage()) }
     }
 
     // Input region. Auto-hide on + compact page: the hover zone (the edge strip while hidden,
@@ -213,7 +212,7 @@ PanelWindow {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: ShellState.showPage(getDefaultPage())
+            onClicked: ShellState.showPage(window.getDefaultPage())
         }
     }
 
@@ -418,7 +417,7 @@ PanelWindow {
                 var topHalf = wheel.y < height / 2
                 var up = steps > 0
                 var count = Math.abs(steps)
-                for (var i = 0; i < count; i++) {
+                for (let i = 0; i < count; i++) {
                     if (topHalf && ShellState.islandScrollVolume) {
                         if (up) VolumeService.increase(); else VolumeService.decrease()
                     } else if (!topHalf && ShellState.islandScrollBrightness) {
@@ -579,7 +578,7 @@ PanelWindow {
         Component {
             id: brightnessPage
             LevelIndicator {
-                iconSource: window.iconDir + "brightness-" + brightnessTier(BrightnessService.percent) + ".png"
+                iconSource: window.iconDir + "brightness-" + window.brightnessTier(BrightnessService.percent) + ".png"
                 percent: BrightnessService.percent
             }
         }
@@ -595,4 +594,4 @@ PanelWindow {
             }
         }
     }
-}
+}
