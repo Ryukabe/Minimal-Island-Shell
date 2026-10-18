@@ -48,6 +48,8 @@ Item {
             case "brightness": return brightnessSubviewComp
             case "volume": return volumeSubviewComp
             case "audiosink": return audioSinkSubviewComp
+            case "nightlight": return nightlightSubviewComp
+            case "shades": return shadesSubviewComp
             default: return mainViewComp
             }
         }
@@ -163,5 +165,15 @@ Item {
     Component {
         id: audioSinkSubviewComp
         AudioSinkSubView { onBackRequested: root.activeSubview = "volume" }
+    }
+
+    Component {
+        id: nightlightSubviewComp
+        NightLightSubView { onBackRequested: root.activeSubview = "" }
+    }
+
+    Component {
+        id: shadesSubviewComp
+        ShadesSubView { onBackRequested: root.activeSubview = "" }
     }
 }

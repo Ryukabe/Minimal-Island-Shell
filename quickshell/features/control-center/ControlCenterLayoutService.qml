@@ -31,12 +31,13 @@ QtObject {
         "volume": universalSizes,
         "brightness": universalSizes,
         "media": universalSizes,
-        "notifications": universalSizes
+        "notifications": universalSizes,
+        "shades": universalSizes
     })
 
     property var manageableTypes: [
         "wifi", "bluetooth", "nightlight", "focus", "airplane", "caffeine",
-        "recording", "powerprofile", "lightmode", "volume", "brightness", "media"
+        "recording", "powerprofile", "lightmode", "volume", "brightness", "media", "shades"
     ]
 
     property var typeDisplayNames: ({
@@ -51,7 +52,8 @@ QtObject {
         lightmode: "Light Mode",
         volume: "Volume",
         brightness: "Brightness",
-        media: "Media"
+        media: "Media",
+        shades: "Shades"
     })
 
     property var defaultLayout: [
@@ -67,7 +69,8 @@ QtObject {
         { tileId: "media", type: "media", col: 3, row: 1, colSpan: 3, rowSpan: 2 },
         { tileId: "volume", type: "volume", col: 0, row: 2, colSpan: 3, rowSpan: 1 },
         { tileId: "brightness", type: "brightness", col: 0, row: 3, colSpan: 3, rowSpan: 1 },
-        { tileId: "notifications", type: "notifications", col: 3, row: 3, colSpan: 3, rowSpan: 2 }
+        { tileId: "notifications", type: "notifications", col: 3, row: 3, colSpan: 3, rowSpan: 2 },
+        { tileId: "shades", type: "shades", col: 0, row: 4, colSpan: 3, rowSpan: 1 }
     ]
 
     property ListModel layoutModel: ListModel {}

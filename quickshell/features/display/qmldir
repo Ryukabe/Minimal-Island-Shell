@@ -3,3 +3,4 @@ singleton BrightnessService 1.0 BrightnessService.qml
 DisplaySettings 1.0 DisplaySettings.qml
 singleton MonitorSettingsService 1.0 MonitorSettingsService.qml
 singleton NightLightService 1.0 NightLightService.qml
+singleton HyprshadeService 1.0 HyprshadeService.qml

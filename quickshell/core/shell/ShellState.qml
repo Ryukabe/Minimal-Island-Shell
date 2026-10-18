@@ -153,6 +153,7 @@ QtObject {
         templateQt6ct: false,
         templateStarship: false,
         // sound & media
+        brightnessStep: 5,
         volumeStep: 5,
         volumeMax: 100,
         lyricsBackend: "Auto",
@@ -372,6 +373,10 @@ QtObject {
     property bool motionIconsEnabled: root.defaults.motionIconsEnabled
     property real motionIconSpeedPercent: root.defaults.motionIconSpeedPercent
     property real motionIconBouncePercent: root.defaults.motionIconBouncePercent
+
+    // ================= DISPLAY =================
+    // How much the brightness keys, IPC calls and island scroll change brightness per step.
+    property int brightnessStep: root.defaults.brightnessStep
 
     // ================= SOUND & MEDIA =================
     // Stored here so they persist. VolumeService / the media module still have to read them.

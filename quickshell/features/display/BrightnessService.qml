@@ -9,7 +9,8 @@ import "../../core/shell"
 
 Singleton {
     id: root
-    readonly property int step: 5
+    // Set from Settings > Displays. Kept as `step` so anything already reading it still works.
+    readonly property int step: ShellState.brightnessStep
     property int percent: 50
 
     Process {

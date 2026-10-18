@@ -253,6 +253,7 @@ Item {
                     case "volume": return volumeTile
                     case "brightness": return brightnessTile
                     case "media": return mediaTile
+                    case "shades": return shadesTile
                     default: return null
                     }
                 }
@@ -385,4 +386,6 @@ Item {
     Component { id: mediaTile; MediaToggleTile {} }
     Component { id: volumeTile; VolumeToggleTile { onSubviewRequested: root.subviewRequestedFor("volume") } }
     Component { id: brightnessTile; BrightnessToggleTile { onSubviewRequested: root.subviewRequestedFor("brightness") } }
+    Component { id: nightlightTile; NightLightToggleTile { onSubviewRequested: root.subviewRequestedFor("nightlight") } }
+    Component { id: shadesTile; ShadesToggleTile { onSubviewRequested: root.subviewRequestedFor("shades") } }
 }
