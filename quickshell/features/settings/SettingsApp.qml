@@ -170,6 +170,11 @@ Scope {
                 return true
             }
 
+            // Hands a shared service to the page if the page declares a property with that name.
+            function inject(page, name, value) {
+                if (name in page) page[name] = value
+            }
+
             // ── Input ──────────────────────────────────────────
             // Click anywhere outside the search box to give focus back (closes the suggestions).
             TapHandler {
@@ -364,10 +369,14 @@ Scope {
 
                             // Loader does not reliably size its item inside a layout, so bind it.
                             onLoaded: {
-                                item.width = Qt.binding(() => pageLoader.width)
-                                item.height = Qt.binding(() => pageLoader.height)
-                                if (item.updateService !== undefined) item.updateService = updateService
-                                if (item.systemInfo !== undefined) item.systemInfo = systemInfo
+                                const page = pageLoader.item as Item
+                                if (!page) return
+                                page.width = Qt.binding(() => pageLoader.width)
+                                page.height = Qt.binding(() => pageLoader.height)
+
+                                // Pages that declare these properties receive the shared services.
+                                contentRoot.inject(page, "updateService", updateService)
+                                contentRoot.inject(page, "systemInfo", systemInfo)
                                 loadFade.restart()
                             }
 

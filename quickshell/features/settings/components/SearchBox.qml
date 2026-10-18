@@ -4,8 +4,9 @@
 // Title and word-start matches rank first; matched letters are shown in bold.
 // Focused with an empty box it lists recent picks (or the main menus). Picking an option reports
 // its title so the host can scroll to the row and flash it.
+
+pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import "../core"
 import "../../../core/styles"
