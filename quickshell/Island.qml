@@ -1,4 +1,6 @@
 // Island.qml — bar window, page router, and IPC
+
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects

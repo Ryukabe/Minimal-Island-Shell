@@ -15,7 +15,7 @@ QtObject {
 
     readonly property string appTitle: "Settings"
     readonly property string appSubtitle: "Hermit"
-    readonly property string defaultMenuId: "appearance"
+    readonly property string defaultMenuId: "bar"
 
     // Shown on the About page. Change the version here and nowhere else.
     readonly property string projectName: "Hermit-dots"
