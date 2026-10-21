@@ -44,7 +44,7 @@
     "type": "powerprofile",
     "col": 2,
     "row": 1,
-    "colSpan": 2,
+    "colSpan": 1,
     "rowSpan": 1
   },
   {
@@ -74,8 +74,8 @@
   {
     "tileId": "shades",
     "type": "shades",
-    "col": 0,
-    "row": 4,
+    "col": 3,
+    "row": 1,
     "colSpan": 1,
     "rowSpan": 1
   }

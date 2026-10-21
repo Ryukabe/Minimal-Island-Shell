@@ -51,24 +51,29 @@ QtObject {
         notificationCenterMaxHeight: 480,
         powerMenuWidth: 320,
         powerMenuHeight: 76,
-        statusPanelWidth: 520,
-        statusPanelHeight: 172,
+        statusPanelWidth: 780,
+        statusPanelHeight: 420,
         timerWidth: 320,
         timerHeight: 180,
         // dashboard
-        dashboardTabOverview: true,
-        dashboardTabMedia: true,
-        dashboardTabPerformance: true,
-        dashboardTabWeather: true,
-        dashboardWidgetBattery: false,
-        dashboardWidgetGpu: true,
-        dashboardWidgetCpu: true,
-        dashboardWidgetMemory: true,
-        dashboardWidgetStorage: true,
-        dashboardWidgetNetwork: false,
-        dashboardShowOnHover: true,
-        dashboardDragThreshold: 50,
-        dashboardStatsIntervalSec: 1,
+        dashboardNoteShowToolbar: true,
+        dashboardNoteFontSize: 13,
+        dashboardCdSpin: true,
+        dashboardCdSpinSeconds: 8,
+        dashboardMediaShowControls: true,
+        dashboardMediaShowArtist: true,
+        dashboardMediaBlurBackground: true,
+        dashboardStatCpu: true,
+        dashboardStatGpu: true,
+        dashboardStatMemory: true,
+        dashboardStatNetwork: true,
+        dashboardStatBattery: true,
+        dashboardStatTemperature: true,
+        dashboardStatsShowGraphs: true,
+        dashboardStatsGraphSamples: 40,
+        dashboardStatsIntervalSec: 2,
+        dashboardCalendarWeekStart: "Sunday",
+        dashboardCalendarShowOutsideDays: true,
         // motion
         motionReduced: false,
         motionMovementMs: 480,
@@ -287,20 +292,25 @@ QtObject {
     property real timerWidth: root.defaults.timerWidth
     property real timerHeight: root.defaults.timerHeight
 
-        // ================= DASHBOARD =================
-    property bool dashboardTabOverview: root.defaults.dashboardTabOverview
-    property bool dashboardTabMedia: root.defaults.dashboardTabMedia
-    property bool dashboardTabPerformance: root.defaults.dashboardTabPerformance
-    property bool dashboardTabWeather: root.defaults.dashboardTabWeather
-    property bool dashboardWidgetBattery: root.defaults.dashboardWidgetBattery
-    property bool dashboardWidgetGpu: root.defaults.dashboardWidgetGpu
-    property bool dashboardWidgetCpu: root.defaults.dashboardWidgetCpu
-    property bool dashboardWidgetMemory: root.defaults.dashboardWidgetMemory
-    property bool dashboardWidgetStorage: root.defaults.dashboardWidgetStorage
-    property bool dashboardWidgetNetwork: root.defaults.dashboardWidgetNetwork
-    property bool dashboardShowOnHover: root.defaults.dashboardShowOnHover
-    property int dashboardDragThreshold: root.defaults.dashboardDragThreshold
+    // ================= DASHBOARD =================
+    property bool dashboardNoteShowToolbar: root.defaults.dashboardNoteShowToolbar
+    property int dashboardNoteFontSize: root.defaults.dashboardNoteFontSize
+    property bool dashboardCdSpin: root.defaults.dashboardCdSpin
+    property real dashboardCdSpinSeconds: root.defaults.dashboardCdSpinSeconds
+    property bool dashboardMediaShowControls: root.defaults.dashboardMediaShowControls
+    property bool dashboardMediaShowArtist: root.defaults.dashboardMediaShowArtist
+    property bool dashboardMediaBlurBackground: root.defaults.dashboardMediaBlurBackground
+    property bool dashboardStatCpu: root.defaults.dashboardStatCpu
+    property bool dashboardStatGpu: root.defaults.dashboardStatGpu
+    property bool dashboardStatMemory: root.defaults.dashboardStatMemory
+    property bool dashboardStatNetwork: root.defaults.dashboardStatNetwork
+    property bool dashboardStatBattery: root.defaults.dashboardStatBattery
+    property bool dashboardStatTemperature: root.defaults.dashboardStatTemperature
+    property bool dashboardStatsShowGraphs: root.defaults.dashboardStatsShowGraphs
+    property int dashboardStatsGraphSamples: root.defaults.dashboardStatsGraphSamples
     property real dashboardStatsIntervalSec: root.defaults.dashboardStatsIntervalSec
+    property string dashboardCalendarWeekStart: root.defaults.dashboardCalendarWeekStart
+    property bool dashboardCalendarShowOutsideDays: root.defaults.dashboardCalendarShowOutsideDays
 
     // ================= UPDATES =================
     property bool updateAutoCheck: root.defaults.updateAutoCheck

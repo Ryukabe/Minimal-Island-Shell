@@ -1,0 +1,3 @@
+singleton WelcomeTheme 1.0 WelcomeTheme.qml
+singleton WelcomeStore 1.0 WelcomeStore.qml
+WelcomeApp WelcomeApp.qml

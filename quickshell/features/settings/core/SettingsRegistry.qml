@@ -39,9 +39,27 @@ QtObject {
                           source: "../bar/ClockSettings.qml" }
                     ]
                 },
-                { id: "dashboard", title: "Dashboard", subtitle: "Tabs, widgets and opening", icon: "dashboard",
-                  tags: "status panel width height size tabs media performance weather widgets battery gpu cpu memory storage drag threshold hover",
-                  source: "../dashboard/DashboardSettings.qml" },
+                {
+                    id: "dashboard", title: "Dashboard", subtitle: "Layout, components and size", icon: "dashboard",
+                    tags: "status panel width height size grid columns rows layout components move resize corner undo reset quick note media cd system stats calendar",
+                    views: [
+                        { id: "layout", title: "Layout", subtitle: "Panel size, grid and components", icon: "dashboard",
+                          tags: "width height size grid columns rows components move resize corner undo reset preview",
+                          source: "../dashboard/DashboardSettings.qml" },
+                        { id: "quicknote", title: "Quick note", subtitle: "Markdown note editor", icon: "edit_note",
+                          tags: "note markdown toolbar bold italic heading bullet numbered list text size file save",
+                          source: "../dashboard/DashboardQuickNoteSettings.qml" },
+                        { id: "media", title: "Media", subtitle: "CD player card", icon: "album",
+                          tags: "cd disc spin rotation cover blur background controls artist player",
+                          source: "../dashboard/DashboardMediaSettings.qml" },
+                        { id: "stats", title: "System stats", subtitle: "Rows, graphs and update rate", icon: "monitoring",
+                          tags: "cpu gpu memory ram network battery temperature graph history update interval",
+                          source: "../dashboard/DashboardStatsSettings.qml" },
+                        { id: "calendar", title: "Calendar", subtitle: "Month view options", icon: "calendar_month",
+                          tags: "calendar month week start sunday monday saturday days outside",
+                          source: "../dashboard/DashboardCalendarSettings.qml" }
+                    ]
+                },
                 {
                     id: "launcher", title: "Launcher", subtitle: "App search, tools and clipboard", icon: "rocket_launch",
                     tags: "app search width rows results match fuzzy prefix recent apps icons animate shrink preset",

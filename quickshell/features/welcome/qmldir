@@ -1,0 +1,3 @@
+singleton WelcomeService WelcomeService.qml
+Welcome Welcome.qml
+WelcomeBridge WelcomeBridge.qml
