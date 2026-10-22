@@ -8,3 +8,6 @@ DashboardQuickNoteSettings 1.0 DashboardQuickNoteSettings.qml
 DashboardMediaSettings 1.0 DashboardMediaSettings.qml
 DashboardStatsSettings 1.0 DashboardStatsSettings.qml
 DashboardCalendarSettings 1.0 DashboardCalendarSettings.qml
+FloatingRoundButton 1.0 FloatingRoundButton.qml
+DashboardSideButtons 1.0 DashboardSideButtons.qml
+DashboardDataService 1.0 DashboardDataService.qml

@@ -5,3 +5,9 @@ QuickNote 1.0 QuickNote.qml
 MediaCD 1.0 MediaCD.qml
 SystemStats 1.0 SystemStats.qml
 CalendarCard 1.0 CalendarCard.qml
+DashIconButton 1.0 DashIconButton.qml
+DashInput 1.0 DashInput.qml
+CountdownCard 1.0 CountdownCard.qml
+StudyTrackerCard 1.0 StudyTrackerCard.qml
+ChecklistCard 1.0 ChecklistCard.qml
+SystemInfoCard 1.0 SystemInfoCard.qml

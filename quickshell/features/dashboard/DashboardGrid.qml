@@ -1,5 +1,6 @@
 // features/dashboard/DashboardGrid.qml — the component grid. Read-only on the Dashboard; in the
 // settings preview (editMode) drag a component to move it and use the four corner dots to resize it.
+// Its implicitWidth / implicitHeight size the whole Dashboard panel (like ControlGrid does).
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -14,14 +15,18 @@ Item {
     property bool editMode: false
     property string selectedTileId: ""
 
-    // ---- Grid geometry ----
+    // ---- Grid geometry (cell size comes from the layout service) ----
     readonly property int columns: DashboardLayoutService.columns
-    readonly property int rows: DashboardLayoutService.rows
     readonly property real gap: Dimens.spacingSm
-    readonly property real cellW: Math.max(1, (width - (columns - 1) * gap) / columns)
-    readonly property real cellH: Math.max(1, (height - (rows - 1) * gap) / rows)
+    readonly property real cellW: DashboardLayoutService.cellWidth
+    readonly property real cellH: DashboardLayoutService.cellHeight
     readonly property real stepX: cellW + gap
     readonly property real stepY: cellH + gap
+    // In edit mode one spare row is shown so a component can be dragged below the last one.
+    readonly property int gridRows: DashboardLayoutService.rowCount() + (editMode ? 1 : 0)
+
+    implicitWidth: columns * cellW + Math.max(0, columns - 1) * gap
+    implicitHeight: gridRows * cellH + Math.max(0, gridRows - 1) * gap
 
     // ---- Drag state (filled in by whichever tile is being dragged) ----
     property string dragTileId: ""
@@ -31,7 +36,7 @@ Item {
     property int dragRowSpan: 1
     readonly property bool dragActive: dragTileId !== ""
     readonly property int dragTargetCol: Math.max(0, Math.min(columns - dragColSpan, Math.round(dragX / stepX)))
-    readonly property int dragTargetRow: Math.max(0, Math.min(rows - dragRowSpan, Math.round(dragY / stepY)))
+    readonly property int dragTargetRow: Math.max(0, Math.min(DashboardLayoutService.maxRows - dragRowSpan, Math.round(dragY / stepY)))
 
     // Arrow keys move the selected component, Shift + arrows resize it.
     focus: editMode
@@ -63,7 +68,7 @@ Item {
 
     // ---- Guide dots (edit mode only), behind the tiles ----
     Repeater {
-        model: root.editMode ? root.columns * root.rows : 0
+        model: root.editMode ? root.columns * root.gridRows : 0
 
         delegate: Item {
             id: guide
@@ -113,6 +118,7 @@ Item {
             // Position and size only glide after the tile has settled, so the grid appearing
             // (or the panel changing size) never makes tiles fly in.
             property bool animReady: false
+            property bool resizing: false
             Timer {
                 interval: 150
                 running: true
@@ -168,6 +174,10 @@ Item {
                     case "media": return mediaComp
                     case "stats": return statsComp
                     case "calendar": return calendarComp
+                    case "countdown": return countdownComp
+                    case "study": return studyComp
+                    case "checklist": return checklistComp
+                    case "sysinfo": return sysinfoComp
                     default: return null
                     }
                 }
@@ -202,7 +212,7 @@ Item {
 
                     onReleased: {
                         var targetCol = Math.max(0, Math.min(root.columns - tile.colSpan, Math.round(tile.x / root.stepX)))
-                        var targetRow = Math.max(0, Math.min(root.rows - tile.rowSpan, Math.round(tile.y / root.stepY)))
+                        var targetRow = Math.max(0, Math.min(DashboardLayoutService.maxRows - tile.rowSpan, Math.round(tile.y / root.stepY)))
                         if (targetCol !== tile.col || targetRow !== tile.row) {
                             DashboardLayoutService.pushUndoSnapshot()
                             DashboardLayoutService.moveTile(tile.tileId, targetCol, targetRow)
@@ -268,9 +278,9 @@ Item {
                                 if (c0 < 0) { cs += c0; c0 = 0 }
                                 if (r0 < 0) { rs += r0; r0 = 0 }
                                 if (c0 + cs > root.columns) cs = root.columns - c0
-                                if (r0 + rs > root.rows) rs = root.rows - r0
+                                if (r0 + rs > DashboardLayoutService.maxRows) rs = DashboardLayoutService.maxRows - r0
 
-                                // Rejected (too small, or it would hit a neighbour): stays at the last valid size.
+                                // Components in the way are pushed aside; if that is impossible it stays at the last valid size.
                                 DashboardLayoutService.setRect(tile.tileId, c0, r0, cs, rs)
                             }
 
@@ -308,4 +318,9 @@ Item {
     Component { id: mediaComp; MediaCD {} }
     Component { id: statsComp; SystemStats {} }
     Component { id: calendarComp; CalendarCard {} }
+    Component { id: countdownComp; CountdownCard {} }
+    Component { id: studyComp; StudyTrackerCard {} }
+    Component { id: checklistComp; ChecklistCard {} }
+    Component { id: sysinfoComp; SystemInfoCard {} }
+    
 }
