@@ -152,6 +152,10 @@ QtObject {
         templateAlacritty: false,
         templateBtop: false,
         templateFirefox: false,
+        templateChrome: false,
+        templateBrave: false,
+        templateHelium: false,
+        templateZen: false,
         templateHelix: false,
         templateObsidian: false,
         templateQt5ct: false,
@@ -236,6 +240,10 @@ QtObject {
     property bool templateAlacritty: root.defaults.templateAlacritty
     property bool templateBtop: root.defaults.templateBtop
     property bool templateFirefox: root.defaults.templateFirefox
+    property bool templateChrome: root.defaults.templateChrome
+    property bool templateBrave: root.defaults.templateBrave
+    property bool templateHelium: root.defaults.templateHelium
+    property bool templateZen: root.defaults.templateZen
     property bool templateHelix: root.defaults.templateHelix
     property bool templateObsidian: root.defaults.templateObsidian
     property bool templateQt5ct: root.defaults.templateQt5ct

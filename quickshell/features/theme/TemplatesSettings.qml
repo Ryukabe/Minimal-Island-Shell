@@ -37,7 +37,7 @@ PageScroll {
         GroupCard {
             ToggleRow {
                 label: "GTK 3"
-                description: "Writes ~/.config/gtk-3.0/gtk.css (also themes Thunar)"
+                description: "Themes GTK 3 apps and Thunar live"
                 checked: ShellState.templateGtk3
                 onToggled: (v) => ShellState.templateGtk3 = v
             }
@@ -142,6 +142,30 @@ PageScroll {
                 description: "Writes a colors file for userChrome.css"
                 checked: ShellState.templateFirefox
                 onToggled: (v) => ShellState.templateFirefox = v
+            }
+            ToggleRow {
+                label: "Zen"
+                description: "Writes userChrome.css colors, applied next time Zen starts"
+                checked: ShellState.templateZen
+                onToggled: (v) => ShellState.templateZen = v
+            }
+            ToggleRow {
+                label: "Chrome"
+                description: "Recolors the browser frame live (needs one-time setup)"
+                checked: ShellState.templateChrome
+                onToggled: (v) => ShellState.templateChrome = v
+            }
+            ToggleRow {
+                label: "Brave"
+                description: "Recolors the browser frame live (needs one-time setup)"
+                checked: ShellState.templateBrave
+                onToggled: (v) => ShellState.templateBrave = v
+            }
+            ToggleRow {
+                label: "Helium"
+                description: "Recolors the browser frame live (needs one-time setup)"
+                checked: ShellState.templateHelium
+                onToggled: (v) => ShellState.templateHelium = v
                 showDivider: false
             }
         }

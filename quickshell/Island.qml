@@ -117,6 +117,10 @@ PanelWindow {
         Alacritty
         Btop
         Firefox
+        Chrome
+        Brave
+        Helium
+        Zen
         Helix
         Obsidian
         Qt5ct
@@ -594,4 +598,4 @@ PanelWindow {
             }
         }
     }
-}
+}
