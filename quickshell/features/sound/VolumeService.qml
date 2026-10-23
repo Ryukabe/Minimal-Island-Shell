@@ -107,14 +107,6 @@ Singleton {
         Pipewire.preferredDefaultAudioSink = node
     }
 
-    Timer {
-    interval: 2000; running: true; repeat: true
-    onTriggered: {
-        for (const n of Pipewire.nodes.values)
-            console.log(n.name, "| stream:", n.isStream, "| sink:", n.isSink, "| audio:", !!n.audio)
-    }
-}
-
     IpcHandler {
         target: "volume"
         function increase() { root.increase() }

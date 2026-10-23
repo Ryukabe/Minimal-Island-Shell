@@ -111,7 +111,6 @@
     padding: 5px;
     min-height: 0;
     min-width: 0;
-    transition: all ease 0.3s;
 }
 
 .thunar headerbar button:hover,
@@ -140,7 +139,6 @@
 .thunar .image-button {
     padding: 5px;
     margin: 0 0 0 4px;
-    transition: all ease 0.4s;
 }
 
 .thunar button.toggle:checked {
@@ -191,7 +189,6 @@
     padding: 4px 5px;
     border-radius: 8px;
     border: none;
-    transition: all ease 0.4s;
 }
 
 .thunar .location-button.toggle:checked,
@@ -241,7 +238,6 @@
     border-radius: 8px;
     background: none;
     color: @hm_fg;
-    transition: all ease 300ms;
 }
 
 .thunar .sidebar .view:hover {
@@ -358,7 +354,6 @@
     color: @hm_muted;
     background: none;
     border: none;
-    transition: all ease 300ms;
 }
 
 .thunar header.top tabs .reorderable-page + .reorderable-page {
@@ -628,7 +623,6 @@ dialog button {
     box-shadow: none;
     border-radius: 8px;
     padding: 6px 12px;
-    transition: all ease 0.3s;
 }
 
 dialog button:hover {
@@ -772,7 +766,6 @@ messagedialog button {
     border-radius: 10px;
     padding: 8px 16px;
     min-height: 0;
-    transition: all ease 0.3s;
 }
 
 messagedialog button:hover {

@@ -43,11 +43,6 @@ Item {
                 if (themeName.length > 0) {
                     root.currentTheme = themeName
 
-                    console.log(
-                        "[ThemeService] Loaded saved theme:",
-                        themeName
-                    )
-
                     // DO NOT call:
                     // WallpaperService.switchToThemeWallpaper(themeName)
                     //

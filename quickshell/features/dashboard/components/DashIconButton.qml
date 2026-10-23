@@ -3,25 +3,33 @@ import QtQuick
 import "../../../core/shell"
 import "../../../core/styles"
 
-Text {
+Item {
     id: root
 
+    property alias text: label.text
     property bool active: false
     signal clicked()
 
-    font.family: Fonts.icon
-    font.pixelSize: Dimens.fontSizeLg
-    font.variableAxes: Fonts.iconAxes
-    color: (root.active || mouse.containsMouse) ? Colors.accent : Colors.fgMuted
+    implicitWidth: Math.max(28, label.implicitWidth)
+    implicitHeight: Math.max(28, label.implicitHeight)
 
-    Behavior on color {
-        ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
+    Text {
+        id: label
+        anchors.centerIn: parent
+        font.family: Fonts.icon
+        font.pixelSize: Dimens.fontSizeLg
+        font.variableAxes: Fonts.iconAxes
+        color: (root.active || mouse.containsMouse) ? Colors.accent : Colors.fgMuted
+
+        Behavior on color {
+            ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
+        }
     }
 
     MouseArea {
         id: mouse
         anchors.fill: parent
-        anchors.margins: -Dimens.spacingSm / 2
+        anchors.margins: -4
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: root.clicked()

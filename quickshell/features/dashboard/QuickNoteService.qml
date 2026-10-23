@@ -1,59 +1,60 @@
-// features/dashboard/QuickNoteService.qml — the Dashboard quick note, stored as Markdown.
-// Standalone for now; it can be connected to the launcher notes later.
 pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
 
-QtObject {
+Item {
     id: root
 
-    readonly property string path: Quickshell.env("HOME") + "/.config/quickshell/state/dashboard-quicknote.md"
+    property string noteText: ""
+    property bool _loaded: false
 
-    property string text: ""
-    property bool loaded: false
-    property bool _applying: false
+    readonly property string _home: Quickshell.env("HOME")
 
-    function setText(value) { root.text = value }
-
-    // Save button: write now, no waiting for the autosave delay.
-    function saveNow() {
-        root.saveTimer.stop()
-        root._write()
-    }
-
-    // Writes immediately if an autosave is pending (called when the editor goes away).
-    function flush() {
-        if (root.saveTimer.running) root.saveNow()
-    }
-
-    function openFile() {
-        root._opener.command = ["xdg-open", root.path]
-        root._opener.running = true
-    }
-
-    function _write() {
-        if (root.loaded) root.file.setText(root.text)
-    }
-
-    onTextChanged: if (root.loaded && !root._applying) root.saveTimer.restart()
-
-    property FileView file: FileView {
-        path: root.path
-        printErrors: false
-        onLoaded: {
-            root._applying = true
-            root.text = text()
-            root._applying = false
-            root.loaded = true
+    Process {
+        id: mkdirProc
+        command: ["mkdir", "-p", root._home + "/.config/quickshell/state"]
+        onExited: (code) => {
+            if (code === 0) root.noteFile.reload()
         }
-        onLoadFailed: root.loaded = true
+    }
+
+    property FileView noteFile: FileView {
+        path: root._home + "/.config/quickshell/state/dashboard-quicknote.md"
+        printErrors: true
+        onLoaded: {
+            root.noteText = text()
+            root._loaded = true
+        }
+        onLoadFailed: (error) => {
+            console.warn("QuickNoteService: load failed, starting empty", error)
+            root._loaded = true
+        }
     }
 
     property Timer saveTimer: Timer {
-        interval: 600
-        onTriggered: root._write()
+        interval: 300
+        onTriggered: root._doSave()
     }
 
-    property Process _opener: Process {}
+    Component.onCompleted: {
+        mkdirProc.running = true
+    }
+
+    function _doSave() {
+        if (!root._loaded) return
+        root.noteFile.setText(root.noteText)
+    }
+
+    function updateText(text) {
+        root.noteText = text
+        if (root._loaded) {
+            root.saveTimer.restart()
+        }
+    }
+
+    function flush() {
+        saveTimer.stop()
+        root._doSave()
+    }
 }

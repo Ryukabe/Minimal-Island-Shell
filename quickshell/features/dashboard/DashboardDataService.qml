@@ -5,7 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-QtObject {
+Item {
     id: root
 
     // Always reassign these (never push) so change signals fire.
@@ -18,23 +18,60 @@ QtObject {
 
     readonly property string _home: Quickshell.env("HOME")
 
+    Process {
+        id: mkdirProc
+        command: ["mkdir", "-p", root._home + "/.config/quickshell/state"]
+        onExited: (code) => {
+            if (code === 0) {
+                root.dataFile.reload()
+            }
+        }
+    }
+
     property FileView dataFile: FileView {
         path: root._home + "/.config/quickshell/state/dashboard-data.json"
-        printErrors: false
+        printErrors: true
         onLoaded: root._load(text())
-        onLoadFailed: root._loaded = true
+        onLoadFailed: (error) => {
+            console.warn("DashboardDataService: load failed, starting fresh", error)
+            root._loaded = true
+        }
+        onSaveFailed: (error) => console.warn("DashboardDataService: failed to save data file:", error)
     }
 
     property Timer saveTimer: Timer {
-        interval: 300
-        onTriggered: root.dataFile.setText(JSON.stringify(root._state(), null, 2))
+        interval: 150
+        onTriggered: {
+            if (!root._loaded) return
+            var payload = JSON.stringify(root._state(), null, 2)
+            root.dataFile.setText(payload)
+        }
+    }
+
+    Component.onCompleted: {
+        mkdirProc.running = true
     }
 
     // ---------- helpers ----------
-    function _state() { return { countdowns: root.countdowns, subjects: root.subjects, checklist: root.checklist } }
-    // Never saves before the file has been read, so an early change cannot wipe saved data.
-    function _changed() { if (root._loaded) root.saveTimer.restart() }
-    function _newId() { root._idCounter++; return Date.now() + "-" + root._idCounter }
+    function _state() { 
+        return { 
+            countdowns: root.countdowns, 
+            subjects: root.subjects, 
+            checklist: root.checklist 
+        } 
+    }
+
+    function _changed() { 
+        if (root._loaded) {
+            root.saveTimer.restart() 
+        }
+    }
+
+    function _newId() { 
+        root._idCounter++
+        return Date.now().toString() + "-" + root._idCounter.toString() 
+    }
+
     function _list(value) { return Array.isArray(value) ? value : [] }
     function _pct(v) { return Math.max(0, Math.min(100, Math.round(Number(v)) || 0)) }
 
@@ -58,12 +95,15 @@ QtObject {
         root.countdowns = root._list(data.countdowns)
             .filter(function (c) { return c && root.isValidDate(String(c.date)) })
             .map(function (c) { return { id: String(c.id), label: String(c.label || ""), date: String(c.date) } })
+        
         root.subjects = root._list(data.subjects)
             .filter(function (s) { return s && s.name })
             .map(function (s) { return { id: String(s.id), name: String(s.name), percent: root._pct(s.percent) } })
+        
         root.checklist = root._list(data.checklist)
             .filter(function (t) { return t && t.text })
             .map(function (t) { return { id: String(t.id), text: String(t.text), done: t.done === true } })
+        
         root._loaded = true
     }
 
@@ -73,12 +113,14 @@ QtObject {
         var d = String(date).trim()
         if (l === "" || !root.isValidDate(d)) return false
         root.countdowns = root.countdowns.concat([{ id: root._newId(), label: l, date: d }])
+        root.countdownsChanged()
         root._changed()
         return true
     }
 
     function removeCountdown(id) {
         root.countdowns = root.countdowns.filter(function (c) { return c.id !== id })
+        root.countdownsChanged()
         root._changed()
     }
 
@@ -87,6 +129,7 @@ QtObject {
         var n = String(name).trim()
         if (n === "") return false
         root.subjects = root.subjects.concat([{ id: root._newId(), name: n, percent: 0 }])
+        root.subjectsChanged()
         root._changed()
         return true
     }
@@ -96,11 +139,13 @@ QtObject {
         root.subjects = root.subjects.map(function (s) {
             return s.id === id ? { id: s.id, name: s.name, percent: p } : s
         })
+        root.subjectsChanged()
         root._changed()
     }
 
     function removeSubject(id) {
         root.subjects = root.subjects.filter(function (s) { return s.id !== id })
+        root.subjectsChanged()
         root._changed()
     }
 
@@ -109,24 +154,31 @@ QtObject {
         var t = String(text).trim()
         if (t === "") return false
         root.checklist = root.checklist.concat([{ id: root._newId(), text: t, done: false }])
+        root.checklistChanged()
         root._changed()
         return true
     }
 
     function toggleItem(id) {
-        root.checklist = root.checklist.map(function (t) {
-            return t.id === id ? { id: t.id, text: t.text, done: !t.done } : t
+        root.checklist = root.checklist.map(function (item) {
+            if (item.id === id) {
+                return { id: item.id, text: item.text, done: !item.done }
+            }
+            return item
         })
+        root.checklistChanged()
         root._changed()
     }
 
     function removeItem(id) {
         root.checklist = root.checklist.filter(function (t) { return t.id !== id })
+        root.checklistChanged()
         root._changed()
     }
 
     function clearDone() {
         root.checklist = root.checklist.filter(function (t) { return !t.done })
+        root.checklistChanged()
         root._changed()
     }
 }

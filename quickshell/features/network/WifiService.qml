@@ -421,9 +421,7 @@ Singleton {
     }
 
     // password empty  -> reconnect: saved profile if there is one, otherwise an open network
-    // password typed  -> any old profile with this name is replaced, so the new password is
-    //                    really used (nmcli would otherwise silently reuse the old secrets).
-    // ssid/password go to sh as positional args, never spliced into the command string.
+    // password typed  -> explicit connection creation and activation with wpa-psk security.
     function connectToNetwork(ssid, password) {
         if (root.device === "") {
             root.lastError = "No Wi-Fi adapter found"
@@ -437,7 +435,9 @@ Singleton {
         connectProc._stderrLines = []
         if (root._pendingUsedPassword) {
             connectProc.command = ["sh", "-c",
-                "nmcli connection delete id \"$1\" >/dev/null 2>&1; exec nmcli device wifi connect \"$1\" password \"$2\" ifname \"$3\"",
+                "nmcli connection delete id \"$1\" >/dev/null 2>&1; " +
+                "nmcli connection add type wifi ifname \"$3\" con-name \"$1\" ssid \"$1\" wifi-sec.key-mgmt wpa-psk wifi-sec.psk \"$2\" && " +
+                "exec nmcli connection up id \"$1\"",
                 "sh", ssid, password, root.device]
         } else if (root.isSaved(ssid)) {
             connectProc.command = ["nmcli", "connection", "up", "id", ssid, "ifname", root.device]

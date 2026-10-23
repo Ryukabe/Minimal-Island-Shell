@@ -15,7 +15,7 @@
       "col": 4,
       "row": 0,
       "colSpan": 4,
-      "rowSpan": 6
+      "rowSpan": 3
     },
     {
       "tileId": "stats",
@@ -23,13 +23,29 @@
       "col": 8,
       "row": 0,
       "colSpan": 4,
-      "rowSpan": 6
+      "rowSpan": 4
     },
     {
-      "tileId": "sysinfo",
-      "type": "sysinfo",
+      "tileId": "checklist",
+      "type": "checklist",
       "col": 0,
       "row": 3,
+      "colSpan": 4,
+      "rowSpan": 4
+    },
+    {
+      "tileId": "study",
+      "type": "study",
+      "col": 4,
+      "row": 3,
+      "colSpan": 4,
+      "rowSpan": 4
+    },
+    {
+      "tileId": "countdown",
+      "type": "countdown",
+      "col": 8,
+      "row": 4,
       "colSpan": 4,
       "rowSpan": 3
     }

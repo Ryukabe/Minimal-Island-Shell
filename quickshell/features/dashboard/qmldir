@@ -1,13 +1,13 @@
+singleton DashboardDataService 1.0 DashboardDataService.qml
 singleton DashboardLayoutService 1.0 DashboardLayoutService.qml
 singleton QuickNoteService 1.0 QuickNoteService.qml
 singleton StatsService 1.0 StatsService.qml
 Dashboard 1.0 Dashboard.qml
-DashboardGrid 1.0 DashboardGrid.qml
 DashboardSettings 1.0 DashboardSettings.qml
-DashboardQuickNoteSettings 1.0 DashboardQuickNoteSettings.qml
-DashboardMediaSettings 1.0 DashboardMediaSettings.qml
-DashboardStatsSettings 1.0 DashboardStatsSettings.qml
+DashboardGrid 1.0 DashboardGrid.qml
 DashboardCalendarSettings 1.0 DashboardCalendarSettings.qml
-FloatingRoundButton 1.0 FloatingRoundButton.qml
+DashboardMediaSettings 1.0 DashboardMediaSettings.qml
+DashboardQuickNoteSettings 1.0 DashboardQuickNoteSettings.qml
+DashboardStatsSettings 1.0 DashboardStatsSettings.qml
 DashboardSideButtons 1.0 DashboardSideButtons.qml
-DashboardDataService 1.0 DashboardDataService.qml
+FloatingRoundButton 1.0 FloatingRoundButton.qml
