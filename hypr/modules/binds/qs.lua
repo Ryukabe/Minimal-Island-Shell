@@ -21,6 +21,9 @@ hl.bind(mainMod .. " + Escape",              hl.dsp.exec_cmd("qs ipc call power 
 -- Lock screen
 hl.bind(mainMod .. " + L",                   hl.dsp.exec_cmd("quickshell ipc call lock lock"))
 
+-- Overview
+--hl.bind("SUPER + Tab",                       hl.dsp.exec_cmd("quickshell ipc call overview toggle"))
+
 -- Theme switcher
 hl.bind(mainMod .. " + T",                   hl.dsp.exec_cmd("qs ipc call themeswitcher toggle"))
 

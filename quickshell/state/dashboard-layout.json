@@ -1,6 +1,23 @@
 {
   "columns": 12,
+  "rows": 6,
   "tiles": [
+    {
+      "tileId": "stats",
+      "type": "stats",
+      "col": 4,
+      "row": 0,
+      "colSpan": 4,
+      "rowSpan": 6
+    },
+    {
+      "tileId": "quicknote",
+      "type": "quicknote",
+      "col": 8,
+      "row": 0,
+      "colSpan": 4,
+      "rowSpan": 6
+    },
     {
       "tileId": "media",
       "type": "media",
@@ -10,42 +27,10 @@
       "rowSpan": 3
     },
     {
-      "tileId": "quicknote",
-      "type": "quicknote",
-      "col": 4,
-      "row": 0,
-      "colSpan": 4,
-      "rowSpan": 3
-    },
-    {
-      "tileId": "stats",
-      "type": "stats",
-      "col": 8,
-      "row": 0,
-      "colSpan": 4,
-      "rowSpan": 4
-    },
-    {
-      "tileId": "checklist",
-      "type": "checklist",
+      "tileId": "calendar",
+      "type": "calendar",
       "col": 0,
       "row": 3,
-      "colSpan": 4,
-      "rowSpan": 4
-    },
-    {
-      "tileId": "study",
-      "type": "study",
-      "col": 4,
-      "row": 3,
-      "colSpan": 4,
-      "rowSpan": 4
-    },
-    {
-      "tileId": "countdown",
-      "type": "countdown",
-      "col": 8,
-      "row": 4,
       "colSpan": 4,
       "rowSpan": 3
     }

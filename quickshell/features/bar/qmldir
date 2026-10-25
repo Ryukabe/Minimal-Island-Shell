@@ -3,5 +3,7 @@ singleton AppLaunchToastService 1.0 AppLaunchToastService.qml
 singleton ClockLayoutService 1.0 ClockLayoutService.qml
 singleton PrivacyService 1.0 PrivacyService.qml
 BarSettings 1.0 BarSettings.qml
+BehaviorSettings 1.0 BehaviorSettings.qml
 ClockSettings 1.0 ClockSettings.qml
+VisualizerSettings 1.0 VisualizerSettings.qml
 WorkspacesSettings 1.0 WorkspacesSettings.qml

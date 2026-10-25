@@ -27,16 +27,22 @@ QtObject {
             id: "shell",
             menus: [
                 {
-                    id: "bar", title: "Bar & Island", subtitle: "Shape, size and behaviour of the island", icon: "dock_to_bottom",
-                    tags: "top margin corner radius border notch flare height width collapsed expanded hover lift click outside dismiss persistent show on hover drag threshold scroll gestures",
+                    id: "bar", title: "Bar & Island", subtitle: "Style, clock items and size of the island", icon: "dock_to_bottom",
+                    tags: "island notch style top margin border flare height width collapsed expanded clock layout items chips add remove order move workspaces visualizer timer icon mic camera privacy recording dot",
                     source: "../bar/BarSettings.qml",
                     views: [
                         { id: "workspaces", title: "Workspaces", subtitle: "Indicators and window icons", icon: "grid_view",
                           tags: "workspace shown active indicator trail occupied windows special per-monitor",
                           source: "../bar/WorkspacesSettings.qml" },
-                        { id: "clock", title: "Clock", subtitle: "Time, date and bar indicators", icon: "schedule",
-                          tags: "time date seconds leading zero am pm visualizer timer icon recording indicator preview",
-                          source: "../bar/ClockSettings.qml" }
+                        { id: "clock", title: "Clock", subtitle: "Time and date format", icon: "schedule",
+                          tags: "time date format seconds leading zero am pm 24 hour short long timer toast recording",
+                          source: "../bar/ClockSettings.qml" },
+                        { id: "visualizer", title: "Music visualizer", subtitle: "Bars, speed and color", icon: "equalizer",
+                          tags: "visualizer music audio bars width gap height speed color preview",
+                          source: "../bar/VisualizerSettings.qml" },
+                        { id: "behavior", title: "Behavior", subtitle: "Visibility, hover and scroll", icon: "tune",
+                          tags: "persistent always visible show on hover reveal zone hide delay lift click outside dismiss scroll gestures volume brightness",
+                          source: "../bar/BehaviorSettings.qml" }
                     ]
                 },
                 {
@@ -140,15 +146,17 @@ QtObject {
             id: "looks",
             menus: [
                 {
-                    id: "appearance", title: "Appearance", subtitle: "Wallpaper, theme, type and motion", icon: "palette",
-                    tags: "theme fonts color dark mode accent wallpaper",
+                    id: "appearance", title: "Appearance", subtitle: "Theme, mode, wallpaper, type and motion", icon: "palette",
+                    tags: "theme picker card preset fonts color dark light auto mode schedule sunrise sunset accent wallpaper",
+                    source: "../theme/AppearanceSettings.qml",
                     views: [
                         { id: "wallpaper", title: "Wallpaper", subtitle: "Background image and rotation", icon: "wallpaper",
                           tags: "background image slideshow",
                           source: "../theme/WallpaperSettings.qml" },
-                        // Theme and Colors used to be two separate views; they are one page now.
-                        { id: "theme", title: "Theme", subtitle: "Theme, colors and palette overrides", icon: "format_paint",
-                          tags: "theme card preset changer colors palette accent override theme tracking light dark",
+                        // The theme picker and light/dark mode moved to the Appearance page; this view keeps
+                        // the palette source and the manual colors. The id stays "theme" so nothing that links here breaks.
+                        { id: "theme", title: "Colors", subtitle: "Palette source and custom colors", icon: "format_paint",
+                          tags: "colors palette source prebuilt dynamic custom accent override hex dark light",
                           source: "../theme/ThemeSettings.qml" },
                         { id: "typography", title: "Typography", subtitle: "Fonts, size and icon style", icon: "text_fields",
                           tags: "fonts size icons weight",
@@ -159,6 +167,9 @@ QtObject {
                         { id: "opacity", title: "Opacity", subtitle: "Mica, spacing and shadows", icon: "opacity",
                           tags: "mica transparency shadow depth",
                           source: "../theme/OpacitySettings.qml" },
+                        { id: "corners", title: "Corners", subtitle: "Island, card and control radius", icon: "rounded_corner",
+                          tags: "corner radius round universal island card control chip border",
+                          source: "../theme/CornersSettings.qml" },
                         { id: "templates", title: "Templates", subtitle: "Re-theme other apps when your theme changes", icon: "dashboard_customize",
                           tags: "templates apps gtk qt kitty terminal vscode hyprland sync colors adapters",
                           source: "../theme/TemplatesSettings.qml" },

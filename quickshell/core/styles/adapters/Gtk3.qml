@@ -1,7 +1,6 @@
 // styles/adapters/Gtk3.qml
 pragma Singleton
 import QtQuick
-import Quickshell
 import Quickshell.Io
 import ".."
 import "../../shell"
@@ -9,34 +8,17 @@ import "../../shell"
 Item {
     id: root
 
-    // hermit-thunar.css stays where it is; its contents are pasted into the theme.
-    readonly property string srcDir: "$HOME/.config/gtk-3.0"
-    readonly property var merges: ["hermit-thunar.css"]
-    readonly property string themesDir: "$HOME/.themes"
+    readonly property string dir: "$HOME/.config/gtk-3.0"
+    readonly property string cssPath: root.dir + "/gtk.css"
+    // Extra CSS files (living next to gtk.css) that get re-imported after every write.
+    readonly property var imports: ["hermit-thunar.css"]
     readonly property bool active: ShellState.templatesEnabled && ShellState.templateGtk3
-
-    property bool _pending: false
 
     Process {
         id: proc
         stderr: SplitParser {
-            onRead: data => console.log("[Gtk3] stderr:", data)
+            onRead: data => console.log("[Gtk3] write stderr:", data)
         }
-        onExited: (exitCode, exitStatus) => {
-            if (exitCode !== 0)
-                console.log("[Gtk3] apply failed, exit code:", exitCode)
-            if (root._pending) {
-                root._pending = false
-                root.apply()
-            }
-        }
-    }
-
-    // Re-apply when you edit the Thunar file by hand.
-    FileView {
-        path: Quickshell.env("HOME") + "/.config/gtk-3.0/hermit-thunar.css"
-        watchChanges: true
-        onFileChanged: root.apply()
     }
 
     function buildCss() {
@@ -72,33 +54,14 @@ Item {
 
     function apply() {
         if (!Colors.loaded || !root.active) return;
-        if (proc.running) { root._pending = true; return }
-
-        var base = Colors.lightModeEnabled ? "adw-gtk3" : "adw-gtk3-dark"
-        var sh = ""
-        sh += "set -e; "
-        // Pick the theme that is NOT currently active.
-        sh += "cur=$(gsettings get org.gnome.desktop.interface gtk-theme | tr -d \"'\"); "
-        sh += "if [ \"$cur\" = hermit-a ]; then n=b; else n=a; fi; "
-        sh += "t=\"" + root.themesDir + "/hermit-$n\"; "
-        sh += "mkdir -p \"$t/gtk-3.0\"; "
-        sh += "printf '[Desktop Entry]\\nType=X-GNOME-Metatheme\\nName=hermit-%s\\n\\n[X-GNOME-Metatheme]\\nGtkTheme=hermit-%s\\n' \"$n\" \"$n\" > \"$t/index.theme\"; "
-        // Theme gtk.css = adw-gtk3 base + shell colors + Thunar CSS.
-        sh += "{ printf '@import url(\"file:///usr/share/themes/" + base + "/gtk-3.0/gtk.css\");\\n'; "
-        sh += "printf '%s' '" + root.buildCss() + "'; "
-        for (var i = 0; i < root.merges.length; i++) {
-            var f = root.srcDir + "/" + root.merges[i]
-            sh += "[ -f \"" + f + "\" ] && cat \"" + f + "\"; true; "
+        var tmp = "/tmp/gtk3-theme.css.tmp"
+        var script = 'mkdir -p "' + root.dir + '" && printf "%s" \'' + root.buildCss() + '\' > ' + tmp
+        for (var i = 0; i < root.imports.length; i++) {
+            var f = root.imports[i]
+            script += ' && { [ -f "' + root.dir + '/' + f + '" ] && printf "@import \\"' + f + '\\";\\n" >> ' + tmp + '; true; }'
         }
-        sh += "} > \"$t/gtk-3.0/gtk.css.tmp\"; "
-        sh += "mv \"$t/gtk-3.0/gtk.css.tmp\" \"$t/gtk-3.0/gtk.css\"; "
-        // The old generated user gtk.css would override the theme, so remove it.
-        sh += "u=\"" + root.srcDir + "/gtk.css\"; "
-        sh += "if [ -f \"$u\" ] && grep -q hm_bg \"$u\"; then rm -f \"$u\"; fi; "
-        // Switch: running GTK3 apps reload the theme live.
-        sh += "gsettings set org.gnome.desktop.interface gtk-theme \"hermit-$n\""
-
-        proc.command = ["bash", "-c", sh]
+        script += ' && mv ' + tmp + ' "' + root.cssPath + '"'
+        proc.command = ["bash", "-c", script]
         proc.running = true
     }
 

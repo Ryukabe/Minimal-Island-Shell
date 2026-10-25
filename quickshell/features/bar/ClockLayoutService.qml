@@ -1,17 +1,24 @@
-// features/bar/ClockLayoutService.qml — order of the items inside the bar clock.
-// Stores ORDER ONLY. Whether an item shows is still decided by the existing
-// ShellState clock* toggles (single source of truth for visibility).
+// features/bar/ClockLayoutService.qml — which items the bar clock shows, and in what order.
+// The layout IS the visibility: an item in the list is on the bar (while its own runtime
+// condition holds, e.g. the visualizer only while music plays); an item not in the list is off.
+// Saved as { "version": 2, "items": [...] } in state/clock-layout.json.
 pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../../core/shell"
 
 QtObject {
     id: root
 
-    // Every item type the clock knows. Add new types here AND in Clock.qml.
-    readonly property var defaultOrder: ["workspaces", "visualizer", "date", "time", "timer", "recording"]
+    // Every item type the clock knows. A new type needs an entry here, in typeDisplayNames,
+    // and in Clock.qml (itemShown + componentFor). It starts off until the user adds it.
+    readonly property var allTypes: ["workspaces", "visualizer", "date", "time", "timer", "privacy", "recording"]
+
+    // What a fresh install starts with (Date stays off until it is added).
+    readonly property var defaultOrder: ["workspaces", "visualizer", "time", "timer", "privacy", "recording"]
+
+    // Items that cannot be taken off the bar.
+    readonly property var requiredTypes: ["time"]
 
     readonly property var typeDisplayNames: ({
         workspaces: "Workspaces",
@@ -19,9 +26,11 @@ QtObject {
         date: "Date",
         time: "Time",
         timer: "Timer icon",
+        privacy: "Mic & camera dot",
         recording: "Recording dot"
     })
 
+    // Placed items only, in bar order.
     property ListModel layoutModel: ListModel {}
     property var undoStack: []
 
@@ -51,36 +60,60 @@ QtObject {
     }
 
     function loadFromJson(jsonText) {
-        var ids = []
+        var ids = null
+        var legacy = false
         if (jsonText && jsonText.trim() !== "") {
             try {
                 var parsed = JSON.parse(jsonText)
-                if (Array.isArray(parsed)) ids = parsed
+                if (Array.isArray(parsed)) {
+                    // Old format: a bare array that listed every item (visibility lived in
+                    // the ShellState clock* toggles).
+                    ids = parsed
+                    legacy = true
+                } else if (parsed && Array.isArray(parsed.items)) {
+                    ids = parsed.items
+                }
             } catch (e) {
                 console.warn("ClockLayoutService: bad saved layout, using defaults", e)
             }
         }
 
-        // Keep known types once each, drop the rest, then append any type the file
-        // does not mention yet, so items added in future updates always appear.
+        if (ids === null) {
+            _fill(defaultOrder)
+            return
+        }
+
+        // Keep known types once each. Types missing from the file stay off.
         var seen = {}
         var clean = []
         for (var i = 0; i < ids.length; i++) {
-            if (defaultOrder.indexOf(ids[i]) >= 0 && !seen[ids[i]]) {
-                seen[ids[i]] = true
-                clean.push(ids[i])
-            }
+            var id = ids[i]
+            if (allTypes.indexOf(id) < 0 || seen[id]) continue
+            // Date used to be driven by its own setting and is off by default, so a migrated
+            // layout starts without it.
+            if (legacy && id === "date") continue
+            seen[id] = true
+            clean.push(id)
         }
-        for (var j = 0; j < defaultOrder.length; j++) {
-            if (!seen[defaultOrder[j]]) clean.push(defaultOrder[j])
+
+        // Migration: the privacy dot had no slot in the old layout, so slot it in before the
+        // recording dot.
+        if (legacy && !seen["privacy"]) {
+            var rec = clean.indexOf("recording")
+            if (rec >= 0) clean.splice(rec, 0, "privacy")
+            else clean.push("privacy")
+        }
+
+        for (var r = 0; r < requiredTypes.length; r++) {
+            if (clean.indexOf(requiredTypes[r]) < 0) clean.push(requiredTypes[r])
         }
 
         _fill(clean)
-        if (JSON.stringify(clean) !== JSON.stringify(ids)) saveLayout()
+        if (legacy || JSON.stringify(clean) !== JSON.stringify(ids)) saveLayout()
     }
 
     function saveLayout() {
-        layoutFile.setText(JSON.stringify(snapshot(), null, 2))
+        layoutFile.setText(JSON.stringify({ version: 2, items: snapshot() }, null, 2))
     }
 
     function pushUndoSnapshot() {
@@ -125,16 +158,32 @@ QtObject {
         if (idx >= 0) moveItem(idx, idx + delta)
     }
 
-    // Used only by the settings editor to dim items that are switched off.
-    function isEnabled(type) {
-        switch (type) {
-            case "workspaces": return ShellState.clockShowWorkspaces
-            case "visualizer": return ShellState.clockShowVisualizer
-            case "date": return ShellState.clockDateStyle > 0
-            case "time": return true
-            case "timer": return ShellState.clockShowTimerIcon
-            case "recording": return ShellState.clockShowRecordingIndicator
-            default: return true
+    function canRemove(type) {
+        return requiredTypes.indexOf(type) < 0
+    }
+
+    // Puts an item on the bar, at the end of the row.
+    function addItem(type) {
+        if (allTypes.indexOf(type) < 0 || indexForId(type) >= 0) return
+        pushUndoSnapshot()
+        layoutModel.append({ itemId: type })
+        saveLayout()
+    }
+
+    function removeItem(type) {
+        var idx = indexForId(type)
+        if (idx < 0 || !canRemove(type)) return
+        pushUndoSnapshot()
+        layoutModel.remove(idx)
+        saveLayout()
+    }
+
+    // Types that are currently off, in the order of allTypes.
+    function unplacedTypes() {
+        var out = []
+        for (var i = 0; i < allTypes.length; i++) {
+            if (indexForId(allTypes[i]) < 0) out.push(allTypes[i])
         }
+        return out
     }
 }

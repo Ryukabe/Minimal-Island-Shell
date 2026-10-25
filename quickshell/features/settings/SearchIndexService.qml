@@ -231,8 +231,9 @@ Item {
         }
 
         root.entries = out
-        if (missing.length > 0)
-            console.warn("SearchIndex: no file for pages: " + missing.join(", "))
+        console.log("SearchIndex v5: " + names.length + " files | " + out.length + " options from "
+                    + (map.pages.length - missing.length) + "/" + map.pages.length + " pages"
+                    + (missing.length > 0 ? " | no file for: " + missing.join(", ") : ""))
     }
 
     Process {

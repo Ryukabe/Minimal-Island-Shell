@@ -25,7 +25,7 @@ Item {
     readonly property var shownDate: LocationService.localize(clock.date)
 
     // Dots fade out on their own; their slot stays in the row until the fade ends.
-    readonly property bool recordingActive: RecordingService.enabled && ShellState.clockShowRecordingIndicator
+    readonly property bool recordingActive: RecordingService.enabled
     property bool recordingFading: false
 
     onRecordingActiveChanged: {
@@ -45,7 +45,7 @@ Item {
         onTriggered: root.recordingFading = false
     }
 
-    readonly property bool privacyActive: ShellState.clockShowPrivacyIndicator && PrivacyService.active
+    readonly property bool privacyActive: PrivacyService.active
     property bool privacyFading: false
 
     onPrivacyActiveChanged: {
@@ -65,14 +65,15 @@ Item {
         onTriggered: root.privacyFading = false
     }
 
-    // Whether an item takes up space right now. Hidden items leave no gap.
+    // Whether an item takes up space right now. Items in the layout can still hide on a
+    // runtime condition (no music, no timer). Hidden items leave no gap.
     function itemShown(type) {
         switch (type) {
-            case "workspaces": return ShellState.clockShowWorkspaces
-            case "visualizer": return ShellState.clockShowVisualizer && AudioService.isPlaying
-            case "date": return ShellState.clockDateStyle > 0
+            case "workspaces": return true
+            case "visualizer": return AudioService.isPlaying
+            case "date": return true
             case "time": return true
-            case "timer": return ShellState.clockShowTimerIcon && (TimerService.secondsRemaining > 0 || TimerService.running)
+            case "timer": return TimerService.secondsRemaining > 0 || TimerService.running
             case "privacy": return root.privacyActive || root.privacyFading
             case "recording": return root.recordingActive || root.recordingFading
             default: return false
@@ -97,7 +98,8 @@ Item {
         anchors.centerIn: parent
         spacing: 14
 
-        // Order comes from ClockLayoutService (Settings > Bar & Island > Clock).
+        // Order and presence come from ClockLayoutService (Settings > Bar & Island > Layout).
+        // An item that is not in that list is never created.
         Repeater {
             model: ClockLayoutService.layoutModel
 
@@ -119,12 +121,12 @@ Item {
         Workspaces {}
     }
 
-    // Looks: Settings > Bar & Island > Clock > Visualizer.
+    // Looks: Settings > Bar & Island > Music visualizer.
     Component {
         id: visualizerItem
 
         ClockVisualizer {
-            running: ShellState.clockShowVisualizer && AudioService.isPlaying
+            running: AudioService.isPlaying
         }
     }
 
@@ -186,7 +188,7 @@ Item {
         }
     }
 
-    // Follows Clock settings > Recording indicator (clock)
+    // On the bar while "Recording dot" is in the layout.
     Component {
         id: recordingItem
 

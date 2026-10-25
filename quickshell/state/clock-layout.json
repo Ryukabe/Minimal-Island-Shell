@@ -1,8 +1,11 @@
-[
-  "workspaces",
-  "date",
-  "time",
-  "visualizer",
-  "timer",
-  "recording"
-]
+{
+  "version": 2,
+  "items": [
+    "workspaces",
+    "time",
+    "visualizer",
+    "privacy",
+    "recording",
+    "timer"
+  ]
+}

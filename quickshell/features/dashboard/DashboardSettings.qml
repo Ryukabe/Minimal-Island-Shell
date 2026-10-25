@@ -1,6 +1,5 @@
-// features/dashboard/DashboardSettings.qml — Dashboard: grid columns, the components you can add,
-// and a live preview where components are moved and resized. The panel sizes itself from the
-// components (no width / height sliders). Per-component options live on their own pages.
+// features/dashboard/DashboardSettings.qml — Dashboard: panel size, grid, which components show,
+// and a live preview where components are moved and resized. Per-component options live on their own pages.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -12,8 +11,43 @@ PageScroll {
     id: root
 
     readonly property var columnOptions: ["8", "10", "12", "14", "16"]
+    readonly property var rowOptions: ["4", "5", "6", "7", "8"]
     readonly property var selectedTile: DashboardLayoutService.tileInfo(grid.selectedTileId)
-    readonly property var unplaced: DashboardLayoutService.unplacedTypes()
+
+    function toggleType(type) {
+        if (DashboardLayoutService.hasType(type)) {
+            if (grid.selectedTileId === type) grid.selectedTileId = ""
+            DashboardLayoutService.removeTile(type)
+        } else {
+            DashboardLayoutService.addTile(type)
+        }
+    }
+
+    SectionLabel { text: "Panel size" }
+
+    GroupCard {
+        SliderRow {
+            label: "Width"
+            description: "Width of the Dashboard panel"
+            from: 480
+            to: 1400
+            stepSize: 10
+            value: ShellState.statusPanelWidth
+            unit: "px"
+            onMoved: (v) => ShellState.statusPanelWidth = v
+        }
+
+        SliderRow {
+            label: "Height"
+            description: "Height of the Dashboard panel"
+            from: 300
+            to: 900
+            stepSize: 10
+            value: ShellState.statusPanelHeight
+            unit: "px"
+            onMoved: (v) => ShellState.statusPanelHeight = v
+        }
+    }
 
     SectionLabel { text: "Grid" }
 
@@ -22,65 +56,47 @@ PageScroll {
             label: "Columns"
             options: root.columnOptions
             selectedValue: String(DashboardLayoutService.columns)
-            onOptionSelected: (name) => DashboardLayoutService.setColumns(parseInt(name))
+            onOptionSelected: (name) => DashboardLayoutService.setGrid(parseInt(name), DashboardLayoutService.rows)
+        }
+
+        SegmentRow {
+            label: "Rows"
+            options: root.rowOptions
+            selectedValue: String(DashboardLayoutService.rows)
+            onOptionSelected: (name) => DashboardLayoutService.setGrid(DashboardLayoutService.columns, parseInt(name))
             showDivider: false
         }
     }
 
     SectionLabel { text: "Components" }
 
-    // Components that are not on the Dashboard. Tap one to add it; remove one with the
-    // button under "Selected component" below.
     GroupCard {
-        InfoRow {
-            visible: root.unplaced.length === 0
-            label: "Every component is already on the Dashboard"
-            showDivider: false
+        ToggleRow {
+            label: "Quick note"
+            description: "A Markdown note you can write in"
+            checked: DashboardLayoutService.hasType("quicknote")
+            onToggled: root.toggleType("quicknote")
         }
 
-        Flow {
-            visible: root.unplaced.length > 0
-            Layout.fillWidth: true
-            Layout.margins: Dimens.paddingMedium
-            spacing: Dimens.spacingSmall
+        ToggleRow {
+            label: "Media"
+            description: "Spinning CD with playback buttons"
+            checked: DashboardLayoutService.hasType("media")
+            onToggled: root.toggleType("media")
+        }
 
-            Repeater {
-                model: root.unplaced
+        ToggleRow {
+            label: "System stats"
+            description: "CPU, GPU, memory, network, battery, temperature"
+            checked: DashboardLayoutService.hasType("stats")
+            onToggled: root.toggleType("stats")
+        }
 
-                delegate: Rectangle {
-                    id: addChip
-                    required property string modelData
-
-                    readonly property var size: DashboardLayoutService.defaultSizeForType(addChip.modelData)
-
-                    implicitWidth: addChipLabel.implicitWidth + Dimens.paddingLarge
-                    implicitHeight: 34
-                    radius: Dimens.radiusChip
-                    color: addMouse.containsMouse ? Colors.accent : Colors.elevatedBg
-
-                    Behavior on color {
-                        ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
-                    }
-
-                    Text {
-                        id: addChipLabel
-                        anchors.centerIn: parent
-                        text: (DashboardLayoutService.typeDisplayNames[addChip.modelData] || addChip.modelData)
-                              + "  " + addChip.size.c + " × " + addChip.size.r
-                        color: addMouse.containsMouse ? Colors.mainBgMica : Colors.fg
-                        font.family: Fonts.text
-                        font.pixelSize: Dimens.fontSizeSm
-                    }
-
-                    MouseArea {
-                        id: addMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: DashboardLayoutService.addTile(addChip.modelData)
-                    }
-                }
-            }
+        ToggleRow {
+            label: "Calendar"
+            description: "Month view"
+            checked: DashboardLayoutService.hasType("calendar")
+            onToggled: root.toggleType("calendar")
         }
     }
 
@@ -97,7 +113,7 @@ PageScroll {
 
         ButtonRow {
             label: "Reset layout"
-            description: "Back to the default components and a 12-column grid"
+            description: "Back to the default components and a 12 × 6 grid"
             buttonText: "Reset"
             showDivider: false
             onClicked: DashboardLayoutService.resetToDefault()
@@ -106,15 +122,16 @@ PageScroll {
 
     SectionLabel { text: "Layout" }
 
-    // Same size and padding as the real Dashboard panel, so the preview and the panel always match.
+    // Same proportions as the real panel (scaled down to fit).
     Rectangle {
         id: previewPanel
 
         readonly property real pad: Dimens.paddingMedium
+        readonly property real panelW: Math.max(200, Math.min(root.width - Dimens.paddingLarge * 2, ShellState.statusPanelWidth))
 
         Layout.alignment: Qt.AlignHCenter
-        Layout.preferredWidth: grid.implicitWidth + pad * 2
-        Layout.preferredHeight: grid.implicitHeight + pad * 2
+        Layout.preferredWidth: panelW
+        Layout.preferredHeight: panelW * ShellState.statusPanelHeight / ShellState.statusPanelWidth
 
         radius: Dimens.radiusIsland
         color: Colors.mainBgMica
@@ -123,10 +140,8 @@ PageScroll {
 
         DashboardGrid {
             id: grid
-            x: previewPanel.pad
-            y: previewPanel.pad
-            width: implicitWidth
-            height: implicitHeight
+            anchors.fill: parent
+            anchors.margins: previewPanel.pad
             editMode: true
         }
     }
@@ -135,7 +150,7 @@ PageScroll {
         Layout.fillWidth: true
         leftPadding: Dimens.paddingSmall
         wrapMode: Text.WordWrap
-        text: "Click a component to select it. Drag it to move it and use the four corner dots to resize it. With one selected, the arrow keys move it and Shift + arrows resize it. Components in the way are pushed aside, and the Dashboard grows or shrinks to fit."
+        text: "Click a component to select it. Drag it to move it and use the four corner dots to resize it. With one selected, the arrow keys move it and Shift + arrows resize it."
         color: Colors.subtext
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeXs

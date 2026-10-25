@@ -6,16 +6,10 @@ import "../../shell"
 
 Item {
     id: root
-    readonly property string base: "$HOME/.config/starship/starship.base.toml"
+    readonly property string base: "$HOME/.config/starship.base.toml"
     readonly property string out: "$HOME/.config/starship.toml"
     readonly property bool active: ShellState.templatesEnabled && ShellState.templateStarship
-    Process {
-        id: proc
-        stderr: SplitParser {
-            onRead: data => console.log("[Starship] stderr:", data)
-        }
-        onExited: (exitCode, exitStatus) => console.log("[Starship] exit code:", exitCode)
-    }
+    Process { id: proc }
 
     function buildPalette() {
         function p(k, v) { return k + ' = "' + Colors.toHex(v) + '"\n' }
@@ -27,10 +21,7 @@ Item {
     }
 
     function apply() {
-        if (!Colors.loaded || !root.active) {
-            console.log("[Starship] skipped, loaded:", Colors.loaded, "active:", root.active)
-            return
-        }
+        if (!Colors.loaded || !root.active) return;
         var tmp = "/tmp/starship-theme.tmp"
         proc.command = ["bash", "-c",
             '[ -f "' + root.base + '" ] && cat "' + root.base + '" > ' + tmp +
