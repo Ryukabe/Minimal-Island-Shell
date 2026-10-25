@@ -89,7 +89,12 @@ Item {
         root._write(root.mainModFile, 'return "' + newMod + '"\n')
     }
 
+    // The two shell-switch binds belong with the shell shortcuts (the Shell page), not with the
+    // window ones, so they count as "Quickshell" even though they call a script, not qs ipc.
     function _categorizeBind(action) {
+        if (root._isShellBind(action)) {
+            return "Quickshell"
+        }
         if (/qs ipc call|quickshell ipc call/.test(action)) {
             return "Quickshell"
         }
@@ -99,7 +104,7 @@ Item {
         return "Hyprland"
     }
 
-    // The two shell-switch binds are listed first in the menu
+    // The two shell-switch binds are listed first on their page
     function _isShellBind(action) {
         return /switch-shell\.sh/.test(action)
     }
@@ -257,7 +262,17 @@ Item {
         return !root.labelOverrides[bind.actionKey]
     }
 
-    function _autoLabel(action) {
+    // Whether a row should show the raw action under its name. A clear label already says what the
+    // shortcut does, so the code line would only repeat it. It is shown where it adds information:
+    // shortcuts you added, shortcuts you renamed, and ones with no recognised label ("Run: ...").
+    function showsAction(bind) {
+        return bind.isCustom
+            || !root.isAutoNamed(bind)
+            || root._knownLabel(bind.actionFull) === ""
+    }
+
+    // The readable label for every action this file recognises, or "" when it has none.
+    function _knownLabel(action) {
         let m
 
         if (/window\.float/.test(action)) return "Toggle Floating"
@@ -307,6 +322,7 @@ Item {
         if (/playerctl play-pause/.test(action)) return "Play / Pause"
 
         if (/hyprctl kill/.test(action)) return "Kill Active Window (Force)"
+        if (/hyprctl reload/.test(action)) return "Reload Hyprland"
         if (/wlogout/.test(action)) return "Power Menu (wlogout)"
         if (/hyprlock/.test(action)) return "Lock Screen (hyprlock)"
         if (/cliphist wipe/.test(action)) return "Clear Clipboard History"
@@ -314,7 +330,14 @@ Item {
         if (/hyprshot -m region/.test(action)) return "Screenshot: Region"
         if (/hyprpicker/.test(action)) return "Color Picker"
 
-        m = action.match(/exec_cmd\("([^"]+)"/)
+        return ""
+    }
+
+    function _autoLabel(action) {
+        let known = root._knownLabel(action)
+        if (known !== "") return known
+
+        let m = action.match(/exec_cmd\("([^"]+)"/)
         if (m) {
             let cmd = m[1]
             let bin = cmd.split("/").pop().split(" ")[0]

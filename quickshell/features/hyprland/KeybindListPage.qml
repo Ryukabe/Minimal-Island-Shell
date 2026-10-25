@@ -30,6 +30,7 @@ PageScroll {
                 label: HyprlandKeybindsService.friendlyName(modelData)
                 isAutoLabel: HyprlandKeybindsService.isAutoNamed(modelData)
                 actionPreview: modelData.actionPreview
+                showAction: HyprlandKeybindsService.showsAction(modelData)
                 keyDisplay: modelData.keyDisplay
                 isCustom: modelData.isCustom
                 isMultiline: modelData.isMultiline

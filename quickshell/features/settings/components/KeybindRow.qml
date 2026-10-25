@@ -1,4 +1,5 @@
-// components/KeybindRow.qml — one shortcut: friendly name with the raw action underneath, and the key pill.
+// components/KeybindRow.qml — one shortcut: friendly name, the raw action underneath when it helps,
+// and the key pill. The raw action shows only when `showAction` is on (the list page decides).
 // Hover the name and click to rename (stores an override, never touches binds.lua).
 // Click the key pill to rebind: capture is live, the combo is staged until Save, Escape cancels.
 // Conflict warning, Flatten for multi-line binds, Remove for custom-added binds.
@@ -13,6 +14,7 @@ Item {
     property string label: ""
     property bool isAutoLabel: true
     property string actionPreview: ""
+    property bool showAction: true
     property string keyDisplay: ""
     property bool hasConflict: false
     property bool isCustom: false
@@ -107,6 +109,8 @@ Item {
                 }
 
                 Text {
+                    // Hidden rows take no space, so a clear label gives a one-line row.
+                    visible: root.showAction
                     Layout.fillWidth: true
                     text: root.actionPreview
                     color: Colors.subtext
