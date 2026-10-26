@@ -147,7 +147,7 @@
   "hiddenApps": [],
   "appIconTheme": "Papirus",
   "updateAutoCheck": true,
-  "wifiScanIntervalSec": 15,
+  "wifiScanIntervalSec": 60,
   "bluetoothShowBattery": true,
   "bluetoothReconnectAtStartup": false,
   "bluetoothLastDevice": ""

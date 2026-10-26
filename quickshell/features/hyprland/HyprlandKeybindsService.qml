@@ -17,6 +17,8 @@ Item {
     property var fileTexts: ({})
     property var binds: []
     property var conflictCounts: ({})
+    // Binds the parser skips (workspace 1-10 loops, mouse binds). They still own their keys.
+    property var reserved: []
     property var labelOverrides: ({})
     property bool loaded: false
     property bool labelsLoaded: false
@@ -114,8 +116,9 @@ Item {
         root.mainMod = mm ? mm[1] : "SUPER"
 
         let results = []
+        let reserved = []
         for (let name of root.bindFiles)
-            root._parseFile(name, root.fileTexts[name] || "", results)
+            root._parseFile(name, root.fileTexts[name] || "", results, reserved)
 
         // Shell-switch binds first, everything else keeps its order
         let shellBinds = results.filter(b => root._isShellBind(b.actionFull))
@@ -124,10 +127,11 @@ Item {
         results.forEach((b, idx) => { b.id = idx })
 
         root.binds = results
+        root.reserved = reserved
         root._buildConflicts()
     }
 
-    function _parseFile(fileName, t, results) {
+    function _parseFile(fileName, t, results, reserved) {
         let i = 0
 
         while (true) {
@@ -165,6 +169,11 @@ Item {
             let keyRaw = t.substring(keyStart, keyExprEnd).trim()
 
             if (/\bkey\b|\bi\b|mouse:/.test(keyRaw)) {
+                // Not listed in Settings, but remembered so the Add form can warn about their keys.
+                reserved.push({
+                    keyDisplay: root._resolveKeyDisplay(keyRaw),
+                    actionFull: t.substring(keyExprEnd + 1, callEnd).trim().replace(/\s+/g, " ")
+                })
                 i = callEnd + 1
                 continue
             }
@@ -386,14 +395,209 @@ Item {
         return true
     }
 
-    function addExecBind(newKeyDisplay, command) {
+    // ================= ADD FORM: checks =================
+
+    // "SUPER + shift + a" and "super+SHIFT+A" are the same shortcut, so compare them in one form.
+    function normalizeCombo(combo) {
+        const order = ["SUPER", "CTRL", "ALT", "SHIFT"]
+        const alias = { CONTROL: "CTRL", META: "SUPER", WIN: "SUPER", MOD4: "SUPER" }
+        let mods = []
+        let keys = []
+        for (let raw of String(combo || "").split("+")) {
+            let tok = raw.trim().toUpperCase()
+            if (tok === "") continue
+            if (alias[tok] !== undefined) tok = alias[tok]
+            if (order.indexOf(tok) >= 0) {
+                if (mods.indexOf(tok) < 0) mods.push(tok)
+            } else {
+                keys.push(tok)
+            }
+        }
+        mods.sort((x, y) => order.indexOf(x) - order.indexOf(y))
+        const key = keys.join(" ")
+        return { mods: mods, key: key, text: mods.concat(key === "" ? [] : [key]).join(" + ") }
+    }
+
+    // The existing shortcut that already uses this combination, or null. The workspace 1-10 loop
+    // binds are checked as a range, since the parser does not list them one by one.
+    function findConflict(combo) {
+        const n = root.normalizeCombo(combo)
+        if (n.key === "") return null
+
+        for (const b of root.binds) {
+            if (root.normalizeCombo(b.keyDisplay).text === n.text)
+                return { label: root.friendlyName(b), keyDisplay: b.keyDisplay }
+        }
+
+        for (const r of root.reserved) {
+            const rn = root.normalizeCombo(r.keyDisplay)
+            const sameMods = rn.mods.join("+") === n.mods.join("+")
+            if (rn.text === n.text || (rn.key === "1-10" && /^[0-9]$/.test(n.key) && sameMods))
+                return { label: root._autoLabel(r.actionFull), keyDisplay: r.keyDisplay }
+        }
+        return null
+    }
+
+    // How safe a combination is to bind. level: "ok" | "warn" (allowed, ask) | "block" (not allowed).
+    function comboRisk(combo) {
+        const n = root.normalizeCombo(combo)
+        const ok = { level: "ok", text: "" }
+        if (n.key === "") return ok
+
+        // Keys you type with. A bare one, bound system-wide, stops working in every app.
+        const typing = /^([A-Z0-9]|SPACE|RETURN|TAB|BACKSPACE|DELETE|LEFT|RIGHT|UP|DOWN|COMMA|PERIOD)$/.test(n.key)
+        if (!typing) return ok
+
+        if (n.mods.indexOf("SUPER") >= 0 || n.mods.indexOf(root.mainMod) >= 0) return ok
+
+        if (n.mods.length === 0) {
+            return { level: "block",
+                text: "A shortcut with no modifier would stop " + n.key + " working in every app. Add "
+                    + root.mainMod + " or another modifier." }
+        }
+        if (n.mods.length === 1 && n.mods[0] === "SHIFT") {
+            return { level: "warn",
+                text: "Shift plus a key is how you type capitals. This shortcut would stop that in every app." }
+        }
+        return { level: "warn",
+            text: "Apps use this combination themselves (copy, paste, tabs). Hyprland takes it first, so they stop receiving it." }
+    }
+
+    // ================= ADD FORM: actions =================
+    // Every action here is copied from your own binds files (common.lua, qs.lua) or from the
+    // Hyprland wiki's Lua dispatcher page. build(value) returns { action, flags } or null while the
+    // input is not valid yet. `flags` is the optional third argument of hl.bind, like { locked = true }.
+
+    readonly property var actionGroups: ["Run", "Window", "Workspace", "Shell", "System"]
+
+    readonly property var actionCatalog: [
+        // ---- Run ----
+        { group: "Run", title: "Run a command", input: "command",
+          build: v => { v = v.trim(); return v === "" ? null : root._exec(v) } },
+        { group: "Run", title: "Run in a floating window", input: "command",
+          build: v => { v = v.trim(); return v === "" ? null
+              : { action: 'hl.dsp.exec_cmd("' + root._luaString(v) + '", { float = true })', flags: "" } } },
+        { group: "Run", title: "Open default app", input: "app",
+          build: v => /^(terminal|browser|files)$/.test(v)
+              ? root._exec("$HOME/.config/hypr/scripts/open-default.sh " + v) : null },
+
+        // ---- Window ----
+        { group: "Window", title: "Close window", input: "none",
+          build: v => ({ action: "hl.dsp.window.close()", flags: "" }) },
+        { group: "Window", title: "Force kill window", input: "none",
+          build: v => ({ action: "hl.dsp.window.kill()", flags: "" }) },
+        { group: "Window", title: "Toggle floating", input: "none",
+          build: v => ({ action: 'hl.dsp.window.float({ action = "toggle" })', flags: "" }) },
+        { group: "Window", title: "Toggle pseudotile", input: "none",
+          build: v => ({ action: "hl.dsp.window.pseudo()", flags: "" }) },
+        { group: "Window", title: "Focus window", input: "direction",
+          build: v => /^(left|right|up|down)$/.test(v)
+              ? { action: 'hl.dsp.focus({ direction = "' + v + '" })', flags: "" } : null },
+        { group: "Window", title: "Toggle group", input: "none",
+          build: v => ({ action: "hl.dsp.group.toggle()", flags: "" }) },
+        { group: "Window", title: "Toggle split (dwindle layout only)", input: "none",
+          build: v => ({ action: 'hl.dsp.layout("togglesplit")', flags: "" }) },
+
+        // ---- Workspace ----
+        { group: "Workspace", title: "Go to workspace", input: "workspace",
+          build: v => /^([1-9]|10)$/.test(v)
+              ? { action: "hl.dsp.focus({ workspace = " + v + " })", flags: "" } : null },
+        { group: "Workspace", title: "Next workspace", input: "none",
+          build: v => ({ action: 'hl.dsp.focus({ workspace = "e+1" })', flags: "" }) },
+        { group: "Workspace", title: "Previous workspace", input: "none",
+          build: v => ({ action: 'hl.dsp.focus({ workspace = "e-1" })', flags: "" }) },
+        { group: "Workspace", title: "Move window to workspace", input: "workspace",
+          build: v => /^([1-9]|10)$/.test(v)
+              ? { action: "hl.dsp.window.move({ workspace = " + v + " })", flags: "" } : null },
+        { group: "Workspace", title: "Toggle scratchpad", input: "name",
+          build: v => /^[A-Za-z0-9_-]+$/.test(v)
+              ? { action: 'hl.dsp.workspace.toggle_special("' + v + '")', flags: "" } : null },
+        { group: "Workspace", title: "Send window to scratchpad", input: "name",
+          build: v => /^[A-Za-z0-9_-]+$/.test(v)
+              ? { action: 'hl.dsp.window.move({ workspace = "special:' + v + '" })', flags: "" } : null },
+
+        // ---- Shell (qs.lua) ----
+        { group: "Shell", title: "Toggle Settings", input: "none",
+          build: v => root._exec("qs ipc call settings toggle") },
+        { group: "Shell", title: "Toggle App Launcher", input: "none",
+          build: v => root._exec("qs ipc call launcher toggle", "{ locked = true }") },
+        { group: "Shell", title: "Toggle Clipboard", input: "none",
+          build: v => root._exec("qs ipc call clipboard toggle") },
+        { group: "Shell", title: "Toggle Control Center", input: "none",
+          build: v => root._exec("qs ipc call controlcenter toggle") },
+        { group: "Shell", title: "Toggle Notification Center", input: "none",
+          build: v => root._exec("qs ipc call notificationcenter toggle") },
+        { group: "Shell", title: "Toggle Power Menu", input: "none",
+          build: v => root._exec("qs ipc call power toggle") },
+        { group: "Shell", title: "Lock Screen", input: "none",
+          build: v => root._exec("quickshell ipc call lock lock") },
+        { group: "Shell", title: "Toggle Theme Switcher", input: "none",
+          build: v => root._exec("qs ipc call themeswitcher toggle") },
+        { group: "Shell", title: "Toggle Wallpaper Switcher", input: "none",
+          build: v => root._exec("qs ipc call wallpaper toggle") },
+        { group: "Shell", title: "Brightness Up", input: "none",
+          build: v => root._exec("qs ipc call brightness increase", "{ locked = true, repeating = true }") },
+        { group: "Shell", title: "Brightness Down", input: "none",
+          build: v => root._exec("qs ipc call brightness decrease", "{ locked = true, repeating = true }") },
+        { group: "Shell", title: "Volume Up", input: "none",
+          build: v => root._exec("qs ipc call volume increase", "{ locked = true, repeating = true }") },
+        { group: "Shell", title: "Volume Down", input: "none",
+          build: v => root._exec("qs ipc call volume decrease", "{ locked = true, repeating = true }") },
+        { group: "Shell", title: "Mute Toggle", input: "none",
+          build: v => root._exec("qs ipc call volume toggle", "{ locked = true, repeating = true }") },
+
+        // ---- System (common.lua) ----
+        { group: "System", title: "Next Track", input: "none",
+          build: v => root._exec("playerctl next", "{ locked = true }") },
+        { group: "System", title: "Play / Pause", input: "none",
+          build: v => root._exec("playerctl play-pause", "{ locked = true }") },
+        { group: "System", title: "Previous Track", input: "none",
+          build: v => root._exec("playerctl previous", "{ locked = true }") },
+        { group: "System", title: "Screenshot: Region", input: "none",
+          build: v => root._exec("hyprshot -m region -o $HOME/Pictures/Screenshot") },
+        { group: "System", title: "Color Picker", input: "none",
+          build: v => root._exec("hyprpicker -a -f hex") },
+        { group: "System", title: "Clear Clipboard History", input: "none",
+          build: v => root._exec("cliphist wipe") },
+        { group: "System", title: "Power Menu (wlogout)", input: "none",
+          build: v => root._exec("$HOME/.config/wlogout/scripts/wlogout.sh") },
+        { group: "System", title: "Lock Screen (hyprlock)", input: "none",
+          build: v => root._exec("hyprlock -c $HOME/.config/hypr/hyprlock/hyprlock.conf") },
+        { group: "System", title: "Reload Hyprland", input: "none",
+          build: v => root._exec("hyprctl reload") }
+    ]
+
+    function actionsForGroup(group) {
+        return root.actionCatalog.filter(e => e.group === group)
+    }
+
+    // Escapes text for use inside a Lua "..." string.
+    function _luaString(s) {
+        return String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/[\r\n]+/g, " ")
+    }
+
+    function _exec(cmd, flags) {
+        return { action: 'hl.dsp.exec_cmd("' + root._luaString(cmd) + '")', flags: flags || "" }
+    }
+
+    // Appends hl.bind(key, action[, flags]) to custom.lua. A name is optional: it becomes the
+    // friendly label, stored under the same key the list uses (the text after the key comma).
+    function addBind(newKeyDisplay, action, flags, name) {
         let t = root.fileTexts[root.customFile] || ""
-        let keyLit = "\"" + newKeyDisplay.replace(/"/g, '\\"') + "\""
-        let cmdLit = command.replace(/"/g, '\\"')
-        let line = "hl.bind(" + keyLit + ", hl.dsp.exec_cmd(\"" + cmdLit + "\"))"
+        let tail = action + (flags ? ", " + flags : "")
+        let line = 'hl.bind("' + root._luaString(newKeyDisplay) + '", ' + tail + ")"
 
         t = t.replace(/\s*$/, "") + "\n" + line + "\n"
         root._write(root.customFile, t)
+
+        let label = (name || "").trim()
+        if (label !== "") root.setLabel(tail.replace(/\s+/g, " ").trim(), label)
+    }
+
+    // Kept for older callers: a plain "run this command" shortcut.
+    function addExecBind(newKeyDisplay, command) {
+        let built = root._exec(command)
+        root.addBind(newKeyDisplay, built.action, built.flags, "")
     }
 
     function removeCustomBind(bindId) {
