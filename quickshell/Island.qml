@@ -1,6 +1,7 @@
 // Island.qml — bar window, page router, and IPC
 
 pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Effects
 import Quickshell
@@ -16,14 +17,14 @@ import "features/notifications"
 import "features/power"
 import "features/theme"
 import "features/timer"
-import "core/styles"
-import "core/styles/adapters"
 import "features/display"
 import "features/sound"
-import "core/shell"
 import "features/bar/components"
-import "core/common"
 import "features/settings/core"
+import "core/shell"
+import "core/styles"
+import "core/styles/adapters"
+import "core/common"
 
 PanelWindow {
     id: window
@@ -314,12 +315,12 @@ PanelWindow {
         property int targetWidth: {
             if (!pageLoader.item) return compactWidth
             var floor = expanded ? ShellState.islandMinExpandedWidth : compactWidth
-            return Math.max(pageLoader.item.implicitWidth, floor)
+            return Math.max(pageLoader.implicitWidth, floor)
         }
         property int targetHeight: {
             if (!pageLoader.item) return compactHeight
             var floor = expanded ? ShellState.islandExpandedHeight : compactHeight
-            return Math.max(pageLoader.item.implicitHeight, floor)
+            return Math.max(pageLoader.implicitHeight, floor)
         }
 
         // Spring physics on: width/height follow MorphSpring (velocity-carrying, can overshoot,

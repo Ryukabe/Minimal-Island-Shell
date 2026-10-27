@@ -1,8 +1,9 @@
 // features/theme/AppearanceSettings.qml — the Appearance menu itself: the settings you reach for
 // most. Theme picker and light/dark mode (with the Auto schedule) sit here. Wallpaper, Colors,
 // Typography, Motion, Opacity, Corners and Templates open from the list at the bottom.
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "."
 import "../../core/shell"

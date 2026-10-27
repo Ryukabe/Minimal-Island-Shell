@@ -1,9 +1,9 @@
 // pages/appearance/wallpaper/WallpaperSettings.qml — Appearance > Wallpaper.
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "."
-import "../../core/styles"
 import "components"
 
 PageScroll {

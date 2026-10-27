@@ -2,10 +2,8 @@
 // Values live on ShellState (persisted by SettingsStore). Fonts.qml and Dimens.qml read them,
 // so write to ShellState here and never to those directly.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root

@@ -64,19 +64,19 @@
     "rowSpan": 4
   },
   {
-    "tileId": "brightness",
-    "type": "brightness",
-    "col": 0,
-    "row": 0,
-    "colSpan": 1,
-    "rowSpan": 4
-  },
-  {
     "tileId": "shades",
     "type": "shades",
     "col": 3,
     "row": 1,
     "colSpan": 1,
     "rowSpan": 1
+  },
+  {
+    "tileId": "brightness",
+    "type": "brightness",
+    "col": 0,
+    "row": 0,
+    "colSpan": 1,
+    "rowSpan": 4
   }
 ]

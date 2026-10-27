@@ -1,7 +1,6 @@
 // features/sound/MediaExpanded.qml
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import "../../core/styles"
 import "."
 import "../../core/shell"

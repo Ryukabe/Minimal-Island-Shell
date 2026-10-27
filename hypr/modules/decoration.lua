@@ -1,8 +1,8 @@
 hl.config({
     general = {
         --screen_shader = "$HOME/.config/hypr/shaders/vivid.glsl",
-        gaps_in  = 4,
-        gaps_out = 8,
+        gaps_in  = 5,
+        gaps_out = 20,
 
         border_size = 0,
 

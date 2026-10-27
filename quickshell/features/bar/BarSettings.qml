@@ -2,6 +2,8 @@
 // Style, the clock items and their order, and size sit here. Workspaces, Clock,
 // Music visualizer and Behavior open from the list at the bottom.
 // Everything here is bound to ShellState or ClockLayoutService.
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -100,7 +102,7 @@ PageScroll {
             shown: root.barStyle === "Notch"
 
             SliderRow {
-                label: "Notch flare"
+                label: "Notch side radius"
                 description: "How far the notch curves out into the screen edge"
                 from: 0; to: 40; stepSize: 1
                 value: ShellState.islandNotchFlare
@@ -122,8 +124,6 @@ PageScroll {
             implicitHeight: 72
 
             property string selectedId: ""
-            readonly property bool hasSelection: strip.selectedId !== ""
-                && ClockLayoutService.indexForId(strip.selectedId) >= 0
             readonly property int count: ClockLayoutService.layoutModel.count
             readonly property real gap: Dimens.spacingSmall
             readonly property real pad: Dimens.paddingMedium
@@ -305,59 +305,16 @@ PageScroll {
         }
     }
 
-    // Slides open while an item is selected in the row above.
-    Reveal {
-        shown: strip.hasSelection
-
-        SectionLabel { text: "Selected item" }
-
-        GroupCard {
-            InfoRow {
-                label: ClockLayoutService.typeDisplayNames[strip.selectedId] || ""
-                value: "Position " + (ClockLayoutService.indexForId(strip.selectedId) + 1) + " of " + strip.count
-            }
-
-            ButtonRow {
-                label: "Move left"
-                buttonText: "Left"
-                enabled: ClockLayoutService.indexForId(strip.selectedId) > 0
-                onClicked: ClockLayoutService.moveItemBy(strip.selectedId, -1)
-            }
-
-            ButtonRow {
-                label: "Move right"
-                buttonText: "Right"
-                enabled: ClockLayoutService.indexForId(strip.selectedId) < strip.count - 1
-                onClicked: ClockLayoutService.moveItemBy(strip.selectedId, 1)
-            }
-
-            ButtonRow {
-                label: "Remove from the island"
-                description: ClockLayoutService.canRemove(strip.selectedId)
-                    ? "You can add it back below"
-                    : "Time always stays on the island"
-                buttonText: "Remove"
-                enabled: ClockLayoutService.canRemove(strip.selectedId)
-                showDivider: false
-                onClicked: {
-                    const id = strip.selectedId
-                    strip.selectedId = ""
-                    ClockLayoutService.removeItem(id)
-                }
-            }
-        }
-    }
-
     SectionLabel { text: "Layout tools" }
 
     GroupCard {
-        ButtonRow {
+        /*ButtonRow {
             label: "Undo"
             description: "Step back one change"
             buttonText: "Undo"
             enabled: ClockLayoutService.undoStack.length > 0
             onClicked: ClockLayoutService.undo()
-        }
+        }*/
 
         ButtonRow {
             label: "Reset layout"

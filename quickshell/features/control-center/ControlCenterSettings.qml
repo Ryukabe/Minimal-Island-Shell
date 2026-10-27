@@ -250,18 +250,6 @@ PageScroll {
                     }
                 }
             }
-
-            ButtonRow {
-                label: "Remove from the grid"
-                description: "You can add it back above"
-                buttonText: "Remove"
-                showDivider: false
-                onClicked: {
-                    const id = grid.selectedTileId
-                    grid.selectedTileId = ""
-                    ControlCenterLayoutService.removeTile(id)
-                }
-            }
         }
     }
 }

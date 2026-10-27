@@ -1,4 +1,6 @@
 // features/power/PowerMenu.qml
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io

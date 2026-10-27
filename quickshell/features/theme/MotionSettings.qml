@@ -1,5 +1,7 @@
 // features/theme/MotionSettings.qml — Appearance > Motion.
 // Every control binds straight to ShellState (the single source of truth); SettingsStore persists it.
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"

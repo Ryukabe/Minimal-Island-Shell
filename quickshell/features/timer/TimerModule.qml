@@ -1,12 +1,11 @@
 // moules/TimerModule.qml
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import "../../core/styles"
 import "."
 import "../../core/shell"
-import "../bar/components"
 
 Item {
     id: root

@@ -2,12 +2,8 @@
 // Everything here is bound to ShellState and read by the island / EventToastService /
 // AppLaunchToastService.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
-import "../bar"
-import "."
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root

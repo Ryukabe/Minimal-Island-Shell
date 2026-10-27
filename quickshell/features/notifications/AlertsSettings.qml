@@ -1,11 +1,9 @@
 // pages/focusnotifications/AlertsSettings.qml — Focus & Notifications > Alerts.
 // Everything here is bound to ShellState and read by NotificationService / NotificationCenter.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "."
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root

@@ -5,7 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
-import "."
 import "../../core/shell"
 
 Singleton {

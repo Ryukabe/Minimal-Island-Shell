@@ -1,6 +1,5 @@
 module features.theme
 AppearanceSettings 1.0 AppearanceSettings.qml
-CornersSettings 1.0 CornersSettings.qml
 singleton IconThemeService 1.0 IconThemeService.qml
 MotionSettings 1.0 MotionSettings.qml
 OpacitySettings 1.0 OpacitySettings.qml

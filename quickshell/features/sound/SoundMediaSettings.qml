@@ -3,11 +3,9 @@
 // preferred player are saved on ShellState; VolumeService and the media module read them from there.
 // Position update rate is a greyed placeholder until the media module reads it.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "."
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root

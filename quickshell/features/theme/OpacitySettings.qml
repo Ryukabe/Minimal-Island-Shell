@@ -2,7 +2,6 @@
 // the island's drop shadow. Radius values live on ShellState. Opacity and shadow values are 0-1
 // numbers on Colors, shown here as percentages so the sliders need no decimals.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "../../core/shell"
 import "../../core/styles"
@@ -10,7 +9,7 @@ import "../../core/styles"
 PageScroll {
     id: root
 
-    SectionLabel { text: "Corners" }
+    SectionLabel { text: "Radius" }
 
     GroupCard {
         ToggleRow {
@@ -65,11 +64,11 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Mica" }
+    SectionLabel { text: "Opacity" }
 
     GroupCard {
         SliderRow {
-            label: "Main opacity"
+            label: "Background "
             description: "Window and panel backgrounds"
             from: 0; to: 100; stepSize: 1
             value: Math.round(Colors.micaAlpha * 100)
@@ -78,7 +77,7 @@ PageScroll {
         }
 
         SliderRow {
-            label: "Secondary opacity"
+            label: "Foreground"
             description: "Cards and raised surfaces"
             from: 0; to: 100; stepSize: 1
             value: Math.round(Colors.micaBeta * 100)

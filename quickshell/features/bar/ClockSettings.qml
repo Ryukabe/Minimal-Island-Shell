@@ -1,11 +1,9 @@
 // features/bar/ClockSettings.qml — Bar & Island > Clock. Time and date format only.
 // Which items sit in the clock, and in what order, is edited on the Bar & Island page (Layout).
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "."
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root

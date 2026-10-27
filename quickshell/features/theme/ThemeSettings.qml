@@ -1,13 +1,12 @@
 // features/theme/ThemeSettings.qml — Appearance > Colors. Where the palette comes from, and the
 // manual palette colours (the old separate Colors page lives here now).
 // The theme picker and light/dark mode (with the Auto schedule) are on the Appearance page.
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
-import "."
-import "../../core/shell"
 import "../../core/styles"
-import "components"
+
 
 PageScroll {
     id: root

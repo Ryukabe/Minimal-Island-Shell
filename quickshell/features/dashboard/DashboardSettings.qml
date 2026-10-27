@@ -246,18 +246,7 @@ PageScroll {
                 label: root.selectedTile
                     ? (DashboardLayoutService.typeDisplayNames[root.selectedTile.type] || root.selectedTile.type) : ""
                 value: root.selectedTile ? root.selectedTile.colSpan + " × " + root.selectedTile.rowSpan : ""
-            }
-
-            ButtonRow {
-                label: "Remove from the Dashboard"
-                description: "You can add it back above"
-                buttonText: "Remove"
                 showDivider: false
-                onClicked: {
-                    const id = grid.selectedTileId
-                    grid.selectedTileId = ""
-                    DashboardLayoutService.removeTile(id)
-                }
             }
         }
     }
