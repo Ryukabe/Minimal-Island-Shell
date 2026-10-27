@@ -315,7 +315,7 @@ PanelWindow {
         property int targetWidth: {
             if (!pageLoader.item) return compactWidth
             var floor = expanded ? ShellState.islandMinExpandedWidth : compactWidth
-            return Math.max(pageLoader.implicitWidth, floor)
+            return Math.max(pageLoader.item.implicitWidth, floor)
         }
         property int targetHeight: {
             if (!pageLoader.item) return compactHeight

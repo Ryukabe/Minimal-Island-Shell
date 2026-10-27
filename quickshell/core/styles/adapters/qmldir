@@ -1,4 +1,9 @@
 module core.styles.adapters
+singleton Chrome 1.0 Chrome.qml
+singleton Brave 1.0 Brave.qml
+singleton Helium 1.0 Helium.qml
+singleton Zen 1.0 Zen.qml
+ChromiumPolicy 1.0 ChromiumPolicy.qml
 singleton Hyprland 1.0 Hyprland.qml
 singleton Kitty 1.0 Kitty.qml
 singleton VSCode 1.0 VSCode.qml

@@ -4,13 +4,14 @@
 pragma Singleton
 import QtQuick
 import Quickshell.Io
+import "."
 import "../../core/styles"
 import "../../core/shell"
 
 QtObject {
     id: root
 
-    readonly property bool enabled: ShellState.clockShowPrivacyIndicator
+    readonly property bool enabled: ClockLayoutService.indexForId("privacy") >= 0
 
     property bool micActive: false
     property bool pwCamera: false     // an app reading a camera through PipeWire
