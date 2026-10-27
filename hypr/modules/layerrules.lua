@@ -67,12 +67,11 @@ hl.layer_rule({
 })
 
 -- ---------- Quickshell ----------
+-- Blur for the island lives in decoration/blur.lua (Settings > Appearance > Surfaces > Blur).
 
 hl.layer_rule({
-    match        = { namespace = "quickshell:island" },
-    blur         = true,
-    ignore_alpha = 0.5,
-    animation    = "slide down",
+    match     = { namespace = "quickshell:island" },
+    animation = "slide down",
 })
 
 

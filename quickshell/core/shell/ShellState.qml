@@ -130,6 +130,23 @@ QtObject {
         eventToastAudioInput: true,
         appToastEnabled: true,
         appToastMs: 2000,
+        // blur (written to Hyprland)
+        blurUniversal: true,
+        blurEnabled: true,
+        customBlurWindows: true,
+        customBlurIsland: true,
+        blurIslandCutoff: 0.5,
+        blurSize: 5,
+        blurPasses: 2,
+        blurNoise: 0.0117,
+        blurContrast: 0.8916,
+        blurBrightness: 0.8,
+        blurVibrancy: 0.5,
+        blurVibrancyDarkness: 0,
+        blurIgnoreOpacity: true,
+        blurXray: false,
+        blurOptimizations: true,
+        blurPopups: false,
         // typography
         fontSizeBase: 15,
         fontBody: "SF Pro Text",
@@ -216,6 +233,31 @@ QtObject {
     property bool eventToastAudioInput: root.defaults.eventToastAudioInput
     property bool appToastEnabled: root.defaults.appToastEnabled
     property real appToastMs: root.defaults.appToastMs
+
+    // ================= BLUR =================
+    // Universal on = one switch (blurEnabled) for windows and the island. Off = one switch each.
+    // Strength and look are global in Hyprland, so they are shared either way.
+    property bool blurUniversal: root.defaults.blurUniversal
+    property bool blurEnabled: root.defaults.blurEnabled
+    property bool customBlurWindows: root.defaults.customBlurWindows
+    property bool customBlurIsland: root.defaults.customBlurIsland
+    property real blurIslandCutoff: root.defaults.blurIslandCutoff    // 0-1, island pixels more see-through than this are not blurred
+    property int blurSize: root.defaults.blurSize
+    property int blurPasses: root.defaults.blurPasses
+    property real blurNoise: root.defaults.blurNoise
+    property real blurContrast: root.defaults.blurContrast
+    property real blurBrightness: root.defaults.blurBrightness
+    property real blurVibrancy: root.defaults.blurVibrancy
+    property real blurVibrancyDarkness: root.defaults.blurVibrancyDarkness
+    property bool blurIgnoreOpacity: root.defaults.blurIgnoreOpacity
+    property bool blurXray: root.defaults.blurXray
+    property bool blurOptimizations: root.defaults.blurOptimizations
+    property bool blurPopups: root.defaults.blurPopups
+
+    // Derived, never persisted. BlurService and the Surfaces page both read these.
+    readonly property bool blurWindowsActive: blurUniversal ? blurEnabled : customBlurWindows
+    readonly property bool blurIslandActive: blurUniversal ? blurEnabled : customBlurIsland
+    readonly property bool blurAnyActive: blurWindowsActive || blurIslandActive
     
     // ================= TYPOGRAPHY =================
     // Fonts.qml and Dimens.qml read these; the Typography page writes them.
@@ -558,5 +600,6 @@ QtObject {
         // restored to at startup (e.g. if it was left true from a
         // previous session), rather than waiting for the next toggle.
         HyprlandAnimationsService.setEnabled(!motionReduced)
+        BlurService.signature
     }
 }
