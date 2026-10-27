@@ -1,6 +1,5 @@
 {
   "dark": {
-    "vscodeTheme": "Hermit Dark",
     "isLight": false,
     "background": "#0A0A0A",
     "foreground": "#F6F1EA",
@@ -16,7 +15,6 @@
     "cyan": "#6CBFBF"
   },
   "light": {
-    "vscodeTheme": "Hermit Light",
     "isLight": true,
     "background": "#F6F1EA",
     "foreground": "#101010",
@@ -31,4 +29,4 @@
     "purple": "#C488EC",
     "cyan": "#6CBFBF"
   }
-}}
+}

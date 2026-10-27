@@ -7,6 +7,7 @@ import QtQuick.Layouts
 import "../settings/components"
 import "."
 import "../hyprland"
+import "../../core/shell"
 import "../../core/styles"
 
 PageScroll {
