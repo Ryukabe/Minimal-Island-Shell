@@ -1,5 +1,7 @@
 // features/dashboard/DashboardSettings.qml — Dashboard: panel size, grid, which components show,
 // and a live preview where components are moved and resized. Per-component options live on their own pages.
+// Components that are not on the grid sit under "Add a component": tap one to add it, or drag it into the
+// preview. Drag a component out of the preview to remove it.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -13,14 +15,60 @@ PageScroll {
     readonly property var columnOptions: ["8", "10", "12", "14", "16"]
     readonly property var rowOptions: ["4", "5", "6", "7", "8"]
     readonly property var selectedTile: DashboardLayoutService.tileInfo(grid.selectedTileId)
+    // Types that are not on the grid right now (hasType() re-evaluates on every layout change).
+    readonly property var unplaced: DashboardLayoutService.manageableTypes.filter(t => !DashboardLayoutService.hasType(t))
 
-    function toggleType(type) {
-        if (DashboardLayoutService.hasType(type)) {
-            if (grid.selectedTileId === type) grid.selectedTileId = ""
-            DashboardLayoutService.removeTile(type)
-        } else {
-            DashboardLayoutService.addTile(type)
+    // Set when an add had nowhere to go, so the page can say why nothing happened.
+    property string noRoomFor: ""
+
+    // ---- Drag a component from "Add a component" into the preview ----
+    CatalogDrag {
+        id: dnd
+        flickable: root.flickable
+        viewport: root
+        onDropped: (type, pos) => root.handleDrop(type, pos)
+    }
+
+    // The size a new component is tried at first (the same one addTile starts with).
+    function newSize(type) {
+        const d = DashboardLayoutService.defaultLayout.find(e => e.type === type
+            && e.colSpan <= DashboardLayoutService.columns && e.rowSpan <= DashboardLayoutService.rows)
+        const m = DashboardLayoutService.minFor(type)
+        return d ? { c: d.colSpan, r: d.rowSpan } : { c: m.c, r: m.r }
+    }
+
+    // Where a component dropped at this scene point would land, or null when it is not over the preview.
+    // The component is centred on the pointer.
+    function planAt(type, scenePoint) {
+        const q = previewPanel.mapFromItem(null, scenePoint.x, scenePoint.y)
+        if (q.x < 0 || q.y < 0 || q.x > previewPanel.width || q.y > previewPanel.height) return null
+        const g = grid.mapFromItem(null, scenePoint.x, scenePoint.y)
+        const size = root.newSize(type)
+        const col = Math.max(0, Math.min(grid.columns - size.c, Math.round(g.x / grid.stepX - size.c / 2)))
+        const row = Math.max(0, Math.min(grid.rows - size.r, Math.round(g.y / grid.stepY - size.r / 2)))
+        return { col: col, row: row, c: size.c, r: size.r }
+    }
+
+    readonly property var dropPlan: {
+        dnd.tick
+        return dnd.active ? root.planAt(dnd.type, dnd.scenePos) : null
+    }
+
+    function addByTap(type) {
+        root.noRoomFor = DashboardLayoutService.addTile(type) ? "" : type
+    }
+
+    function handleDrop(type, pos) {
+        const plan = root.planAt(type, pos)
+        if (!plan) return
+        // Add it, then place it exactly like moving a component: a taken spot goes to the nearest free one.
+        if (!DashboardLayoutService.addTile(type)) {
+            root.noRoomFor = type
+            return
         }
+        DashboardLayoutService.moveTile(type, plan.col, plan.row)
+        grid.selectedTileId = type
+        root.noRoomFor = ""
     }
 
     SectionLabel { text: "Panel size" }
@@ -68,38 +116,6 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Components" }
-
-    GroupCard {
-        ToggleRow {
-            label: "Quick note"
-            description: "A Markdown note you can write in"
-            checked: DashboardLayoutService.hasType("quicknote")
-            onToggled: root.toggleType("quicknote")
-        }
-
-        ToggleRow {
-            label: "Media"
-            description: "Spinning CD with playback buttons"
-            checked: DashboardLayoutService.hasType("media")
-            onToggled: root.toggleType("media")
-        }
-
-        ToggleRow {
-            label: "System stats"
-            description: "CPU, GPU, memory, network, battery, temperature"
-            checked: DashboardLayoutService.hasType("stats")
-            onToggled: root.toggleType("stats")
-        }
-
-        ToggleRow {
-            label: "Calendar"
-            description: "Month view"
-            checked: DashboardLayoutService.hasType("calendar")
-            onToggled: root.toggleType("calendar")
-        }
-    }
-
     SectionLabel { text: "Layout tools" }
 
     GroupCard {
@@ -143,6 +159,27 @@ PageScroll {
             anchors.fill: parent
             anchors.margins: previewPanel.pad
             editMode: true
+
+            // Where a component dragged in from "Add a component" would land.
+            Rectangle {
+                visible: root.dropPlan !== null
+                z: 25
+                x: root.dropPlan ? root.dropPlan.col * grid.stepX : 0
+                y: root.dropPlan ? root.dropPlan.row * grid.stepY : 0
+                width: root.dropPlan ? root.dropPlan.c * grid.stepX - grid.gap : 0
+                height: root.dropPlan ? root.dropPlan.r * grid.stepY - grid.gap : 0
+                radius: Dimens.radiusCard
+                color: "transparent"
+                border.width: 2
+                border.color: Colors.accent
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: Colors.accent
+                    opacity: 0.14
+                }
+            }
         }
     }
 
@@ -150,8 +187,51 @@ PageScroll {
         Layout.fillWidth: true
         leftPadding: Dimens.paddingSmall
         wrapMode: Text.WordWrap
-        text: "Click a component to select it. Drag it to move it and use the four corner dots to resize it. With one selected, the arrow keys move it and Shift + arrows resize it."
+        text: "Click a component to select it. Drag it to move it and use the four corner dots to resize it. Drag it out of the preview to remove it. With one selected, the arrow keys move it and Shift + arrows resize it."
         color: Colors.subtext
+        font.family: Fonts.text
+        font.pixelSize: Dimens.fontSizeXs
+    }
+
+    SectionLabel { text: "Add a component" }
+
+    GroupCard {
+        InfoRow {
+            visible: root.unplaced.length === 0
+            label: "Every component is already on the Dashboard"
+            showDivider: false
+        }
+
+        Flow {
+            visible: root.unplaced.length > 0
+            Layout.fillWidth: true
+            Layout.margins: Dimens.paddingMedium
+            spacing: Dimens.spacingSmall
+
+            Repeater {
+                model: root.unplaced
+
+                delegate: CatalogChip {
+                    id: addChip
+                    required property string modelData
+
+                    typeId: addChip.modelData
+                    label: DashboardLayoutService.typeDisplayNames[addChip.modelData] || addChip.modelData
+                    controller: dnd
+                    onActivated: root.addByTap(addChip.modelData)
+                }
+            }
+        }
+    }
+
+    Text {
+        visible: root.noRoomFor !== ""
+        Layout.fillWidth: true
+        leftPadding: Dimens.paddingSmall
+        wrapMode: Text.WordWrap
+        text: (DashboardLayoutService.typeDisplayNames[root.noRoomFor] || root.noRoomFor)
+              + " has no room. Make the grid bigger or remove something first."
+        color: Colors.yellow
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeXs
     }
@@ -170,7 +250,7 @@ PageScroll {
 
             ButtonRow {
                 label: "Remove from the Dashboard"
-                description: "You can add it back under Components"
+                description: "You can add it back above"
                 buttonText: "Remove"
                 showDivider: false
                 onClicked: {

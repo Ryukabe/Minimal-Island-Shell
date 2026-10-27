@@ -1,5 +1,5 @@
 // features/bar/BarSettings.qml — the Bar & Island menu itself: how the island looks.
-// Style, the clock items and their order, size and shape sit here. Workspaces, Clock,
+// Style, the clock items and their order, and size sit here. Workspaces, Clock,
 // Music visualizer and Behavior open from the list at the bottom.
 // Everything here is bound to ShellState or ClockLayoutService.
 import QtQuick
@@ -29,6 +29,35 @@ PageScroll {
             case "time": return Qt.formatDateTime(previewClock.date, ShellState.clockTimeFormat)
             default: return ClockLayoutService.typeDisplayNames[type] || type
         }
+    }
+
+    // ---- Drag a catalogue chip into the row (tap still adds it at the end) ----
+    CatalogDrag {
+        id: dnd
+        flickable: root.flickable
+        viewport: root
+        onDropped: (type, pos) => root.handleDrop(type, pos)
+    }
+
+    // Where a dragged chip would be inserted (0 = first), or -1 when the pointer is not over the row.
+    function dropIndexAt(scenePoint) {
+        const p = strip.mapFromItem(null, scenePoint.x, scenePoint.y)
+        if (p.x < -12 || p.x > strip.width + 12 || p.y < -12 || p.y > strip.height + 12) return -1
+        const step = strip.slotWidth + strip.gap
+        if (step <= 0) return 0
+        return Math.max(0, Math.min(strip.count, Math.ceil((p.x - strip.pad - strip.slotWidth / 2) / step)))
+    }
+
+    readonly property int dropIndex: {
+        dnd.tick
+        return dnd.active ? root.dropIndexAt(dnd.scenePos) : -1
+    }
+
+    function handleDrop(type, pos) {
+        const idx = root.dropIndexAt(pos)
+        if (idx < 0) return
+        ClockLayoutService.addItemAt(type, idx)
+        strip.selectedId = type
     }
 
     SectionLabel { text: "Style" }
@@ -104,6 +133,12 @@ PageScroll {
                 ? Math.min(chipMaxWidth, (width - pad * 2 - gap * (count - 1)) / count)
                 : 0
 
+            // True when a scene point is well outside the row: letting go there removes the item.
+            function isOutside(scenePoint) {
+                const p = strip.mapFromItem(null, scenePoint.x, scenePoint.y)
+                return p.x < -28 || p.x > strip.width + 28 || p.y < -28 || p.y > strip.height + 28
+            }
+
             Keys.onPressed: (event) => {
                 if (strip.selectedId === "") return
                 if (event.key === Qt.Key_Left) {
@@ -113,6 +148,18 @@ PageScroll {
                     ClockLayoutService.moveItemBy(strip.selectedId, 1)
                     event.accepted = true
                 }
+            }
+
+            // Where a chip dragged in from "Add an item" would land.
+            Rectangle {
+                visible: root.dropIndex >= 0
+                z: 5
+                width: 3
+                radius: 1.5
+                height: strip.chipHeight + 8
+                color: Colors.accent
+                x: strip.pad + root.dropIndex * (strip.slotWidth + strip.gap) - strip.gap / 2 - width / 2
+                y: (strip.height - height) / 2
             }
 
             Repeater {
@@ -126,14 +173,17 @@ PageScroll {
                     readonly property bool selected: strip.selectedId === chip.itemId
                     readonly property real slotX: strip.pad + chip.index * (strip.slotWidth + strip.gap)
                     property real dragOffset: 0
+                    property real dragOffsetY: 0
+                    // True while dragged away from the row: letting go removes it.
+                    property bool dragOutside: false
 
                     x: chip.slotX + chip.dragOffset
-                    y: (strip.height - height) / 2
+                    y: (strip.height - height) / 2 + chip.dragOffsetY
                     width: strip.slotWidth
                     height: strip.chipHeight
                     radius: Dimens.radiusChip
                     color: chip.selected ? Colors.accent : Colors.elevatedBg
-                    opacity: dragHandler.active ? 0.85 : 1.0
+                    opacity: dragHandler.active ? (chip.dragOutside ? 0.35 : 0.85) : 1.0
                     z: dragHandler.active ? 10 : 0
 
                     // Only the settle after a drop animates; the drag itself follows the pointer.
@@ -183,18 +233,31 @@ PageScroll {
                             const lo = strip.pad - chip.slotX
                             const hi = strip.width - strip.pad - chip.width - chip.slotX
                             chip.dragOffset = Math.max(lo, Math.min(hi, raw))
+                            chip.dragOffsetY = centroid.scenePosition.y - centroid.scenePressPosition.y
+                            // Time stays on the island, so it never counts as "about to be removed".
+                            chip.dragOutside = ClockLayoutService.canRemove(chip.itemId)
+                                && strip.isOutside(centroid.scenePosition)
                         }
 
                         onActiveChanged: {
                             if (active) {
                                 strip.selectedId = chip.itemId
                                 strip.forceActiveFocus()
+                            } else if (chip.dragOutside) {
+                                const removedId = chip.itemId
+                                chip.dragOutside = false
+                                chip.dragOffset = 0
+                                chip.dragOffsetY = 0
+                                if (strip.selectedId === removedId) strip.selectedId = ""
+                                // Deferred: removing the item destroys this chip while its handler is still running.
+                                Qt.callLater(function () { ClockLayoutService.removeItem(removedId) })
                             } else {
                                 const step = strip.slotWidth + strip.gap
                                 const target = Math.max(0, Math.min(strip.count - 1,
                                     Math.round((chip.x - strip.pad) / step)))
                                 if (target !== chip.index) ClockLayoutService.moveItem(chip.index, target)
                                 chip.dragOffset = 0
+                                chip.dragOffsetY = 0
                             }
                         }
                     }
@@ -207,10 +270,39 @@ PageScroll {
         Layout.fillWidth: true
         leftPadding: Dimens.paddingSmall
         wrapMode: Text.WordWrap
-        text: "Drag an item to move it. Click one to select it, then use the left and right arrow keys or the buttons below. Some items only appear when they have something to show, like the visualizer while music plays."
+        text: "Drag an item to move it, or drag it away from the row to remove it. Drag one from Add an item into the row, or just tap it, to add it. Some items only appear when they have something to show, like the visualizer while music plays."
         color: Colors.subtext
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeXs
+    }
+
+    SectionLabel { text: "Add an item" }
+
+    GroupCard {
+        InfoRow {
+            visible: root.unplaced.length === 0
+            label: "Every item is already on the island"
+            showDivider: false
+        }
+
+        Flow {
+            visible: root.unplaced.length > 0
+            Layout.fillWidth: true
+            Layout.margins: Dimens.paddingMedium
+            spacing: Dimens.spacingSmall
+
+            Repeater {
+                model: root.unplaced
+
+                delegate: CatalogChip {
+                    required property string modelData
+                    typeId: modelData
+                    label: ClockLayoutService.typeDisplayNames[modelData] || modelData
+                    controller: dnd
+                    onActivated: ClockLayoutService.addItem(modelData)
+                }
+            }
+        }
     }
 
     // Slides open while an item is selected in the row above.
@@ -251,58 +343,6 @@ PageScroll {
                     const id = strip.selectedId
                     strip.selectedId = ""
                     ClockLayoutService.removeItem(id)
-                }
-            }
-        }
-    }
-
-    SectionLabel { text: "Add an item" }
-
-    GroupCard {
-        InfoRow {
-            visible: root.unplaced.length === 0
-            label: "Every item is already on the island"
-            showDivider: false
-        }
-
-        Flow {
-            visible: root.unplaced.length > 0
-            Layout.fillWidth: true
-            Layout.margins: Dimens.paddingMedium
-            spacing: Dimens.spacingSmall
-
-            Repeater {
-                model: root.unplaced
-
-                delegate: Rectangle {
-                    id: addChip
-                    required property string modelData
-
-                    implicitWidth: addChipLabel.implicitWidth + Dimens.paddingLarge
-                    implicitHeight: 34
-                    radius: Dimens.radiusChip
-                    color: addMouse.containsMouse ? Colors.accent : Colors.elevatedBg
-
-                    Behavior on color {
-                        ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
-                    }
-
-                    Text {
-                        id: addChipLabel
-                        anchors.centerIn: parent
-                        text: ClockLayoutService.typeDisplayNames[addChip.modelData] || addChip.modelData
-                        color: addMouse.containsMouse ? Colors.mainBgMica : Colors.fg
-                        font.family: Fonts.text
-                        font.pixelSize: Dimens.fontSizeSm
-                    }
-
-                    MouseArea {
-                        id: addMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: ClockLayoutService.addItem(addChip.modelData)
-                    }
                 }
             }
         }
@@ -363,61 +403,6 @@ PageScroll {
             unit: " px"
             onMoved: (val) => ShellState.islandMinExpandedWidth = val
             showDivider: false
-        }
-    }
-
-    SectionLabel { text: "Shape" }
-
-    GroupCard {
-        ToggleRow {
-            label: "Universal radius"
-            description: "On: every corner follows the island radius. Off: set each kind of component yourself"
-            checked: ShellState.radiusUniversal
-            onToggled: (val) => ShellState.radiusUniversal = val
-        }
-
-        SliderRow {
-            label: "Island radius"
-            description: ShellState.radiusUniversal
-                ? "Everything else follows this"
-                : "Corners of the island itself"
-            from: 0; to: 30; stepSize: 1
-            value: ShellState.islandCornerRadius
-            unit: " px"
-            onMoved: (val) => ShellState.islandCornerRadius = val
-            showDivider: !ShellState.radiusUniversal
-        }
-
-        Reveal {
-            shown: !ShellState.radiusUniversal
-
-            SliderRow {
-                label: "Card radius"
-                description: "Settings cards, page title and sidebar items"
-                from: 0; to: 30; stepSize: 1
-                value: ShellState.customRadiusCard
-                unit: " px"
-                onMoved: (val) => ShellState.customRadiusCard = val
-            }
-
-            SliderRow {
-                label: "Control radius"
-                description: "Rows, buttons, inputs and the search box"
-                from: 0; to: 30; stepSize: 1
-                value: ShellState.customRadiusControl
-                unit: " px"
-                onMoved: (val) => ShellState.customRadiusControl = val
-            }
-
-            SliderRow {
-                label: "Chip radius"
-                description: "Small tags and pickers"
-                from: 0; to: 20; stepSize: 1
-                value: ShellState.customRadiusChip
-                unit: " px"
-                onMoved: (val) => ShellState.customRadiusChip = val
-                showDivider: false
-            }
         }
     }
 

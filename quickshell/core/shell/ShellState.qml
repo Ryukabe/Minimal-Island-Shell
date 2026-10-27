@@ -85,23 +85,18 @@ QtObject {
         motionIconsEnabled: true,
         motionIconSpeedPercent: 100,
         motionIconBouncePercent: 50,
-        // clock
+        // clock (which items show, and their order, live in ClockLayoutService)
         clockUse24Hour: false,
         clockShowSeconds: false,
         clockLeadingZero: true,
         clockLowercaseAmPm: false,
-        clockDateStyle: 0,
-        clockShowVisualizer: true,
-        clockShowWorkspaces: true,
+        clockDateStyle: 1,
         clockVisualizerBars: 4,
         clockVisualizerBarWidth: 3,
         clockVisualizerGap: 3,
         clockVisualizerMaxHeight: 10,
         clockVisualizerSpeedPercent: 100,
         clockVisualizerColor: "Accent",
-        clockShowPrivacyIndicator: true,
-        clockShowTimerIcon: true,
-        clockShowRecordingIndicator: true,
         timerToastShowRecordingIndicator: true,
         // workspaces
         workspaceShownCount: 5,
@@ -333,23 +328,20 @@ QtObject {
 
     // ================= CLOCK =================
     // Single source of truth for the bar clock AND the Clock settings preview.
+    // Which items the clock shows, and their order, live in ClockLayoutService (an item in its
+    // layout is on the bar). Only formats and looks are stored here.
     // The two format strings below are derived — never persisted, never set by hand.
     property bool clockUse24Hour: root.defaults.clockUse24Hour
     property bool clockShowSeconds: root.defaults.clockShowSeconds
     property bool clockLeadingZero: root.defaults.clockLeadingZero
     property bool clockLowercaseAmPm: root.defaults.clockLowercaseAmPm
-    property int clockDateStyle: root.defaults.clockDateStyle            // 0 = off, 1 = "ddd d", 2 = "ddd d MMM"
-    property bool clockShowVisualizer: root.defaults.clockShowVisualizer
-    property bool clockShowWorkspaces: root.defaults.clockShowWorkspaces
+    property int clockDateStyle: root.defaults.clockDateStyle            // 1 = "ddd d", 2 = "ddd d MMM" (an old saved 0 reads as 1)
     property int clockVisualizerBars: root.defaults.clockVisualizerBars
     property real clockVisualizerBarWidth: root.defaults.clockVisualizerBarWidth
     property real clockVisualizerGap: root.defaults.clockVisualizerGap
     property real clockVisualizerMaxHeight: root.defaults.clockVisualizerMaxHeight
     property real clockVisualizerSpeedPercent: root.defaults.clockVisualizerSpeedPercent
     property string clockVisualizerColor: root.defaults.clockVisualizerColor
-    property bool clockShowPrivacyIndicator: root.defaults.clockShowPrivacyIndicator
-    property bool clockShowTimerIcon: root.defaults.clockShowTimerIcon
-    property bool clockShowRecordingIndicator: root.defaults.clockShowRecordingIndicator
     property bool timerToastShowRecordingIndicator: root.defaults.timerToastShowRecordingIndicator
 
     // 12-hour mode always includes an AM/PM token, which is what makes h/hh

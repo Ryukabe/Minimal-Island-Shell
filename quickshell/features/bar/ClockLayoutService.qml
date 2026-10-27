@@ -170,6 +170,14 @@ QtObject {
         saveLayout()
     }
 
+    // Puts an item on the bar at a given position (0 = first).
+    function addItemAt(type, index) {
+        if (allTypes.indexOf(type) < 0 || indexForId(type) >= 0) return
+        pushUndoSnapshot()
+        layoutModel.insert(Math.max(0, Math.min(layoutModel.count, index)), { itemId: type })
+        saveLayout()
+    }
+
     function removeItem(type) {
         var idx = indexForId(type)
         if (idx < 0 || !canRemove(type)) return

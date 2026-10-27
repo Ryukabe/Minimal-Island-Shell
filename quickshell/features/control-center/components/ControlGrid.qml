@@ -37,6 +37,10 @@ Item {
     readonly property int dragTargetCol: Math.max(0, Math.min(columns - dragColSpan, Math.round(dragX / stepX)))
     readonly property int dragTargetRow: Math.max(0, Math.round(dragY / stepY))
 
+    // ---- Drag-out removal (edit mode): let a tile go outside the grid and it is removed ----
+    property bool dragOutside: false
+    readonly property real outsideMargin: 24
+
     focus: editMode
     Keys.onPressed: (event) => {
         if (!root.editMode || root.selectedTileId === "") return
@@ -139,6 +143,8 @@ Item {
 
             // The dragged tile stays above the drop preview
             z: isDragged ? 20 : 0
+            // Dimmed while it is dragged outside the grid: letting go there removes it
+            opacity: (isDragged && root.dragOutside) ? 0.35 : 1.0
 
             onIsDraggedChanged: {
                 if (isDragged) {
@@ -149,6 +155,7 @@ Item {
                     root.dragTileId = tileId
                 } else if (root.dragTileId === tileId) {
                     root.dragTileId = ""
+                    root.dragOutside = false
                 }
             }
             onXChanged: if (isDragged) root.dragX = x
@@ -288,7 +295,30 @@ Item {
                         root.forceActiveFocus()
                     }
 
+                    // Tracks whether the pointer has left the grid, so a drop there removes the tile.
+                    onPositionChanged: (mouse) => {
+                        if (!drag.active) return
+                        var p = dragArea.mapToItem(root, mouse.x, mouse.y)
+                        root.dragOutside = p.x < -root.outsideMargin || p.x > root.width + root.outsideMargin
+                            || p.y < -root.outsideMargin || p.y > root.height + root.outsideMargin
+                    }
+
                     onReleased: {
+                        if (root.dragOutside) {
+                            var removedId = tileWrapper.tileId
+                            root.dragOutside = false
+                            tileWrapper.x = Qt.binding(function() {
+                                return tileWrapper.col * (tileWrapper.cellW + ControlCenterLayoutService.cellSpacing)
+                            })
+                            tileWrapper.y = Qt.binding(function() {
+                                return tileWrapper.row * (tileWrapper.cellH + ControlCenterLayoutService.cellSpacing)
+                            })
+                            if (root.selectedTileId === removedId) root.selectedTileId = ""
+                            // Deferred: removing the tile destroys this handler's own item.
+                            Qt.callLater(function() { ControlCenterLayoutService.removeTile(removedId) })
+                            return
+                        }
+
                         var targetCol = Math.round(tileWrapper.x / (tileWrapper.cellW + ControlCenterLayoutService.cellSpacing))
                         var targetRow = Math.round(tileWrapper.y / (tileWrapper.cellH + ControlCenterLayoutService.cellSpacing))
                         ControlCenterLayoutService.moveTile(tileWrapper.tileId, targetCol, targetRow)
@@ -350,10 +380,10 @@ Item {
         }
     }
 
-    // ---- Drop preview: where the dragged tile will snap ----
+    // ---- Drop preview: where the dragged tile will snap (hidden while it is outside, about to be removed) ----
     Rectangle {
         id: ghost
-        visible: root.editMode && root.dragActive
+        visible: root.editMode && root.dragActive && !root.dragOutside
         z: 15
 
         x: root.dragTargetCol * root.stepX

@@ -1,6 +1,7 @@
 // pages/controlcenter/ControlCenterSettings.qml — Control Center.
 // Edit the tile grid: columns, layout tools, a live preview you can drag and resize,
-// the selected tile's size, and the controls that are not placed yet.
+// the controls that are not placed yet (tap one to add it, or drag it into the preview),
+// and the selected tile's size. Drag a tile out of the preview to remove it.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -20,6 +21,40 @@ PageScroll {
     readonly property var selectedSizes: root.selectedTile
         ? (ControlCenterLayoutService.allowedSizes[root.selectedTile.type] || []) : []
     readonly property var unplaced: ControlCenterLayoutService.unplacedTypes()
+
+    // ---- Drag a control from "Add a control" into the preview ----
+    CatalogDrag {
+        id: dnd
+        flickable: root.flickable
+        viewport: root
+        onDropped: (type, pos) => root.handleDrop(type, pos)
+    }
+
+    // Where a control dropped at this scene point would land, or null when it is not over the preview.
+    // The control is centred on the pointer.
+    function planAt(type, scenePoint) {
+        const q = previewPanel.mapFromItem(null, scenePoint.x, scenePoint.y)
+        if (q.x < 0 || q.y < 0 || q.x > previewPanel.width || q.y > previewPanel.height) return null
+        const g = grid.mapFromItem(null, scenePoint.x, scenePoint.y)
+        const size = ControlCenterLayoutService.defaultSizeForType(type)
+        const col = Math.max(0, Math.min(grid.columns - size.c, Math.round(g.x / grid.stepX - size.c / 2)))
+        const row = Math.max(0, Math.min(grid.gridRows - 1, Math.round(g.y / grid.stepY - size.r / 2)))
+        return { col: col, row: row, c: size.c, r: size.r }
+    }
+
+    readonly property var dropPlan: {
+        dnd.tick
+        return dnd.active ? root.planAt(dnd.type, dnd.scenePos) : null
+    }
+
+    function handleDrop(type, pos) {
+        const plan = root.planAt(type, pos)
+        if (!plan) return
+        // Add it, then place it exactly like moving a tile: whatever is in the way is pushed aside.
+        ControlCenterLayoutService.addTile(type)
+        ControlCenterLayoutService.moveTile(type, plan.col, plan.row)
+        grid.selectedTileId = type
+    }
 
     SectionLabel { text: "Grid" }
 
@@ -84,6 +119,27 @@ PageScroll {
             width: implicitWidth
             height: implicitHeight
             editMode: true
+
+            // Where a control dragged in from "Add a control" would land.
+            Rectangle {
+                visible: root.dropPlan !== null
+                z: 25
+                x: root.dropPlan ? root.dropPlan.col * grid.stepX : 0
+                y: root.dropPlan ? root.dropPlan.row * grid.stepY : 0
+                width: root.dropPlan ? root.dropPlan.c * grid.cellW + (root.dropPlan.c - 1) * grid.gap : 0
+                height: root.dropPlan ? root.dropPlan.r * grid.cellH + (root.dropPlan.r - 1) * grid.gap : 0
+                radius: ShellState.islandCornerRadius
+                color: "transparent"
+                border.width: 2
+                border.color: Colors.accent
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: Colors.accent
+                    opacity: 0.14
+                }
+            }
         }
     }
 
@@ -91,10 +147,44 @@ PageScroll {
         Layout.fillWidth: true
         leftPadding: Dimens.paddingSmall
         wrapMode: Text.WordWrap
-        text: "Drag a tile to move it and the corner dot to resize it. With a tile selected, the arrow keys move it and [ and ] change its size."
+        text: "Drag a tile to move it and the corner dot to resize it. Drag a tile out of the preview to remove it. With a tile selected, the arrow keys move it and [ and ] change its size."
         color: Colors.subtext
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeXs
+    }
+
+    SectionLabel { text: "Add a control" }
+
+    GroupCard {
+        InfoRow {
+            visible: root.unplaced.length === 0
+            label: "Every control is already on the grid"
+            showDivider: false
+        }
+
+        Flow {
+            visible: root.unplaced.length > 0
+            Layout.fillWidth: true
+            Layout.margins: Dimens.paddingMedium
+            spacing: Dimens.spacingSmall
+
+            Repeater {
+                model: root.unplaced
+
+                delegate: CatalogChip {
+                    id: addChip
+                    required property string modelData
+
+                    readonly property var size: ControlCenterLayoutService.defaultSizeForType(addChip.modelData)
+
+                    typeId: addChip.modelData
+                    label: (ControlCenterLayoutService.typeDisplayNames[addChip.modelData] || addChip.modelData)
+                           + "  " + addChip.size.c + " × " + addChip.size.r
+                    controller: dnd
+                    onActivated: ControlCenterLayoutService.addTile(addChip.modelData)
+                }
+            }
+        }
     }
 
     // Slides open while a tile is selected in the preview.
@@ -163,68 +253,13 @@ PageScroll {
 
             ButtonRow {
                 label: "Remove from the grid"
-                description: "You can add it back below"
+                description: "You can add it back above"
                 buttonText: "Remove"
                 showDivider: false
                 onClicked: {
                     const id = grid.selectedTileId
                     grid.selectedTileId = ""
                     ControlCenterLayoutService.removeTile(id)
-                }
-            }
-        }
-    }
-
-    SectionLabel { text: "Add a control" }
-
-    GroupCard {
-        InfoRow {
-            visible: root.unplaced.length === 0
-            label: "Every control is already on the grid"
-            showDivider: false
-        }
-
-        Flow {
-            visible: root.unplaced.length > 0
-            Layout.fillWidth: true
-            Layout.margins: Dimens.paddingMedium
-            spacing: Dimens.spacingSmall
-
-            Repeater {
-                model: root.unplaced
-
-                delegate: Rectangle {
-                    id: addChip
-                    required property string modelData
-
-                    readonly property var size: ControlCenterLayoutService.defaultSizeForType(addChip.modelData)
-
-                    implicitWidth: addChipLabel.implicitWidth + Dimens.paddingLarge
-                    implicitHeight: 34
-                    radius: Dimens.radiusChip
-                    color: addMouse.containsMouse ? Colors.accent : Colors.elevatedBg
-
-                    Behavior on color {
-                        ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
-                    }
-
-                    Text {
-                        id: addChipLabel
-                        anchors.centerIn: parent
-                        text: (ControlCenterLayoutService.typeDisplayNames[addChip.modelData] || addChip.modelData)
-                              + "  " + addChip.size.c + " × " + addChip.size.r
-                        color: addMouse.containsMouse ? Colors.mainBgMica : Colors.fg
-                        font.family: Fonts.text
-                        font.pixelSize: Dimens.fontSizeSm
-                    }
-
-                    MouseArea {
-                        id: addMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: ControlCenterLayoutService.addTile(addChip.modelData)
-                    }
                 }
             }
         }

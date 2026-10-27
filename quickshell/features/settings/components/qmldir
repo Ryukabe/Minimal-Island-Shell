@@ -1,5 +1,7 @@
 SymbolIcon SymbolIcon.qml
 ComingSoonTag ComingSoonTag.qml
+CatalogChip CatalogChip.qml
+CatalogDrag CatalogDrag.qml
 SectionLabel SectionLabel.qml
 GroupCard GroupCard.qml
 PageScroll PageScroll.qml

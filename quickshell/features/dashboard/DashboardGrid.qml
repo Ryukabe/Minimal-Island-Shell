@@ -1,5 +1,6 @@
 // features/dashboard/DashboardGrid.qml — the component grid. Read-only on the Dashboard; in the
 // settings preview (editMode) drag a component to move it and use the four corner dots to resize it.
+// Let a component go outside the grid and it is removed.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -32,6 +33,10 @@ Item {
     readonly property bool dragActive: dragTileId !== ""
     readonly property int dragTargetCol: Math.max(0, Math.min(columns - dragColSpan, Math.round(dragX / stepX)))
     readonly property int dragTargetRow: Math.max(0, Math.min(rows - dragRowSpan, Math.round(dragY / stepY)))
+
+    // ---- Drag-out removal (edit mode): let a component go outside the grid and it is removed ----
+    property bool dragOutside: false
+    readonly property real outsideMargin: 24
 
     // Arrow keys move the selected component, Shift + arrows resize it.
     focus: editMode
@@ -121,8 +126,12 @@ Item {
             readonly property bool selected: root.selectedTileId === tile.tileId
             readonly property bool isDragged: dragArea.drag.active
             readonly property bool springOn: ShellState.motionSpringEnabled && !ShellState.motionReduced
+            // True while a corner handle is being dragged (the resize handlers below read and set it).
+            property bool resizing: false
 
             z: isDragged ? 20 : (selected ? 5 : 0)
+            // Dimmed while it is dragged outside the grid: letting go there removes it
+            opacity: (isDragged && root.dragOutside) ? 0.35 : 1.0
 
             onIsDraggedChanged: {
                 if (isDragged) {
@@ -133,6 +142,7 @@ Item {
                     root.dragTileId = tileId
                 } else if (root.dragTileId === tileId) {
                     root.dragTileId = ""
+                    root.dragOutside = false
                 }
             }
             onXChanged: if (isDragged) root.dragX = x
@@ -189,10 +199,11 @@ Item {
                     id: dragArea
                     anchors.fill: parent
                     drag.target: tile
-                    drag.minimumX: 0
-                    drag.maximumX: root.width - tile.width
-                    drag.minimumY: 0
-                    drag.maximumY: root.height - tile.height
+                    // Wide limits, so a component can be carried out of the grid to remove it.
+                    drag.minimumX: -root.width
+                    drag.maximumX: root.width * 2
+                    drag.minimumY: -root.height
+                    drag.maximumY: root.height * 2
                     preventStealing: true
 
                     onPressed: {
@@ -200,7 +211,26 @@ Item {
                         root.forceActiveFocus()
                     }
 
+                    // Tracks whether the pointer has left the grid, so a drop there removes the component.
+                    onPositionChanged: (mouse) => {
+                        if (!drag.active) return
+                        var p = dragArea.mapToItem(root, mouse.x, mouse.y)
+                        root.dragOutside = p.x < -root.outsideMargin || p.x > root.width + root.outsideMargin
+                            || p.y < -root.outsideMargin || p.y > root.height + root.outsideMargin
+                    }
+
                     onReleased: {
+                        if (root.dragOutside) {
+                            var removedId = tile.tileId
+                            root.dragOutside = false
+                            tile.x = Qt.binding(function () { return tile.col * root.stepX })
+                            tile.y = Qt.binding(function () { return tile.row * root.stepY })
+                            if (root.selectedTileId === removedId) root.selectedTileId = ""
+                            // Deferred: removing the component destroys this handler's own item.
+                            Qt.callLater(function () { DashboardLayoutService.removeTile(removedId) })
+                            return
+                        }
+
                         var targetCol = Math.max(0, Math.min(root.columns - tile.colSpan, Math.round(tile.x / root.stepX)))
                         var targetRow = Math.max(0, Math.min(root.rows - tile.rowSpan, Math.round(tile.y / root.stepY)))
                         if (targetCol !== tile.col || targetRow !== tile.row) {
@@ -282,10 +312,10 @@ Item {
         }
     }
 
-    // ---- Drop preview ----
+    // ---- Drop preview (hidden while the component is outside, about to be removed) ----
     Rectangle {
         id: ghost
-        visible: root.editMode && root.dragActive
+        visible: root.editMode && root.dragActive && !root.dragOutside
         z: 15
         x: root.dragTargetCol * root.stepX
         y: root.dragTargetRow * root.stepY

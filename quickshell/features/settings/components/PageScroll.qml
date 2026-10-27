@@ -1,5 +1,6 @@
 // components/PageScroll.qml — scrolling page body. Children go into a ColumnLayout.
 // The root is a plain Item (not the Flickable) so layouts can size it safely.
+// `flickable` exposes the scroller, so a page can scroll it while something is being dragged.
 import QtQuick
 import QtQuick.Layouts
 import "../../../core/styles"
@@ -8,6 +9,7 @@ Item {
     id: root
 
     default property alias content: column.data
+    property alias flickable: flick
     property real contentSpacing: Dimens.spacingMedium
 
     Flickable {
