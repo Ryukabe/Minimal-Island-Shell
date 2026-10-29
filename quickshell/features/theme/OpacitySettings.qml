@@ -14,7 +14,7 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Universal radius"
-            description: "On: every corner follows the island radius. Off: set each kind of component yourself"
+            description: "On: every corner follows the island radius, windows included. Off: set each kind of component yourself"
             checked: ShellState.radiusUniversal
             onToggled: (val) => ShellState.radiusUniversal = val
         }
@@ -59,6 +59,15 @@ PageScroll {
                 value: ShellState.customRadiusChip
                 unit: " px"
                 onMoved: (val) => ShellState.customRadiusChip = val
+            }
+
+            SliderRow {
+                label: "Window radius"
+                description: "Corners of application windows (Hyprland)"
+                from: 0; to: 30; stepSize: 1
+                value: ShellState.customRadiusWindow
+                unit: " px"
+                onMoved: (val) => ShellState.customRadiusWindow = val
                 showDivider: false
             }
         }
@@ -255,7 +264,7 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Enable shadow"
-            description: "Soft shadow around the island"
+            description: "Soft shadow around the island. Its color is also used for window shadows"
             checked: Colors.islandShadowEnabled
             onToggled: (val) => Colors.islandShadowEnabled = val
         }
@@ -263,8 +272,8 @@ PageScroll {
         ColorRow {
             label: "Shadow color"
             value: Colors.shadowColor
-            enabled: Colors.islandShadowEnabled
-            opacity: Colors.islandShadowEnabled ? 1.0 : 0.4
+            enabled: Colors.islandShadowEnabled || ShellState.windowShadowEnabled
+            opacity: (Colors.islandShadowEnabled || ShellState.windowShadowEnabled) ? 1.0 : 0.4
             onCommitted: (hex) => Colors.shadowColor = hex
         }
 

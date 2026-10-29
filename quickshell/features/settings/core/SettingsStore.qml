@@ -24,7 +24,7 @@ Item {
         "islandTopMargin", "islandCornerRadius", "islandBorderWidth",
         "islandClickOutsideDismiss", "islandNotchMode", "islandNotchFlare",
         "islandHoverScale", "radiusUniversal", "customRadiusCard",
-        "customRadiusControl", "customRadiusChip",
+        "customRadiusControl", "customRadiusChip", "customRadiusWindow",
         "islandCompactHeight", "islandCompactWidth",
         "islandExpandedHeight", "islandMinExpandedWidth",
         "islandAlwaysVisible", "islandRevealOnHover", "islandRevealZone",

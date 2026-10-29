@@ -28,11 +28,11 @@ QtObject {
             menus: [
                 {
                     id: "bar", title: "Bar & Island", subtitle: "Style, clock items and size of the island", icon: "dock_to_bottom",
-                    tags: "island notch style top margin border flare height width collapsed expanded clock layout items chips add remove order move workspaces visualizer timer icon mic camera privacy recording dot",
+                    tags: "island notch style top margin border flare height width collapsed expanded clock layout items chips add remove order move workspaces visualizer timer icon mic camera privacy recording dot click item card quick options 24 hour seconds date style bars color count dots capsule",
                     source: "../bar/BarSettings.qml",
                     views: [
                         { id: "workspaces", title: "Workspaces", subtitle: "Indicators and window icons", icon: "grid_view",
-                          tags: "workspace shown active indicator trail occupied windows special per-monitor",
+                          tags: "workspace workspaces shown count dots capsule active indicator trail occupied windows special per-monitor",
                           source: "../bar/WorkspacesSettings.qml" },
                         { id: "clock", title: "Clock", subtitle: "Time and date format", icon: "schedule",
                           tags: "time date format seconds leading zero am pm 24 hour short long timer toast recording",
@@ -168,6 +168,9 @@ QtObject {
                         { id: "opacity", title: "Surfaces", subtitle: "Corners, mica and shadows", icon: "opacity",
                           tags: "corner radius round universal island card control chip mica transparency opacity shadow depth blur",
                           source: "../theme/OpacitySettings.qml" },
+                        { id: "windows", title: "Windows", subtitle: "Gaps, opacity, shadow and corner shape", icon: "web_asset",
+                          tags: "windows hyprland gaps inner outer spacing border size corner shape rounding power squircle circle opacity transparency active inactive fullscreen dim dimming shadow range sharpness scale",
+                          source: "../theme/WindowsSettings.qml" },                         
                         { id: "templates", title: "Templates", subtitle: "Re-theme other apps when your theme changes", icon: "dashboard_customize",
                           tags: "templates apps gtk qt kitty terminal vscode hyprland sync colors adapters",
                           source: "../theme/TemplatesSettings.qml" },

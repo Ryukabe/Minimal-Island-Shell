@@ -82,6 +82,12 @@ Scope {
             // Title of the option picked in search; scrolled to and flashed once its page is up.
             property string pendingOption: ""
 
+            // ── Remembering the scroll position ────────────────
+            // The scroller of the page now showing, and the key ("menu/view") its position is saved under.
+            // Going back to a page restores where it was; the page itself is rebuilt from scratch.
+            property var activeFlick: null
+            property string activeFlickKey: ""
+
             // Retries a few times because the page loads a moment after the navigation.
             Timer {
                 id: jumpTimer
@@ -96,6 +102,45 @@ Scope {
                     if (attempts < 8) restart()
                     else contentRoot.pendingOption = ""
                 }
+            }
+
+            // Saves the position as the page scrolls.
+            Connections {
+                target: contentRoot.activeFlick
+                ignoreUnknownSignals: true
+
+                function onContentYChanged() {
+                    if (contentRoot.activeFlickKey !== "" && contentRoot.activeFlick)
+                        SettingsNav.scrollMemory[contentRoot.activeFlickKey] = contentRoot.activeFlick.contentY
+                }
+            }
+
+            // Puts the saved position back once the page is tall enough to reach it (its content
+            // lays out over a few frames).
+            Timer {
+                id: restoreTimer
+                interval: 40
+                property var flick: null
+                property real target: 0
+                property int attempts: 0
+                onTriggered: {
+                    if (!flick) return
+                    const maxY = Math.max(0, flick.contentHeight - flick.height)
+                    attempts++
+                    if (maxY >= target - 1 || attempts >= 10) {
+                        flick.contentY = Math.min(target, maxY)
+                        return
+                    }
+                    restart()
+                }
+            }
+
+            // Clears the "returning" flag a moment after the page has loaded, so the page itself
+            // (which reads it while it is being built) still sees it.
+            Timer {
+                id: returnTimer
+                interval: 400
+                onTriggered: SettingsNav.returning = false
             }
 
             NumberAnimation {
@@ -168,6 +213,20 @@ Scope {
                 }
                 flashComp.createObject(row)
                 return true
+            }
+
+            // The scroller of a page: the one a PageScroll exposes, else the first Flickable inside it.
+            function findFlickable(node) {
+                if (!node) return null
+                if ("flickable" in node && node.flickable) return node.flickable
+                if (node.contentY !== undefined && node.contentHeight !== undefined) return node
+                const kids = node.children
+                if (!kids) return null
+                for (let i = 0; i < kids.length; i++) {
+                    const r = contentRoot.findFlickable(kids[i])
+                    if (r) return r
+                }
+                return null
             }
 
             // Hands a shared service to the page if the page declares a property with that name.
@@ -377,6 +436,23 @@ Scope {
                                 // Pages that declare these properties receive the shared services.
                                 contentRoot.inject(page, "updateService", updateService)
                                 contentRoot.inject(page, "systemInfo", systemInfo)
+
+                                // Track this page's scroller; coming back to a page restores its position
+                                // (but a jump from search scrolls to its option instead).
+                                const fl = contentRoot.findFlickable(page)
+                                const key = SettingsNav.menuId + "/" + SettingsNav.viewId
+                                contentRoot.activeFlickKey = key
+                                contentRoot.activeFlick = fl
+                                const saved = SettingsNav.scrollMemory[key]
+                                if (fl && SettingsNav.returning && contentRoot.pendingOption === ""
+                                        && saved !== undefined && saved > 0) {
+                                    restoreTimer.flick = fl
+                                    restoreTimer.target = saved
+                                    restoreTimer.attempts = 0
+                                    restoreTimer.restart()
+                                }
+                                returnTimer.restart()
+
                                 loadFade.restart()
                             }
 

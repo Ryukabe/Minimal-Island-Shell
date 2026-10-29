@@ -23,7 +23,7 @@ hl.layer_rule({
     name = "island-blur",
     match = { namespace = "quickshell:island" },
     blur = true,
-    ignore_alpha = 0.5,
+    ignore_alpha = 1.0,
 })
 
 hl.window_rule({

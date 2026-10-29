@@ -30,6 +30,40 @@ QtObject {
         recording: "Recording dot"
     })
 
+    // Material symbol for each item (shown on the catalogue chips).
+    readonly property var typeIcons: ({
+        workspaces: "grid_view",
+        visualizer: "equalizer",
+        date: "calendar_month",
+        time: "schedule",
+        timer: "timer",
+        privacy: "videocam",
+        recording: "fiber_manual_record"
+    })
+
+    // What each item is, in one line (shown on the item card in Settings).
+    readonly property var typeDescriptions: ({
+        workspaces: "The workspace dots. The one you are on stretches into a capsule.",
+        visualizer: "Moving bars while music plays.",
+        date: "The day and month, next to the time.",
+        time: "The clock. It always stays on the island.",
+        timer: "A timer icon, shown while a timer is running.",
+        privacy: "A green dot while the camera is on, a yellow dot for the microphone.",
+        recording: "A red dot while the screen is being recorded."
+    })
+
+    // The settings page (a view id under "bar" in SettingsRegistry) that holds each item's full options.
+    // Items missing here have no page of their own.
+    readonly property var typeViews: ({
+        workspaces: "workspaces",
+        time: "clock",
+        date: "clock",
+        visualizer: "visualizer"
+    })
+
+    // The item selected on the Bar page, remembered while a sub-page is open (not saved to disk).
+    property string lastSelectedId: ""
+
     // Placed items only, in bar order.
     property ListModel layoutModel: ListModel {}
     property var undoStack: []

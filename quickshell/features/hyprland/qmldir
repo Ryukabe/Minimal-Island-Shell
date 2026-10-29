@@ -2,6 +2,7 @@ module features.hyprland
 singleton HyprlandAnimationsService 1.0 HyprlandAnimationsService.qml
 singleton BlurService 1.0 BlurService.qml
 singleton HyprlandDecorationService 1.0 HyprlandDecorationService.qml
+singleton WindowDecorationService 1.0 WindowDecorationService.qml
 KeybindListPage 1.0 KeybindListPage.qml
 KeybindsPage 1.0 KeybindsPage.qml
 singleton HyprlandKeybindsService 1.0 HyprlandKeybindsService.qml

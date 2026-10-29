@@ -147,6 +147,22 @@ QtObject {
         blurXray: false,
         blurOptimizations: true,
         blurPopups: false,
+                // windows (Hyprland general/decoration, written by WindowDecorationService)
+        customRadiusWindow: 15,
+        windowRoundingPower: 4,
+        windowGapsIn: 4,
+        windowGapsOut: 8,
+        windowBorderSize: 0,
+        windowActiveOpacity: 1.0,
+        windowInactiveOpacity: 1.0,
+        windowFullscreenOpacity: 1.0,
+        windowDimInactive: false,
+        windowDimStrength: 0.5,
+        windowShadowEnabled: true,
+        windowShadowRange: 15,
+        windowShadowPower: 2,
+        windowShadowScale: 1.0,
+        windowShadowOpacity: 0.87,
         // typography
         fontSizeBase: 15,
         fontBody: "SF Pro Text",
@@ -259,6 +275,27 @@ QtObject {
     readonly property bool blurIslandActive: blurUniversal ? blurEnabled : customBlurIsland
     readonly property bool blurAnyActive: blurWindowsActive || blurIslandActive
     
+    // ================= WINDOWS =================
+    property real windowRoundingPower: root.defaults.windowRoundingPower    // 2 = circle, 4 = squircle
+    property int windowGapsIn: root.defaults.windowGapsIn
+    property int windowGapsOut: root.defaults.windowGapsOut
+    property int windowBorderSize: root.defaults.windowBorderSize
+
+    // Derived, never persisted. Window rounding is part of the radius system:
+    // universal on = windows follow the island radius, off = their own slider.
+    readonly property real windowRounding: radiusUniversal ? islandCornerRadius : customRadiusWindow
+    
+    property real windowActiveOpacity: root.defaults.windowActiveOpacity
+    property real windowInactiveOpacity: root.defaults.windowInactiveOpacity
+    property real windowFullscreenOpacity: root.defaults.windowFullscreenOpacity
+    property bool windowDimInactive: root.defaults.windowDimInactive
+    property real windowDimStrength: root.defaults.windowDimStrength
+    property bool windowShadowEnabled: root.defaults.windowShadowEnabled
+    property int windowShadowRange: root.defaults.windowShadowRange
+    property int windowShadowPower: root.defaults.windowShadowPower
+    property real windowShadowScale: root.defaults.windowShadowScale
+    property real windowShadowOpacity: root.defaults.windowShadowOpacity   // alpha of the shared shadow color
+
     // ================= TYPOGRAPHY =================
     // Fonts.qml and Dimens.qml read these; the Typography page writes them.
     property real fontSizeBase: root.defaults.fontSizeBase            // 15 = 1.0 scale for Dimens.fontSize*
@@ -314,6 +351,7 @@ QtObject {
     property real customRadiusCard: root.defaults.customRadiusCard
     property real customRadiusControl: root.defaults.customRadiusControl
     property real customRadiusChip: root.defaults.customRadiusChip
+    property real customRadiusWindow: root.defaults.customRadiusWindow
 
     // ================= MODULE SIZING PROPERTIES =================
     property real launcherWidth: root.defaults.launcherWidth
@@ -600,6 +638,7 @@ QtObject {
         // restored to at startup (e.g. if it was left true from a
         // previous session), rather than waiting for the next toggle.
         HyprlandAnimationsService.setEnabled(!motionReduced)
+        WindowDecorationService.signature
         BlurService.signature
     }
 }

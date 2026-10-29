@@ -2,13 +2,13 @@
 // Style, the clock items and their order, and size sit here. Workspaces, Clock,
 // Music visualizer and Behavior open from the list at the bottom.
 // Everything here is bound to ShellState or ClockLayoutService.
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "../settings/components"
+import "../settings/core"
 import "."
+import "components" as Bar
 import "../../core/shell"
 import "../../core/styles"
 
@@ -19,18 +19,28 @@ PageScroll {
     readonly property string barStyle: ShellState.islandNotchMode ? "Notch" : "Island"
     readonly property var unplaced: ClockLayoutService.unplacedTypes()
 
+    // Sub-pages whose item is on the bar: the item's card opens them, so the list below skips them.
+    // Take an item off the bar and its page shows up in the list again.
+    readonly property var viewsWithChip: {
+        const hidden = []
+        const map = ClockLayoutService.typeViews
+        for (const t in map) {
+            if (ClockLayoutService.indexForId(t) >= 0 && hidden.indexOf(map[t]) < 0) hidden.push(map[t])
+        }
+        return hidden
+    }
+
+    // Coming back from a sub-page: bring back the item that was selected.
+    Component.onCompleted: {
+        const last = ClockLayoutService.lastSelectedId
+        if (SettingsNav.returning && last !== "" && ClockLayoutService.indexForId(last) >= 0) strip.selectedId = last
+        else ClockLayoutService.lastSelectedId = ""
+    }
+
     SystemClock {
         id: previewClock
         enabled: root.visible
         precision: ShellState.clockShowSeconds ? SystemClock.Seconds : SystemClock.Minutes
-    }
-
-    function chipText(type) {
-        switch (type) {
-            case "date": return Qt.formatDateTime(previewClock.date, ShellState.clockDateFormat)
-            case "time": return Qt.formatDateTime(previewClock.date, ShellState.clockTimeFormat)
-            default: return ClockLayoutService.typeDisplayNames[type] || type
-        }
     }
 
     // ---- Drag a catalogue chip into the row (tap still adds it at the end) ----
@@ -102,7 +112,7 @@ PageScroll {
             shown: root.barStyle === "Notch"
 
             SliderRow {
-                label: "Notch side radius"
+                label: "Notch flare"
                 description: "How far the notch curves out into the screen edge"
                 from: 0; to: 40; stepSize: 1
                 value: ShellState.islandNotchFlare
@@ -124,11 +134,12 @@ PageScroll {
             implicitHeight: 72
 
             property string selectedId: ""
+            onSelectedIdChanged: ClockLayoutService.lastSelectedId = strip.selectedId
             readonly property int count: ClockLayoutService.layoutModel.count
             readonly property real gap: Dimens.spacingSmall
             readonly property real pad: Dimens.paddingMedium
-            readonly property real chipHeight: 40
-            readonly property real chipMaxWidth: 120
+            readonly property real chipHeight: 44
+            readonly property real chipMaxWidth: 130
             readonly property real slotWidth: count > 0
                 ? Math.min(chipMaxWidth, (width - pad * 2 - gap * (count - 1)) / count)
                 : 0
@@ -182,7 +193,9 @@ PageScroll {
                     width: strip.slotWidth
                     height: strip.chipHeight
                     radius: Dimens.radiusChip
-                    color: chip.selected ? Colors.accent : Colors.elevatedBg
+                    color: Colors.elevatedBg
+                    border.width: chip.selected ? 2 : 1
+                    border.color: chip.selected ? Colors.accent : (chipHover.hovered ? Colors.fgMuted : Colors.border)
                     opacity: dragHandler.active ? (chip.dragOutside ? 0.35 : 0.85) : 1.0
                     z: dragHandler.active ? 10 : 0
 
@@ -194,28 +207,30 @@ PageScroll {
                             easing.type: Easing.OutCubic
                         }
                     }
-                    Behavior on color {
+                    Behavior on border.color {
                         ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
                     }
                     Behavior on opacity {
                         NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
                     }
 
-                    Text {
-                        anchors.fill: parent
-                        anchors.margins: Dimens.paddingSmall
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                        text: root.chipText(chip.itemId)
-                        color: chip.selected ? Colors.mainBgMica : Colors.fg
-                        font.family: Fonts.text
-                        font.pixelSize: Dimens.fontSizeSm
+                    // The real look of the item, shrunk to fit when the slot is narrow.
+                    Bar.ClockItemPreview {
+                        anchors.centerIn: parent
+                        type: chip.itemId
+                        now: previewClock.date
+                        scale: Math.min(1, (chip.width - Dimens.paddingMedium) / Math.max(1, implicitWidth))
+                    }
+
+                    // Hover cue: the chip is clickable (click opens its card below the row).
+                    HoverHandler {
+                        id: chipHover
+                        cursorShape: Qt.PointingHandCursor
                     }
 
                     TapHandler {
                         onTapped: {
-                            strip.selectedId = chip.itemId
+                            strip.selectedId = (strip.selectedId === chip.itemId) ? "" : chip.itemId
                             strip.forceActiveFocus()
                         }
                     }
@@ -270,10 +285,144 @@ PageScroll {
         Layout.fillWidth: true
         leftPadding: Dimens.paddingSmall
         wrapMode: Text.WordWrap
-        text: "Drag an item to move it, or drag it away from the row to remove it. Drag one from Add an item into the row, or just tap it, to add it. Some items only appear when they have something to show, like the visualizer while music plays."
+        text: "Click an item to see its options. Drag an item to move it, or drag it away from the row to remove it. Drag one from Add an item into the row to add it. Some items only appear when they have something to show, like the visualizer while music plays."
         color: Colors.subtext
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeXs
+    }
+
+    // ---- Item card: opens under the row for the selected item, with its most-used options ----
+    Reveal {
+        shown: strip.selectedId === "workspaces"
+
+        SectionLabel { text: ClockLayoutService.typeDisplayNames["workspaces"] }
+
+        GroupCard {
+            InfoRow { label: ClockLayoutService.typeDescriptions["workspaces"] }
+
+            SliderRow {
+                label: "Workspaces shown"
+                from: 1; to: 10; stepSize: 1
+                value: ShellState.workspaceShownCount
+                onMoved: (val) => ShellState.workspaceShownCount = val
+            }
+
+            ToggleRow {
+                label: "Active indicator"
+                description: "Stretch the workspace you are on into a capsule"
+                checked: ShellState.workspaceActiveIndicator
+                onToggled: (val) => ShellState.workspaceActiveIndicator = val
+            }
+
+            ButtonRow {
+                label: "All Workspaces settings"
+                description: "Trail, occupied background, window icons and more"
+                buttonText: "Open"
+                showDivider: false
+                onClicked: SettingsNav.openView("bar", ClockLayoutService.typeViews["workspaces"])
+            }
+        }
+    }
+
+    Reveal {
+        shown: strip.selectedId === "time"
+
+        SectionLabel { text: ClockLayoutService.typeDisplayNames["time"] }
+
+        GroupCard {
+            InfoRow { label: ClockLayoutService.typeDescriptions["time"] }
+
+            ToggleRow {
+                label: "24-hour clock"
+                checked: ShellState.clockUse24Hour
+                onToggled: (val) => ShellState.clockUse24Hour = val
+            }
+
+            ToggleRow {
+                label: "Show seconds"
+                checked: ShellState.clockShowSeconds
+                onToggled: (val) => ShellState.clockShowSeconds = val
+            }
+
+            ButtonRow {
+                label: "All clock settings"
+                description: "Leading zero, AM/PM style and the date"
+                buttonText: "Open"
+                showDivider: false
+                onClicked: SettingsNav.openView("bar", ClockLayoutService.typeViews["time"])
+            }
+        }
+    }
+
+    Reveal {
+        shown: strip.selectedId === "date"
+
+        SectionLabel { text: ClockLayoutService.typeDisplayNames["date"] }
+
+        GroupCard {
+            InfoRow { label: ClockLayoutService.typeDescriptions["date"] }
+
+            SegmentRow {
+                label: "Date style"
+                options: ["Short", "Long"]
+                selectedValue: ShellState.clockDateStyle === 2 ? "Long" : "Short"
+                onOptionSelected: (name) => ShellState.clockDateStyle = (name === "Long" ? 2 : 1)
+            }
+
+            ButtonRow {
+                label: "All clock settings"
+                description: "The time format and more"
+                buttonText: "Open"
+                showDivider: false
+                onClicked: SettingsNav.openView("bar", ClockLayoutService.typeViews["date"])
+            }
+        }
+    }
+
+    Reveal {
+        shown: strip.selectedId === "visualizer"
+
+        SectionLabel { text: ClockLayoutService.typeDisplayNames["visualizer"] }
+
+        GroupCard {
+            InfoRow { label: ClockLayoutService.typeDescriptions["visualizer"] }
+
+            SliderRow {
+                label: "Bars"
+                from: 2; to: 8; stepSize: 1
+                value: ShellState.clockVisualizerBars
+                onMoved: (val) => ShellState.clockVisualizerBars = val
+            }
+
+            SegmentRow {
+                label: "Color"
+                options: ["Accent", "Text", "Muted"]
+                selectedValue: ShellState.clockVisualizerColor
+                onOptionSelected: (name) => ShellState.clockVisualizerColor = name
+            }
+
+            ButtonRow {
+                label: "All visualizer settings"
+                description: "Bar width, gap, height and speed"
+                buttonText: "Open"
+                showDivider: false
+                onClicked: SettingsNav.openView("bar", ClockLayoutService.typeViews["visualizer"])
+            }
+        }
+    }
+
+    // Items with no options of their own: just say what they are.
+    Reveal {
+        shown: strip.selectedId === "timer" || strip.selectedId === "privacy" || strip.selectedId === "recording"
+
+        SectionLabel { text: ClockLayoutService.typeDisplayNames[strip.selectedId] || "" }
+
+        GroupCard {
+            InfoRow {
+                label: ClockLayoutService.typeDescriptions[strip.selectedId] || ""
+                showDivider: false
+            }
+        }
     }
 
     SectionLabel { text: "Add an item" }
@@ -298,8 +447,9 @@ PageScroll {
                     required property string modelData
                     typeId: modelData
                     label: ClockLayoutService.typeDisplayNames[modelData] || modelData
+                    icon: ClockLayoutService.typeIcons[modelData] || ""
+                    tapToAdd: false
                     controller: dnd
-                    onActivated: ClockLayoutService.addItem(modelData)
                 }
             }
         }
@@ -308,13 +458,13 @@ PageScroll {
     SectionLabel { text: "Layout tools" }
 
     GroupCard {
-        /*ButtonRow {
+        ButtonRow {
             label: "Undo"
             description: "Step back one change"
             buttonText: "Undo"
             enabled: ClockLayoutService.undoStack.length > 0
             onClicked: ClockLayoutService.undo()
-        }*/
+        }
 
         ButtonRow {
             label: "Reset layout"
@@ -363,7 +513,7 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Parts of the bar" }
+    SectionLabel { text: "More bar settings" }
 
-    ViewList {}
+    ViewList { excludeIds: root.viewsWithChip }
 }

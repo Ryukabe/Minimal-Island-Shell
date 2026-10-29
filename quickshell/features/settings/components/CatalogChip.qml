@@ -1,5 +1,6 @@
 // components/CatalogChip.qml — one item in an "Add ..." catalogue.
-// Tap it to add the item, or press and drag it into the layout (the page's CatalogDrag does the rest).
+// Press and drag it into the layout (the page's CatalogDrag does the rest). Tap adds it too, unless the
+// page turns that off with tapToAdd: false. An optional icon sits before the name.
 import QtQuick
 import "../../../core/shell"
 import "../../../core/styles"
@@ -10,15 +11,20 @@ Rectangle {
     // What it adds (the layout service's type id) and what it says.
     property string typeId: ""
     property string label: ""
+    property string icon: ""
+    // Off = drag only (the Bar page).
+    property bool tapToAdd: true
     // The page's CatalogDrag.
     property var controller: null
 
     signal activated()
 
-    implicitWidth: chipLabel.implicitWidth + Dimens.paddingLarge
+    readonly property bool lit: hover.hovered || dragger.active
+
+    implicitWidth: content.implicitWidth + Dimens.paddingLarge
     implicitHeight: 34
     radius: Dimens.radiusChip
-    color: (hover.hovered || dragger.active) ? Colors.accent : Colors.elevatedBg
+    color: root.lit ? Colors.accent : Colors.elevatedBg
     // The chip stays put (dimmed) while its ghost travels with the pointer.
     opacity: dragger.active ? 0.5 : 1.0
 
@@ -26,21 +32,36 @@ Rectangle {
         ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
     }
 
-    Text {
-        id: chipLabel
+    Row {
+        id: content
         anchors.centerIn: parent
-        text: root.label
-        color: (hover.hovered || dragger.active) ? Colors.mainBgMica : Colors.fg
-        font.family: Fonts.text
-        font.pixelSize: Dimens.fontSizeSm
+        spacing: 6
+
+        SymbolIcon {
+            visible: root.icon !== ""
+            name: root.icon
+            size: Dimens.fontSizeSm + 2
+            color: root.lit ? Colors.mainBgMica : Colors.fg
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Text {
+            id: chipLabel
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.label
+            color: root.lit ? Colors.mainBgMica : Colors.fg
+            font.family: Fonts.text
+            font.pixelSize: Dimens.fontSizeSm
+        }
     }
 
     HoverHandler {
         id: hover
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: root.tapToAdd ? Qt.PointingHandCursor : Qt.OpenHandCursor
     }
 
     TapHandler {
+        enabled: root.tapToAdd
         onTapped: root.activated()
     }
 

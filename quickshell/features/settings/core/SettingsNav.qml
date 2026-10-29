@@ -9,6 +9,14 @@ QtObject {
     property string menuId: SettingsRegistry.defaultMenuId
     property string viewId: ""
 
+    // True right after back(): the page being returned to restores its scroll position (and, for the
+    // Bar page, its selected item). Any other navigation clears it; the host also clears it shortly
+    // after the page has loaded.
+    property bool returning: false
+
+    // Scroll position of pages the user has left, by "menu/view". Kept for the session, not saved.
+    property var scrollMemory: ({})
+
     readonly property var menu: SettingsRegistry.findMenu(root.menuId)
     readonly property var view: root.viewId !== "" ? SettingsRegistry.findView(root.menuId, root.viewId) : null
     readonly property bool canGoBack: root.view !== null
@@ -32,17 +40,22 @@ QtObject {
     }
 
     function openMenu(id) {
+        root.returning = false
         root.viewId = ""
         root.menuId = id
     }
 
     function openView(menuId, viewId) {
+        root.returning = false
         root.menuId = menuId
         root.viewId = viewId
     }
 
     function back() {
-        if (root.viewId !== "") root.viewId = ""
+        if (root.viewId !== "") {
+            root.returning = true
+            root.viewId = ""
+        }
     }
 
     // Used by `qs ipc call settings section <name>`; accepts "menu" or "menu/view".

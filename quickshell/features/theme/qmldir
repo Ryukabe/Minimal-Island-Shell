@@ -11,3 +11,4 @@ TypographySettings 1.0 TypographySettings.qml
 singleton WallpaperService 1.0 WallpaperService.qml
 WallpaperSettings 1.0 WallpaperSettings.qml
 WallpaperSwitcher 1.0 WallpaperSwitcher.qml
+WindowsSettings 1.0 WindowsSettings.qml
