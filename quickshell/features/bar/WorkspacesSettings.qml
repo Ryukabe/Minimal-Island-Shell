@@ -1,20 +1,11 @@
 // pages/bar/workspaces/WorkspacesSettings.qml — Bar > Workspaces.
-// Indicators and Look are live (ShellState.workspace*). The Windows and Monitors
-// sections below are still UI-only: the bar does not read them yet.
+// Every row here is live (ShellState.workspace*).
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root
-
-    // UI-only for now (no backend in the bar yet)
-    property bool showWindows: true
-    property bool windowsOnSpecial: true
-    property int maxWindowIcons: 5
-    property bool perMonitor: true
 
     SectionLabel { text: "Indicators" }
 
@@ -52,7 +43,7 @@ PageScroll {
 
         ToggleRow {
             label: "Occupied background"
-            description: "Tint workspaces that have windows open"
+            description: "Tint empty-looking dots of workspaces that have windows (dots only; icon pills have no fill)"
             checked: ShellState.workspaceOccupiedBackground
             onToggled: (val) => ShellState.workspaceOccupiedBackground = val
             showDivider: false
@@ -93,25 +84,26 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Show windows"
-            description: "Show icons of open windows on each workspace"
-            checked: root.showWindows
-            onToggled: (val) => root.showWindows = val
+            description: "Workspaces with windows show their app icons in a bordered pill instead of a dot"
+            checked: ShellState.workspaceShowWindows
+            onToggled: (val) => ShellState.workspaceShowWindows = val
         }
 
         ToggleRow {
             label: "Windows on special workspaces"
-            checked: root.windowsOnSpecial
-            enabled: root.showWindows
-            onToggled: (val) => root.windowsOnSpecial = val
+            description: "Add one extra pill for windows on special workspaces"
+            checked: ShellState.workspaceWindowsOnSpecial
+            enabled: ShellState.workspaceShowWindows
+            onToggled: (val) => ShellState.workspaceWindowsOnSpecial = val
         }
 
         SliderRow {
             label: "Maximum window icons"
-            description: "Per workspace, before the rest are collapsed"
+            description: "Per workspace, before the rest collapse into +N"
             from: 1; to: 10; stepSize: 1
-            value: root.maxWindowIcons
-            enabled: root.showWindows
-            onMoved: (val) => root.maxWindowIcons = val
+            value: ShellState.workspaceMaxWindowIcons
+            enabled: ShellState.workspaceShowWindows
+            onMoved: (val) => ShellState.workspaceMaxWindowIcons = val
             showDivider: false
         }
     }
@@ -121,9 +113,9 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Per-monitor workspaces"
-            description: "Show each monitor's workspaces independently"
-            checked: root.perMonitor
-            onToggled: (val) => root.perMonitor = val
+            description: "Only show this monitor's workspaces and windows"
+            checked: ShellState.workspacePerMonitor
+            onToggled: (val) => ShellState.workspacePerMonitor = val
             showDivider: false
         }
     }

@@ -102,6 +102,10 @@ QtObject {
         workspaceBounce: true,
         workspaceDotSize: 6,
         workspaceActiveWidth: 20,
+        workspaceShowWindows: true,
+        workspaceWindowsOnSpecial: true,
+        workspaceMaxWindowIcons: 5,
+        workspacePerMonitor: true,
         // notifications & focus
         notificationPreviewsEnabled: true,
         focusModeEnabled: false,
@@ -444,6 +448,10 @@ QtObject {
     property bool workspaceBounce: root.defaults.workspaceBounce
     property real workspaceDotSize: root.defaults.workspaceDotSize
     property real workspaceActiveWidth: root.defaults.workspaceActiveWidth
+    property bool workspaceShowWindows: root.defaults.workspaceShowWindows
+    property bool workspaceWindowsOnSpecial: root.defaults.workspaceWindowsOnSpecial
+    property int workspaceMaxWindowIcons: root.defaults.workspaceMaxWindowIcons
+    property bool workspacePerMonitor: root.defaults.workspacePerMonitor
 
     // ================= MOTION & ANIMATIONS =================
     property bool motionReduced: root.defaults.motionReduced
