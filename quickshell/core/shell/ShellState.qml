@@ -147,7 +147,7 @@ QtObject {
         blurXray: false,
         blurOptimizations: true,
         blurPopups: false,
-                // windows (Hyprland general/decoration, written by WindowDecorationService)
+        // windows (Hyprland general/decoration, written by WindowDecorationService)
         customRadiusWindow: 15,
         windowRoundingPower: 4,
         windowGapsIn: 4,
@@ -163,6 +163,7 @@ QtObject {
         windowShadowPower: 2,
         windowShadowScale: 1.0,
         windowShadowOpacity: 0.87,
+        opacityUniversal: false,
         // typography
         fontSizeBase: 15,
         fontBody: "SF Pro Text",
@@ -295,6 +296,8 @@ QtObject {
     property int windowShadowPower: root.defaults.windowShadowPower
     property real windowShadowScale: root.defaults.windowShadowScale
     property real windowShadowOpacity: root.defaults.windowShadowOpacity   // alpha of the shared shadow color
+    // Universal on = one slider (the shell Background opacity) also drives all three window opacities.
+    property bool opacityUniversal: root.defaults.opacityUniversal
 
     // ================= TYPOGRAPHY =================
     // Fonts.qml and Dimens.qml read these; the Typography page writes them.

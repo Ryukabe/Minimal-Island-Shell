@@ -76,27 +76,70 @@ PageScroll {
     SectionLabel { text: "Opacity" }
 
     GroupCard {
+        ToggleRow {
+            label: "Universal opacity"
+            description: "On: one slider for the shell and application windows. Off: set each one yourself"
+            checked: ShellState.opacityUniversal
+            onToggled: (val) => ShellState.opacityUniversal = val
+        }
+
         SliderRow {
-            label: "Background "
-            description: "Window and panel backgrounds"
-            from: 0; to: 100; stepSize: 1
+            label: ShellState.opacityUniversal ? "Opacity" : "Shell background"
+            description: ShellState.opacityUniversal
+                ? "Island, panels, settings and every application window"
+                : "Island, panels and settings backgrounds"
+            from: ShellState.opacityUniversal ? 10 : 0
+            to: 100
+            stepSize: 1
             value: Math.round(Colors.micaAlpha * 100)
             unit: " %"
             onMoved: (val) => Colors.micaAlpha = val / 100
         }
 
         SliderRow {
-            label: "Foreground"
-            description: "Cards and raised surfaces"
+            label: "Shell foreground"
+            description: "Cards and raised surfaces in the shell"
             from: 0; to: 100; stepSize: 1
             value: Math.round(Colors.micaBeta * 100)
             unit: " %"
             onMoved: (val) => Colors.micaBeta = val / 100
-            showDivider: false
+            showDivider: !ShellState.opacityUniversal
+        }
+
+        Reveal {
+            shown: !ShellState.opacityUniversal
+
+            SliderRow {
+                label: "Active window"
+                description: "The window you are using. Whole window, text included"
+                from: 10; to: 100; stepSize: 1
+                value: Math.round(ShellState.windowActiveOpacity * 100)
+                unit: " %"
+                onMoved: (val) => ShellState.windowActiveOpacity = val / 100
+            }
+
+            SliderRow {
+                label: "Inactive windows"
+                description: "Every window that does not have focus"
+                from: 10; to: 100; stepSize: 1
+                value: Math.round(ShellState.windowInactiveOpacity * 100)
+                unit: " %"
+                onMoved: (val) => ShellState.windowInactiveOpacity = val / 100
+            }
+
+            SliderRow {
+                label: "Fullscreen windows"
+                description: "Windows in fullscreen"
+                from: 10; to: 100; stepSize: 1
+                value: Math.round(ShellState.windowFullscreenOpacity * 100)
+                unit: " %"
+                onMoved: (val) => ShellState.windowFullscreenOpacity = val / 100
+                showDivider: false
+            }
         }
     }
 
-     SectionLabel { text: "Blur" }
+    SectionLabel { text: "Blur" }
 
     GroupCard {
         ToggleRow {

@@ -134,6 +134,7 @@
   "windowShadowPower": 2,
   "windowShadowScale": 1,
   "windowShadowOpacity": 0.87,
+  "opacityUniversal": true,
   "fontSizeBase": 15,
   "fontBody": "SF Pro Text",
   "fontDisplay": "SF Pro Display",

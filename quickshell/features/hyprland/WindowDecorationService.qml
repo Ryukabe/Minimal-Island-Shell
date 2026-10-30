@@ -24,11 +24,18 @@ Item {
     property string _written: ""
     property bool _evalPending: false
 
+    // Universal opacity: windows follow the shell Background opacity, never fully invisible.
+    readonly property real _activeOpacity: ShellState.opacityUniversal
+        ? Math.max(0.1, Colors.micaAlpha) : ShellState.windowActiveOpacity
+    readonly property real _inactiveOpacity: ShellState.opacityUniversal
+        ? Math.max(0.1, Colors.micaAlpha) : ShellState.windowInactiveOpacity
+    readonly property real _fullscreenOpacity: ShellState.opacityUniversal
+        ? Math.max(0.1, Colors.micaAlpha) : ShellState.windowFullscreenOpacity    
+
     readonly property string signature: [
         ShellState.windowRounding, ShellState.windowRoundingPower,
         ShellState.windowGapsIn, ShellState.windowGapsOut, ShellState.windowBorderSize,
-        ShellState.windowActiveOpacity, ShellState.windowInactiveOpacity,
-        ShellState.windowFullscreenOpacity,
+        root._activeOpacity, root._inactiveOpacity, root._fullscreenOpacity,
         ShellState.windowDimInactive, ShellState.windowDimStrength,
         ShellState.windowShadowEnabled, ShellState.windowShadowRange,
         ShellState.windowShadowPower, ShellState.windowShadowScale,
@@ -70,9 +77,9 @@ Item {
             + "    decoration = {\n"
             + "        rounding = " + Math.round(ShellState.windowRounding) + ",\n"
             + "        rounding_power = " + root._num(ShellState.windowRoundingPower) + ",\n"
-            + "        active_opacity = " + root._num(ShellState.windowActiveOpacity) + ",\n"
-            + "        inactive_opacity = " + root._num(ShellState.windowInactiveOpacity) + ",\n"
-            + "        fullscreen_opacity = " + root._num(ShellState.windowFullscreenOpacity) + ",\n"
+            + "        active_opacity = " + root._num(root._activeOpacity) + ",\n"
+            + "        inactive_opacity = " + root._num(root._inactiveOpacity) + ",\n"
+            + "        fullscreen_opacity = " + root._num(root._fullscreenOpacity) + ",\n"
             + "        dim_inactive = " + root._bool(ShellState.windowDimInactive) + ",\n"
             + "        dim_strength = " + root._num(ShellState.windowDimStrength) + ",\n"
             + "        shadow = {\n"

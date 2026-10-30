@@ -165,12 +165,12 @@ QtObject {
                           tags: "animations physics springs reduce bounce hyprland",
                           source: "../theme/MotionSettings.qml" },
                         // Corners, mica and shadow share one page. The id stays "opacity" so nothing that links here breaks.
-                        { id: "opacity", title: "Surfaces", subtitle: "Corners, mica and shadows", icon: "opacity",
-                          tags: "corner radius round universal island card control chip mica transparency opacity shadow depth blur",
+                        { id: "opacity", title: "Surfaces", subtitle: "Corners, opacity, blur and shadows", icon: "opacity",
+                          tags: "corner radius round universal island card control chip mica transparency opacity window windows active inactive fullscreen shadow depth blur",
                           source: "../theme/OpacitySettings.qml" },
-                        { id: "windows", title: "Windows", subtitle: "Gaps, opacity, shadow and corner shape", icon: "web_asset",
-                          tags: "windows hyprland gaps inner outer spacing border size corner shape rounding power squircle circle opacity transparency active inactive fullscreen dim dimming shadow range sharpness scale",
-                          source: "../theme/WindowsSettings.qml" },                         
+                        { id: "windows", title: "Windows", subtitle: "Gaps, shadow and corner shape", icon: "web_asset",
+                          tags: "windows hyprland gaps inner outer spacing border size corner shape rounding power squircle circle dim dimming shadow range sharpness scale",
+                          source: "../theme/WindowsSettings.qml" },
                         { id: "templates", title: "Templates", subtitle: "Re-theme other apps when your theme changes", icon: "dashboard_customize",
                           tags: "templates apps gtk qt kitty terminal vscode hyprland sync colors adapters",
                           source: "../theme/TemplatesSettings.qml" },
@@ -181,6 +181,9 @@ QtObject {
         {
             id: "system",
             menus: [
+                { id: "account", title: "Accounts", subtitle: "Users, passwords and names", icon: "manage_accounts",
+                  tags: "user users account accounts password login username display name full name add create new remove delete administrator admin sudo wheel sddm",
+                  source: "../account/AccountSettings.qml" },
                 {
                     id: "apps", title: "Apps", subtitle: "Defaults, startup and app library", icon: "apps",
                     tags: "default applications terminal browser file manager favourites hidden startup autostart",
