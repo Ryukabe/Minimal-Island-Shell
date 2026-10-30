@@ -9,6 +9,7 @@
 // a menu with `source` and no views is a leaf page; anything with neither shows "Coming soon".
 pragma Singleton
 import QtQuick
+import "../../../core/styles"
 
 QtObject {
     id: root
@@ -153,10 +154,9 @@ QtObject {
                         { id: "wallpaper", title: "Wallpaper", subtitle: "Background image and rotation", icon: "wallpaper",
                           tags: "background image slideshow",
                           source: "../theme/WallpaperSettings.qml" },
-                        // The theme picker and light/dark mode moved to the Appearance page; this view keeps
-                        // the palette source and the manual colors. The id stays "theme" so nothing that links here breaks.
-                        { id: "theme", title: "Colors", subtitle: "Palette source and custom colors", icon: "format_paint",
-                          tags: "colors palette source prebuilt dynamic custom accent override hex dark light",
+                        { id: "theme", title: "Colors", subtitle: "Custom palette colors", icon: "format_paint",
+                          tags: "colors custom accent override hex dark light",
+                          requires: "customPalette",
                           source: "../theme/ThemeSettings.qml" },
                         { id: "typography", title: "Typography", subtitle: "Fonts, size and icon style", icon: "text_fields",
                           tags: "fonts size icons weight",
@@ -239,5 +239,12 @@ QtObject {
             if (menu.views[v].id === viewId) return menu.views[v]
         }
         return null
+    }
+
+    // Views can carry `requires`; anything without it is always shown.
+    function isViewVisible(view) {
+        if (!view) return false
+        if (view.requires === "customPalette") return Colors.paletteSource === "Custom"
+        return true
     }
 }

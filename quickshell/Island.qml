@@ -313,9 +313,10 @@ PanelWindow {
         readonly property int compactWidth: ShellState.islandCompactWidth
 
         property int targetWidth: {
-            if (!pageLoader.item) return compactWidth
+            const page = pageLoader.item as Item
+            if (!page) return compactWidth
             var floor = expanded ? ShellState.islandMinExpandedWidth : compactWidth
-            return Math.max(pageLoader.item.implicitWidth, floor)
+            return Math.max(page.implicitWidth, floor)
         }
         property int targetHeight: {
             if (!pageLoader.item) return compactHeight
@@ -474,11 +475,12 @@ PanelWindow {
             }
 
             onItemChanged: {
-                if (item) {
+                const page = item as Item
+                if (page) {
                     contentAnimSpring.stop()
                     contentAnimEase.stop()
-                    item.opacity = 0
-                    item.scale = 0.94
+                    page.opacity = 0
+                    page.scale = 0.94
                     if (ShellState.motionSpringEnabled && !ShellState.motionReduced) {
                         contentAnimSpring.start()
                     } else {

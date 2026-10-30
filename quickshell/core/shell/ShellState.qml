@@ -1,14 +1,9 @@
 // core/shell/ShellState.qml
 pragma Singleton
 import QtQuick
-import Quickshell.Io
 import "../../features/hyprland"
-import "../../features/lockscreen"
-import "../../features/notifications"
-import "../../features/sound"
-import "../../features/theme"
 import "../../features/timer"
-import "."
+
 
 QtObject {
     id: root

@@ -24,18 +24,22 @@ PageScroll {
             onMoved: (val) => ShellState.fontSizeBase = val
         }
 
-        DropdownRow {
+        PickerRow {
             label: "Body font"
-            options: root.bodyFontOptions
-            selectedValue: ShellState.fontBody
-            onOptionSelected: (value) => ShellState.fontBody = value
+            pickerTitle: "Body font"
+            searchHint: "Search fonts..."
+            items: root.bodyFontOptions
+            value: ShellState.fontBody
+            onCommitted: (v) => ShellState.fontBody = v
         }
 
-        DropdownRow {
+        PickerRow {
             label: "Display font"
-            options: root.displayFontOptions
-            selectedValue: ShellState.fontDisplay
-            onOptionSelected: (value) => ShellState.fontDisplay = value
+            pickerTitle: "Display font"
+            searchHint: "Search fonts..."
+            items: root.displayFontOptions
+            value: ShellState.fontDisplay
+            onCommitted: (v) => ShellState.fontDisplay = v
             showDivider: false
         }
     }

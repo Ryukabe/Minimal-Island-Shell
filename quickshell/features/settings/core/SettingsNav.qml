@@ -80,6 +80,7 @@ QtObject {
                     if (viewQuery !== "" && menu.views) {
                         for (let v = 0; v < menu.views.length; v++) {
                             const view = menu.views[v]
+                            if (!SettingsRegistry.isViewVisible(view)) continue
                             if (view.id === viewQuery || view.title.toLowerCase().includes(viewQuery)) {
                                 root.openView(menu.id, view.id)
                                 break

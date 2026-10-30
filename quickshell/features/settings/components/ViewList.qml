@@ -2,8 +2,9 @@
 // Used by LandingPage, and by any page that shows its own options above its sub-pages (Bar).
 // `excludeIds` hides sub-pages a page already reaches another way (the Bar page hides the ones its
 // item cards open).
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Layouts
 import "../core"
 
 GroupCard {
@@ -13,7 +14,8 @@ GroupCard {
 
     readonly property var shownViews: {
         const all = SettingsNav.menu ? SettingsNav.menu.views : []
-        return all.filter(v => root.excludeIds.indexOf(v.id) < 0)
+        return all.filter(v => root.excludeIds.indexOf(v.id) < 0
+                            && SettingsRegistry.isViewVisible(v))
     }
 
     Repeater {

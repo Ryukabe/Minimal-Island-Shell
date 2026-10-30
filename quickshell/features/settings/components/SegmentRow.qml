@@ -1,4 +1,6 @@
 // components/SegmentRow.qml — label with a pill of mutually exclusive options (e.g. power profile).
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import "../../../core/styles"

@@ -1,12 +1,11 @@
-// features/theme/ThemeSettings.qml — Appearance > Colors. Where the palette comes from, and the
-// manual palette colours (the old separate Colors page lives here now).
-// The theme picker and light/dark mode (with the Auto schedule) are on the Appearance page.
+// features/theme/ThemeSettings.qml — Appearance > Colors. Only reachable when the palette source
+// is Custom: the manual palette colours for dark and light mode.
+// The palette source, theme picker and light/dark mode are on the Appearance page.
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import "../settings/components"
 import "../../core/styles"
-
 
 PageScroll {
     id: root
@@ -26,27 +25,9 @@ PageScroll {
         { key: "cyan", label: "Cyan" }
     ]
 
-    SectionLabel { text: "Palette" }
+    SectionLabel { text: "Custom colors: dark" }
 
     GroupCard {
-        SegmentRow {
-            label: "Palette Source"
-            description: "Where to derive the color palette from"
-            options: ["Prebuilt", "Dynamic", "Custom"]
-            selectedValue: Colors.paletteSource
-            onOptionSelected: (name) => Colors.paletteSource = name
-            showDivider: false
-        }
-    }
-
-    SectionLabel {
-        text: "Custom colors: dark"
-        visible: Colors.paletteSource === "Custom"
-    }
-
-    GroupCard {
-        visible: Colors.paletteSource === "Custom"
-
         Repeater {
             model: root.colorKeys
 
@@ -62,14 +43,9 @@ PageScroll {
         }
     }
 
-    SectionLabel {
-        text: "Custom colors: light"
-        visible: Colors.paletteSource === "Custom"
-    }
+    SectionLabel { text: "Custom colors: light" }
 
     GroupCard {
-        visible: Colors.paletteSource === "Custom"
-
         Repeater {
             model: root.colorKeys
 

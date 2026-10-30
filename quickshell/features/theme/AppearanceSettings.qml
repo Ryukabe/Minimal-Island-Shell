@@ -1,11 +1,13 @@
 // features/theme/AppearanceSettings.qml — the Appearance menu itself: the settings you reach for
-// most. Theme picker and light/dark mode (with the Auto schedule) sit here. Wallpaper, Colors,
-// Typography, Motion, Opacity, Corners and Templates open from the list at the bottom.
+// most. Palette source, the theme picker (Prebuilt only) and light/dark mode (with the Auto
+// schedule) sit here. Wallpaper, Colors (Custom only), Typography, Motion, Opacity, Corners and
+// Templates open from the list at the bottom.
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import "../settings/components"
 import "."
+import "../settings/core"
 import "../../core/shell"
 import "../../core/styles"
 import "components"
@@ -15,11 +17,42 @@ PageScroll {
 
     readonly property bool autoOn: Colors.themeMode === "Auto"
     readonly property bool autoCustom: root.autoOn && Colors.autoSource === "Custom"
+    readonly property bool isPrebuilt: Colors.paletteSource === "Prebuilt"
+    readonly property bool isCustom: Colors.paletteSource === "Custom"
 
-    SectionLabel { text: "Theme" }
+    SectionLabel { text: "Palette" }
+
+    GroupCard {
+        SegmentRow {
+            label: "Palette Source"
+            description: "Where to derive the color palette from"
+            options: ["Prebuilt", "Dynamic", "Custom"]
+            selectedValue: Colors.paletteSource
+            onOptionSelected: (name) => Colors.paletteSource = name
+            showDivider: root.isCustom
+        }
+
+        Reveal {
+            shown: root.isCustom
+
+            LandingRow {
+                icon: "format_paint"
+                title: "Colors"
+                subtitle: "Custom palette colors"
+                showDivider: false
+                onClicked: SettingsNav.openView(SettingsNav.menuId, "theme")
+            }
+        }
+    }
+
+    SectionLabel {
+        text: "Theme"
+        visible: root.isPrebuilt
+    }
 
     CardCarousel {
         id: themeCarousel
+        visible: root.isPrebuilt
         model: ThemeService.themesList
         cardDelegate: Component {
             ThemeCard {
@@ -90,5 +123,5 @@ PageScroll {
 
     SectionLabel { text: "More appearance settings" }
 
-    ViewList {}
+    ViewList { excludeIds: ["theme"] }
 }

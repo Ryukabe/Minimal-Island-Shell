@@ -4,6 +4,7 @@
     "workspaces",
     "time",
     "visualizer",
-    "recording"
+    "recording",
+    "privacy"
   ]
 }
