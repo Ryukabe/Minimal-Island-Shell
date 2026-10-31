@@ -96,6 +96,26 @@ PageScroll {
     SectionLabel { text: "Look" }
 
     GroupCard {
+        SegmentRow {
+            label: "App layout"
+            description: "Emoji picker is always a grid"
+            options: ["List", "Grid"]
+            selectedValue: LauncherSettings.viewMode
+            onOptionSelected: (name) => LauncherSettings.viewMode = name
+        }
+
+        Reveal {
+            shown: LauncherSettings.viewMode === "Grid"
+
+            SliderRow {
+                label: "Grid columns"
+                from: 3; to: 6; stepSize: 1
+                value: LauncherSettings.gridColumns
+                unit: " columns"
+                onMoved: (v) => LauncherSettings.gridColumns = Math.round(v)
+            }
+        }
+
         ToggleRow {
             label: "Show app icons"
             checked: LauncherSettings.showIcons
@@ -123,7 +143,7 @@ PageScroll {
 
         ToggleRow {
             label: "Shrink panel for few results"
-            description: "A single match gets a compact panel"
+            description: "A single match gets a compact panel (list layout only)"
             checked: LauncherSettings.shrinkForFewResults
             onToggled: (val) => LauncherSettings.shrinkForFewResults = val
             showDivider: false

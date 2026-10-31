@@ -22,6 +22,8 @@ Singleton {
     property bool animateResults: true
     property string launcherWidth: "Normal"     // "Compact" | "Normal" | "Wide"
     property bool shrinkForFewResults: true
+    property string viewMode: "List"            // "List" | "Grid" (apps only; emoji is always a grid)
+    property int gridColumns: 4                 // 3..6, app grid only
 
     // ---- Extras ----
     property bool inlineCalculator: true
@@ -55,6 +57,8 @@ Singleton {
     onAnimateResultsChanged: scheduleSave()
     onLauncherWidthChanged: scheduleSave()
     onShrinkForFewResultsChanged: scheduleSave()
+    onViewModeChanged: scheduleSave()
+    onGridColumnsChanged: scheduleSave()
     onInlineCalculatorChanged: scheduleSave()
     onClipboardHistoryChanged: scheduleSave()
     onClipboardLimitChanged: scheduleSave()
@@ -95,6 +99,8 @@ Singleton {
             animateResults: animateResults,
             launcherWidth: launcherWidth,
             shrinkForFewResults: shrinkForFewResults,
+            viewMode: viewMode,
+            gridColumns: gridColumns,
             inlineCalculator: inlineCalculator,
             clipboardHistory: clipboardHistory,
             clipboardLimit: clipboardLimit,
@@ -169,6 +175,8 @@ Singleton {
         animateResults = _bool(d.animateResults, animateResults)
         launcherWidth = _choice(d.launcherWidth, ["Compact", "Normal", "Wide"], launcherWidth)
         shrinkForFewResults = _bool(d.shrinkForFewResults, shrinkForFewResults)
+        viewMode = _choice(d.viewMode, ["List", "Grid"], viewMode)
+        gridColumns = _num(d.gridColumns, 3, 6, gridColumns)
         inlineCalculator = _bool(d.inlineCalculator, inlineCalculator)
         clipboardHistory = _bool(d.clipboardHistory, clipboardHistory)
         clipboardLimit = _num(d.clipboardLimit, 10, 100, clipboardLimit)

@@ -9,6 +9,8 @@
   "animateResults": true,
   "launcherWidth": "Normal",
   "shrinkForFewResults": false,
+  "viewMode": "Grid",
+  "gridColumns": 4,
   "inlineCalculator": true,
   "clipboardHistory": true,
   "clipboardLimit": 100,

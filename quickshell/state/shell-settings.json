@@ -82,7 +82,7 @@
   "workspaceBounce": false,
   "workspaceDotSize": 6,
   "workspaceActiveWidth": 14,
-  "workspaceShowWindows": true,
+  "workspaceShowWindows": false,
   "workspaceWindowsOnSpecial": true,
   "workspaceMaxWindowIcons": 5,
   "workspacePerMonitor": true,
