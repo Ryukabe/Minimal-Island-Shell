@@ -1,4 +1,4 @@
-// components/SidebarItem.qml — one menu entry in the sidebar: icon, title, one-line subtitle.
+// components/SidebarItem.qml — one menu entry in the sidebar: icon and title (subtitle is optional).
 import QtQuick
 import QtQuick.Layouts
 import "../../../core/styles"
@@ -10,11 +10,12 @@ Item {
     property string icon: ""
     property string title: ""
     property string subtitle: ""
+    property bool showSubtitle: false
     property bool selected: false
     signal clicked()
 
     Layout.fillWidth: true
-    implicitHeight: 48
+    implicitHeight: root.showSubtitle ? 48 : 40
 
     Rectangle {
         anchors.fill: parent
@@ -85,6 +86,7 @@ Item {
             }
 
             Text {
+                visible: root.showSubtitle && root.subtitle !== ""
                 Layout.fillWidth: true
                 text: root.subtitle
                 color: Colors.subtext

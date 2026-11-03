@@ -1,6 +1,9 @@
-// components/PageTitle.qml — title card at the top of every page.
-// On a menu's landing list it shows an icon badge; inside a view the badge is replaced by a back arrow.
-// The badge icon plays its own motion whenever the page changes; the back arrow nudges on hover.
+// components/PageTitle.qml — header card at the top of every page.
+// Shows a breadcrumb ("Bar & Island › Clock"). Inside a view the icon badge is replaced by a back arrow,
+// and every crumb except the last is clickable (it goes back). The badge icon plays its own motion
+// whenever the page changes; the back arrow nudges on hover.
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import "../../../core/styles"
@@ -12,11 +15,16 @@ Rectangle {
     property string icon: ""
     property string title: ""
     property string subtitle: ""
+    property var crumbs: []
+    property bool showSubtitle: false
     property bool canGoBack: false
     signal backClicked()
+    signal crumbClicked(int index)
+
+    readonly property var shownCrumbs: root.crumbs.length > 0 ? root.crumbs : [root.title]
 
     Layout.fillWidth: true
-    implicitHeight: 70
+    implicitHeight: 64
     radius: Dimens.settingsContainerRadius
     color: Colors.subBgMica
     border.color: Colors.border
@@ -78,17 +86,58 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 2
 
-            Text {
+            RowLayout {
                 Layout.fillWidth: true
-                text: root.title
-                color: Colors.fg
-                font.family: Fonts.display
-                font.pixelSize: Dimens.fontSizeLg
-                font.weight: Font.Bold
-                elide: Text.ElideRight
+                spacing: Dimens.spacingSmall
+
+                Repeater {
+                    model: root.shownCrumbs
+
+                    delegate: RowLayout {
+                        id: crumb
+
+                        required property string modelData
+                        required property int index
+                        readonly property bool isLast: crumb.index === root.shownCrumbs.length - 1
+
+                        Layout.fillWidth: crumb.isLast
+                        spacing: Dimens.spacingSmall
+
+                        SymbolIcon {
+                            visible: crumb.index > 0
+                            name: "chevron_right"
+                            size: Dimens.fontSizeXxl
+                            color: Colors.fgMuted
+                        }
+
+                        Text {
+                            Layout.fillWidth: crumb.isLast
+                            text: crumb.modelData
+                            color: (crumb.isLast || crumbMouse.containsMouse) ? Colors.fg : Colors.fgMuted
+                            font.family: Fonts.display
+                            font.pixelSize: Dimens.fontSizeXl
+                            font.weight: crumb.isLast ? Font.Bold : Font.Normal
+                            elide: Text.ElideRight
+
+                            Behavior on color {
+                                ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
+                            }
+
+                            MouseArea {
+                                id: crumbMouse
+                                anchors.fill: parent
+                                enabled: !crumb.isLast
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.crumbClicked(crumb.index)
+                            }
+                        }
+                    }
+                }
             }
 
             Text {
+                visible: root.showSubtitle && root.subtitle !== ""
                 Layout.fillWidth: true
                 text: root.subtitle
                 color: Colors.fgMuted

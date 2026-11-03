@@ -1,5 +1,5 @@
 // core/SettingsNav.qml — where the user currently is: a menu, and optionally a view inside it.
-// No breadcrumbs: a view just shows its own title plus a back arrow.
+// `crumbs` feeds the breadcrumb header: ["Menu"] on a menu page, ["Menu", "View"] inside a view.
 pragma Singleton
 import QtQuick
 
@@ -24,6 +24,12 @@ QtObject {
     readonly property string title: root.view ? root.view.title : (root.menu ? root.menu.title : "")
     readonly property string subtitle: root.view ? root.view.subtitle : (root.menu ? root.menu.subtitle : "")
     readonly property string icon: root.view ? root.view.icon : (root.menu ? root.menu.icon : "")
+
+    readonly property var crumbs: {
+        if (root.view && root.menu) return [root.menu.title, root.view.title]
+        if (root.menu) return [root.menu.title]
+        return []
+    }
 
     // Path (relative to SettingsApp.qml) of the page the host should load.
     // A menu with its own `source` shows that page even when it also has views; the page itself

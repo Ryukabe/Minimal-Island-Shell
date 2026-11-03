@@ -2,6 +2,7 @@
 // The sidebar, the landing lists, the title bar and (later) search all read from here,
 // so adding a page means adding one entry.
 //
+//   cluster = { id, title?, menus }   (title is the small label above the group in the sidebar)
 //   menu  = { id, title, subtitle, icon, tags, placeholder?, source?, views? }
 //   view  = { id, title, subtitle, icon, tags, placeholder?, source? }
 //
@@ -16,7 +17,7 @@ QtObject {
 
     readonly property string appTitle: "Settings"
     readonly property string appSubtitle: "Hermit"
-    readonly property string defaultMenuId: "bar"
+    readonly property string defaultMenuId: "home"
 
     // Shown on the About page. Change the version here and nowhere else.
     readonly property string projectName: "Hermit-dots"
@@ -25,7 +26,16 @@ QtObject {
 
     readonly property var clusters: [
         {
+            id: "home",
+            menus: [
+                { id: "home", title: "Home", subtitle: "Quick links to common settings", icon: "home",
+                  tags: "home start overview quick links shortcuts",
+                  source: "pages/home/HomePage.qml" }
+            ]
+        },
+        {
             id: "shell",
+            title: "Shell",
             menus: [
                 {
                     id: "bar", title: "Bar & Island", subtitle: "Style, clock items and size of the island", icon: "dock_to_bottom",
@@ -100,6 +110,7 @@ QtObject {
         },
         {
             id: "devices",
+            title: "Devices",
             menus: [
                 {
                     id: "network", title: "Wi-Fi & Bluetooth", subtitle: "Networks and paired devices", icon: "wifi",
@@ -145,6 +156,7 @@ QtObject {
         },
         {
             id: "looks",
+            title: "Personalization",
             menus: [
                 {
                     id: "appearance", title: "Appearance", subtitle: "Theme, mode, wallpaper, type and motion", icon: "palette",
@@ -180,6 +192,7 @@ QtObject {
         },
         {
             id: "system",
+            title: "System",
             menus: [
                 { id: "account", title: "Accounts", subtitle: "Users, passwords and names", icon: "manage_accounts",
                   tags: "user users account accounts password login username display name full name add create new remove delete administrator admin sudo wheel sddm",
