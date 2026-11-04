@@ -20,7 +20,7 @@ WlSessionLock {
     property Item activePasswordInput: null
 
     locked: typeof ShellState !== "undefined" && ShellState.activePage === "lock"
-    onLockedChanged: if (locked) { KnowledgeSettings.pickNext(); WeatherService.refreshIfStale() }
+    onLockedChanged: if (locked) { KnowledgeState.pickNext(); WeatherService.refreshIfStale() }
 
     function unlock() {
         if (activePasswordInput) {
@@ -62,7 +62,7 @@ WlSessionLock {
                         errorMessage.visible = true
                         passwordInput.text = ""
                         passwordInput.forceActiveFocus()
-                        if (LockScreenSettings.shakeOnWrongPassword) shakeAnim.start()
+                        if (LockScreenState.shakeOnWrongPassword) shakeAnim.start()
                         pam.start()
                     }
                 }
@@ -72,7 +72,7 @@ WlSessionLock {
                     errorMessage.visible = true
                     passwordInput.text = ""
                     passwordInput.forceActiveFocus()
-                    if (LockScreenSettings.shakeOnWrongPassword) shakeAnim.start()
+                    if (LockScreenState.shakeOnWrongPassword) shakeAnim.start()
                     pam.start()
                 }
             }
@@ -90,7 +90,7 @@ WlSessionLock {
             // Respects ShellState.motionReduced via motionDuration() —
             // durations collapse to 0 (i.e. instant) when reduced motion
             // is on, same convention as the rest of the shell. Also skipped
-            // entirely when LockScreenSettings.playEntranceAnimation is off.
+            // entirely when LockScreenState.playEntranceAnimation is off.
             // (WeatherBlock, MediaCard and the knowledge card run their own entrance.)
             ParallelAnimation {
                 id: entranceAnim
@@ -186,7 +186,7 @@ WlSessionLock {
                 entranceAnim.start()
                 // complete() jumps every animated property to its end value, so the lock screen
                 // simply appears fully drawn.
-                if (!LockScreenSettings.playEntranceAnimation) entranceAnim.complete()
+                if (!LockScreenState.playEntranceAnimation) entranceAnim.complete()
             }
 
             // Background focus handling
@@ -205,7 +205,7 @@ WlSessionLock {
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         cache: true
-                        visible: !LockScreenSettings.frostedBlurEnabled
+                        visible: !LockScreenState.frostedBlurEnabled
                         opacity: wallpaperFade.opacity
 
                         transform: Scale {
@@ -229,16 +229,16 @@ WlSessionLock {
                     FastBlur {
                         anchors.fill: wallpaper
                         source: wallpaper
-                        radius: LockScreenSettings.frostedBlurRadius
-                        visible: LockScreenSettings.frostedBlurEnabled
+                        radius: LockScreenState.frostedBlurRadius
+                        visible: LockScreenState.frostedBlurEnabled
                         opacity: wallpaperFade.opacity
                     }
 
                     Rectangle {
                         anchors.fill: parent
                         color: Colors.darkMode
-                            ? Qt.rgba(0, 0, 0, LockScreenSettings.wallpaperDimOpacity)
-                            : Qt.rgba(1, 1, 1, LockScreenSettings.wallpaperDimOpacity)
+                            ? Qt.rgba(0, 0, 0, LockScreenState.wallpaperDimOpacity)
+                            : Qt.rgba(1, 1, 1, LockScreenState.wallpaperDimOpacity)
                     }
 
                     // ---- TOP-RIGHT: weather ----
@@ -248,7 +248,7 @@ WlSessionLock {
                         anchors.topMargin: parent.height * 0.06
                         anchors.rightMargin: parent.width * 0.05
                         now: lockSurface.now
-                        entrance: LockScreenSettings.playEntranceAnimation
+                        entrance: LockScreenState.playEntranceAnimation
                     }
 
                     // ---- TOP-LEFT: clock (+ notifications) ----
@@ -264,7 +264,7 @@ WlSessionLock {
                         // Newest last, same order as the notification service tracks them.
                         readonly property var notifs: NotificationService.trackedNotifications.values
                         readonly property int notifTotal: notifs ? notifs.length : 0
-                        readonly property bool showNotifs: LockScreenSettings.showNotifications && notifTotal > 0
+                        readonly property bool showNotifs: LockScreenState.showNotifications && notifTotal > 0
 
                         transform: Translate {
                             id: clockBlockTranslate
@@ -272,7 +272,7 @@ WlSessionLock {
                         }
 
                         Text {
-                            text: Qt.formatDateTime(lockSurface.now, LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
+                            text: Qt.formatDateTime(lockSurface.now, LockScreenState.clockFormat24h ? "HH:mm" : "h:mm AP")
                             font.family: Fonts.display
                             font.pixelSize: Dimens.fontSizeDisplay
                             font.weight: Font.Bold
@@ -280,7 +280,7 @@ WlSessionLock {
                         }
 
                         Text {
-                            visible: LockScreenSettings.showDate
+                            visible: LockScreenState.showDate
                             text: Qt.formatDateTime(lockSurface.now, "dddd, MMMM d").toUpperCase()
                             font.family: Fonts.text
                             font.pixelSize: Dimens.fontSizeXs
@@ -299,7 +299,7 @@ WlSessionLock {
                         }
 
                         Repeater {
-                            model: clockBlock.showNotifs ? Math.min(LockScreenSettings.notificationLimit, clockBlock.notifTotal) : 0
+                            model: clockBlock.showNotifs ? Math.min(LockScreenState.notificationLimit, clockBlock.notifTotal) : 0
 
                             Text {
                                 required property int index
@@ -321,8 +321,8 @@ WlSessionLock {
                     // ---- BOTTOM-CENTER: knowledge slide ----
                     Item {
                         id: knowledgeCard
-                        readonly property var entry: KnowledgeSettings.current
-                        visible: KnowledgeSettings.slideEnabled && !!entry
+                        readonly property var entry: KnowledgeState.current
+                        visible: KnowledgeState.slideEnabled && !!entry
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: parent.height * 0.06
@@ -333,7 +333,7 @@ WlSessionLock {
                         transform: Translate { id: knowledgeTranslate; y: 18 }
 
                         Component.onCompleted: {
-                            if (LockScreenSettings.playEntranceAnimation) {
+                            if (LockScreenState.playEntranceAnimation) {
                                 knowledgeAnim.start()
                             } else {
                                 knowledgeCard.opacity = 1
@@ -420,13 +420,13 @@ WlSessionLock {
                         anchors.leftMargin: parent.width * 0.05
                         anchors.bottomMargin: parent.height * 0.06
                             + (hyprlandBtn.visible ? hyprlandBtn.height + Dimens.spacingLg : 0)
-                        entrance: LockScreenSettings.playEntranceAnimation
+                        entrance: LockScreenState.playEntranceAnimation
                     }
 
                     // ---- BOTTOM-LEFT: hyprland action ----
                     Text {
                         id: hyprlandBtn
-                        visible: LockScreenSettings.showHyprlandAction
+                        visible: LockScreenState.showHyprlandAction
                         anchors.left: parent.left
                         anchors.bottom: parent.bottom
                         anchors.leftMargin: parent.width * 0.05
@@ -466,7 +466,7 @@ WlSessionLock {
                         Text {
                             id: usernameLabel
                             Layout.alignment: Qt.AlignRight
-                            visible: LockScreenSettings.showUsername
+                            visible: LockScreenState.showUsername
                             text: (Quickshell.env("USER") || Qt.userName || "user").toUpperCase()
                             font.family: Fonts.display
                             font.pixelSize: Dimens.fontSizeMd
@@ -488,7 +488,7 @@ WlSessionLock {
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: 8
                                 visible: passwordInput.text.length === 0
-                                text: LockScreenSettings.passwordPlaceholder.toUpperCase()
+                                text: LockScreenState.passwordPlaceholder.toUpperCase()
                                 font.family: Fonts.text
                                 font.pixelSize: Dimens.fontSizeXs
                                 font.letterSpacing: 1.5
@@ -566,7 +566,7 @@ WlSessionLock {
                                 anchors.bottom: parent.bottom
                                 height: 1
                                 color: errorMessage.visible
-                                    ? (LockScreenSettings.errorUsesAccent ? Colors.accent : Colors.red)
+                                    ? (LockScreenState.errorUsesAccent ? Colors.accent : Colors.red)
                                     : (passwordInput.activeFocus ? Colors.accent : Colors.border)
                                 opacity: passwordInput.activeFocus || errorMessage.visible ? 0.9 : 0.4
                             }
@@ -578,7 +578,7 @@ WlSessionLock {
                             text: "incorrect password"
                             font.family: Fonts.text
                             font.pixelSize: Dimens.fontSizeXs
-                            color: LockScreenSettings.errorUsesAccent ? Colors.accent : Colors.red
+                            color: LockScreenState.errorUsesAccent ? Colors.accent : Colors.red
                             visible: false
                         }
 
@@ -589,7 +589,7 @@ WlSessionLock {
 
                             Text {
                                 id: rebootBtn
-                                visible: LockScreenSettings.showRebootAction
+                                visible: LockScreenState.showRebootAction
                                 text: "RESTART"
                                 font.family: Fonts.mono
                                 font.pixelSize: Dimens.fontSizeXs
@@ -608,7 +608,7 @@ WlSessionLock {
 
                             Text {
                                 id: powerBtn
-                                visible: LockScreenSettings.showPowerAction
+                                visible: LockScreenState.showPowerAction
                                 text: "SHUT DOWN"
                                 font.family: Fonts.mono
                                 font.pixelSize: Dimens.fontSizeXs

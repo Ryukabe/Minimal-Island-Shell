@@ -119,7 +119,7 @@ Singleton {
     ]
 
     function _on(name) {
-        return LauncherSettings.features[name] !== false
+        return LauncherState.features[name] !== false
     }
 
     function _info(name, comment, glyph) {
@@ -140,9 +140,9 @@ Singleton {
         if (c === ">" && _on("commands")) return { mode: "cmd", arg: q.slice(1).trim() }
         if (c === "?" && _on("web")) return { mode: "web", engine: LauncherData.defaultEngine, arg: q.slice(1).trim() }
         if (c === "/" && _on("files")) return { mode: "files", arg: q.slice(1).trim() }
-        if (c === LauncherSettings.triggerEmoji && _on("emoji")) return { mode: "emoji", arg: q.slice(1).trim() }
-        if (c === LauncherSettings.triggerSnippets && _on("snippets")) return { mode: "snippets", arg: q.slice(1).trim() }
-        if (c === LauncherSettings.triggerNotes && _on("notes")) return { mode: "note", arg: q.slice(1).trim() }
+        if (c === LauncherState.triggerEmoji && _on("emoji")) return { mode: "emoji", arg: q.slice(1).trim() }
+        if (c === LauncherState.triggerSnippets && _on("snippets")) return { mode: "snippets", arg: q.slice(1).trim() }
+        if (c === LauncherState.triggerNotes && _on("notes")) return { mode: "note", arg: q.slice(1).trim() }
 
         var m = /^([a-z]+)\s+(.*)$/i.exec(q)
         if (m) {
@@ -232,7 +232,7 @@ Singleton {
 
         var pre = []
 
-        if (LauncherSettings.inlineCalculator) {
+        if (LauncherState.inlineCalculator) {
             var calc = CalculatorService.evaluate(q)
             if (calc) {
                 pre.push({ kind: "copy", id: "calc", name: "= " + calc.text, comment: q + "  ·  Enter to copy",
@@ -312,7 +312,7 @@ Singleton {
     }
 
     function noteRows(p) {
-        if (!p.arg) return [_info("Quick note", "Type your note after " + LauncherSettings.triggerNotes, "edit_note")]
+        if (!p.arg) return [_info("Quick note", "Type your note after " + LauncherState.triggerNotes, "edit_note")]
 
         var mode = LauncherData.notesMode
         var target = _noteTarget(p.arg)

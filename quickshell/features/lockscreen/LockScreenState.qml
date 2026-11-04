@@ -1,4 +1,4 @@
-// features/lockscreen/LockScreenSettings.qml
+// features/lockscreen/LockScreenState.qml
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -142,7 +142,7 @@ Item {
             try {
                 root._apply(JSON.parse(text()));
             } catch (e) {
-                console.log("[LockScreenSettings] parse error:", e);
+                console.log("[LockScreenState] parse error:", e);
             }
             root._configLoaded = true
         }

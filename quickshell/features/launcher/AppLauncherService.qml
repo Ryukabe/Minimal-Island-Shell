@@ -65,9 +65,9 @@ QtObject {
     }
 
     function scoreApp(app, q) {
-        var fuzzy = LauncherSettings.matchMode === "Fuzzy"
+        var fuzzy = LauncherState.matchMode === "Fuzzy"
         var s = nameScore((app.name || "").toLowerCase(), q, fuzzy)
-        if (s < 0 && LauncherSettings.searchDescriptions) s = descScore(app, q)
+        if (s < 0 && LauncherState.searchDescriptions) s = descScore(app, q)
         return s
     }
 
@@ -77,8 +77,8 @@ QtObject {
         var q = (query || "").trim().toLowerCase()
 
         var recentRank = {}
-        if (LauncherSettings.showRecentsFirst) {
-            var recents = LauncherSettings.recentIds.slice(0, LauncherSettings.recentLimit)
+        if (LauncherState.showRecentsFirst) {
+            var recents = LauncherState.recentIds.slice(0, LauncherState.recentLimit)
             for (var r = 0; r < recents.length; r++) recentRank[recents[r]] = r
         }
 
@@ -116,12 +116,12 @@ QtObject {
         })
 
         var list = entries.map(e => e.app)
-        return q.length > 0 ? list.slice(0, LauncherSettings.maxResults) : list
+        return q.length > 0 ? list.slice(0, LauncherState.maxResults) : list
     }
 
     function launch(app) {
         if (!app) return
-        LauncherSettings.recordLaunch(appId(app))
+        LauncherState.recordLaunch(appId(app))
         app.execute()
     }
 }

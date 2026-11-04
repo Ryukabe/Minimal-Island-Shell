@@ -14,7 +14,7 @@ Item {
     readonly property real ageMin: (root.now.getTime() - WeatherService.updatedAt) / 60000
     readonly property bool stale: root.ageMin > 90
 
-    visible: LockScreenSettings.showWeather && WeatherService.hasPlace && WeatherService.hasData
+    visible: LockScreenState.showWeather && WeatherService.hasPlace && WeatherService.hasData
     width: column.implicitWidth
     height: column.implicitHeight
     opacity: 0
@@ -40,7 +40,7 @@ Item {
     }
 
     function hourLabel(h) {
-        if (LockScreenSettings.clockFormat24h) return (h < 10 ? "0" : "") + h
+        if (LockScreenState.clockFormat24h) return (h < 10 ? "0" : "") + h
         return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? "A" : "P")
     }
 
@@ -70,7 +70,7 @@ Item {
             Layout.alignment: Qt.AlignRight
             text: ("H " + WeatherService.fmt(WeatherService.highC)
                 + "  L " + WeatherService.fmt(WeatherService.lowC)
-                + (LockScreenSettings.weatherShowFeelsLike
+                + (LockScreenState.weatherShowFeelsLike
                     ? "  ·  FEELS " + WeatherService.fmt(WeatherService.feelsC) : ""))
             font.family: Fonts.mono
             font.pixelSize: Dimens.fontSizeXs
@@ -93,7 +93,7 @@ Item {
         // Hourly curve: temps above, curve with dots, hours below.
         ColumnLayout {
             id: strip
-            visible: LockScreenSettings.weatherShowHourly && WeatherService.hourly.length > 1
+            visible: LockScreenState.weatherShowHourly && WeatherService.hourly.length > 1
             Layout.alignment: Qt.AlignRight
             Layout.topMargin: Dimens.spacingMedium
             Layout.preferredWidth: 320

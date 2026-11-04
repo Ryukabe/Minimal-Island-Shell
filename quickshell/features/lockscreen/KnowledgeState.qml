@@ -1,4 +1,4 @@
-// features/lockscreen/KnowledgeSettings.qml
+// features/lockscreen/KnowledgeState.qml
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -98,7 +98,7 @@ Item {
             try {
                 root._apply(JSON.parse(text()));
             } catch (e) {
-                console.log("[KnowledgeSettings] parse error:", e);
+                console.log("[KnowledgeState] parse error:", e);
             }
             root._configLoaded = true
         }

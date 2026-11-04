@@ -1,4 +1,4 @@
-// pages/lockscreen/LockScreenPage.qml — Lock Screen. Real: everything bound to LockScreenSettings,
+// pages/lockscreen/LockScreenPage.qml — Lock Screen. Real: everything bound to LockScreenState,
 // plus the lock timer, which lives in hypridle.conf (LockTimerService), and the weather city,
 // which lives in WeatherService.
 // The lid row stays a greyed placeholder: it belongs to logind / a Hyprland bind, not to the shell.
@@ -22,7 +22,7 @@ PageScroll {
         "Calendar: Study block at 8"
     ]
 
-    Component.onCompleted: if (!KnowledgeSettings.current) KnowledgeSettings.pickNext()
+    Component.onCompleted: if (!KnowledgeState.current) KnowledgeState.pickNext()
 
     SystemClock {
         id: previewClock
@@ -58,26 +58,26 @@ PageScroll {
                     Image {
                         id: previewWall
                         anchors.fill: parent
-                        source: LockScreenSettings.effectiveWallpaper
-                            ? LockScreenSettings.folderUrl(LockScreenSettings.effectiveWallpaper) : ""
+                        source: LockScreenState.effectiveWallpaper
+                            ? LockScreenState.folderUrl(LockScreenState.effectiveWallpaper) : ""
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         sourceSize.width: 1366
-                        visible: !LockScreenSettings.frostedBlurEnabled
+                        visible: !LockScreenState.frostedBlurEnabled
                     }
 
                     FastBlur {
                         anchors.fill: previewWall
                         source: previewWall
-                        radius: LockScreenSettings.frostedBlurRadius
-                        visible: LockScreenSettings.frostedBlurEnabled
+                        radius: LockScreenState.frostedBlurRadius
+                        visible: LockScreenState.frostedBlurEnabled
                     }
 
                     Rectangle {
                         anchors.fill: parent
                         color: Colors.darkMode
-                            ? Qt.rgba(0, 0, 0, LockScreenSettings.wallpaperDimOpacity)
-                            : Qt.rgba(1, 1, 1, LockScreenSettings.wallpaperDimOpacity)
+                            ? Qt.rgba(0, 0, 0, LockScreenState.wallpaperDimOpacity)
+                            : Qt.rgba(1, 1, 1, LockScreenState.wallpaperDimOpacity)
                     }
 
                     // Top-left: clock, date, notifications
@@ -87,7 +87,7 @@ PageScroll {
                         spacing: Dimens.spacingSmall
 
                         Text {
-                            text: Qt.formatDateTime(previewClock.date, LockScreenSettings.clockFormat24h ? "HH:mm" : "h:mm AP")
+                            text: Qt.formatDateTime(previewClock.date, LockScreenState.clockFormat24h ? "HH:mm" : "h:mm AP")
                             font.family: Fonts.display
                             font.pixelSize: Dimens.fontSizeDisplay
                             font.weight: Font.Bold
@@ -95,7 +95,7 @@ PageScroll {
                         }
 
                         Text {
-                            visible: LockScreenSettings.showDate
+                            visible: LockScreenState.showDate
                             text: Qt.formatDateTime(previewClock.date, "dddd, MMMM d").toUpperCase()
                             font.family: Fonts.text
                             font.pixelSize: Dimens.fontSizeXs
@@ -104,7 +104,7 @@ PageScroll {
                         }
 
                         Text {
-                            visible: LockScreenSettings.showNotifications
+                            visible: LockScreenState.showNotifications
                             topPadding: Dimens.spacingMedium
                             text: "3 NOTIFICATIONS"
                             font.family: Fonts.text
@@ -114,8 +114,8 @@ PageScroll {
                         }
 
                         Repeater {
-                            model: LockScreenSettings.showNotifications
-                                ? Math.min(LockScreenSettings.notificationLimit, root.sampleNotifs.length) : 0
+                            model: LockScreenState.showNotifications
+                                ? Math.min(LockScreenState.notificationLimit, root.sampleNotifs.length) : 0
 
                             Text {
                                 required property int index
@@ -129,7 +129,7 @@ PageScroll {
 
                     // Top-right: weather
                     Column {
-                        visible: LockScreenSettings.showWeather
+                        visible: LockScreenState.showWeather
                         x: stage.width * 0.95 - width
                         y: stage.height * 0.06
                         spacing: Dimens.spacingSmall
@@ -159,8 +159,8 @@ PageScroll {
                             anchors.right: parent.right
                             text: WeatherService.hasData
                                 ? ("H " + WeatherService.fmt(WeatherService.highC) + "  L " + WeatherService.fmt(WeatherService.lowC)
-                                   + (LockScreenSettings.weatherShowFeelsLike ? "  ·  FEELS " + WeatherService.fmt(WeatherService.feelsC) : ""))
-                                : "H 31°  L 24°" + (LockScreenSettings.weatherShowFeelsLike ? "  ·  FEELS 33°" : "")
+                                   + (LockScreenState.weatherShowFeelsLike ? "  ·  FEELS " + WeatherService.fmt(WeatherService.feelsC) : ""))
+                                : "H 31°  L 24°" + (LockScreenState.weatherShowFeelsLike ? "  ·  FEELS 33°" : "")
                             font.family: Fonts.mono
                             font.pixelSize: Dimens.fontSizeXs
                             font.letterSpacing: 1.5
@@ -168,7 +168,7 @@ PageScroll {
                         }
 
                         Row {
-                            visible: LockScreenSettings.weatherShowHourly
+                            visible: LockScreenState.weatherShowHourly
                             anchors.right: parent.right
                             topPadding: Dimens.spacingMedium
                             spacing: 44
@@ -188,7 +188,7 @@ PageScroll {
 
                     // Bottom-left: media card (sits above Hyprland when that is shown)
                     Rectangle {
-                        visible: LockScreenSettings.showMedia
+                        visible: LockScreenState.showMedia
                         x: stage.width * 0.05
                         y: stage.height * 0.94 - height
                             - (previewHyprland.visible ? previewHyprland.height + Dimens.spacingLg : 0)
@@ -232,7 +232,7 @@ PageScroll {
                                 }
 
                                 Text {
-                                    text: LockScreenSettings.mediaHideDetails ? "Hidden while locked" : "Song title"
+                                    text: LockScreenState.mediaHideDetails ? "Hidden while locked" : "Song title"
                                     font.family: Fonts.text
                                     font.pixelSize: Dimens.fontSizeBase
                                     font.bold: true
@@ -240,7 +240,7 @@ PageScroll {
                                 }
 
                                 Text {
-                                    visible: !LockScreenSettings.mediaHideDetails
+                                    visible: !LockScreenState.mediaHideDetails
                                     text: "Artist"
                                     font.family: Fonts.text
                                     font.pixelSize: Dimens.fontSizeSm
@@ -248,7 +248,7 @@ PageScroll {
                                 }
 
                                 Rectangle {
-                                    visible: LockScreenSettings.mediaShowProgress
+                                    visible: LockScreenState.mediaShowProgress
                                     width: 200; height: 2; radius: 1
                                     color: Colors.fg
                                     opacity: 0.15
@@ -261,7 +261,7 @@ PageScroll {
                     // Bottom-left: Hyprland
                     Text {
                         id: previewHyprland
-                        visible: LockScreenSettings.showHyprlandAction
+                        visible: LockScreenState.showHyprlandAction
                         x: stage.width * 0.05
                         y: stage.height * 0.94 - height
                         text: "HYPRLAND"
@@ -274,8 +274,8 @@ PageScroll {
                     // Bottom-centre: knowledge slide
                     Column {
                         id: previewSlide
-                        readonly property var entry: KnowledgeSettings.current
-                        visible: KnowledgeSettings.slideEnabled && !!entry
+                        readonly property var entry: KnowledgeState.current
+                        visible: KnowledgeState.slideEnabled && !!entry
                         width: Math.min(520, stage.width * 0.36)
                         x: (stage.width - width) / 2
                         y: stage.height * 0.94 - height
@@ -345,7 +345,7 @@ PageScroll {
                         spacing: Dimens.spacingSmall
 
                         Text {
-                            visible: LockScreenSettings.showUsername
+                            visible: LockScreenState.showUsername
                             anchors.right: parent.right
                             text: (Quickshell.env("USER") || "user").toUpperCase()
                             font.family: Fonts.display
@@ -363,7 +363,7 @@ PageScroll {
                                 anchors.right: parent.right
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: 8
-                                text: LockScreenSettings.passwordPlaceholder.toUpperCase()
+                                text: LockScreenState.passwordPlaceholder.toUpperCase()
                                 font.family: Fonts.text
                                 font.pixelSize: Dimens.fontSizeXs
                                 font.letterSpacing: 1.5
@@ -386,7 +386,7 @@ PageScroll {
                             spacing: Dimens.spacingLg
 
                             Text {
-                                visible: LockScreenSettings.showRebootAction
+                                visible: LockScreenState.showRebootAction
                                 text: "RESTART"
                                 font.family: Fonts.mono
                                 font.pixelSize: Dimens.fontSizeXs
@@ -395,7 +395,7 @@ PageScroll {
                             }
 
                             Text {
-                                visible: LockScreenSettings.showPowerAction
+                                visible: LockScreenState.showPowerAction
                                 text: "SHUT DOWN"
                                 font.family: Fonts.mono
                                 font.pixelSize: Dimens.fontSizeXs
@@ -415,31 +415,31 @@ PageScroll {
         ToggleRow {
             label: "Use its own wallpaper"
             description: "Pick a lock screen wallpaper separate from the desktop one"
-            checked: LockScreenSettings.useOwnWallpaper
-            onToggled: (val) => LockScreenSettings.useOwnWallpaper = val
-            showDivider: LockScreenSettings.useOwnWallpaper
+            checked: LockScreenState.useOwnWallpaper
+            onToggled: (val) => LockScreenState.useOwnWallpaper = val
+            showDivider: LockScreenState.useOwnWallpaper
         }
 
         TextRow {
-            visible: LockScreenSettings.useOwnWallpaper
+            visible: LockScreenState.useOwnWallpaper
             label: "Lock screen folder"
-            description: LockScreenSettings.wallpaperList.length === 0
+            description: LockScreenState.wallpaperList.length === 0
                 ? "No images found in this folder"
                 : "Press Enter to apply. Example: ~/Pictures/Wallpapers"
             placeholderText: "~/Pictures/Wallpapers"
             monospace: true
             fieldWidth: 280
-            value: LockScreenSettings.wallpaperFolder
+            value: LockScreenState.wallpaperFolder
             showDivider: false
-            onCommitted: (v) => LockScreenSettings.setWallpaperFolder(v)
+            onCommitted: (v) => LockScreenState.setWallpaperFolder(v)
         }
     }
 
     CardCarousel {
         id: lockWallpaperCarousel
-        enabled: LockScreenSettings.useOwnWallpaper
+        enabled: LockScreenState.useOwnWallpaper
         opacity: enabled ? 1.0 : 0.4
-        model: LockScreenSettings.wallpaperList
+        model: LockScreenState.wallpaperList
         cardDelegate: Component {
             WallpaperCard {
                 required property var modelData
@@ -447,9 +447,9 @@ PageScroll {
 
                 wallpaperPath: modelData.path
                 wallpaperName: modelData.name
-                isApplied: LockScreenSettings.effectiveWallpaper === modelData.path
-                isSelected: LockScreenSettings.effectiveWallpaper === modelData.path
-                onClicked: LockScreenSettings.wallpaperFile = modelData.path
+                isApplied: LockScreenState.effectiveWallpaper === modelData.path
+                isSelected: LockScreenState.effectiveWallpaper === modelData.path
+                onClicked: LockScreenState.wallpaperFile = modelData.path
             }
         }
     }
@@ -460,19 +460,19 @@ PageScroll {
         ToggleRow {
             label: "Frosted glass"
             description: "Blur the wallpaper behind the lock screen"
-            checked: LockScreenSettings.frostedBlurEnabled
-            onToggled: (val) => LockScreenSettings.frostedBlurEnabled = val
-            showDivider: LockScreenSettings.frostedBlurEnabled
+            checked: LockScreenState.frostedBlurEnabled
+            onToggled: (val) => LockScreenState.frostedBlurEnabled = val
+            showDivider: LockScreenState.frostedBlurEnabled
         }
 
         Reveal {
-            shown: LockScreenSettings.frostedBlurEnabled
+            shown: LockScreenState.frostedBlurEnabled
 
             SliderRow {
                 label: "Blur strength"
                 from: 0; to: 64; stepSize: 1
-                value: LockScreenSettings.frostedBlurRadius
-                onMoved: (val) => LockScreenSettings.frostedBlurRadius = val
+                value: LockScreenState.frostedBlurRadius
+                onMoved: (val) => LockScreenState.frostedBlurRadius = val
             }
         }
 
@@ -480,15 +480,15 @@ PageScroll {
             label: "Dimming"
             description: "Darkens the wallpaper so the text stays readable"
             from: 0; to: 0.8; stepSize: 0.01
-            value: LockScreenSettings.wallpaperDimOpacity
-            onMoved: (val) => LockScreenSettings.wallpaperDimOpacity = val
+            value: LockScreenState.wallpaperDimOpacity
+            onMoved: (val) => LockScreenState.wallpaperDimOpacity = val
         }
 
         ToggleRow {
             label: "Entrance animation"
             description: "Fade and slide the lock screen in. Off: it appears fully drawn"
-            checked: LockScreenSettings.playEntranceAnimation
-            onToggled: (val) => LockScreenSettings.playEntranceAnimation = val
+            checked: LockScreenState.playEntranceAnimation
+            onToggled: (val) => LockScreenState.playEntranceAnimation = val
             showDivider: false
         }
     }
@@ -498,20 +498,20 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "24-hour clock"
-            checked: LockScreenSettings.clockFormat24h
-            onToggled: (val) => LockScreenSettings.clockFormat24h = val
+            checked: LockScreenState.clockFormat24h
+            onToggled: (val) => LockScreenState.clockFormat24h = val
         }
 
         ToggleRow {
             label: "Show the date"
-            checked: LockScreenSettings.showDate
-            onToggled: (val) => LockScreenSettings.showDate = val
+            checked: LockScreenState.showDate
+            onToggled: (val) => LockScreenState.showDate = val
         }
 
         ToggleRow {
             label: "Show your username"
-            checked: LockScreenSettings.showUsername
-            onToggled: (val) => LockScreenSettings.showUsername = val
+            checked: LockScreenState.showUsername
+            onToggled: (val) => LockScreenState.showUsername = val
             showDivider: false
         }
     }
@@ -522,19 +522,19 @@ PageScroll {
         ToggleRow {
             label: "Show notifications on the lock screen"
             description: "A count and the latest few, under the clock. Respects Show previews"
-            checked: LockScreenSettings.showNotifications
-            onToggled: (val) => LockScreenSettings.showNotifications = val
-            showDivider: LockScreenSettings.showNotifications
+            checked: LockScreenState.showNotifications
+            onToggled: (val) => LockScreenState.showNotifications = val
+            showDivider: LockScreenState.showNotifications
         }
 
         Reveal {
-            shown: LockScreenSettings.showNotifications
+            shown: LockScreenState.showNotifications
 
             SliderRow {
                 label: "Notifications shown"
                 from: 1; to: 6; stepSize: 1
-                value: LockScreenSettings.notificationLimit
-                onMoved: (val) => LockScreenSettings.notificationLimit = val
+                value: LockScreenState.notificationLimit
+                onMoved: (val) => LockScreenState.notificationLimit = val
                 showDivider: false
             }
         }
@@ -546,13 +546,13 @@ PageScroll {
         ToggleRow {
             label: "Show weather"
             description: "Temperature and forecast in the top-right corner"
-            checked: LockScreenSettings.showWeather
-            onToggled: (val) => LockScreenSettings.showWeather = val
-            showDivider: LockScreenSettings.showWeather
+            checked: LockScreenState.showWeather
+            onToggled: (val) => LockScreenState.showWeather = val
+            showDivider: LockScreenState.showWeather
         }
 
         Reveal {
-            shown: LockScreenSettings.showWeather
+            shown: LockScreenState.showWeather
 
             ButtonRow {
                 label: "Location"
@@ -565,23 +565,23 @@ PageScroll {
         }
 
         Reveal {
-            shown: LockScreenSettings.showWeather
+            shown: LockScreenState.showWeather
 
             ToggleRow {
                 label: "Hourly forecast"
                 description: "The next few hours as a small curve"
-                checked: LockScreenSettings.weatherShowHourly
-                onToggled: (val) => LockScreenSettings.weatherShowHourly = val
+                checked: LockScreenState.weatherShowHourly
+                onToggled: (val) => LockScreenState.weatherShowHourly = val
             }
         }
 
         Reveal {
-            shown: LockScreenSettings.showWeather
+            shown: LockScreenState.showWeather
 
             ToggleRow {
                 label: "Show feels-like"
-                checked: LockScreenSettings.weatherShowFeelsLike
-                onToggled: (val) => LockScreenSettings.weatherShowFeelsLike = val
+                checked: LockScreenState.weatherShowFeelsLike
+                onToggled: (val) => LockScreenState.weatherShowFeelsLike = val
                 showDivider: false
             }
         }
@@ -593,40 +593,40 @@ PageScroll {
         ToggleRow {
             label: "Show now playing"
             description: "A card above the Hyprland button while something is playing"
-            checked: LockScreenSettings.showMedia
-            onToggled: (val) => LockScreenSettings.showMedia = val
-            showDivider: LockScreenSettings.showMedia
+            checked: LockScreenState.showMedia
+            onToggled: (val) => LockScreenState.showMedia = val
+            showDivider: LockScreenState.showMedia
         }
 
         Reveal {
-            shown: LockScreenSettings.showMedia
+            shown: LockScreenState.showMedia
 
             ToggleRow {
                 label: "Blurred album art background"
-                checked: LockScreenSettings.mediaBlurBackdrop
-                onToggled: (val) => LockScreenSettings.mediaBlurBackdrop = val
+                checked: LockScreenState.mediaBlurBackdrop
+                onToggled: (val) => LockScreenState.mediaBlurBackdrop = val
             }
         }
 
         Reveal {
-            shown: LockScreenSettings.showMedia
+            shown: LockScreenState.showMedia
 
             ToggleRow {
                 label: "Progress line"
                 description: "Only appears if the player reports its position"
-                checked: LockScreenSettings.mediaShowProgress
-                onToggled: (val) => LockScreenSettings.mediaShowProgress = val
+                checked: LockScreenState.mediaShowProgress
+                onToggled: (val) => LockScreenState.mediaShowProgress = val
             }
         }
 
         Reveal {
-            shown: LockScreenSettings.showMedia
+            shown: LockScreenState.showMedia
 
             ToggleRow {
                 label: "Hide track details"
                 description: "Hides the title, artist and cover, so anyone near your screen can't see what you're playing"
-                checked: LockScreenSettings.mediaHideDetails
-                onToggled: (val) => LockScreenSettings.mediaHideDetails = val
+                checked: LockScreenState.mediaHideDetails
+                onToggled: (val) => LockScreenState.mediaHideDetails = val
                 showDivider: false
             }
         }
@@ -638,22 +638,22 @@ PageScroll {
         TextRow {
             label: "Hint text"
             description: "Shown inside the empty password box"
-            value: LockScreenSettings.passwordPlaceholder
+            value: LockScreenState.passwordPlaceholder
             fieldWidth: 220
-            onCommitted: (v) => LockScreenSettings.passwordPlaceholder = v
+            onCommitted: (v) => LockScreenState.passwordPlaceholder = v
         }
 
         ToggleRow {
             label: "Shake on wrong password"
-            checked: LockScreenSettings.shakeOnWrongPassword
-            onToggled: (val) => LockScreenSettings.shakeOnWrongPassword = val
+            checked: LockScreenState.shakeOnWrongPassword
+            onToggled: (val) => LockScreenState.shakeOnWrongPassword = val
         }
 
         ToggleRow {
             label: "Accent colour for wrong passwords"
             description: "Flash the accent colour instead of red"
-            checked: LockScreenSettings.errorUsesAccent
-            onToggled: (val) => LockScreenSettings.errorUsesAccent = val
+            checked: LockScreenState.errorUsesAccent
+            onToggled: (val) => LockScreenState.errorUsesAccent = val
             showDivider: false
         }
     }
@@ -664,20 +664,20 @@ PageScroll {
         ToggleRow {
             label: "Hyprland"
             description: "Leave the lock screen and go back to Hyprland"
-            checked: LockScreenSettings.showHyprlandAction
-            onToggled: (val) => LockScreenSettings.showHyprlandAction = val
+            checked: LockScreenState.showHyprlandAction
+            onToggled: (val) => LockScreenState.showHyprlandAction = val
         }
 
         ToggleRow {
             label: "Reboot"
-            checked: LockScreenSettings.showRebootAction
-            onToggled: (val) => LockScreenSettings.showRebootAction = val
+            checked: LockScreenState.showRebootAction
+            onToggled: (val) => LockScreenState.showRebootAction = val
         }
 
         ToggleRow {
             label: "Power"
-            checked: LockScreenSettings.showPowerAction
-            onToggled: (val) => LockScreenSettings.showPowerAction = val
+            checked: LockScreenState.showPowerAction
+            onToggled: (val) => LockScreenState.showPowerAction = val
             showDivider: false
         }
     }

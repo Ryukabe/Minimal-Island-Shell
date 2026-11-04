@@ -44,7 +44,7 @@ Singleton {
     onSearchQueryChanged: filterHistory()
 
     Connections {
-        target: LauncherSettings
+        target: LauncherState
         function onClipboardLimitChanged() { root.applyLimit() }
     }
 
@@ -170,7 +170,7 @@ Singleton {
     }
 
     function applyLimit() {
-        var limit = LauncherSettings.clipboardLimit
+        var limit = LauncherState.clipboardLimit
         var pinned = []
         var rest = []
         for (var i = 0; i < allHistory.length; i++) {

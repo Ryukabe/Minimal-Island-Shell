@@ -60,7 +60,7 @@ Item {
         return ""
     }
 
-    // Reads LockScreenSettings.weatherFahrenheit, so bindings using this update when the unit changes.
+    // Reads LockScreenState.weatherFahrenheit, so bindings using this update when the unit changes.
     // Follows Language & Region > Weather temperature (ShellState.weatherUnit), so bindings
     // using this update when the unit changes.
     function fmt(c) {

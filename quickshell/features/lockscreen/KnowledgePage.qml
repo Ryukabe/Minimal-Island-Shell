@@ -8,7 +8,7 @@ import "../../core/styles"
 PageScroll {
     id: root
 
-    Component.onCompleted: if (!KnowledgeSettings.current) KnowledgeSettings.pickNext()
+    Component.onCompleted: if (!KnowledgeState.current) KnowledgeState.pickNext()
 
     SectionLabel { text: "Preview (click for another)" }
 
@@ -17,9 +17,9 @@ PageScroll {
             id: previewItem
             Layout.fillWidth: true
             implicitHeight: 150
-            opacity: KnowledgeSettings.slideEnabled ? 1.0 : 0.4
+            opacity: KnowledgeState.slideEnabled ? 1.0 : 0.4
 
-            readonly property var entry: KnowledgeSettings.current
+            readonly property var entry: KnowledgeState.current
 
             Column {
                 anchors.centerIn: parent
@@ -88,7 +88,7 @@ PageScroll {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: KnowledgeSettings.pickNext()
+                onClicked: KnowledgeState.pickNext()
             }
         }
     }
@@ -99,29 +99,29 @@ PageScroll {
         ToggleRow {
             label: "Show a slide when locking"
             description: "A fact or a word with its meaning, picked fresh each time you lock"
-            checked: KnowledgeSettings.slideEnabled
-            onToggled: (val) => KnowledgeSettings.slideEnabled = val
-            showDivider: KnowledgeSettings.slideEnabled
+            checked: KnowledgeState.slideEnabled
+            onToggled: (val) => KnowledgeState.slideEnabled = val
+            showDivider: KnowledgeState.slideEnabled
         }
 
         Reveal {
-            shown: KnowledgeSettings.slideEnabled
+            shown: KnowledgeState.slideEnabled
 
             ToggleRow {
                 label: "Interesting facts"
-                checked: KnowledgeSettings.showFacts
-                onToggled: (val) => KnowledgeSettings.showFacts = val
+                checked: KnowledgeState.showFacts
+                onToggled: (val) => KnowledgeState.showFacts = val
             }
         }
 
         Reveal {
-            shown: KnowledgeSettings.slideEnabled
+            shown: KnowledgeState.slideEnabled
 
             ToggleRow {
                 label: "Words and meanings"
                 description: "If both are off, no slide appears"
-                checked: KnowledgeSettings.showWords
-                onToggled: (val) => KnowledgeSettings.showWords = val
+                checked: KnowledgeState.showWords
+                onToggled: (val) => KnowledgeState.showWords = val
                 showDivider: false
             }
         }

@@ -15,7 +15,7 @@ Item {
 
     readonly property int rowHeight: 54
     readonly property int maxVisibleRows: ShellState.launcherMaxRows
-    readonly property int maxWidth: Math.round(ShellState.launcherWidth * LauncherSettings.widthScale)
+    readonly property int maxWidth: Math.round(ShellState.launcherWidth * LauncherState.widthScale)
     readonly property int minWidth: Math.round(maxWidth * 0.72)
     readonly property int chromeHeight: 76
 
@@ -44,14 +44,14 @@ Item {
     // plain app (no calculator / unit / system rows mixed in).
     readonly property bool useGrid: {
         if (mode === "emoji") return results.every(r => r.kind === "copy")
-        if (mode !== "apps" || LauncherSettings.viewMode !== "Grid") return false
+        if (mode !== "apps" || LauncherState.viewMode !== "Grid") return false
         return results.every(r => r.kind === undefined)
     }
 
     readonly property int gridWidth: maxWidth - sideMargins
     readonly property int gridColumns: isEmoji
         ? Math.max(1, Math.floor(gridWidth / emojiCellSize))
-        : LauncherSettings.gridColumns
+        : LauncherState.gridColumns
     readonly property int gridCellHeight: isEmoji ? emojiCellSize : appCellHeight
     readonly property int gridRows: Math.ceil(results.length / gridColumns)
     readonly property int gridVisibleRows: Math.max(2, Math.floor(maxVisibleRows * rowHeight / gridCellHeight))
@@ -74,7 +74,7 @@ Item {
     }
     readonly property bool pluginActive: searchGlyph !== "search"
 
-    implicitWidth: (LauncherSettings.shrinkForFewResults && !useGrid && results.length <= 1) ? minWidth : maxWidth
+    implicitWidth: (LauncherState.shrinkForFewResults && !useGrid && results.length <= 1) ? minWidth : maxWidth
     implicitHeight: useGrid
         ? chromeHeight + Math.min(Math.max(gridRows, 1), gridVisibleRows) * gridCellHeight
         : Math.min(
@@ -118,7 +118,7 @@ Item {
         selectedIndex = 0
         hideTip()
         LauncherSearch.prepare(query)
-        if (LauncherSettings.clipboardHistory && query.startsWith(":")) {
+        if (LauncherState.clipboardHistory && query.startsWith(":")) {
             ClipboardService.searchQuery = query.substring(1)
             ShellState.showPage("clipboard")
         }
@@ -259,7 +259,7 @@ Item {
             scale: delegateRoot.index === root.selectedIndex ? 1.015 : 1.0
 
             // Fade-in when a row is created (runs on every filter change too)
-            readonly property bool fadeEnabled: LauncherSettings.animateResults && !ShellState.motionReduced
+            readonly property bool fadeEnabled: LauncherState.animateResults && !ShellState.motionReduced
             opacity: fadeEnabled ? 0 : 1
             Behavior on opacity {
                 enabled: delegateRoot.fadeEnabled
@@ -294,7 +294,7 @@ Item {
                     width: 32
                     height: 32
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: LauncherSettings.showIcons
+                    visible: LauncherState.showIcons
 
                     Image {
                         id: appIcon
@@ -341,7 +341,7 @@ Item {
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 1
-                    width: parent.width - (LauncherSettings.showIcons ? 44 : 0)
+                    width: parent.width - (LauncherState.showIcons ? 44 : 0)
 
                     Text {
                         text: delegateRoot.modelData.name
@@ -416,7 +416,7 @@ Item {
 
             scale: cell.selected ? 1.04 : 1.0
 
-            readonly property bool fadeEnabled: LauncherSettings.animateResults && !ShellState.motionReduced
+            readonly property bool fadeEnabled: LauncherState.animateResults && !ShellState.motionReduced
             opacity: fadeEnabled ? 0 : 1
             Behavior on opacity {
                 enabled: cell.fadeEnabled
@@ -467,7 +467,7 @@ Item {
                     width: 40
                     height: 40
                     anchors.horizontalCenter: parent.horizontalCenter
-                    visible: LauncherSettings.showIcons
+                    visible: LauncherState.showIcons
 
                     Image {
                         id: gridIcon

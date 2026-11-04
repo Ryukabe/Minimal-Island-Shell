@@ -15,19 +15,19 @@ PageScroll {
         ToggleRow {
             label: "Clipboard history"
             description: "Type : in the launcher to browse it"
-            checked: LauncherSettings.clipboardHistory
-            onToggled: (val) => LauncherSettings.clipboardHistory = val
-            showDivider: LauncherSettings.clipboardHistory
+            checked: LauncherState.clipboardHistory
+            onToggled: (val) => LauncherState.clipboardHistory = val
+            showDivider: LauncherState.clipboardHistory
         }
 
         Reveal {
-            shown: LauncherSettings.clipboardHistory
+            shown: LauncherState.clipboardHistory
 
             SliderRow {
                 label: "Entries shown"
                 from: 10; to: 100; stepSize: 10
-                value: LauncherSettings.clipboardLimit
-                onMoved: (v) => LauncherSettings.clipboardLimit = Math.round(v)
+                value: LauncherState.clipboardLimit
+                onMoved: (v) => LauncherState.clipboardLimit = Math.round(v)
                 showDivider: false
             }
         }

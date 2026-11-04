@@ -15,43 +15,43 @@ PageScroll {
         ToggleRow {
             label: "Calculator"
             description: "Type 2+2 or sqrt(16)"
-            checked: LauncherSettings.inlineCalculator
-            onToggled: (val) => LauncherSettings.inlineCalculator = val
+            checked: LauncherState.inlineCalculator
+            onToggled: (val) => LauncherState.inlineCalculator = val
         }
 
         ToggleRow {
             label: "Unit conversion"
             description: "Type 10 km to mi"
-            checked: LauncherSettings.feature("units")
-            onToggled: (val) => LauncherSettings.setFeature("units", val)
+            checked: LauncherState.feature("units")
+            onToggled: (val) => LauncherState.setFeature("units", val)
         }
 
         ToggleRow {
             label: "Web search"
             description: "Type g cats, yt lofi or ? cats"
-            checked: LauncherSettings.feature("web")
-            onToggled: (val) => LauncherSettings.setFeature("web", val)
+            checked: LauncherState.feature("web")
+            onToggled: (val) => LauncherState.setFeature("web", val)
         }
 
         ToggleRow {
             label: "Run commands"
             description: "Start with >"
-            checked: LauncherSettings.feature("commands")
-            onToggled: (val) => LauncherSettings.setFeature("commands", val)
+            checked: LauncherState.feature("commands")
+            onToggled: (val) => LauncherState.setFeature("commands", val)
         }
 
         ToggleRow {
             label: "File search"
             description: "Start with /"
-            checked: LauncherSettings.feature("files")
-            onToggled: (val) => LauncherSettings.setFeature("files", val)
+            checked: LauncherState.feature("files")
+            onToggled: (val) => LauncherState.setFeature("files", val)
         }
 
         ToggleRow {
             label: "System commands"
             description: "Lock, sleep, restart"
-            checked: LauncherSettings.feature("system")
-            onToggled: (val) => LauncherSettings.setFeature("system", val)
+            checked: LauncherState.feature("system")
+            onToggled: (val) => LauncherState.setFeature("system", val)
             showDivider: false
         }
     }
@@ -61,60 +61,60 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Emoji picker"
-            checked: LauncherSettings.feature("emoji")
-            onToggled: (val) => LauncherSettings.setFeature("emoji", val)
+            checked: LauncherState.feature("emoji")
+            onToggled: (val) => LauncherState.setFeature("emoji", val)
         }
 
         Reveal {
-            shown: LauncherSettings.feature("emoji")
+            shown: LauncherState.feature("emoji")
 
             TextRow {
                 label: "Emoji trigger"
                 description: "Type this first, then a word"
-                value: LauncherSettings.triggerEmoji
+                value: LauncherState.triggerEmoji
                 fieldWidth: 80
                 maximumLength: 3
-                onCommitted: (v) => LauncherSettings.setTrigger("emoji", v)
+                onCommitted: (v) => LauncherState.setTrigger("emoji", v)
             }
         }
 
         ToggleRow {
             label: "Snippets"
-            checked: LauncherSettings.feature("snippets")
-            onToggled: (val) => LauncherSettings.setFeature("snippets", val)
+            checked: LauncherState.feature("snippets")
+            onToggled: (val) => LauncherState.setFeature("snippets", val)
         }
 
         Reveal {
-            shown: LauncherSettings.feature("snippets")
+            shown: LauncherState.feature("snippets")
 
             TextRow {
                 label: "Snippets trigger"
                 description: "Type this first, then a snippet name"
-                value: LauncherSettings.triggerSnippets
+                value: LauncherState.triggerSnippets
                 fieldWidth: 80
                 maximumLength: 3
-                onCommitted: (v) => LauncherSettings.setTrigger("snippets", v)
+                onCommitted: (v) => LauncherState.setTrigger("snippets", v)
             }
         }
 
         ToggleRow {
             label: "Quick notes"
-            checked: LauncherSettings.feature("notes")
-            onToggled: (val) => LauncherSettings.setFeature("notes", val)
-            showDivider: LauncherSettings.feature("notes")
+            checked: LauncherState.feature("notes")
+            onToggled: (val) => LauncherState.setFeature("notes", val)
+            showDivider: LauncherState.feature("notes")
         }
 
         Reveal {
-            shown: LauncherSettings.feature("notes")
+            shown: LauncherState.feature("notes")
 
             TextRow {
                 label: "Quick notes trigger"
                 description: "Type this first, then your note"
-                value: LauncherSettings.triggerNotes
+                value: LauncherState.triggerNotes
                 fieldWidth: 80
                 maximumLength: 3
                 showDivider: false
-                onCommitted: (v) => LauncherSettings.setTrigger("notes", v)
+                onCommitted: (v) => LauncherState.setTrigger("notes", v)
             }
         }
     }

@@ -1,10 +1,10 @@
 module features.lockscreen
 KnowledgePage 1.0 KnowledgePage.qml
-singleton KnowledgeSettings 1.0 KnowledgeSettings.qml
+singleton KnowledgeState 1.0 KnowledgeState.qml
 singleton LocationService 1.0 LocationService.qml
 LockScreen 1.0 LockScreen.qml
 LockScreenPage 1.0 LockScreenPage.qml
-singleton LockScreenSettings 1.0 LockScreenSettings.qml
+singleton LockScreenState 1.0 LockScreenState.qml
 singleton LockTimerService 1.0 LockTimerService.qml
 MediaCard 1.0 MediaCard.qml
 PolkitAgent 1.0 PolkitAgent.qml

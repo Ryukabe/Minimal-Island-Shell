@@ -1,4 +1,4 @@
-// features/launcher/LauncherSettings.qml
+// features/launcher/LauncherState.qml
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -158,7 +158,7 @@ Singleton {
         try {
             d = JSON.parse(txt)
         } catch (e) {
-            console.warn("LauncherSettings: bad settings file, using defaults", e)
+            console.warn("LauncherState: bad settings file, using defaults", e)
             return
         }
 

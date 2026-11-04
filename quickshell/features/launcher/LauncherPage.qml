@@ -26,8 +26,8 @@ PageScroll {
         SegmentRow {
             label: "Width preset"
             options: ["Compact", "Normal", "Wide"]
-            selectedValue: LauncherSettings.launcherWidth
-            onOptionSelected: (name) => LauncherSettings.launcherWidth = name
+            selectedValue: LauncherState.launcherWidth
+            onOptionSelected: (name) => LauncherState.launcherWidth = name
         }
 
         SliderRow {
@@ -46,21 +46,21 @@ PageScroll {
         SliderRow {
             label: "Maximum results"
             from: 3; to: 15; stepSize: 1
-            value: LauncherSettings.maxResults
-            onMoved: (v) => LauncherSettings.maxResults = Math.round(v)
+            value: LauncherState.maxResults
+            onMoved: (v) => LauncherState.maxResults = Math.round(v)
         }
 
         SegmentRow {
             label: "Match mode"
             options: ["Fuzzy", "Prefix"]
-            selectedValue: LauncherSettings.matchMode
-            onOptionSelected: (name) => LauncherSettings.matchMode = name
+            selectedValue: LauncherState.matchMode
+            onOptionSelected: (name) => LauncherState.matchMode = name
         }
 
         ToggleRow {
             label: "Search app descriptions"
-            checked: LauncherSettings.searchDescriptions
-            onToggled: (val) => LauncherSettings.searchDescriptions = val
+            checked: LauncherState.searchDescriptions
+            onToggled: (val) => LauncherState.searchDescriptions = val
             showDivider: false
         }
     }
@@ -70,25 +70,25 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Show recent apps first"
-            checked: LauncherSettings.showRecentsFirst
-            onToggled: (val) => LauncherSettings.showRecentsFirst = val
+            checked: LauncherState.showRecentsFirst
+            onToggled: (val) => LauncherState.showRecentsFirst = val
         }
 
         Reveal {
-            shown: LauncherSettings.showRecentsFirst
+            shown: LauncherState.showRecentsFirst
 
             SliderRow {
                 label: "Recent apps to remember"
                 from: 3; to: 20; stepSize: 1
-                value: LauncherSettings.recentLimit
-                onMoved: (v) => LauncherSettings.recentLimit = Math.round(v)
+                value: LauncherState.recentLimit
+                onMoved: (v) => LauncherState.recentLimit = Math.round(v)
             }
         }
 
         ButtonRow {
             label: "Recent history"
             buttonText: "Clear"
-            onClicked: LauncherSettings.clearRecents()
+            onClicked: LauncherState.clearRecents()
             showDivider: false
         }
     }
@@ -100,26 +100,26 @@ PageScroll {
             label: "App layout"
             description: "Emoji picker is always a grid"
             options: ["List", "Grid"]
-            selectedValue: LauncherSettings.viewMode
-            onOptionSelected: (name) => LauncherSettings.viewMode = name
+            selectedValue: LauncherState.viewMode
+            onOptionSelected: (name) => LauncherState.viewMode = name
         }
 
         Reveal {
-            shown: LauncherSettings.viewMode === "Grid"
+            shown: LauncherState.viewMode === "Grid"
 
             SliderRow {
                 label: "Grid columns"
                 from: 3; to: 6; stepSize: 1
-                value: LauncherSettings.gridColumns
+                value: LauncherState.gridColumns
                 unit: " columns"
-                onMoved: (v) => LauncherSettings.gridColumns = Math.round(v)
+                onMoved: (v) => LauncherState.gridColumns = Math.round(v)
             }
         }
 
         ToggleRow {
             label: "Show app icons"
-            checked: LauncherSettings.showIcons
-            onToggled: (val) => LauncherSettings.showIcons = val
+            checked: LauncherState.showIcons
+            onToggled: (val) => LauncherState.showIcons = val
         }
 
         PickerRow {
@@ -131,21 +131,21 @@ PageScroll {
             items: IconThemeService.pickerItems
             value: ShellState.appIconTheme
             strict: true
-            enabled: LauncherSettings.showIcons
+            enabled: LauncherState.showIcons
             onCommitted: (v) => ShellState.appIconTheme = v
         }
 
         ToggleRow {
             label: "Animate results"
-            checked: LauncherSettings.animateResults
-            onToggled: (val) => LauncherSettings.animateResults = val
+            checked: LauncherState.animateResults
+            onToggled: (val) => LauncherState.animateResults = val
         }
 
         ToggleRow {
             label: "Shrink panel for few results"
             description: "A single match gets a compact panel (list layout only)"
-            checked: LauncherSettings.shrinkForFewResults
-            onToggled: (val) => LauncherSettings.shrinkForFewResults = val
+            checked: LauncherState.shrinkForFewResults
+            onToggled: (val) => LauncherState.shrinkForFewResults = val
             showDivider: false
         }
     }

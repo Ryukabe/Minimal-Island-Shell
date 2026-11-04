@@ -13,7 +13,7 @@ Item {
     property bool entrance: false   // lock screen: fade/slide in like the other blocks
 
     readonly property var player: AudioService.activePlayer
-    readonly property bool hideDetails: LockScreenSettings.mediaHideDetails
+    readonly property bool hideDetails: LockScreenState.mediaHideDetails
     readonly property bool hasArt: !root.hideDetails && AudioService.artUrl !== ""
 
     readonly property real pad: 12
@@ -26,7 +26,7 @@ Item {
     readonly property real ratio: root.canShowProgress
         ? Math.max(0, Math.min(1, root.player.position / root.player.length)) : 0
 
-    visible: LockScreenSettings.showMedia && root.player !== null
+    visible: LockScreenState.showMedia && root.player !== null
     width: 340
     height: root.artSize + root.pad * 2
     opacity: 0
@@ -70,7 +70,7 @@ Item {
     // Blurred album art behind everything, rounded to the card
     Item {
         anchors.fill: parent
-        visible: LockScreenSettings.mediaBlurBackdrop && root.hasArt
+        visible: LockScreenState.mediaBlurBackdrop && root.hasArt
         layer.enabled: visible
         layer.effect: OpacityMask {
             maskSource: Rectangle { width: card.width; height: card.height; radius: card.radius }
@@ -238,7 +238,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.topMargin: 4
                 implicitHeight: 2
-                visible: LockScreenSettings.mediaShowProgress && root.canShowProgress
+                visible: LockScreenState.mediaShowProgress && root.canShowProgress
 
                 Rectangle {
                     anchors.fill: parent
