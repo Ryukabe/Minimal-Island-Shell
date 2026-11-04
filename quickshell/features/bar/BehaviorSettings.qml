@@ -1,4 +1,4 @@
-// features/bar/BehaviorSettings.qml — Bar & Island > Behavior. When the island shows,
+// features/bar/BehaviorSettings.qml — Bar > Behavior. When the island shows,
 // how it reacts to the pointer, and what scrolling on it does.
 // Everything here is bound to ShellState.
 import QtQuick
@@ -9,6 +9,12 @@ import "../../core/styles"
 
 PageScroll {
     id: root
+
+    // ShellState keys this page owns (used by "Reset this page").
+    readonly property var resetKeys: [
+        "islandAlwaysVisible", "islandRevealOnHover", "islandRevealZone", "islandHideDelayMs",
+        "islandClickOutsideDismiss", "islandScrollVolume", "islandScrollBrightness"
+    ]
 
     SectionLabel { text: "Visibility" }
 
@@ -56,14 +62,6 @@ PageScroll {
     SectionLabel { text: "Interaction" }
 
     GroupCard {
-        SliderRow {
-            label: "Lift on hover"
-            description: "Scale of the island while the pointer is over it. 1 is no lift"
-            from: 1.0; to: 1.1; stepSize: 0.005
-            value: ShellState.islandHoverScale
-            onMoved: (val) => ShellState.islandHoverScale = val
-        }
-
         ToggleRow {
             label: "Click outside to dismiss"
             description: "Closes an open panel when you click anywhere else"
@@ -90,5 +88,11 @@ PageScroll {
             onToggled: (val) => ShellState.islandScrollBrightness = val
             showDivider: false
         }
+    }
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow { keys: root.resetKeys }
     }
 }

@@ -1,12 +1,19 @@
-// pages/focusnotifications/ToastsSettings.qml — Focus & Notifications > Toasts.
+// features/notifications/ToastsSettings.qml — Focus & Notifications > Toasts.
 // Everything here is bound to ShellState and read by the island / EventToastService /
-// AppLaunchToastService.
+// AppLaunchToastService / the timer toast.
 import QtQuick
 import "../settings/components"
 import "../../core/shell"
 
 PageScroll {
     id: root
+
+    // ShellState keys this page owns (used by "Reset this page").
+    readonly property var resetKeys: [
+        "notificationToastMaxWidth", "eventToastMs", "appToastMs", "notificationOverFullscreen",
+        "appToastEnabled", "eventToastCharging", "eventToastDnd", "eventToastAudioOutput",
+        "eventToastAudioInput", "timerToastShowRecordingIndicator"
+    ]
 
     SectionLabel { text: "Pop-ups" }
 
@@ -81,5 +88,23 @@ PageScroll {
             onToggled: (val) => ShellState.eventToastAudioInput = val
             showDivider: false
         }
+    }
+
+    SectionLabel { text: "Timer toast" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Recording indicator"
+            description: "Recording dot inside the timer toast"
+            checked: ShellState.timerToastShowRecordingIndicator
+            onToggled: (val) => ShellState.timerToastShowRecordingIndicator = val
+            showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow { keys: root.resetKeys }
     }
 }

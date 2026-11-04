@@ -1,5 +1,5 @@
-// features/bar/VisualizerSettings.qml — Bar & Island > Music visualizer. Looks only.
-// Whether it sits in the clock is set on the Bar & Island page (Layout).
+// features/bar/VisualizerSettings.qml — Bar > Visualizer. Looks only.
+// Whether it sits in the clock is set on the Bar page (Layout).
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -11,6 +11,12 @@ PageScroll {
     id: root
 
     readonly property var colorLabels: ["Accent", "Text", "Muted"]
+
+    // ShellState keys this page owns (used by "Reset this page").
+    readonly property var resetKeys: [
+        "clockVisualizerBars", "clockVisualizerBarWidth", "clockVisualizerGap",
+        "clockVisualizerMaxHeight", "clockVisualizerSpeedPercent", "clockVisualizerColor"
+    ]
 
     SectionLabel { text: "Look" }
 
@@ -81,9 +87,15 @@ PageScroll {
         Layout.fillWidth: true
         leftPadding: Dimens.paddingSmall
         wrapMode: Text.WordWrap
-        text: "To show or hide the visualizer on the island, add or remove it in the Layout section of Bar & Island."
+        text: "To show or hide the visualizer on the island, add or remove it in the Layout section of the Bar page."
         color: Colors.subtext
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeXs
+    }
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow { keys: root.resetKeys }
     }
 }

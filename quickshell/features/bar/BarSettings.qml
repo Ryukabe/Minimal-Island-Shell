@@ -1,6 +1,6 @@
-// features/bar/BarSettings.qml — the Bar & Island menu itself: how the island looks.
-// Style, the clock items and their order, and size sit here. Workspaces, Clock,
-// Music visualizer and Behavior open from the list at the bottom.
+// features/bar/BarSettings.qml — the Bar menu itself: how the island looks.
+// Style and size come first, then the clock items and their order. Workspaces, Clock, Visualizer,
+// Behavior and Advanced open from the list at the bottom.
 // Everything here is bound to ShellState or ClockLayoutService.
 import QtQuick
 import QtQuick.Layouts
@@ -18,6 +18,12 @@ PageScroll {
     // Single source of truth stays ShellState.islandNotchMode (bool); this is only its label.
     readonly property string barStyle: ShellState.islandNotchMode ? "Notch" : "Island"
     readonly property var unplaced: ClockLayoutService.unplacedTypes()
+
+    // ShellState keys this page owns (used by "Reset this page"). The clock items have their own Reset layout.
+    readonly property var resetKeys: [
+        "islandNotchMode", "islandBorderWidth", "islandTopMargin", "islandNotchFlare",
+        "islandCompactHeight", "islandCompactWidth"
+    ]
 
     // Sub-pages whose item is on the bar: the item's card opens them, so the list below skips them.
     // Take an item off the bar and its page shows up in the list again.
@@ -120,6 +126,29 @@ PageScroll {
                 onMoved: (val) => ShellState.islandNotchFlare = val
                 showDivider: false
             }
+        }
+    }
+
+    SectionLabel { text: "Size" }
+
+    GroupCard {
+        SliderRow {
+            label: "Bar height"
+            description: "How tall the island is when nothing is open"
+            from: 24; to: 60; stepSize: 1
+            value: ShellState.islandCompactHeight
+            unit: " px"
+            onMoved: (val) => ShellState.islandCompactHeight = val
+        }
+
+        SliderRow {
+            label: "Collapsed width"
+            description: "How wide the island is when nothing is open"
+            from: 80; to: 300; stepSize: 1
+            value: ShellState.islandCompactWidth
+            unit: " px"
+            onMoved: (val) => ShellState.islandCompactWidth = val
+            showDivider: false
         }
     }
 
@@ -475,45 +504,13 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Size" }
-
-    GroupCard {
-        SliderRow {
-            label: "Bar height"
-            from: 24; to: 60; stepSize: 1
-            value: ShellState.islandCompactHeight
-            unit: " px"
-            onMoved: (val) => ShellState.islandCompactHeight = val
-        }
-
-        SliderRow {
-            label: "Collapsed width"
-            from: 80; to: 300; stepSize: 1
-            value: ShellState.islandCompactWidth
-            unit: " px"
-            onMoved: (val) => ShellState.islandCompactWidth = val
-        }
-
-        SliderRow {
-            label: "Expanded height floor"
-            description: "Smallest height the island has while a panel is open"
-            from: 60; to: 400; stepSize: 1
-            value: ShellState.islandExpandedHeight
-            unit: " px"
-            onMoved: (val) => ShellState.islandExpandedHeight = val
-        }
-
-        SliderRow {
-            label: "Minimum expanded width"
-            from: 300; to: 900; stepSize: 1
-            value: ShellState.islandMinExpandedWidth
-            unit: " px"
-            onMoved: (val) => ShellState.islandMinExpandedWidth = val
-            showDivider: false
-        }
-    }
-
     SectionLabel { text: "More bar settings" }
 
     ViewList { excludeIds: root.viewsWithChip }
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow { keys: root.resetKeys }
+    }
 }

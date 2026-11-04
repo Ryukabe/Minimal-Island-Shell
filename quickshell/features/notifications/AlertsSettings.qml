@@ -1,4 +1,4 @@
-// pages/focusnotifications/AlertsSettings.qml — Focus & Notifications > Alerts.
+// features/notifications/AlertsSettings.qml — Focus & Notifications > Alerts.
 // Everything here is bound to ShellState and read by NotificationService / NotificationCenter.
 import QtQuick
 import "../settings/components"
@@ -7,6 +7,14 @@ import "../../core/shell"
 
 PageScroll {
     id: root
+
+    // ShellState keys this page owns (used by "Reset this page").
+    readonly property var resetKeys: [
+        "notificationAutoHide", "notificationTimeoutMs", "notificationRespectAppTimeout",
+        "notificationCriticalBypassFocus", "notificationCriticalSticky",
+        "notificationGroupExpanded", "notificationGroupPreviewCount",
+        "notificationHistoryLimit", "notificationMutedApps"
+    ]
 
     SectionLabel { text: "Lifetime" }
 
@@ -120,5 +128,11 @@ PageScroll {
                 showDivider: index < NotificationService.appNames.length - 1
             }
         }
+    }
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow { keys: root.resetKeys }
     }
 }

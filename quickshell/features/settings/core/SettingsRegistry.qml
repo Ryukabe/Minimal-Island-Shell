@@ -52,8 +52,11 @@ QtObject {
                           tags: "visualizer music audio bars width gap height speed color preview",
                           source: "../bar/VisualizerSettings.qml" },
                         { id: "behavior", title: "Behavior", subtitle: "Visibility, hover and scroll", icon: "tune",
-                          tags: "persistent always visible show on hover reveal zone hide delay lift click outside dismiss scroll gestures volume brightness",
-                          source: "../bar/BehaviorSettings.qml" }
+                          tags: "persistent always visible show on hover reveal zone hide delay click outside dismiss scroll gestures volume brightness",
+                          source: "../bar/BehaviorSettings.qml" },
+                        { id: "advanced", title: "Advanced", subtitle: "Panel sizes and hover feel", icon: "build",
+                          tags: "expanded height floor minimum width panel size lift hover scale advanced reset",
+                          source: "../bar/BarAdvancedSettings.qml" }
                     ]
                 },
                 {

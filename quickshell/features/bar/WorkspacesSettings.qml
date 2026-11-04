@@ -1,4 +1,4 @@
-// pages/bar/workspaces/WorkspacesSettings.qml — Bar > Workspaces.
+// features/bar/WorkspacesSettings.qml — Bar > Workspaces.
 // Every row here is live (ShellState.workspace*).
 import QtQuick
 import "../settings/components"
@@ -6,6 +6,13 @@ import "../../core/shell"
 
 PageScroll {
     id: root
+
+    // ShellState keys this page owns (used by "Reset this page").
+    readonly property var resetKeys: [
+        "workspaceShownCount", "workspaceActiveIndicator", "workspaceUseAccent", "workspaceActiveTrail",
+        "workspaceOccupiedBackground", "workspaceBounce", "workspaceDotSize", "workspaceActiveWidth",
+        "workspaceShowWindows", "workspaceWindowsOnSpecial", "workspaceMaxWindowIcons", "workspacePerMonitor"
+    ]
 
     SectionLabel { text: "Indicators" }
 
@@ -63,7 +70,7 @@ PageScroll {
         SliderRow {
             label: "Dot size"
             from: 4; to: 10; stepSize: 1
-            unit: "px"
+            unit: " px"
             value: ShellState.workspaceDotSize
             onMoved: (val) => ShellState.workspaceDotSize = val
         }
@@ -72,7 +79,7 @@ PageScroll {
             label: "Active width"
             description: "Length of the active capsule"
             from: 12; to: 40; stepSize: 2
-            unit: "px"
+            unit: " px"
             value: ShellState.workspaceActiveWidth
             onMoved: (val) => ShellState.workspaceActiveWidth = val
             showDivider: false
@@ -118,5 +125,11 @@ PageScroll {
             onToggled: (val) => ShellState.workspacePerMonitor = val
             showDivider: false
         }
+    }
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow { keys: root.resetKeys }
     }
 }
