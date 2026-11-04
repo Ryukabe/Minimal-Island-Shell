@@ -1,4 +1,4 @@
-// pages/lockscreen/knowledge/KnowledgePage.qml — Knowledge: the fact / word slide on the lock screen.
+// pages/lockscreen/knowledge/KnowledgeSettings.qml — Knowledge: the fact / word slide on the lock screen.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"

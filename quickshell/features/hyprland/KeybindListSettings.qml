@@ -1,4 +1,4 @@
-// pages/keybinds/KeybindListPage.qml — the shortcuts of one category. The category comes from the
+// pages/keybinds/KeybindListSettings.qml — the shortcuts of one category. The category comes from the
 // registry view that opened this page (its `category` field), so one file serves every sub-page.
 import QtQuick
 import QtQuick.Layouts

@@ -1,4 +1,4 @@
-// features/account/AccountSettings.qml — the Accounts menu.
+// features/account/AccountsSettings.qml — the Accounts menu.
 // Pick an account at the top; the cards below act on it. Adding an account opens a form.
 // Everything runs through AccountService, which asks for authentication through polkit.
 import QtQuick

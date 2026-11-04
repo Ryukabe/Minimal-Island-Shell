@@ -1,4 +1,4 @@
-// pages/home/HomePage.qml — the Home page: quick links to the settings people open most.
+// pages/home/HomeSettings.qml — the Home page: quick links to the settings people open most.
 // Rows are built from SettingsRegistry, so a title or icon change there shows up here too.
 pragma ComponentBehavior: Bound
 

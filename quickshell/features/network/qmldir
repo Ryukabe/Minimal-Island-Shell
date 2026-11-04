@@ -1,6 +1,7 @@
 module features.network
 singleton AirplaneModeService 1.0 AirplaneModeService.qml
-BluetoothPage 1.0 BluetoothPage.qml
+singleton AirplaneService 1.0 AirplaneService.qml
+BluetoothSettings 1.0 BluetoothSettings.qml
 singleton BluetoothService 1.0 BluetoothService.qml
-WifiPage 1.0 WifiPage.qml
+WifiSettings 1.0 WifiSettings.qml
 singleton WifiService 1.0 WifiService.qml

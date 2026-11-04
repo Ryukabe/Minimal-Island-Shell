@@ -2,9 +2,9 @@ module features.launcher
 AppLauncher 1.0 AppLauncher.qml
 singleton AppLauncherService 1.0 AppLauncherService.qml
 singleton CalculatorService 1.0 CalculatorService.qml
-LauncherPage 1.0 LauncherPage.qml
+LauncherSettings 1.0 LauncherSettings.qml
 singleton LauncherData 1.0 LauncherData.qml
 singleton LauncherSearch 1.0 LauncherSearch.qml
 singleton LauncherState 1.0 LauncherState.qml
-NotesSnippetsPage 1.0 NotesSnippetsPage.qml
-SearchToolsPage 1.0 SearchToolsPage.qml
+NotesSnippetsSettings 1.0 NotesSnippetsSettings.qml
+SearchToolsSettings 1.0 SearchToolsSettings.qml

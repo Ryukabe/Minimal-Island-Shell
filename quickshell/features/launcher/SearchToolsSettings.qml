@@ -1,4 +1,4 @@
-// pages/launcher/SearchToolsPage.qml — Launcher > Search tools.
+// pages/launcher/SearchToolsSettings.qml — Launcher > Search tools.
 // Each tool is a switch. The three quick pickers also get a trigger character that appears when they are on.
 import QtQuick
 import QtQuick.Layouts

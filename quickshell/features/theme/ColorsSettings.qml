@@ -1,4 +1,4 @@
-// features/theme/ThemeSettings.qml — Appearance > Colors. Only reachable when the palette source
+// features/theme/ColorsSettings.qml — Appearance > Colors. Only reachable when the palette source
 // is Custom: the manual palette colours for dark and light mode.
 // The palette source, theme picker and light/dark mode are on the Appearance page.
 pragma ComponentBehavior: Bound

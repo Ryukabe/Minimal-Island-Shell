@@ -1,4 +1,4 @@
-// features/network/BluetoothPage.qml — Bluetooth. Embeds the Control Center Bluetooth view.
+// features/network/BluetoothSettings.qml — Bluetooth. Embeds the Control Center Bluetooth view.
 // Battery and reconnect are ShellState settings; "visible" is read from and written to BlueZ.
 import QtQuick
 import QtQuick.Layouts

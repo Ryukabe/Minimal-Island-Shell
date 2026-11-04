@@ -36,13 +36,13 @@ QtObject {
     // embeds a ViewList to reach them. A menu with only views shows the plain landing list.
     readonly property string pageSource: {
         if (root.view) {
-            return root.view.source ? root.view.source : "components/PlaceholderPage.qml"
+            return root.view.source ? root.view.source : "components/PlaceholderSettings.qml"
         }
         if (root.menu) {
             if (root.menu.source) return root.menu.source
-            if (root.menu.views && root.menu.views.length > 0) return "components/LandingPage.qml"
+            if (root.menu.views && root.menu.views.length > 0) return "components/LandingSettings.qml"
         }
-        return "components/PlaceholderPage.qml"
+        return "components/PlaceholderSettings.qml"
     }
 
     function openMenu(id) {

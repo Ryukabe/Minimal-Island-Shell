@@ -7,8 +7,8 @@ GroupCard GroupCard.qml
 PageScroll PageScroll.qml
 PageTitle PageTitle.qml
 LandingRow LandingRow.qml
-LandingPage LandingPage.qml
-PlaceholderPage PlaceholderPage.qml
+LandingSettings LandingSettings.qml
+PlaceholderSettings PlaceholderSettings.qml
 SidebarItem SidebarItem.qml
 ToggleRow ToggleRow.qml
 SliderRow SliderRow.qml

@@ -1,4 +1,4 @@
-// pages/lockscreen/LockScreenPage.qml — Lock Screen. Real: everything bound to LockScreenState,
+// pages/lockscreen/LockScreenSettings.qml — Lock Screen. Real: everything bound to LockScreenState,
 // plus the lock timer, which lives in hypridle.conf (LockTimerService), and the weather city,
 // which lives in WeatherService.
 // The lid row stays a greyed placeholder: it belongs to logind / a Hyprland bind, not to the shell.

@@ -1,4 +1,4 @@
-// components/PlaceholderPage.qml — shown for any menu or view that has no real page yet.
+// components/PlaceholderSettings.qml — shown for any menu or view that has no real page yet.
 import QtQuick
 import QtQuick.Layouts
 import "../../../core/styles"

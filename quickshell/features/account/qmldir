@@ -1,2 +1,2 @@
 singleton AccountService AccountService.qml
-AccountSettings AccountSettings.qml
+AccountsSettings AccountsSettings.qml

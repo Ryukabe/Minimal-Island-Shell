@@ -1,4 +1,4 @@
-// features/theme/OpacitySettings.qml — Appearance > Surfaces. Corner radius, mica transparency and
+// features/theme/SurfacesSettings.qml — Appearance > Surfaces. Corner radius, mica transparency and
 // the island's drop shadow. Radius values live on ShellState. Opacity and shadow values are 0-1
 // numbers on Colors, shown here as percentages so the sliders need no decimals.
 import QtQuick

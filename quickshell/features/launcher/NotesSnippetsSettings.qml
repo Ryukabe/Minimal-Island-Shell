@@ -1,4 +1,4 @@
-// pages/launcher/NotesSnippetsPage.qml — Launcher > Notes & snippets.
+// pages/launcher/NotesSnippetsSettings.qml — Launcher > Notes & snippets.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"

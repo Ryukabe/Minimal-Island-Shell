@@ -1,5 +1,5 @@
 // components/ViewList.qml — card listing the current menu's sub-pages (icon, title, subtitle, chevron).
-// Used by LandingPage, and by any page that shows its own options above its sub-pages (Bar).
+// Used by LandingSettings, and by any page that shows its own options above its sub-pages (Bar).
 // `excludeIds` hides sub-pages a page already reaches another way (the Bar page hides the ones its
 // item cards open).
 pragma ComponentBehavior: Bound

@@ -1,4 +1,4 @@
-// features/network/WifiPage.qml — Wi-Fi. Embeds the Control Center Wi-Fi view, so both places show the same state.
+// features/network/WifiSettings.qml — Wi-Fi. Embeds the Control Center Wi-Fi view, so both places show the same state.
 // Every option here is real: saved networks and metered are NetworkManager settings, the scan
 // interval is a ShellState setting, and airplane mode is AirplaneModeService (shared with the Control Center).
 import QtQuick

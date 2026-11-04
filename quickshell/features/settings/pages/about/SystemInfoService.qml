@@ -1,5 +1,5 @@
 // pages/about/SystemInfoService.qml — reads hardware and OS info for the About page.
-// Plain component (no qmldir). SettingsApp.qml creates one and hands it to About.qml.
+// Plain component (no qmldir). SettingsApp.qml creates one and hands it to AboutSettings.qml.
 // Needs on PATH: free, df, uptime (procps/coreutils), lspci (pciutils), quickshell, hyprctl.
 // memoryUsed and diskUsed are "used / total" strings; About splits them on " / ".
 import QtQuick

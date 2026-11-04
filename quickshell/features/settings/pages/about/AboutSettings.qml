@@ -1,4 +1,4 @@
-// pages/about/About.qml — About: Hermit-dots card, device tiles, device info, software, power, updates, project.
+// pages/about/AboutSettings.qml — About: Hermit-dots card, device tiles, device info, software, power, updates, project.
 // Leaf page, no qmldir. The two services are created once in SettingsApp.qml and handed in below.
 import QtQuick
 import QtQuick.Layouts

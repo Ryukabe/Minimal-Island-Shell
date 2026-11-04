@@ -1,4 +1,4 @@
-// pages/launcher/LauncherPage.qml — the Launcher menu. Its own options sit here;
+// pages/launcher/LauncherSettings.qml — the Launcher menu. Its own options sit here;
 // Search tools, Clipboard and Notes & snippets open from the list at the bottom.
 import QtQuick
 import QtQuick.Layouts

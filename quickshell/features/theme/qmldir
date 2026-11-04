@@ -2,10 +2,10 @@ module features.theme
 AppearanceSettings 1.0 AppearanceSettings.qml
 singleton IconThemeService 1.0 IconThemeService.qml
 MotionSettings 1.0 MotionSettings.qml
-OpacitySettings 1.0 OpacitySettings.qml
+SurfacesSettings 1.0 SurfacesSettings.qml
 TemplatesSettings 1.0 TemplatesSettings.qml
 singleton ThemeService 1.0 ThemeService.qml
-ThemeSettings 1.0 ThemeSettings.qml
+ColorsSettings 1.0 ColorsSettings.qml
 ThemeSwitcher 1.0 ThemeSwitcher.qml
 TypographySettings 1.0 TypographySettings.qml
 singleton WallpaperService 1.0 WallpaperService.qml

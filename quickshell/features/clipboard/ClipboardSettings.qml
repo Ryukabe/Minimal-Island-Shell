@@ -1,4 +1,4 @@
-// pages/launcher/ClipboardPage.qml — Launcher > Clipboard.
+// pages/launcher/ClipboardSettings.qml — Launcher > Clipboard.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"

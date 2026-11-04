@@ -3,8 +3,8 @@ singleton HyprlandAnimationsService 1.0 HyprlandAnimationsService.qml
 singleton BlurService 1.0 BlurService.qml
 singleton HyprlandDecorationService 1.0 HyprlandDecorationService.qml
 singleton WindowDecorationService 1.0 WindowDecorationService.qml
-KeybindListPage 1.0 KeybindListPage.qml
-KeybindsPage 1.0 KeybindsPage.qml
+KeybindListSettings 1.0 KeybindListSettings.qml
+KeybindsSettings 1.0 KeybindsSettings.qml
 singleton HyprlandKeybindsService 1.0 HyprlandKeybindsService.qml
 singleton InputSettingsService 1.0 InputSettingsService.qml
 singleton LayoutSettingsService 1.0 LayoutSettingsService.qml

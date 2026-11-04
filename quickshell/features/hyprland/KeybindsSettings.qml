@@ -1,4 +1,4 @@
-// pages/keybinds/KeybindsPage.qml — the Keybinds menu. Main modifier, a form to add a shortcut,
+// pages/keybinds/KeybindsSettings.qml — the Keybinds menu. Main modifier, a form to add a shortcut,
 // and a conflict count sit here; each category of shortcuts opens from the list at the bottom.
 // The form: press the keys (checked live for clashes and risky combos), pick what it should do
 // from a list or type a command, optionally name it, then Add.

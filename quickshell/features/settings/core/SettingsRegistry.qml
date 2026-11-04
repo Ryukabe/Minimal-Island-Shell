@@ -30,7 +30,7 @@ QtObject {
             menus: [
                 { id: "home", title: "Home", subtitle: "Quick links to common settings", icon: "home",
                   tags: "home start overview quick links shortcuts",
-                  source: "pages/home/HomePage.qml" }
+                  source: "pages/home/HomeSettings.qml" }
             ]
         },
         {
@@ -65,32 +65,32 @@ QtObject {
                           source: "../dashboard/DashboardSettings.qml" },
                         { id: "quicknote", title: "Quick note", subtitle: "Markdown note editor", icon: "edit_note",
                           tags: "note markdown toolbar bold italic heading bullet numbered list text size file save",
-                          source: "../dashboard/DashboardQuickNoteSettings.qml" },
+                          source: "../dashboard/QuickNoteSettings.qml" },
                         { id: "media", title: "Media", subtitle: "CD player card", icon: "album",
                           tags: "cd disc spin rotation cover blur background controls artist player",
-                          source: "../dashboard/DashboardMediaSettings.qml" },
+                          source: "../dashboard/MediaSettings.qml" },
                         { id: "stats", title: "System stats", subtitle: "Rows, graphs and update rate", icon: "monitoring",
                           tags: "cpu gpu memory ram network battery temperature graph history update interval",
-                          source: "../dashboard/DashboardStatsSettings.qml" },
+                          source: "../dashboard/SystemStatsSettings.qml" },
                         { id: "calendar", title: "Calendar", subtitle: "Month view options", icon: "calendar_month",
                           tags: "calendar month week start sunday monday saturday days outside",
-                          source: "../dashboard/DashboardCalendarSettings.qml" }
+                          source: "../dashboard/CalendarSettings.qml" }
                     ]
                 },
                 {
                     id: "launcher", title: "Launcher", subtitle: "App search, tools and clipboard", icon: "rocket_launch",
                     tags: "app search width rows results match fuzzy prefix recent apps icons animate shrink preset",
-                    source: "../launcher/LauncherPage.qml",
+                    source: "../launcher/LauncherSettings.qml",
                     views: [
                         { id: "searchtools", title: "Search tools", subtitle: "Calculator, web, files and quick pickers", icon: "bolt",
                           tags: "calculator units web search commands files system emoji snippets notes trigger prefix",
-                          source: "../launcher/SearchToolsPage.qml" },
+                          source: "../launcher/SearchToolsSettings.qml" },
                         { id: "clipboard", title: "Clipboard", subtitle: "History and panel size", icon: "content_paste",
                           tags: "clipboard history cliphist entries width rows",
-                          source: "../clipboard/ClipboardPage.qml" },
+                          source: "../clipboard/ClipboardSettings.qml" },
                         { id: "notessnippets", title: "Notes & snippets", subtitle: "Where they are saved", icon: "edit_note",
                           tags: "quick notes snippets folder file json aliases pinned search engines storage",
-                          source: "../launcher/NotesSnippetsPage.qml" }
+                          source: "../launcher/NotesSnippetsSettings.qml" }
                     ]
                 },
                 { id: "controlcenter", title: "Control Center", subtitle: "Tiles and layout", icon: "widgets",
@@ -99,11 +99,11 @@ QtObject {
                 {
                   id: "lockscreen", title: "Lock Screen", subtitle: "Look and unlock behaviour", icon: "lock",
                   tags: "pam password security idle lid clock blur dim username hint text nav actions reboot power hyprland notifications wallpaper preview folder weather city temperature celsius fahrenheit forecast hourly feels like media now playing album art progress cover hide track",
-                  source: "../lockscreen/LockScreenPage.qml",
+                  source: "../lockscreen/LockScreenSettings.qml",
                   views: [
                       { id: "knowledge", title: "Knowledge", subtitle: "Facts and words on the lock screen", icon: "lightbulb",
                         tags: "fact word meaning vocabulary slide interesting did you know learn",
-                        source: "../lockscreen/KnowledgePage.qml" }
+                        source: "../lockscreen/KnowledgeSettings.qml" }
                   ]
                 },
             ]
@@ -118,10 +118,10 @@ QtObject {
                     views: [
                         { id: "wifi", title: "Wi-Fi", subtitle: "Networks and connections", icon: "wifi",
                           tags: "wifi wireless network password connect scan metered airplane",
-                          source: "../network/WifiPage.qml" },
+                          source: "../network/WifiSettings.qml" },
                         { id: "bluetooth", title: "Bluetooth", subtitle: "Paired and nearby devices", icon: "bluetooth",
                           tags: "bluetooth pair device headphones battery discoverable",
-                          source: "../network/BluetoothPage.qml" }
+                          source: "../network/BluetoothSettings.qml" }
                     ]
                 },
                 { id: "soundmedia", title: "Sound & Media", subtitle: "Volume, outputs and players", icon: "graphic_eq",
@@ -136,20 +136,20 @@ QtObject {
                 {
                     id: "keybinds", title: "Keybinds", subtitle: "Hyprland and shell shortcuts", icon: "keyboard",
                     tags: "keyboard shortcuts hyprland binds hotkeys rebind modifier super add custom conflict",
-                    source: "../hyprland/KeybindsPage.qml",
+                    source: "../hyprland/KeybindsSettings.qml",
                     views: [
                         { id: "windows", title: "Windows", subtitle: "Windows, workspaces and layout", icon: "window",
                           tags: "hyprland window workspace move focus tile float fullscreen close",
                           category: "Hyprland",
-                          source: "../hyprland/KeybindListPage.qml" },
+                          source: "../hyprland/KeybindListSettings.qml" },
                         { id: "shell", title: "Shell", subtitle: "Launcher, panels and the island", icon: "dock_to_bottom",
                           tags: "quickshell launcher control center power menu clipboard settings island",
                           category: "Quickshell",
-                          source: "../hyprland/KeybindListPage.qml" },
+                          source: "../hyprland/KeybindListSettings.qml" },
                         { id: "mediasystem", title: "Media & system", subtitle: "Volume, brightness and screenshots", icon: "perm_media",
                           tags: "media volume brightness screenshot play pause next previous lock",
                           category: "Media & System",
-                          source: "../hyprland/KeybindListPage.qml" }
+                          source: "../hyprland/KeybindListSettings.qml" }
                     ]
                 },
             ]
@@ -169,7 +169,7 @@ QtObject {
                         { id: "theme", title: "Colors", subtitle: "Custom palette colors", icon: "format_paint",
                           tags: "colors custom accent override hex dark light",
                           requires: "customPalette",
-                          source: "../theme/ThemeSettings.qml" },
+                          source: "../theme/ColorsSettings.qml" },
                         { id: "typography", title: "Typography", subtitle: "Fonts, size and icon style", icon: "text_fields",
                           tags: "fonts size icons weight",
                           source: "../theme/TypographySettings.qml" },
@@ -179,7 +179,7 @@ QtObject {
                         // Corners, mica and shadow share one page. The id stays "opacity" so nothing that links here breaks.
                         { id: "opacity", title: "Surfaces", subtitle: "Corners, opacity, blur and shadows", icon: "opacity",
                           tags: "corner radius round universal island card control chip mica transparency opacity window windows active inactive fullscreen shadow depth blur",
-                          source: "../theme/OpacitySettings.qml" },
+                          source: "../theme/SurfacesSettings.qml" },
                         { id: "windows", title: "Windows", subtitle: "Gaps, shadow and corner shape", icon: "web_asset",
                           tags: "windows hyprland gaps inner outer spacing border size corner shape rounding power squircle circle dim dimming shadow range sharpness scale",
                           source: "../theme/WindowsSettings.qml" },
@@ -196,7 +196,7 @@ QtObject {
             menus: [
                 { id: "account", title: "Accounts", subtitle: "Users, passwords and names", icon: "manage_accounts",
                   tags: "user users account accounts password login username display name full name add create new remove delete administrator admin sudo wheel sddm",
-                  source: "../account/AccountSettings.qml" },
+                  source: "../account/AccountsSettings.qml" },
                 {
                     id: "apps", title: "Apps", subtitle: "Defaults, startup and app library", icon: "apps",
                     tags: "default applications terminal browser file manager favourites hidden startup autostart",
@@ -227,10 +227,10 @@ QtObject {
                 },
                 { id: "language", title: "Language & Region", subtitle: "Language, units and clock format", icon: "language",
                   tags: "locale language clock 12 24 hour temperature units weather location",
-                  source: "pages/language/LanguageSettings.qml" },
+                  source: "pages/language/LanguageRegionSettings.qml" },
                 { id: "about", title: "About", subtitle: "This setup, system and updates", icon: "info",
                   tags: "hardware info updates hermit version license credits cpu gpu kernel power profile reset",
-                  source: "pages/about/About.qml" }
+                  source: "pages/about/AboutSettings.qml" }
             ]
         }
     ]
