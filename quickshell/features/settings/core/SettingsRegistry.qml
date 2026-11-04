@@ -38,7 +38,7 @@ QtObject {
             title: "Shell",
             menus: [
                 {
-                    id: "bar", title: "Bar & Island", subtitle: "Style, clock items and size of the island", icon: "dock_to_bottom",
+                    id: "bar", title: "Bar", subtitle: "Style, clock items and size of the island", icon: "dock_to_bottom",
                     tags: "island notch style top margin border flare height width collapsed expanded clock layout items chips add remove order move workspaces visualizer timer icon mic camera privacy recording dot click item card quick options 24 hour seconds date style bars color count dots capsule",
                     source: "../bar/BarSettings.qml",
                     views: [
@@ -48,7 +48,7 @@ QtObject {
                         { id: "clock", title: "Clock", subtitle: "Time and date format", icon: "schedule",
                           tags: "time date format seconds leading zero am pm 24 hour short long timer toast recording",
                           source: "../bar/ClockSettings.qml" },
-                        { id: "visualizer", title: "Music visualizer", subtitle: "Bars, speed and color", icon: "equalizer",
+                        { id: "visualizer", title: "Visualizer", subtitle: "Bars, speed and color", icon: "equalizer",
                           tags: "visualizer music audio bars width gap height speed color preview",
                           source: "../bar/VisualizerSettings.qml" },
                         { id: "behavior", title: "Behavior", subtitle: "Visibility, hover and scroll", icon: "tune",
@@ -127,7 +127,7 @@ QtObject {
                 { id: "soundmedia", title: "Sound & Media", subtitle: "Volume, outputs and players", icon: "graphic_eq",
                   tags: "volume output mpris visualizer step max lyrics source backend preferred default player",
                   source: "../sound/SoundMediaSettings.qml" },
-                { id: "display", title: "Displays", subtitle: "Monitors and scaling", icon: "desktop_windows",
+                { id: "display", title: "Display", subtitle: "Monitors and scaling", icon: "desktop_windows",
                   tags: "resolution refresh rate scale transparency monitor",
                   source: "../display/DisplaySettings.qml" },
                 { id: "trackpadmouse", title: "Trackpad & Mouse", subtitle: "Pointer, tap and scroll", icon: "mouse",
