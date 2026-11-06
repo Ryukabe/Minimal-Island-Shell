@@ -11,10 +11,6 @@ PageScroll {
     readonly property var dateLabels: ["Short", "Long"]
     readonly property var ampmLabels: ["AM", "am"]
 
-    // ShellState keys this page owns (used by "Reset this page").
-    readonly property var resetKeys: [
-        "clockUse24Hour", "clockShowSeconds", "clockLeadingZero", "clockLowercaseAmPm", "clockDateStyle"
-    ]
 
     SectionLabel { text: "Time" }
 
@@ -61,11 +57,5 @@ PageScroll {
             onOptionSelected: (name) => ShellState.clockDateStyle = (name === "Long" ? 2 : 1)
             showDivider: false
         }
-    }
-
-    SectionLabel { text: "Reset" }
-
-    GroupCard {
-        ResetRow { keys: root.resetKeys }
     }
 }

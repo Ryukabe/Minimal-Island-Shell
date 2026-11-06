@@ -10,12 +10,6 @@ import "../../core/styles"
 PageScroll {
     id: root
 
-    // ShellState keys this page owns (used by "Reset this page").
-    readonly property var resetKeys: [
-        "islandAlwaysVisible", "islandRevealOnHover", "islandRevealZone", "islandHideDelayMs",
-        "islandClickOutsideDismiss", "islandScrollVolume", "islandScrollBrightness"
-    ]
-
     SectionLabel { text: "Visibility" }
 
     GroupCard {
@@ -88,11 +82,5 @@ PageScroll {
             onToggled: (val) => ShellState.islandScrollBrightness = val
             showDivider: false
         }
-    }
-
-    SectionLabel { text: "Reset" }
-
-    GroupCard {
-        ResetRow { keys: root.resetKeys }
     }
 }

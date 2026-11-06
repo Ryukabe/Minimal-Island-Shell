@@ -121,6 +121,8 @@ QtObject {
         notificationOverFullscreen: false,
         notificationGroupExpanded: false,
         notificationGroupPreviewCount: 3,
+        notificationSoundMode: "Default",
+        notificationSoundFile: "",
         // event toasts
         eventToastMs: 2500,
         eventToastDnd: true,
@@ -240,6 +242,8 @@ QtObject {
     // Notification center grouping: groups start fully open, or show this many before collapsing.
     property bool notificationGroupExpanded: root.defaults.notificationGroupExpanded
     property int notificationGroupPreviewCount: root.defaults.notificationGroupPreviewCount
+    property string notificationSoundMode: root.defaults.notificationSoundMode   // "Off" | "Default" | "Custom"
+    property string notificationSoundFile: root.defaults.notificationSoundFile   // full path; only used in Custom mode
 
     // ================= EVENT TOASTS =================
     property real eventToastMs: root.defaults.eventToastMs

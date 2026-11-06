@@ -12,11 +12,6 @@ PageScroll {
 
     readonly property var colorLabels: ["Accent", "Text", "Muted"]
 
-    // ShellState keys this page owns (used by "Reset this page").
-    readonly property var resetKeys: [
-        "clockVisualizerBars", "clockVisualizerBarWidth", "clockVisualizerGap",
-        "clockVisualizerMaxHeight", "clockVisualizerSpeedPercent", "clockVisualizerColor"
-    ]
 
     SectionLabel { text: "Look" }
 
@@ -91,11 +86,5 @@ PageScroll {
         color: Colors.subtext
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeXs
-    }
-
-    SectionLabel { text: "Reset" }
-
-    GroupCard {
-        ResetRow { keys: root.resetKeys }
     }
 }

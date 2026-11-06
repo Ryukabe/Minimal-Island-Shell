@@ -69,10 +69,7 @@ Item {
     }
 
     function clearAll() {
-        const items = [...NotificationService.trackedNotifications.values]
-        for (let i = 0; i < items.length; i++) {
-            items[i].dismiss()
-        }
+        NotificationService.clearAll()
     }
 
     Column {

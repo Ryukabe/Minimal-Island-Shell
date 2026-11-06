@@ -8,6 +8,7 @@ Singleton {
     id: root
 
     readonly property alias trackedNotifications: server.trackedNotifications
+    readonly property int count: server.trackedNotifications.values.length
     property var latestNotification: null
 
     // App names seen this session. The Alerts page lists these together with the muted ones,
@@ -36,6 +37,42 @@ Singleton {
     function _noteApp(app) {
         if (!app || root.seenApps.indexOf(app) >= 0) return
         root.seenApps = root.seenApps.concat([app])
+    }
+
+    // Dismisses every notification in the center. Used by the center's "Clear all" and by Settings.
+    function clearAll() {
+        const items = [...server.trackedNotifications.values]
+        for (let i = 0; i < items.length; i++) items[i].dismiss()
+    }
+
+    // ---- Sound ----
+    // Off: silent. Default: the system's "new message" sound. Custom: the file chosen in Settings.
+    // wav / ogg / flac go through pw-play (starts at once); anything else (mp3, m4a, ...) through ffplay.
+    // A custom mode with no file chosen yet falls back to the default sound.
+    property real _lastSoundMs: 0
+
+    function _soundCommand() {
+        const mode = ShellState.notificationSoundMode
+        if (mode === "Off") return []
+
+        let file = (ShellState.notificationSoundFile || "").trim()
+        if (mode === "Custom" && file !== "") {
+            file = file.replace(/^file:\/\//, "").replace(/^~(?=\/|$)/, Quickshell.env("HOME"))
+            const ext = file.split(".").pop().toLowerCase()
+            if (["wav", "ogg", "oga", "flac"].indexOf(ext) >= 0) return ["pw-play", file]
+            return ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", file]
+        }
+        return ["canberra-gtk-play", "-i", "message-new-instant"]
+    }
+
+    // `test` skips the short cool-down that stops a chatty app from machine-gunning the sound.
+    function playSound(test) {
+        const cmd = root._soundCommand()
+        if (cmd.length === 0) return
+        const now = Date.now()
+        if (test !== true && now - root._lastSoundMs < 400) return
+        root._lastSoundMs = now
+        Quickshell.execDetached(cmd)
     }
 
     // Keeps the notification center to the history limit by dismissing the oldest ones.
@@ -71,7 +108,7 @@ Singleton {
 
             var critical = notification.urgency === NotificationUrgency.Critical
 
-            // Muted apps: no popup, still listed in the notification center.
+            // Muted apps: no popup and no sound, still listed in the notification center.
             if (root.isMuted(notification.appName)) {
                 console.log("[NotificationService] muted app — suppressed popup for:", notification.appName)
                 return
@@ -83,6 +120,7 @@ Singleton {
                 return
             }
 
+            root.playSound(false)
             ShellState.flashPageFor("notification", root._toastDuration(notification, critical))
         }
     }

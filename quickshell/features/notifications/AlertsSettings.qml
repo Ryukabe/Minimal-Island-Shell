@@ -8,14 +8,6 @@ import "../../core/shell"
 PageScroll {
     id: root
 
-    // ShellState keys this page owns (used by "Reset this page").
-    readonly property var resetKeys: [
-        "notificationAutoHide", "notificationTimeoutMs", "notificationRespectAppTimeout",
-        "notificationCriticalBypassFocus", "notificationCriticalSticky",
-        "notificationGroupExpanded", "notificationGroupPreviewCount",
-        "notificationHistoryLimit", "notificationMutedApps"
-    ]
-
     SectionLabel { text: "Lifetime" }
 
     GroupCard {
@@ -46,6 +38,44 @@ PageScroll {
                 onToggled: (val) => ShellState.notificationRespectAppTimeout = val
                 showDivider: false
             }
+        }
+    }
+
+    SectionLabel { text: "Sound" }
+
+    GroupCard {
+        SegmentRow {
+            label: "Notification sound"
+            description: ShellState.notificationSoundMode === "Off"
+                ? "Notifications are silent"
+                : (ShellState.notificationSoundMode === "Default"
+                    ? "The system's new message sound"
+                    : "Your own sound file")
+            options: ["Off", "Default", "Custom"]
+            selectedValue: ShellState.notificationSoundMode
+            onOptionSelected: (name) => ShellState.notificationSoundMode = name
+        }
+
+        Reveal {
+            shown: ShellState.notificationSoundMode === "Custom"
+
+            TextRow {
+                label: "Sound file"
+                description: "Full path to a .wav, .ogg, .flac, .mp3 or .m4a file. Empty plays the default sound"
+                value: ShellState.notificationSoundFile
+                fieldWidth: 280
+                monospace: true
+                onCommitted: (v) => ShellState.notificationSoundFile = v.trim()
+            }
+        }
+
+        ButtonRow {
+            label: "Test sound"
+            description: "Plays the sound as it is set now"
+            buttonText: "Play"
+            enabled: ShellState.notificationSoundMode !== "Off"
+            showDivider: false
+            onClicked: NotificationService.playSound(true)
         }
     }
 
@@ -122,17 +152,11 @@ PageScroll {
                 required property int index
 
                 label: modelData
-                description: index === 0 ? "Muted apps show no popup but stay in the notification center" : ""
+                description: index === 0 ? "Muted apps show no popup and play no sound, but stay in the notification center" : ""
                 checked: NotificationService.isMuted(modelData)
                 onToggled: (val) => NotificationService.setMuted(modelData, val)
                 showDivider: index < NotificationService.appNames.length - 1
             }
         }
-    }
-
-    SectionLabel { text: "Reset" }
-
-    GroupCard {
-        ResetRow { keys: root.resetKeys }
     }
 }

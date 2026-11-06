@@ -8,12 +8,6 @@ import "../../core/shell"
 PageScroll {
     id: root
 
-    // ShellState keys this page owns (used by "Reset this page").
-    readonly property var resetKeys: [
-        "notificationToastMaxWidth", "eventToastMs", "appToastMs", "notificationOverFullscreen",
-        "appToastEnabled", "eventToastCharging", "eventToastDnd", "eventToastAudioOutput",
-        "eventToastAudioInput", "timerToastShowRecordingIndicator"
-    ]
 
     SectionLabel { text: "Pop-ups" }
 
@@ -100,11 +94,5 @@ PageScroll {
             onToggled: (val) => ShellState.timerToastShowRecordingIndicator = val
             showDivider: false
         }
-    }
-
-    SectionLabel { text: "Reset" }
-
-    GroupCard {
-        ResetRow { keys: root.resetKeys }
     }
 }

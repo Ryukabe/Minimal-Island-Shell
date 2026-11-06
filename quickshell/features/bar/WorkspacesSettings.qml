@@ -7,13 +7,6 @@ import "../../core/shell"
 PageScroll {
     id: root
 
-    // ShellState keys this page owns (used by "Reset this page").
-    readonly property var resetKeys: [
-        "workspaceShownCount", "workspaceActiveIndicator", "workspaceUseAccent", "workspaceActiveTrail",
-        "workspaceOccupiedBackground", "workspaceBounce", "workspaceDotSize", "workspaceActiveWidth",
-        "workspaceShowWindows", "workspaceWindowsOnSpecial", "workspaceMaxWindowIcons", "workspacePerMonitor"
-    ]
-
     SectionLabel { text: "Indicators" }
 
     GroupCard {
@@ -125,11 +118,5 @@ PageScroll {
             onToggled: (val) => ShellState.workspacePerMonitor = val
             showDivider: false
         }
-    }
-
-    SectionLabel { text: "Reset" }
-
-    GroupCard {
-        ResetRow { keys: root.resetKeys }
     }
 }

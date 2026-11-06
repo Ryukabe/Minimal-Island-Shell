@@ -19,10 +19,19 @@ PageScroll {
     readonly property string barStyle: ShellState.islandNotchMode ? "Notch" : "Island"
     readonly property var unplaced: ClockLayoutService.unplacedTypes()
 
-    // ShellState keys this page owns (used by "Reset this page"). The clock items have their own Reset layout.
+    // Every ShellState key in the Bar menu, sub-pages included (used by the Reset row at the bottom).
     readonly property var resetKeys: [
         "islandNotchMode", "islandBorderWidth", "islandTopMargin", "islandNotchFlare",
-        "islandCompactHeight", "islandCompactWidth"
+        "islandCompactHeight", "islandCompactWidth",
+        "islandExpandedHeight", "islandMinExpandedWidth", "islandHoverScale",
+        "islandAlwaysVisible", "islandRevealOnHover", "islandRevealZone", "islandHideDelayMs",
+        "islandClickOutsideDismiss", "islandScrollVolume", "islandScrollBrightness",
+        "clockUse24Hour", "clockShowSeconds", "clockLeadingZero", "clockLowercaseAmPm", "clockDateStyle",
+        "clockVisualizerBars", "clockVisualizerBarWidth", "clockVisualizerGap",
+        "clockVisualizerMaxHeight", "clockVisualizerSpeedPercent", "clockVisualizerColor",
+        "workspaceShownCount", "workspaceActiveIndicator", "workspaceUseAccent", "workspaceActiveTrail",
+        "workspaceOccupiedBackground", "workspaceBounce", "workspaceDotSize", "workspaceActiveWidth",
+        "workspaceShowWindows", "workspaceWindowsOnSpecial", "workspaceMaxWindowIcons", "workspacePerMonitor"
     ]
 
     // Sub-pages whose item is on the bar: the item's card opens them, so the list below skips them.
