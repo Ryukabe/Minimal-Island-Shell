@@ -312,15 +312,20 @@ PanelWindow {
         readonly property int compactHeight: ShellState.islandCompactHeight
         readonly property int compactWidth: ShellState.islandCompactWidth
 
+        // Detailed and Interactive notification popups size themselves. Compact keeps the old
+        // behaviour (the popup page counts as expanded, so the minimum expanded size applies).
+        readonly property bool popupSizesItself: ShellState.activePage === "notification"
+            && ShellState.notificationPopupStyle !== "Compact"
+
         property int targetWidth: {
             const page = pageLoader.item as Item
             if (!page) return compactWidth
-            var floor = expanded ? ShellState.islandMinExpandedWidth : compactWidth
+            var floor = (expanded && !popupSizesItself) ? ShellState.islandMinExpandedWidth : compactWidth
             return Math.max(page.implicitWidth, floor)
         }
         property int targetHeight: {
             if (!pageLoader.item) return compactHeight
-            var floor = expanded ? ShellState.islandExpandedHeight : compactHeight
+            var floor = (expanded && !popupSizesItself) ? ShellState.islandExpandedHeight : compactHeight
             return Math.max(pageLoader.implicitHeight, floor)
         }
 

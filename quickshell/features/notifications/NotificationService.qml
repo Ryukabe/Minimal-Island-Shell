@@ -10,6 +10,8 @@ Singleton {
     readonly property alias trackedNotifications: server.trackedNotifications
     readonly property int count: server.trackedNotifications.values.length
     property var latestNotification: null
+    // When the popup for latestNotification appeared (Detailed and Interactive popups show the time).
+    property var latestReceivedAt: null
 
     // App names seen this session. The Alerts page lists these together with the muted ones,
     // so a muted app stays listed (and can be un-muted) even before it speaks again.
@@ -43,6 +45,34 @@ Singleton {
     function clearAll() {
         const items = [...server.trackedNotifications.values]
         for (let i = 0; i < items.length; i++) items[i].dismiss()
+    }
+
+    // ---- Snooze ----
+    // Hides the popup now and shows this notification again after `minutes`, if it is still in the
+    // center and Focus is off by then. The reminder stays up until you click it.
+    function snooze(notification, minutes) {
+        if (!notification) return
+        ShellState.dismissFlash()
+        snoozeTimerComp.createObject(root, { notification: notification, interval: minutes * 60000 }).start()
+    }
+
+    Component {
+        id: snoozeTimerComp
+
+        Timer {
+            property var notification: null
+            repeat: false
+            onTriggered: {
+                const stillThere = notification && server.trackedNotifications.values.indexOf(notification) >= 0
+                if (stillThere && !ShellState.focusModeEnabled) {
+                    root.latestNotification = notification
+                    root.latestReceivedAt = new Date()
+                    root.playSound(false)
+                    ShellState.flashPageFor("notification", 0)
+                }
+                destroy()
+            }
+        }
     }
 
     // ---- Sound ----
@@ -103,6 +133,7 @@ Singleton {
         onNotification: (notification) => {
             notification.tracked = true
             root.latestNotification = notification
+            root.latestReceivedAt = new Date()
             root._noteApp(notification.appName)
             root._trimHistory()
 

@@ -31,3 +31,5 @@ PickerSheet PickerSheet.qml
 PickerRow PickerRow.qml
 TimeRow TimeRow.qml
 ResetRow ResetRow.qml
+PreviewCard PreviewCard.qml
+NotificationStylePicker NotificationStylePicker.qml

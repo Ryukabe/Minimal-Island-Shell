@@ -123,6 +123,8 @@ QtObject {
         notificationGroupPreviewCount: 3,
         notificationSoundMode: "Default",
         notificationSoundFile: "",
+        notificationPopupStyle: "Compact",
+        notificationSnoozeMinutes: 10,
         // event toasts
         eventToastMs: 2500,
         eventToastDnd: true,
@@ -244,6 +246,8 @@ QtObject {
     property int notificationGroupPreviewCount: root.defaults.notificationGroupPreviewCount
     property string notificationSoundMode: root.defaults.notificationSoundMode   // "Off" | "Default" | "Custom"
     property string notificationSoundFile: root.defaults.notificationSoundFile   // full path; only used in Custom mode
+    property string notificationPopupStyle: root.defaults.notificationPopupStyle   // "Compact" | "Detailed" | "Interactive"
+    property int notificationSnoozeMinutes: root.defaults.notificationSnoozeMinutes
 
     // ================= EVENT TOASTS =================
     property real eventToastMs: root.defaults.eventToastMs
@@ -566,6 +570,17 @@ QtObject {
         onTriggered: root._returnFromFlash()
     }
 
+    // True for a popup that stays until clicked (shown with a duration of 0).
+    property bool _flashSticky: false
+
+    // A Detailed or Interactive popup stays up while the pointer is over it, and starts its
+    // countdown again when the pointer leaves.
+    function holdFlash(hold) {
+        if (!root._isFlashPage(root.activePage)) return
+        if (hold) flashTimer.stop()
+        else if (!root._flashSticky) flashTimer.restart()
+    }
+
     function showPage(page) {
         flashTimer.stop()
         if (!root._isFlashPage(page)) root.previousPage = page
@@ -579,6 +594,7 @@ QtObject {
     function flashPage(page) {
         if (!root._isFlashPage(root.activePage) && root.activePage !== page) root.previousPage = root.activePage
         root.activePage = page
+        root._flashSticky = false
         flashTimer.interval = 1500
         flashTimer.restart()
     }
@@ -587,6 +603,7 @@ QtObject {
     function flashPageFor(page, durationMs) {
         if (!root._isFlashPage(root.activePage) && root.activePage !== page) root.previousPage = root.activePage
         root.activePage = page
+        root._flashSticky = durationMs <= 0
         if (durationMs > 0) {
             flashTimer.interval = durationMs
             flashTimer.restart()

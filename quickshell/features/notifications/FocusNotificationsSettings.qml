@@ -14,6 +14,7 @@ PageScroll {
     // Every ShellState key in Focus & Notifications, sub-pages included (used by the Reset row).
     // Focus itself is not reset: it is something you switch on and off, not a setting.
     readonly property var resetKeys: [
+        "notificationPopupStyle", "notificationSnoozeMinutes",
         "notificationPreviewsEnabled", "notificationCenterWidth", "notificationCenterMaxHeight",
         "notificationAutoHide", "notificationTimeoutMs", "notificationRespectAppTimeout",
         "notificationCriticalBypassFocus", "notificationCriticalSticky",
@@ -33,6 +34,31 @@ PageScroll {
     }
 
     SectionLabel {
+        text: "Notification popups"
+        Layout.topMargin: Dimens.spacingLarge
+    }
+
+    GroupCard {
+        NotificationStylePicker {
+            showDivider: ShellState.notificationPopupStyle === "Interactive"
+        }
+
+        Reveal {
+            shown: ShellState.notificationPopupStyle === "Interactive"
+
+            SliderRow {
+                label: "Snooze length"
+                description: "How long the Snooze button hides a notification before it pops up again"
+                from: 1; to: 60; stepSize: 1
+                value: ShellState.notificationSnoozeMinutes
+                unit: " min"
+                onMoved: (val) => ShellState.notificationSnoozeMinutes = val
+                showDivider: false
+            }
+        }
+    }
+
+    SectionLabel {
         text: "Notification center"
         Layout.topMargin: Dimens.spacingLarge
     }
@@ -47,6 +73,7 @@ PageScroll {
 
         SliderRow {
             label: "Width"
+            description: "Also the width of Detailed and Interactive popups"
             from: 280; to: 600; stepSize: 10
             value: ShellState.notificationCenterWidth
             unit: " px"

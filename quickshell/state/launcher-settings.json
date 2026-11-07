@@ -4,7 +4,9 @@
   "searchDescriptions": false,
   "showRecentsFirst": false,
   "recentLimit": 10,
-  "recentIds": [],
+  "recentIds": [
+    "btop"
+  ],
   "showIcons": true,
   "animateResults": true,
   "launcherWidth": "Normal",
