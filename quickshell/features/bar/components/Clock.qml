@@ -147,14 +147,12 @@ Item {
     Component {
         id: timeItem
 
-        Text {
+        ClockTimeText {
             text: Qt.formatDateTime(root.shownDate, ShellState.clockTimeFormat)
-            color: Colors.fg
-            font {
-                family: Fonts.display
-                pixelSize: Dimens.fontSizeBase
-                weight: 700
-            }
+            plain: ShellState.clockAnimation !== "Flip"
+            animate: !ShellState.motionReduced
+            cards: ShellState.clockFlipCards
+            durationMs: ShellState.clockFlipMs
         }
     }
 

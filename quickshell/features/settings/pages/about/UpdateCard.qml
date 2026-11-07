@@ -1,4 +1,4 @@
-// pages/about/UpdateCard.qml — status card with Recheck + action buttons.
+// features/settings/pages/about/UpdateCard.qml — status card with Recheck + action buttons.
 // Used for both system updates and shell self-update. No outline, per your earlier design feedback.
 import QtQuick
 import QtQuick.Layouts

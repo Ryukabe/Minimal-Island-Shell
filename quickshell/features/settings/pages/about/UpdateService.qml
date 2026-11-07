@@ -1,4 +1,4 @@
-// pages/about/UpdateService.qml — update checks and updates for the About page.
+// features/settings/pages/about/UpdateService.qml — update checks and updates for the About page.
 //   System: counts repo updates (checkupdates) and AUR updates (paru/yay). "Update Now" opens your default
 //           terminal and runs pacman first, then the AUR helper for the AUR packages.
 //   Shell:  the configs are symlinks into a git clone (found through the shell folder), so updating is

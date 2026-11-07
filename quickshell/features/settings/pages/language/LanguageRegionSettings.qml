@@ -1,4 +1,4 @@
-// pages/language/LanguageRegionSettings.qml — Language & Region.
+// features/settings/pages/language/LanguageRegionSettings.qml — Language & Region.
 // System language is a readout. Location is one picked place that feeds both weather and the
 // time on every clock (LocationService). Clock format and both temperature units live on
 // ShellState, so they persist and every module reads the same value.

@@ -1,4 +1,4 @@
-// features/bar/ClockSettings.qml — Bar > Clock. Time and date format only.
+// features/bar/ClockSettings.qml — Bar > Clock. Time and date format, and how the time changes.
 // Which items sit in the clock, and in what order, is edited on the Bar page (Layout).
 import QtQuick
 import "../settings/components"
@@ -10,7 +10,6 @@ PageScroll {
 
     readonly property var dateLabels: ["Short", "Long"]
     readonly property var ampmLabels: ["AM", "am"]
-
 
     SectionLabel { text: "Time" }
 
@@ -56,6 +55,43 @@ PageScroll {
             selectedValue: ShellState.clockDateStyle === 2 ? "Long" : "Short"
             onOptionSelected: (name) => ShellState.clockDateStyle = (name === "Long" ? 2 : 1)
             showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Animation" }
+
+    GroupCard {
+        SegmentRow {
+            label: "Time change"
+            description: ShellState.clockAnimation === "Flip"
+                ? "Digits flip like the cards of a flip clock"
+                : "The time changes without animation"
+            options: ["None", "Flip"]
+            selectedValue: ShellState.clockAnimation
+            onOptionSelected: (name) => ShellState.clockAnimation = name
+            showDivider: ShellState.clockAnimation === "Flip"
+        }
+
+        Reveal {
+            shown: ShellState.clockAnimation === "Flip"
+
+            SliderRow {
+                label: "Flip speed"
+                description: "How long one flip takes"
+                from: 150; to: 800; stepSize: 10
+                value: ShellState.clockFlipMs
+                unit: " ms"
+                enabled: !ShellState.motionReduced
+                onMoved: (val) => ShellState.clockFlipMs = val
+            }
+
+            ToggleRow {
+                label: "Card look"
+                description: "Draw each digit on a small card with a centre line"
+                checked: ShellState.clockFlipCards
+                onToggled: (val) => ShellState.clockFlipCards = val
+                showDivider: false
+            }
         }
     }
 }

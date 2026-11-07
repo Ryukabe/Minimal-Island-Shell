@@ -1,4 +1,4 @@
-// pages/apps/allapps/AppRow.qml — one installed app: icon, name, short description, and two toggles
+// features/settings/components/AppRow.qml — one installed app: icon, name, short description, and two toggles
 // (favourite star, hide eye). Only the All apps page uses it, so it lives here.
 import QtQuick
 import QtQuick.Layouts

@@ -85,14 +85,11 @@ Item {
     Component {
         id: timeLook
 
-        Text {
+        ClockTimeText {
             text: Qt.formatDateTime(root.now, ShellState.clockTimeFormat)
-            color: Colors.fg
-            font {
-                family: Fonts.display
-                pixelSize: Dimens.fontSizeBase
-                weight: 700
-            }
+            plain: ShellState.clockAnimation !== "Flip"
+            animate: false
+            cards: ShellState.clockFlipCards
         }
     }
 

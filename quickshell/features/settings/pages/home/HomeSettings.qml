@@ -1,4 +1,4 @@
-// pages/home/HomeSettings.qml — the Home page: quick settings and quick links.
+// features/settings/pages/home/HomeSettings.qml — the Home page: quick settings and quick links.
 // The quick settings are second controls for options that live on other pages; they use the same
 // labels and the same ShellState properties, so changing one changes the other.
 // The links are built from SettingsRegistry, so a title or icon change there shows up here too.

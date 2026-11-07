@@ -519,7 +519,9 @@ PageScroll {
 
     SectionLabel { text: "Reset" }
 
-    GroupCard {
-        ResetRow { keys: root.resetKeys }
+    ResetRow {
+        menuName: "Bar"
+        keys: root.resetKeys
+        onResetDone: ClockLayoutService.resetToDefault()
     }
 }

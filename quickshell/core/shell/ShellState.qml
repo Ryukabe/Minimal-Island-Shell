@@ -80,6 +80,7 @@ QtObject {
         motionIconsEnabled: true,
         motionIconSpeedPercent: 100,
         motionIconBouncePercent: 50,
+        motionIslandBouncePercent: 40,
         // clock (which items show, and their order, live in ClockLayoutService)
         clockUse24Hour: false,
         clockShowSeconds: false,
@@ -92,6 +93,9 @@ QtObject {
         clockVisualizerMaxHeight: 10,
         clockVisualizerSpeedPercent: 100,
         clockVisualizerColor: "Accent",
+        clockAnimation: "Flip",
+        clockFlipMs: 420,
+        clockFlipCards: true,
         timerToastShowRecordingIndicator: true,
         // workspaces
         workspaceShownCount: 5,
@@ -433,6 +437,9 @@ QtObject {
     property real clockVisualizerSpeedPercent: root.defaults.clockVisualizerSpeedPercent
     property string clockVisualizerColor: root.defaults.clockVisualizerColor
     property bool timerToastShowRecordingIndicator: root.defaults.timerToastShowRecordingIndicator
+    property string clockAnimation: root.defaults.clockAnimation   // "None" | "Flip"
+    property int clockFlipMs: root.defaults.clockFlipMs
+    property bool clockFlipCards: root.defaults.clockFlipCards
 
     // 12-hour mode always includes an AM/PM token, which is what makes h/hh
     // render as 1-12 instead of 0-23.
@@ -477,6 +484,8 @@ QtObject {
     property bool motionIconsEnabled: root.defaults.motionIconsEnabled
     property real motionIconSpeedPercent: root.defaults.motionIconSpeedPercent
     property real motionIconBouncePercent: root.defaults.motionIconBouncePercent
+    // How far the island overshoots when it grows, changes style or pops its content in.
+    property real motionIslandBouncePercent: root.defaults.motionIslandBouncePercent
 
     // ================= DISPLAY =================
     // How much the brightness keys, IPC calls and island scroll change brightness per step.
@@ -517,6 +526,12 @@ QtObject {
 
     function motionOvershoot() {
         return root.motionReduced ? 1.0 : (1.0 + root.motionBouncePercent / 100)
+    }
+    
+    // OutBack overshoot for the island's own motion. 0 % gives 0, which is a plain ease-out;
+    // 40 % (the default) gives 1.2, about 5 % past the target.
+    function motionIslandOvershoot() {
+        return root.motionReduced ? 0 : root.motionIslandBouncePercent * 0.03
     }
 
     // Generalized spring-stiffness mapping: shorter user-set duration (ms)

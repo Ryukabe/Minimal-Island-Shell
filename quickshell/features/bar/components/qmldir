@@ -11,3 +11,7 @@ ClockVisualizer 1.0 ClockVisualizer.qml
 ClockItemPreview 1.0 ClockItemPreview.qml
 PrivacyIndicator 1.0 PrivacyIndicator.qml
 AppToast 1.0 AppToast.qml
+IslandShape 1.0 IslandShape.qml
+FlipHalf 1.0 FlipHalf.qml
+FlipDigit 1.0 FlipDigit.qml
+ClockTimeText 1.0 ClockTimeText.qml
