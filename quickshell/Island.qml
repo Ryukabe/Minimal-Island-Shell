@@ -1,13 +1,13 @@
-// Island.qml — the bar window: page router, island morphing, auto-hide and IPC.
+// Island.qml — the bar window: page router, island morphing, auto-hide, hover panel and IPC.
 //
 // Order of this file:
 //   1. Window, layer and input region
-//   2. Page state and auto-hide
+//   2. Page state, auto-hide, and the hover panel's timers and magnify trigger
 //   3. Startup and helpers
 //   4. IPC handlers
 //   5. Click catcher and hover zone
 //   6. Island background (shape and shadow)
-//   7. The island: size, style, visibility, pointer input, page loader
+//   7. The island: size, style, magnify, visibility, pointer input, page loader
 //   8. Page components
 //
 // One animation type everywhere: eases. Growing uses OutBack, so it overshoots a little and settles
@@ -25,6 +25,7 @@ import "features/bar"
 import "features/clipboard"
 import "features/control-center"
 import "features/dashboard"
+import "features/hoverpanel"
 import "features/launcher"
 import "features/lockscreen"
 import "features/notifications"
@@ -78,20 +79,26 @@ PanelWindow {
         : 0
 
     // Input region. Auto-hide on + compact page: the hover zone (the edge strip while hidden,
-    // the island plus the gap above it while shown). Otherwise exactly as before.
+    // the island plus the gap above it while shown). Popups and the hover panel never turn on the
+    // click catcher, so you can keep clicking your windows while they are up.
     mask: Region {
-        item: (island.expanded && ShellState.activePage !== "notification" && ShellState.islandClickOutsideDismiss && ShellState.activePage !== "apptoast")
+        item: (island.expanded
+               && ShellState.activePage !== "notification"
+               && ShellState.activePage !== "hover"
+               && ShellState.islandClickOutsideDismiss
+               && ShellState.activePage !== "apptoast")
             ? clickCatcher
             : ((!ShellState.islandAlwaysVisible && window.compactPage) ? hoverZone : island)
     }
 
     // ============================================================
-    // 2. PAGE STATE AND AUTO-HIDE
+    // 2. PAGE STATE, AUTO-HIDE, AND THE HOVER PANEL'S TIMERS AND MAGNIFY TRIGGER
     // ============================================================
 
     // The idle pages, and the pages that pop up briefly.
     readonly property bool compactPage: ShellState.activePage === "clock" || ShellState.activePage === "timertoast"
     readonly property bool toastPage: ShellState.activePage === "notification" || ShellState.activePage === "eventtoast" || ShellState.activePage === "apptoast"
+    readonly property bool hoverPageOpen: ShellState.activePage === "hover"
 
     // Auto-hide: the island only slides away while a compact page is showing and the pointer is
     // away. Any panel, toast or shortcut brings it back (compactPage goes false).
@@ -122,6 +129,43 @@ PanelWindow {
         interval: ShellState.islandHideDelayMs
         repeat: false
         onTriggered: if (!window.pointerOver) window.revealed = false
+    }
+
+    // The pointer is resting on the idle island (it is on screen and showing an idle page).
+    readonly property bool pointerOnIdle: window.compactPage && !window.islandHidden && islandTapArea.containsMouse
+
+    // ---- Magnify: when the island grows a little wider and taller and drops a little ----
+    readonly property bool magnifyActive: {
+        switch (ShellState.islandMagnifyTrigger) {
+            case "Pointer over": return window.pointerOnIdle
+            case "Panel opens": return window.hoverPageOpen
+            case "Both": return window.pointerOnIdle || window.hoverPageOpen
+            default: return false
+        }
+    }
+
+    // ---- Hover panel ----
+    // Resting the pointer on the idle island for the hover delay opens the hover panel.
+    readonly property bool dwellActive: ShellState.hoverPanelEnabled && window.pointerOnIdle
+
+    onDwellActiveChanged: {
+        if (dwellActive) dwellTimer.restart()
+        else dwellTimer.stop()
+    }
+
+    Timer {
+        id: dwellTimer
+        interval: ShellState.hoverPanelDelayMs
+        repeat: false
+        onTriggered: if (window.dwellActive) ShellState.showPage("hover")
+    }
+
+    // The panel closes a moment after the pointer leaves the island.
+    Timer {
+        id: hoverCloseTimer
+        interval: ShellState.hoverPanelCloseDelayMs
+        repeat: false
+        onTriggered: if (window.hoverPageOpen) ShellState.showPage(window.getDefaultPage())
     }
 
     // ============================================================
@@ -338,7 +382,7 @@ PanelWindow {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: island.styleMargin + island.hideOffset
+        anchors.topMargin: island.styleMargin + island.hideOffset + island.moveDown
         clip: true
         // The fill is drawn by islandShape; the island itself only clips its content and draws the border.
         color: "transparent"
@@ -371,32 +415,36 @@ PanelWindow {
                        && ShellState.activePage !== "polkit"
         readonly property int compactHeight: ShellState.islandCompactHeight
         readonly property int compactWidth: ShellState.islandCompactWidth
-        readonly property bool popupSizesItself: ShellState.activePage === "notification"
-            && ShellState.notificationPopupStyle !== "Compact"
+
+        // Pages that size themselves from their own content, so the minimum expanded size does not apply:
+        // the Detailed and Interactive notification popups, and the hover panel.
+        readonly property bool sizesItself: ShellState.activePage === "hover"
+            || (ShellState.activePage === "notification" && ShellState.notificationPopupStyle !== "Compact")
 
         // ---------- 7a. Size ----------
         // The size the current page wants.
         property int targetWidth: {
             const page = pageLoader.item as Item
             if (!page) return compactWidth
-            var floor = (expanded && !popupSizesItself) ? ShellState.islandMinExpandedWidth : compactWidth
+            var floor = (expanded && !sizesItself) ? ShellState.islandMinExpandedWidth : compactWidth
             return Math.max(page.implicitWidth, floor)
         }
         property int targetHeight: {
             if (!pageLoader.item) return compactHeight
-            var floor = (expanded && !popupSizesItself) ? ShellState.islandExpandedHeight : compactHeight
+            var floor = (expanded && !sizesItself) ? ShellState.islandExpandedHeight : compactHeight
             return Math.max(pageLoader.implicitHeight, floor)
         }
 
-        // The size on screen. It is animated by hand so the curve can depend on the direction:
-        // growing uses OutBack (a quick start, a small overshoot, a soft settle); shrinking uses an
-        // ease-out with no overshoot, so the island never dips below its true size.
+        // The size the page morph has reached. It is animated by hand so the curve can depend on the
+        // direction: growing uses OutBack (a quick start, a small overshoot, a soft settle); shrinking
+        // uses an ease-out with no overshoot, so the island never dips below its true size.
         property real animWidth: 0
         property real animHeight: 0
         property bool _sized: false
 
-        width: Math.max(0, Math.round(animWidth))
-        height: Math.max(0, Math.round(animHeight))
+        // The size on screen: the morph plus the magnify (7c).
+        width: Math.max(0, Math.round(animWidth + island.extraWidth))
+        height: Math.max(0, Math.round(animHeight + island.extraHeight))
 
         Component.onCompleted: {
             island.animWidth = island.targetWidth
@@ -448,7 +496,24 @@ PanelWindow {
         // The gap above the island: the full margin as an island, none as a notch.
         readonly property real styleMargin: (1 - island.styleProgress) * ShellState.islandTopMargin
 
-        // ---------- 7c. Visibility (auto-hide) ----------
+        // ---------- 7c. Magnify on hover ----------
+        // 0 = normal, 1 = magnified. The island gets wider (left and right), longer (at the bottom) and drops
+        // a little, as if the pointer were magnifying it. The notch stays attached to the top edge, so the
+        // drop fades out as the style goes to notch. It is a plain ease, so it never squeezes below its size.
+        property real magnifyProgress: window.magnifyActive ? 1 : 0
+
+        Behavior on magnifyProgress {
+            NumberAnimation {
+                duration: ShellState.motionDuration(Motion.glideMs * 0.6)
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        readonly property real extraWidth: island.magnifyProgress * ShellState.islandMagnifyWidth
+        readonly property real extraHeight: island.magnifyProgress * ShellState.islandMagnifyHeight
+        readonly property real moveDown: island.magnifyProgress * ShellState.islandMagnifyMoveDown * (1 - island.styleProgress)
+
+        // ---------- 7d. Visibility (auto-hide) ----------
         // Hidden: parked above the screen edge, far enough that the shadow halo clears it too.
         property real hideOffset: window.islandHidden
             ? -(island.height + ShellState.islandTopMargin + Dimens.paddingLarge * 4)
@@ -461,13 +526,13 @@ PanelWindow {
             }
         }
 
-        // ---------- 7d. Pointer input ----------
+        // ---------- 7e. Pointer input ----------
         MouseArea {
             id: islandTapArea
             anchors.fill: parent
             enabled: ShellState.activePage === "clock" || ShellState.activePage === "timertoast"
             // Without this, containsMouse is only true while a button is pressed,
-            // so the hover lift never played on plain hover.
+            // so the hover effects never played on plain hover.
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
@@ -475,6 +540,9 @@ PanelWindow {
             // units of 120 per notch; touchpads send many small ones, so they are accumulated.
             property real wheelAccumulator: 0
             onWheel: (wheel) => {
+                // Scrolling means you are using the island, so the wait for the hover panel starts over.
+                if (window.dwellActive) dwellTimer.restart()
+
                 wheelAccumulator += wheel.angleDelta.y
                 var steps = Math.trunc(wheelAccumulator / 120)
                 if (steps === 0) return
@@ -501,6 +569,16 @@ PanelWindow {
             }
         }
 
+        // While the hover panel is open it closes a moment after the pointer leaves the island.
+        HoverHandler {
+            id: islandPointer
+            onHoveredChanged: {
+                if (!window.hoverPageOpen) return
+                if (hovered) hoverCloseTimer.stop()
+                else hoverCloseTimer.restart()
+            }
+        }
+
         MouseArea {
             id: islandConsumeArea
             anchors.fill: parent
@@ -508,21 +586,38 @@ PanelWindow {
             onClicked: {}
         }
 
-        // ---------- 7e. Page loader ----------
+        // A thin line that grows along the bottom of the island while you wait for the hover panel.
+        Rectangle {
+            id: dwellHint
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            z: 5
+            height: 2
+            radius: 1
+            color: Colors.accent
+            opacity: 0.85
+            width: 0
+            visible: window.dwellActive && ShellState.hoverPanelShowHint && !ShellState.motionReduced
+
+            NumberAnimation on width {
+                running: dwellHint.visible
+                from: 0
+                to: island.width * 0.6
+                duration: ShellState.hoverPanelDelayMs
+                easing.type: Easing.InOutSine
+            }
+        }
+
+        // ---------- 7f. Page loader ----------
         Loader {
             id: pageLoader
             anchors.top: parent.top
+            // While the island grows downwards, half of the extra height goes above the content, so it stays centred.
+            anchors.topMargin: island.extraHeight / 2
             anchors.horizontalCenter: parent.horizontalCenter
-            scale: islandTapArea.containsMouse ? ShellState.islandHoverScale : 1.0
+            // The content grows with the island, by half as much, so the magnify reads as one effect.
+            scale: 1 + island.magnifyProgress * (ShellState.islandMagnifyWidth / Math.max(1, island.animWidth)) * 0.5
             opacity: 1.0
-
-            // Hover lift: the scale only moves a couple of percent, so a plain ease-out is enough.
-            Behavior on scale {
-                NumberAnimation {
-                    duration: ShellState.motionDuration(Motion.snapMs)
-                    easing.type: Easing.OutCubic
-                }
-            }
 
             // Content entrance: the island leads, the content follows after Motion.contentDelayMs.
             onItemChanged: {
@@ -580,6 +675,7 @@ PanelWindow {
                     case "timer": return timerPage
                     case "timertoast": return timerToastPage
                     case "apptoast": return appToastPage
+                    case "hover": return hoverPage
                     default: return clockPage
                 }
             }
@@ -605,6 +701,7 @@ PanelWindow {
         Component { id: timerPage; TimerModule {} }
         Component { id: statusPage; Dashboard {} }
         Component { id: appToastPage; AppToast {} }
+        Component { id: hoverPage; HoverPanel {} }
 
         Component {
             id: brightnessPage

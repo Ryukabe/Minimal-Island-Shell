@@ -2,10 +2,8 @@
 // how it reacts to the pointer, and what scrolling on it does.
 // Everything here is bound to ShellState.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root
@@ -61,6 +59,52 @@ PageScroll {
             description: "Closes an open panel when you click anywhere else"
             checked: ShellState.islandClickOutsideDismiss
             onToggled: (val) => ShellState.islandClickOutsideDismiss = val
+            showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Magnify on hover" }
+
+    GroupCard {
+        SegmentRow {
+            label: "Magnify"
+            description: ShellState.islandMagnifyTrigger === "Off" ? "The island keeps its size"
+                : ShellState.islandMagnifyTrigger === "Pointer over" ? "As soon as the pointer is on the island"
+                : ShellState.islandMagnifyTrigger === "Panel opens" ? "Only while the hover panel is open"
+                : "While the pointer is on the island, and while the hover panel is open"
+            options: ["Off", "Pointer over", "Panel opens", "Both"]
+            selectedValue: ShellState.islandMagnifyTrigger
+            onOptionSelected: (name) => ShellState.islandMagnifyTrigger = name
+        }
+
+        SliderRow {
+            label: "Widen by"
+            description: "Extra width, shared between the left and right sides"
+            from: 0; to: 40; stepSize: 1
+            value: ShellState.islandMagnifyWidth
+            unit: " px"
+            enabled: ShellState.islandMagnifyTrigger !== "Off"
+            onMoved: (val) => ShellState.islandMagnifyWidth = val
+        }
+
+        SliderRow {
+            label: "Lengthen by"
+            description: "Extra height, added at the bottom"
+            from: 0; to: 20; stepSize: 1
+            value: ShellState.islandMagnifyHeight
+            unit: " px"
+            enabled: ShellState.islandMagnifyTrigger !== "Off"
+            onMoved: (val) => ShellState.islandMagnifyHeight = val
+        }
+
+        SliderRow {
+            label: "Move down by"
+            description: "How far the whole island drops. Not used in notch style, where it stays on the top edge"
+            from: 0; to: 20; stepSize: 1
+            value: ShellState.islandMagnifyMoveDown
+            unit: " px"
+            enabled: ShellState.islandMagnifyTrigger !== "Off"
+            onMoved: (val) => ShellState.islandMagnifyMoveDown = val
             showDivider: false
         }
     }

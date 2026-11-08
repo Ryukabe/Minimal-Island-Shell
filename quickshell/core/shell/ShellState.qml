@@ -19,7 +19,12 @@ QtObject {
         islandClickOutsideDismiss: true,
         islandNotchMode: false,
         islandNotchFlare: 14,
-        islandHoverScale: 1.02,
+        //islandHoverScale: 1.02,
+        // island magnify on hover
+        islandMagnifyTrigger: "Pointer over",
+        islandMagnifyWidth: 12,
+        islandMagnifyHeight: 4,
+        islandMagnifyMoveDown: 3,
         radiusUniversal: true,
         customRadiusCard: 12,
         customRadiusControl: 6,
@@ -345,8 +350,14 @@ QtObject {
     property bool islandClickOutsideDismiss: root.defaults.islandClickOutsideDismiss
     property bool islandNotchMode: root.defaults.islandNotchMode
     property real islandNotchFlare: root.defaults.islandNotchFlare
-    property real islandHoverScale: root.defaults.islandHoverScale
+    //property real islandHoverScale: root.defaults.islandHoverScale
 
+    // Magnify on hover: the island grows wider and a bit taller (downwards) and moves down a little.
+    property string islandMagnifyTrigger: root.defaults.islandMagnifyTrigger   // "Off" | "Pointer over" | "Panel opens" | "Both"
+    property real islandMagnifyWidth: root.defaults.islandMagnifyWidth
+    property real islandMagnifyHeight: root.defaults.islandMagnifyHeight
+    property real islandMagnifyMoveDown: root.defaults.islandMagnifyMoveDown
+     
     property real islandCompactHeight: root.defaults.islandCompactHeight
     property real islandCompactWidth: root.defaults.islandCompactWidth
     property real islandExpandedHeight: root.defaults.islandExpandedHeight
