@@ -40,8 +40,19 @@ QtObject {
         islandHideDelayMs: 600,
         islandScrollVolume: true,
         islandScrollBrightness: true,
+        // hover panel
+        hoverPanelEnabled: true,
+        hoverPanelDelayMs: 2000,
+        hoverPanelCloseDelayMs: 400,
+        hoverPanelShowHint: true,
+        hoverPanelWidth: 420,
+        hoverPanelShowDate: true,
+        hoverPanelShowLevels: true,
+        hoverPanelShowNotifications: true,
+        hoverPanelShowTimer: true,
+        hoverPanelShowActions: true,
         // module sizing
-        launcherWidth: 420,
+        launcherWidth: 620,
         launcherMaxRows: 7,
         clipboardWidth: 420,
         clipboardMaxRows: 6,
@@ -314,6 +325,19 @@ QtObject {
     property real windowShadowOpacity: root.defaults.windowShadowOpacity   // alpha of the shared shadow color
     // Universal on = one slider (the shell Background opacity) also drives all three window opacities.
     property bool opacityUniversal: root.defaults.opacityUniversal
+
+    // ================= HOVER PANEL =================
+    // Rest the pointer on the idle island and a panel opens (Island.qml). Settings: Bar > Hover panel.
+    property bool hoverPanelEnabled: root.defaults.hoverPanelEnabled
+    property real hoverPanelDelayMs: root.defaults.hoverPanelDelayMs
+    property real hoverPanelCloseDelayMs: root.defaults.hoverPanelCloseDelayMs
+    property bool hoverPanelShowHint: root.defaults.hoverPanelShowHint
+    property real hoverPanelWidth: root.defaults.hoverPanelWidth
+    property bool hoverPanelShowDate: root.defaults.hoverPanelShowDate
+    property bool hoverPanelShowLevels: root.defaults.hoverPanelShowLevels
+    property bool hoverPanelShowNotifications: root.defaults.hoverPanelShowNotifications
+    property bool hoverPanelShowTimer: root.defaults.hoverPanelShowTimer
+    property bool hoverPanelShowActions: root.defaults.hoverPanelShowActions
 
     // ================= TYPOGRAPHY =================
     // Fonts.qml and Dimens.qml read these; the Typography page writes them.

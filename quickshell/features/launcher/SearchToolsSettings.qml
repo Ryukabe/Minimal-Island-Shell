@@ -1,5 +1,5 @@
-// pages/launcher/SearchToolsSettings.qml — Launcher > Search tools.
-// Each tool is a switch. The three quick pickers also get a trigger character that appears when they are on.
+// features/launcher/SearchToolsSettings.qml — Launcher > Search tools.
+// Each tool is a switch. The trigger marks for the quick pickers are in Launcher > Advanced.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -61,61 +61,24 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Emoji picker"
+            description: "Starts with the emoji trigger mark"
             checked: LauncherState.feature("emoji")
             onToggled: (val) => LauncherState.setFeature("emoji", val)
         }
 
-        Reveal {
-            shown: LauncherState.feature("emoji")
-
-            TextRow {
-                label: "Emoji trigger"
-                description: "Type this first, then a word"
-                value: LauncherState.triggerEmoji
-                fieldWidth: 80
-                maximumLength: 3
-                onCommitted: (v) => LauncherState.setTrigger("emoji", v)
-            }
-        }
-
         ToggleRow {
             label: "Snippets"
+            description: "Starts with the snippets trigger mark"
             checked: LauncherState.feature("snippets")
             onToggled: (val) => LauncherState.setFeature("snippets", val)
         }
 
-        Reveal {
-            shown: LauncherState.feature("snippets")
-
-            TextRow {
-                label: "Snippets trigger"
-                description: "Type this first, then a snippet name"
-                value: LauncherState.triggerSnippets
-                fieldWidth: 80
-                maximumLength: 3
-                onCommitted: (v) => LauncherState.setTrigger("snippets", v)
-            }
-        }
-
         ToggleRow {
             label: "Quick notes"
+            description: "Starts with the quick notes trigger mark"
             checked: LauncherState.feature("notes")
             onToggled: (val) => LauncherState.setFeature("notes", val)
-            showDivider: LauncherState.feature("notes")
-        }
-
-        Reveal {
-            shown: LauncherState.feature("notes")
-
-            TextRow {
-                label: "Quick notes trigger"
-                description: "Type this first, then your note"
-                value: LauncherState.triggerNotes
-                fieldWidth: 80
-                maximumLength: 3
-                showDivider: false
-                onCommitted: (v) => LauncherState.setTrigger("notes", v)
-            }
+            showDivider: false
         }
     }
 }

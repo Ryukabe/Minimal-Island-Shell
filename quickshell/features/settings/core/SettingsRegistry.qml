@@ -54,8 +54,11 @@ QtObject {
                         { id: "behavior", title: "Behavior", subtitle: "Visibility, hover and scroll", icon: "tune",
                           tags: "persistent always visible show on hover reveal zone hide delay click outside dismiss scroll gestures volume brightness",
                           source: "../bar/BehaviorSettings.qml" },
-                        { id: "advanced", title: "Advanced", subtitle: "Panel sizes and hover feel", icon: "build",
-                          tags: "expanded height floor minimum width panel size lift hover scale advanced reset",
+                        { id: "hoverpanel", title: "Hover panel", subtitle: "The panel that opens when you rest the pointer", icon: "preview",
+                          tags: "hover panel rest pointer delay close hint width date time volume brightness notifications timer quick actions dwell",
+                          source: "../hoverpanel/HoverPanelSettings.qml" },  
+                        { id: "advanced", title: "Advanced", subtitle: "Minimum size of open panels", icon: "build",
+                          tags: "expanded height floor minimum width panel size advanced",
                           source: "../bar/BarAdvancedSettings.qml" }
                     ]
                 },
@@ -93,7 +96,10 @@ QtObject {
                           source: "../clipboard/ClipboardSettings.qml" },
                         { id: "notessnippets", title: "Notes & snippets", subtitle: "Where they are saved", icon: "edit_note",
                           tags: "quick notes snippets folder file json aliases pinned search engines storage",
-                          source: "../launcher/NotesSnippetsSettings.qml" }
+                          source: "../launcher/NotesSnippetsSettings.qml" },
+                        { id: "advanced", title: "Advanced", subtitle: "Result limits, icon theme and trigger marks", icon: "build",
+                          tags: "maximum results recent apps remember icon theme trigger mark emoji snippets notes character advanced",
+                          source: "../launcher/LauncherAdvancedSettings.qml" }  
                     ]
                 },
                 { id: "controlcenter", title: "Control Center", subtitle: "Tiles and layout", icon: "widgets",

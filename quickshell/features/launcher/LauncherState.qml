@@ -1,49 +1,69 @@
-// features/launcher/LauncherState.qml
+// features/launcher/LauncherState.qml — saved Launcher options (state/launcher-settings.json).
+// The panel width and visible rows live in ShellState (launcherWidth, launcherMaxRows).
 pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../settings/core"
+import "../../core/shell"
 
 Singleton {
     id: root
 
+    readonly property var defaults: ({
+        maxResults: 8,
+        matchMode: "Fuzzy",
+        searchDescriptions: true,
+        showRecentsFirst: true,
+        recentLimit: 10,
+        showIcons: true,
+        animateResults: true,
+        shrinkForFewResults: true,
+        viewMode: "List",
+        gridColumns: 4,
+        inlineCalculator: true,
+        clipboardHistory: true,
+        clipboardLimit: 100,
+        features: { commands: true, web: true, files: true, system: true, units: true, emoji: true, snippets: true, notes: true },
+        triggerEmoji: ";",
+        triggerSnippets: "\"",
+        triggerNotes: "-"
+    })
+
     // ---- Search ----
-    property int maxResults: 8
-    property string matchMode: "Fuzzy"          // "Fuzzy" | "Prefix"
-    property bool searchDescriptions: true
+    property int maxResults: root.defaults.maxResults
+    property string matchMode: root.defaults.matchMode               // "Fuzzy" | "Prefix"
+    property bool searchDescriptions: root.defaults.searchDescriptions
 
     // ---- Recent apps ----
-    property bool showRecentsFirst: true
-    property int recentLimit: 10
+    property bool showRecentsFirst: root.defaults.showRecentsFirst
+    property int recentLimit: root.defaults.recentLimit
     property var recentIds: []
 
     // ---- Appearance ----
-    property bool showIcons: true
-    property bool animateResults: true
-    property string launcherWidth: "Normal"     // "Compact" | "Normal" | "Wide"
-    property bool shrinkForFewResults: true
-    property string viewMode: "List"            // "List" | "Grid" (apps only; emoji is always a grid)
-    property int gridColumns: 4                 // 3..6, app grid only
+    property bool showIcons: root.defaults.showIcons
+    property bool animateResults: root.defaults.animateResults
+    property bool shrinkForFewResults: root.defaults.shrinkForFewResults
+    property string viewMode: root.defaults.viewMode                 // "List" | "Grid" (apps only; emoji is always a grid)
+    property int gridColumns: root.defaults.gridColumns              // 3..6, app grid only
 
     // ---- Extras ----
-    property bool inlineCalculator: true
-    property bool clipboardHistory: true
-    property int clipboardLimit: 100
+    property bool inlineCalculator: root.defaults.inlineCalculator
+    property bool clipboardHistory: root.defaults.clipboardHistory
+    property int clipboardLimit: root.defaults.clipboardLimit
 
     // ---- Feature switches (one per launcher provider) ----
-    property var features: ({
-        commands: true, web: true, files: true,
-        system: true, units: true, emoji: true, snippets: true, notes: true
-    })
+    property var features: root.defaults.features
 
     // ---- Trigger marks for emoji / snippets / notes. Reserved: > ? / : ----
-    property string triggerEmoji: ";"
-    property string triggerSnippets: "\""
-    property string triggerNotes: "-"
+    property string triggerEmoji: root.defaults.triggerEmoji
+    property string triggerSnippets: root.defaults.triggerSnippets
+    property string triggerNotes: root.defaults.triggerNotes
     readonly property var reservedMarks: [">", "?", "/", ":"]
 
-    readonly property real widthScale: launcherWidth === "Compact" ? 0.8
-                                     : (launcherWidth === "Wide" ? 1.25 : 1.0)
+    // Old saves kept a width preset here ("Compact" | "Normal" | "Wide"). The width is now the one
+    // slider ShellState.launcherWidth, so the preset is folded into it once and then dropped.
+    property real _legacyWidthScale: 0
 
     property bool _loading: false
 
@@ -55,7 +75,6 @@ Singleton {
     onRecentIdsChanged: scheduleSave()
     onShowIconsChanged: scheduleSave()
     onAnimateResultsChanged: scheduleSave()
-    onLauncherWidthChanged: scheduleSave()
     onShrinkForFewResultsChanged: scheduleSave()
     onViewModeChanged: scheduleSave()
     onGridColumnsChanged: scheduleSave()
@@ -73,6 +92,11 @@ Singleton {
         printErrors: false
         onLoaded: root.applyJson(text())
         onLoadFailed: (error) => root.saveNow()
+    }
+
+    Connections {
+        target: SettingsStore
+        function onSettingsLoaded() { root._migrateWidth() }
     }
 
     // Slider drags fire many changes, so writes are debounced.
@@ -97,7 +121,6 @@ Singleton {
             recentIds: recentIds,
             showIcons: showIcons,
             animateResults: animateResults,
-            launcherWidth: launcherWidth,
             shrinkForFewResults: shrinkForFewResults,
             viewMode: viewMode,
             gridColumns: gridColumns,
@@ -109,6 +132,30 @@ Singleton {
             triggerSnippets: triggerSnippets,
             triggerNotes: triggerNotes
         }, null, 2))
+    }
+
+    // Back to the defaults. The recent apps history is not an option, so it stays (use Clear for that).
+    function resetToDefaults() {
+        _loading = true
+        maxResults = defaults.maxResults
+        matchMode = defaults.matchMode
+        searchDescriptions = defaults.searchDescriptions
+        showRecentsFirst = defaults.showRecentsFirst
+        recentLimit = defaults.recentLimit
+        showIcons = defaults.showIcons
+        animateResults = defaults.animateResults
+        shrinkForFewResults = defaults.shrinkForFewResults
+        viewMode = defaults.viewMode
+        gridColumns = defaults.gridColumns
+        inlineCalculator = defaults.inlineCalculator
+        clipboardHistory = defaults.clipboardHistory
+        clipboardLimit = defaults.clipboardLimit
+        features = defaults.features
+        triggerEmoji = defaults.triggerEmoji
+        triggerSnippets = defaults.triggerSnippets
+        triggerNotes = defaults.triggerNotes
+        _loading = false
+        saveNow()
     }
 
     function feature(name) {
@@ -151,6 +198,16 @@ Singleton {
     function _bool(v, fallback) { return typeof v === "boolean" ? v : fallback }
     function _choice(v, allowed, fallback) { return allowed.indexOf(v) >= 0 ? v : fallback }
 
+    // Runs once, as soon as both this file and the shell settings are loaded. The launcher was never
+    // narrower than the island's minimum expanded width, so that floor is kept to look the same.
+    function _migrateWidth() {
+        if (root._legacyWidthScale <= 0 || !SettingsStore.ready) return
+        var px = Math.max(ShellState.islandMinExpandedWidth, ShellState.launcherWidth * root._legacyWidthScale)
+        ShellState.launcherWidth = Math.max(300, Math.min(1000, Math.round(px / 10) * 10))
+        root._legacyWidthScale = 0
+        root.scheduleSave()
+    }
+
     function applyJson(txt) {
         if (!txt || txt.trim() === "") { saveNow(); return }
 
@@ -173,13 +230,16 @@ Singleton {
             : []
         showIcons = _bool(d.showIcons, showIcons)
         animateResults = _bool(d.animateResults, animateResults)
-        launcherWidth = _choice(d.launcherWidth, ["Compact", "Normal", "Wide"], launcherWidth)
         shrinkForFewResults = _bool(d.shrinkForFewResults, shrinkForFewResults)
         viewMode = _choice(d.viewMode, ["List", "Grid"], viewMode)
         gridColumns = _num(d.gridColumns, 3, 6, gridColumns)
         inlineCalculator = _bool(d.inlineCalculator, inlineCalculator)
         clipboardHistory = _bool(d.clipboardHistory, clipboardHistory)
         clipboardLimit = _num(d.clipboardLimit, 10, 100, clipboardLimit)
+
+        if (typeof d.launcherWidth === "string") {
+            root._legacyWidthScale = d.launcherWidth === "Compact" ? 0.8 : (d.launcherWidth === "Wide" ? 1.25 : 1.0)
+        }
 
         // Keys from an older save (e.g. "windows", "processes") are simply
         // dropped here since they're no longer in the default `features` set.
@@ -193,6 +253,8 @@ Singleton {
         if (_basicValidTrigger(d.triggerSnippets)) triggerSnippets = d.triggerSnippets
         if (_basicValidTrigger(d.triggerNotes)) triggerNotes = d.triggerNotes
         _loading = false
+
+        root._migrateWidth()
     }
 
     // ---- Recent apps ----

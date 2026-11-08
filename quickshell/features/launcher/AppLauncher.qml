@@ -1,4 +1,5 @@
-// features/launcher/AppLauncher.qml
+// features/launcher/AppLauncher.qml — the launcher page. The island animates this page's size; inside it,
+// everything uses the island's curves: OutBack for things that appear, OutCubic for small moves and fades.
 pragma ComponentBehavior: Bound
 
 import "../clipboard"
@@ -15,7 +16,7 @@ Item {
 
     readonly property int rowHeight: 54
     readonly property int maxVisibleRows: ShellState.launcherMaxRows
-    readonly property int maxWidth: Math.round(ShellState.launcherWidth * LauncherState.widthScale)
+    readonly property int maxWidth: Math.round(ShellState.launcherWidth)
     readonly property int minWidth: Math.round(maxWidth * 0.72)
     readonly property int chromeHeight: 76
 
@@ -34,6 +35,10 @@ Item {
     // with a `kind` (see features/launcher/LauncherSearch.qml).
     property var results: LauncherSearch.search(query)
     property int selectedIndex: 0
+
+    // True for a moment after the panel opens: results then wait for the island's content delay and
+    // stagger in. While typing it is false, so results only fade.
+    property bool opening: true
 
     // ---- mode / layout ----
     readonly property string mode: LauncherSearch.parse(query).mode
@@ -84,6 +89,7 @@ Item {
 
     // ---- hover name pill (emoji grid) ----
     property string tipLabel: ""
+    property string tipLastLabel: ""   // kept while the pill fades out
     property real tipX: 0
     property real tipY: 0
     property real tipCellHeight: 0
@@ -94,10 +100,17 @@ Item {
         tipY = p.y
         tipCellHeight = item.height
         tipLabel = label
+        tipLastLabel = label
     }
 
     function hideTip() {
         tipLabel = ""
+    }
+
+    // Delay before a result starts to appear: nothing while typing, the island's content delay plus a short
+    // stagger when the panel opens.
+    function enterDelay(index, stepMs, cap) {
+        return root.opening ? Motion.contentDelayMs + Math.min(index, cap) * stepMs : 0
     }
 
     function scrollToSelected() {
@@ -131,13 +144,23 @@ Item {
         onTriggered: searchInput.forceActiveFocus()
     }
 
+    Timer {
+        id: openTimer
+        interval: 700
+        repeat: false
+        onTriggered: root.opening = false
+    }
+
     onVisibleChanged: {
         if (visible && ShellState.activePage === "launcher") {
             focusTimer.restart()
         }
     }
 
-    Component.onCompleted: focusTimer.restart()
+    Component.onCompleted: {
+        focusTimer.restart()
+        openTimer.restart()
+    }
 
     Rectangle {
         id: searchBar
@@ -161,6 +184,7 @@ Item {
             spacing: Dimens.spacingLg
 
             Text {
+                id: glyph
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.searchGlyph
                 font.family: Fonts.icon
@@ -168,6 +192,37 @@ Item {
                 font.variableAxes: Fonts.iconAxes
                 font.features: { "liga": 1, "dlig": 1 }
                 color: root.pluginActive ? Colors.accent : Colors.fgMuted
+
+                property bool ready: false
+                Component.onCompleted: glyph.ready = true
+
+                Behavior on color {
+                    ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                }
+
+                // A new mode pops its icon in, with the island's OutBack curve.
+                onTextChanged: if (glyph.ready && !ShellState.motionReduced) glyphPop.restart()
+
+                ParallelAnimation {
+                    id: glyphPop
+                    NumberAnimation {
+                        target: glyph
+                        property: "scale"
+                        from: 0.6
+                        to: 1.0
+                        duration: ShellState.motionDuration(Motion.glideMs * 0.6)
+                        easing.type: Easing.OutBack
+                        easing.overshoot: ShellState.motionIslandOvershoot() * 1.5
+                    }
+                    NumberAnimation {
+                        target: glyph
+                        property: "opacity"
+                        from: 0.3
+                        to: 1.0
+                        duration: ShellState.motionDuration(Motion.fadeMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             Item {
@@ -232,6 +287,24 @@ Item {
         model: root.useGrid ? [] : root.results
         currentIndex: root.selectedIndex
 
+        // One highlight that glides to the selected row. It is drawn behind the rows.
+        highlightFollowsCurrentItem: false
+        highlight: Rectangle {
+            visible: appList.currentItem !== null
+            radius: root._outerRadius
+            color: Colors.subBgMica
+            height: appList.currentItem ? appList.currentItem.height : 0
+            width: appList.width
+            y: appList.currentItem ? appList.currentItem.y : 0
+
+            Behavior on y {
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.hoverMs)
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
         WheelHandler {
@@ -250,39 +323,31 @@ Item {
 
             // Non-app rows (calculator, web search, files, ...) carry a `kind`.
             readonly property bool isAction: modelData.kind !== undefined
+            readonly property bool selected: delegateRoot.index === root.selectedIndex
 
             width: appList.width
             height: root.rowHeight - appList.spacing
             radius: root._outerRadius
-            color: (delegateRoot.index !== undefined && delegateRoot.index === root.selectedIndex) ? Colors.subBgMica : "transparent"
+            color: "transparent"
 
-            scale: delegateRoot.index === root.selectedIndex ? 1.015 : 1.0
-
-            // Fade-in when a row is created (runs on every filter change too)
+            // Entrance: fade and rise a little. Runs on every filter change (the rows are rebuilt).
             readonly property bool fadeEnabled: LauncherState.animateResults && !ShellState.motionReduced
-            opacity: fadeEnabled ? 0 : 1
-            Behavior on opacity {
-                enabled: delegateRoot.fadeEnabled
-                NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
-            }
-            Component.onCompleted: delegateRoot.opacity = 1
+            property real enter: delegateRoot.fadeEnabled ? 0 : 1
+            opacity: delegateRoot.enter
+            transform: Translate { y: (1 - delegateRoot.enter) * 5 }
 
-            // Row selection is snap tier — small, frequent, must not lag key repeats
-            SpringAnimation {
-                id: selectSpringAnim
-                spring: Motion.snapSpring
-                damping: Motion.snapDamping
-                mass: Motion.snapMass
-                epsilon: Motion.epsilon
+            SequentialAnimation {
+                id: enterAnim
+                PauseAnimation { duration: ShellState.motionDuration(root.enterDelay(delegateRoot.index, 22, 6)) }
+                NumberAnimation {
+                    target: delegateRoot
+                    property: "enter"
+                    to: 1
+                    duration: ShellState.motionDuration(Motion.fadeMs)
+                    easing.type: Easing.OutCubic
+                }
             }
-            NumberAnimation {
-                id: selectEaseAnim
-                duration: ShellState.motionDuration(Motion.snapMs)
-                easing.type: Easing.OutCubic
-            }
-            Behavior on scale {
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? selectSpringAnim : selectEaseAnim
-            }
+            Component.onCompleted: if (delegateRoot.fadeEnabled) enterAnim.start()
 
             Row {
                 anchors.fill: parent
@@ -310,8 +375,12 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: ShellState.islandCornerRadius
-                        color: (delegateRoot.index !== undefined && delegateRoot.index === root.selectedIndex) ? Colors.mainBgMica : Colors.subBgMica
+                        color: delegateRoot.selected ? Colors.mainBgMica : Colors.subBgMica
                         visible: appIcon.status !== Image.Ready
+
+                        Behavior on color {
+                            ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                        }
 
                         // first letter for apps without an icon
                         Text {
@@ -390,6 +459,31 @@ Item {
         model: root.useGrid ? root.results : []
         currentIndex: root.selectedIndex
 
+        // One highlight that glides to the selected cell. It is drawn behind the cells.
+        highlightFollowsCurrentItem: false
+        highlight: Rectangle {
+            visible: appGrid.currentItem !== null
+            radius: root._outerRadius
+            color: Colors.subBgMica
+            width: appGrid.cellWidth - 4
+            height: appGrid.cellHeight - 4
+            x: appGrid.currentItem ? appGrid.currentItem.x + 2 : 0
+            y: appGrid.currentItem ? appGrid.currentItem.y + 2 : 0
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.hoverMs)
+                    easing.type: Easing.OutCubic
+                }
+            }
+            Behavior on y {
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.hoverMs)
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
         onContentYChanged: root.hideTip()
@@ -414,38 +508,33 @@ Item {
             width: appGrid.cellWidth
             height: appGrid.cellHeight
 
+            // A selected cell grows a little, with a plain ease.
             scale: cell.selected ? 1.04 : 1.0
-
-            readonly property bool fadeEnabled: LauncherState.animateResults && !ShellState.motionReduced
-            opacity: fadeEnabled ? 0 : 1
-            Behavior on opacity {
-                enabled: cell.fadeEnabled
-                NumberAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
-            }
-            Component.onCompleted: cell.opacity = 1
-
-            SpringAnimation {
-                id: cellSpringAnim
-                spring: Motion.snapSpring
-                damping: Motion.snapDamping
-                mass: Motion.snapMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: cellEaseAnim
-                duration: ShellState.motionDuration(Motion.snapMs)
-                easing.type: Easing.OutCubic
-            }
             Behavior on scale {
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? cellSpringAnim : cellEaseAnim
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.hoverMs)
+                    easing.type: Easing.OutCubic
+                }
             }
 
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: 2
-                radius: root._outerRadius
-                color: cell.selected ? Colors.subBgMica : "transparent"
+            // Entrance: fade and rise a little.
+            readonly property bool fadeEnabled: LauncherState.animateResults && !ShellState.motionReduced
+            property real enter: cell.fadeEnabled ? 0 : 1
+            opacity: cell.enter
+            transform: Translate { y: (1 - cell.enter) * 5 }
+
+            SequentialAnimation {
+                id: cellEnterAnim
+                PauseAnimation { duration: ShellState.motionDuration(root.enterDelay(cell.index, 16, 8)) }
+                NumberAnimation {
+                    target: cell
+                    property: "enter"
+                    to: 1
+                    duration: ShellState.motionDuration(Motion.fadeMs)
+                    easing.type: Easing.OutCubic
+                }
             }
+            Component.onCompleted: if (cell.fadeEnabled) cellEnterAnim.start()
 
             // ---- emoji cell ----
             Text {
@@ -484,6 +573,10 @@ Item {
                         radius: root._outerRadius
                         color: cell.selected ? Colors.mainBgMica : Colors.subBgMica
                         visible: gridIcon.status !== Image.Ready
+
+                        Behavior on color {
+                            ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                        }
 
                         Text {
                             anchors.centerIn: parent
@@ -524,11 +617,12 @@ Item {
         }
     }
 
-    // Hover name for emoji (shown only while the mouse is over a cell)
+    // Hover name for emoji (shown only while the mouse is over a cell). It fades in and out.
     Rectangle {
         id: hoverTip
         z: 10
-        visible: root.tipLabel.length > 0
+        opacity: root.tipLabel.length > 0 ? 1 : 0
+        visible: opacity > 0
         width: tipText.implicitWidth + 16
         height: tipText.implicitHeight + 8
         radius: Dimens.radiusSmall
@@ -539,10 +633,17 @@ Item {
         x: Math.max(4, Math.min(root.tipX - width / 2, root.width - width - 4))
         y: (root.tipY - height - 2 >= 0) ? (root.tipY - height - 2) : (root.tipY + root.tipCellHeight + 2)
 
+        Behavior on opacity {
+            NumberAnimation {
+                duration: ShellState.motionDuration(Motion.fadeMs * 0.6)
+                easing.type: Easing.OutCubic
+            }
+        }
+
         Text {
             id: tipText
             anchors.centerIn: parent
-            text: root.tipLabel
+            text: root.tipLastLabel
             color: Colors.fg
             font.family: Fonts.text
             font.pixelSize: Dimens.fontSizeSm
@@ -557,7 +658,15 @@ Item {
         color: Colors.fgMuted
         font.family: Fonts.text
         font.pixelSize: Dimens.fontSizeMd
-        visible: root.results.length === 0
+        opacity: root.results.length === 0 ? 1 : 0
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: ShellState.motionDuration(Motion.fadeMs)
+                easing.type: Easing.OutCubic
+            }
+        }
     }
 
     Connections {
@@ -566,6 +675,8 @@ Item {
             if (ShellState.activePage === "launcher") {
                 searchInput.text = ""
                 root.selectedIndex = 0
+                root.opening = true
+                openTimer.restart()
                 LauncherSearch.prepare("")
                 focusTimer.restart()
             }

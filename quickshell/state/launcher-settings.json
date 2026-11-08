@@ -5,13 +5,13 @@
   "showRecentsFirst": false,
   "recentLimit": 10,
   "recentIds": [
+    "firefox",
     "btop"
   ],
   "showIcons": true,
   "animateResults": true,
-  "launcherWidth": "Normal",
   "shrinkForFewResults": false,
-  "viewMode": "Grid",
+  "viewMode": "List",
   "gridColumns": 4,
   "inlineCalculator": true,
   "clipboardHistory": true,

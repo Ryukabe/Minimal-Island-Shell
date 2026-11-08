@@ -14,6 +14,10 @@ Item {
     property bool _loaded: false
     property bool _applying: false
 
+    // True once the saved settings have been read. Anything that has to wait for them listens for settingsLoaded().
+    readonly property bool ready: root._loaded
+    signal settingsLoaded()
+
     function _defaults() {
         return JSON.parse(JSON.stringify(ShellState.defaults))
     }

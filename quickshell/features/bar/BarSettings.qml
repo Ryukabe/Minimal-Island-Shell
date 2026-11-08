@@ -23,7 +23,8 @@ PageScroll {
     readonly property var resetKeys: [
         "islandNotchMode", "islandBorderWidth", "islandTopMargin", "islandNotchFlare",
         "islandCompactHeight", "islandCompactWidth",
-        "islandExpandedHeight", "islandMinExpandedWidth", "islandHoverScale",
+        "islandExpandedHeight", "islandMinExpandedWidth",
+        "islandMagnifyTrigger", "islandMagnifyWidth", "islandMagnifyHeight", "islandMagnifyMoveDown",
         "islandAlwaysVisible", "islandRevealOnHover", "islandRevealZone", "islandHideDelayMs",
         "islandClickOutsideDismiss", "islandScrollVolume", "islandScrollBrightness",
         "clockUse24Hour", "clockShowSeconds", "clockLeadingZero", "clockLowercaseAmPm", "clockDateStyle",
@@ -31,7 +32,9 @@ PageScroll {
         "clockVisualizerMaxHeight", "clockVisualizerSpeedPercent", "clockVisualizerColor",
         "workspaceShownCount", "workspaceActiveIndicator", "workspaceUseAccent", "workspaceActiveTrail",
         "workspaceOccupiedBackground", "workspaceBounce", "workspaceDotSize", "workspaceActiveWidth",
-        "workspaceShowWindows", "workspaceWindowsOnSpecial", "workspaceMaxWindowIcons", "workspacePerMonitor"
+        "workspaceShowWindows", "workspaceWindowsOnSpecial", "workspaceMaxWindowIcons", "workspacePerMonitor",
+        "hoverPanelEnabled", "hoverPanelDelayMs", "hoverPanelCloseDelayMs", "hoverPanelShowHint", "hoverPanelWidth",
+        "hoverPanelShowDate", "hoverPanelShowLevels", "hoverPanelShowNotifications", "hoverPanelShowTimer", "hoverPanelShowActions",
     ]
 
     // Sub-pages whose item is on the bar: the item's card opens them, so the list below skips them.

@@ -419,6 +419,7 @@ PanelWindow {
         // Pages that size themselves from their own content, so the minimum expanded size does not apply:
         // the Detailed and Interactive notification popups, and the hover panel.
         readonly property bool sizesItself: ShellState.activePage === "hover"
+            || ShellState.activePage === "launcher"
             || (ShellState.activePage === "notification" && ShellState.notificationPopupStyle !== "Compact")
 
         // ---------- 7a. Size ----------

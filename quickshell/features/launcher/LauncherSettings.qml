@@ -1,33 +1,31 @@
-// pages/launcher/LauncherSettings.qml — the Launcher menu. Its own options sit here;
-// Search tools, Clipboard and Notes & snippets open from the list at the bottom.
+// features/launcher/LauncherSettings.qml — the Launcher menu. Size, search, recent apps and look sit here;
+// Search tools, Clipboard, Notes & snippets and Advanced open from the list near the bottom.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
 import "."
-import "../theme"
 import "../../core/shell"
 import "../../core/styles"
 
 PageScroll {
     id: root
 
+    // Every ShellState key in the Launcher menu, sub-pages included (used by the Reset row at the bottom).
+    // The icon theme is left out: Appearance shares that key.
+    readonly property var resetKeys: [
+        "launcherWidth", "launcherMaxRows", "clipboardWidth", "clipboardMaxRows"
+    ]
+
     SectionLabel { text: "Size" }
 
     GroupCard {
         SliderRow {
             label: "Width"
-            description: "Multiplied by the preset below"
-            from: 300; to: 800; stepSize: 10
+            description: "How wide the launcher is when it opens"
+            from: 300; to: 1000; stepSize: 10
             value: ShellState.launcherWidth
             unit: " px"
             onMoved: (val) => ShellState.launcherWidth = val
-        }
-
-        SegmentRow {
-            label: "Width preset"
-            options: ["Compact", "Normal", "Wide"]
-            selectedValue: LauncherState.launcherWidth
-            onOptionSelected: (name) => LauncherState.launcherWidth = name
         }
 
         SliderRow {
@@ -43,13 +41,6 @@ PageScroll {
     SectionLabel { text: "Search" }
 
     GroupCard {
-        SliderRow {
-            label: "Maximum results"
-            from: 3; to: 15; stepSize: 1
-            value: LauncherState.maxResults
-            onMoved: (v) => LauncherState.maxResults = Math.round(v)
-        }
-
         SegmentRow {
             label: "Match mode"
             options: ["Fuzzy", "Prefix"]
@@ -72,17 +63,6 @@ PageScroll {
             label: "Show recent apps first"
             checked: LauncherState.showRecentsFirst
             onToggled: (val) => LauncherState.showRecentsFirst = val
-        }
-
-        Reveal {
-            shown: LauncherState.showRecentsFirst
-
-            SliderRow {
-                label: "Recent apps to remember"
-                from: 3; to: 20; stepSize: 1
-                value: LauncherState.recentLimit
-                onMoved: (v) => LauncherState.recentLimit = Math.round(v)
-            }
         }
 
         ButtonRow {
@@ -122,28 +102,16 @@ PageScroll {
             onToggled: (val) => LauncherState.showIcons = val
         }
 
-        PickerRow {
-            label: "Icon theme"
-            description: "Icon set used for apps in the launcher"
-            pickerTitle: "Icon Theme"
-            searchHint: "Search icon themes..."
-            hint: "System default"
-            items: IconThemeService.pickerItems
-            value: ShellState.appIconTheme
-            strict: true
-            enabled: LauncherState.showIcons
-            onCommitted: (v) => ShellState.appIconTheme = v
-        }
-
         ToggleRow {
             label: "Animate results"
+            description: "Results fade in as you type"
             checked: LauncherState.animateResults
             onToggled: (val) => LauncherState.animateResults = val
         }
 
         ToggleRow {
             label: "Shrink panel for few results"
-            description: "A single match gets a compact panel (list layout only)"
+            description: "A single match gets a narrower panel (list layout only)"
             checked: LauncherState.shrinkForFewResults
             onToggled: (val) => LauncherState.shrinkForFewResults = val
             showDivider: false
@@ -153,4 +121,17 @@ PageScroll {
     SectionLabel { text: "More launcher settings" }
 
     ViewList {}
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow {
+            menuName: "Launcher"
+            keys: root.resetKeys
+            onResetDone: {
+                LauncherState.resetToDefaults()
+                LauncherData.resetStorageDefaults()
+            }
+        }
+    }
 }

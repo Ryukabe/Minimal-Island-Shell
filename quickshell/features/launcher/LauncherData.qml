@@ -200,6 +200,14 @@ Singleton {
         return i > 0 ? path.slice(0, i) : path
     }
 
+    // Used by Settings > Launcher > Reset. Aliases, pinned apps and search engines are your own data, not options, so they stay.
+    function resetStorageDefaults() {
+        notesMode = "running"
+        notesFile = home + "/Documents/quick-notes.md"
+        notesFolder = home + "/Documents/Quick Notes"
+        snippetsFolder = home + "/.config/quickshell/snippets"
+    }
+    
     function openNotesFolder() {
         var target = notesMode === "running" ? _dirOf(notesFile) : notesFolder
         Quickshell.execDetached(["sh", "-c", "mkdir -p \"$1\" && xdg-open \"$1\"", "sh", target])
