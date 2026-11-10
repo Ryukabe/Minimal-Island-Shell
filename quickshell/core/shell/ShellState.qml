@@ -58,6 +58,13 @@ QtObject {
         clipboardMaxRows: 6,
         controlCenterWidth: 580,
         controlCenterHeight: 400,
+        controlCenterColumns: 6,
+        controlCenterTileHeight: 68,
+        controlCenterGap: 6,
+        controlCenterShowNames: true,
+        controlCenterShowStatus: true,
+        controlCenterShowDot: true,
+        settingsVersion: 0,
         notificationCenterWidth: 360,
         notificationCenterMaxHeight: 480,
         powerMenuWidth: 320,
@@ -194,6 +201,7 @@ QtObject {
         iconStyle: "Rounded",
         iconWeight: 400,
         iconFilled: false,
+        uiDensity: "Default",
         // templates
         templatesEnabled: true,
         templateGtk3: true,
@@ -219,6 +227,7 @@ QtObject {
         volumeMax: 100,
         lyricsBackend: "Auto",
         defaultPlayer: "Spotify",
+        volumeShowPopup: true,
         // language & region
         weatherUnit: "°C",
         systemTempUnit: "°C",
@@ -347,6 +356,8 @@ QtObject {
     property string iconStyle: root.defaults.iconStyle                // "Rounded" | "Outlined" | "Sharp"
     property int iconWeight: root.defaults.iconWeight
     property bool iconFilled: root.defaults.iconFilled
+    property string uiDensity: root.defaults.uiDensity                // "Compact" | "Default" | "Roomy"
+
     // ====================== TEMPLATES ======================
     property bool templatesEnabled: root.defaults.templatesEnabled
     property bool templateGtk3: root.defaults.templateGtk3
@@ -411,6 +422,14 @@ QtObject {
 
     property real controlCenterWidth: root.defaults.controlCenterWidth
     property real controlCenterHeight: root.defaults.controlCenterHeight
+    property int controlCenterColumns: root.defaults.controlCenterColumns
+    property real controlCenterTileHeight: root.defaults.controlCenterTileHeight
+    property real controlCenterGap: root.defaults.controlCenterGap
+    property bool controlCenterShowNames: root.defaults.controlCenterShowNames
+    property bool controlCenterShowStatus: root.defaults.controlCenterShowStatus
+    property bool controlCenterShowDot: root.defaults.controlCenterShowDot
+    // Saved-settings upgrade step. SettingsStore runs each one-time migration once, then raises this.
+    property int settingsVersion: root.defaults.settingsVersion
 
     property real notificationCenterWidth: root.defaults.notificationCenterWidth
     property real notificationCenterMaxHeight: root.defaults.notificationCenterMaxHeight
@@ -446,6 +465,7 @@ QtObject {
 
     // ================= UPDATES =================
     property bool updateAutoCheck: root.defaults.updateAutoCheck
+
 
     // ================= NETWORK =================
     // WifiService rescans this often, but only while a Wi-Fi view is open.
@@ -532,6 +552,7 @@ QtObject {
     property int volumeMax: root.defaults.volumeMax
     property string lyricsBackend: root.defaults.lyricsBackend            // "Auto" | "LRCLIB" | "Local files"
     property string defaultPlayer: root.defaults.defaultPlayer            // "Spotify" | "Firefox" | "mpv" | "Any"
+    property bool volumeShowPopup: root.defaults.volumeShowPopup    // the level indicator that pops up in the island
 
     // ================= LANGUAGE & REGION =================
     property string weatherUnit: root.defaults.weatherUnit                // "°C" | "°F"

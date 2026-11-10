@@ -3,12 +3,14 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "../../core/styles"
+import "../../core/shell"
 
 QtObject {
     id: root
 
-    property int columns: 6
-    property real cellSpacing: Dimens.spacingSm
+    // Saved in ShellState so the choice survives a restart.
+    readonly property int columns: ShellState.controlCenterColumns
+    readonly property real cellSpacing: ShellState.controlCenterGap
 
     property var universalSizes: [
         {c:1,r:1}, {c:1,r:2}, {c:1,r:3}, {c:1,r:4},
@@ -87,6 +89,7 @@ QtObject {
             root._newLoaded = true
             root.loadFromJson(text())
         }
+        onLoadFailed: (error) => root.resetToDefault()
     }
 
     function resetToDefault() {

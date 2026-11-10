@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import "../../../core/styles"
+import "../../../core/shell"
 
 Item {
     id: root
-    implicitWidth: 580
+    implicitWidth: ShellState.controlCenterWidth
     implicitHeight: grid.implicitHeight + 32
 
     signal subviewRequestedFor(string viewName)

@@ -13,7 +13,11 @@ import "components"
 PageScroll {
     id: root
 
-    readonly property var columnOptions: ["5", "6", "7", "8", "9"]
+    // Every ShellState key in the Control Center menu (used by the Reset row at the bottom).
+    readonly property var resetKeys: [
+        "controlCenterColumns", "controlCenterWidth", "controlCenterTileHeight", "controlCenterGap",
+        "controlCenterShowNames", "controlCenterShowStatus", "controlCenterShowDot"
+    ]
     readonly property var selectedTile: {
         const idx = ControlCenterLayoutService.indexForId(grid.selectedTileId)
         return idx >= 0 ? ControlCenterLayoutService.layoutModel.get(idx) : null
@@ -104,7 +108,7 @@ PageScroll {
         readonly property real panelPadding: 16
 
         Layout.alignment: Qt.AlignHCenter
-        Layout.preferredWidth: grid.implicitWidth + panelPadding * 2
+        Layout.preferredWidth: grid.width + panelPadding * 2
         Layout.preferredHeight: grid.implicitHeight + panelPadding * 2
 
         radius: ShellState.islandCornerRadius
@@ -116,7 +120,7 @@ PageScroll {
             id: grid
             x: previewPanel.panelPadding
             y: previewPanel.panelPadding
-            width: implicitWidth
+            width: Math.min(implicitWidth, root.width - Dimens.paddingLarge * 2 - previewPanel.panelPadding * 2)
             height: implicitHeight
             editMode: true
 
@@ -250,6 +254,76 @@ PageScroll {
                     }
                 }
             }
+        }
+    }
+
+    SectionLabel { text: "Size" }
+
+    GroupCard {
+        SliderRow {
+            label: "Width"
+            description: "How wide the Control Center is when it opens"
+            from: 520; to: 900; stepSize: 10
+            value: ShellState.controlCenterWidth
+            unit: " px"
+            onMoved: (val) => ShellState.controlCenterWidth = val
+        }
+
+        SliderRow {
+            label: "Tile height"
+            description: "Height of one row of tiles"
+            from: 56; to: 96; stepSize: 2
+            value: ShellState.controlCenterTileHeight
+            unit: " px"
+            onMoved: (val) => ShellState.controlCenterTileHeight = val
+        }
+
+        SliderRow {
+            label: "Tile gap"
+            description: "Space between tiles"
+            from: 0; to: 20; stepSize: 1
+            value: ShellState.controlCenterGap
+            unit: " px"
+            onMoved: (val) => ShellState.controlCenterGap = val
+            showDivider: false
+        }
+    }    
+
+    SectionLabel { text: "Tile text" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Tile names"
+            description: "The name under the icon on small tiles"
+            checked: ShellState.controlCenterShowNames
+            onToggled: (val) => ShellState.controlCenterShowNames = val
+        }
+
+        ToggleRow {
+            label: "Status text"
+            description: "The line under the title on wide tiles, such as the Wi-Fi network name"
+            checked: ShellState.controlCenterShowStatus
+            onToggled: (val) => ShellState.controlCenterShowStatus = val
+        }
+
+        ToggleRow {
+            label: "Status dot"
+            description: "The small dot in the corner that shows a tile is on"
+            checked: ShellState.controlCenterShowDot
+            onToggled: (val) => ShellState.controlCenterShowDot = val
+            showDivider: false
+        }
+    }
+
+    
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow {
+            menuName: "Control Center"
+            keys: root.resetKeys
+            onResetDone: ControlCenterLayoutService.resetToDefault()
         }
     }
 }

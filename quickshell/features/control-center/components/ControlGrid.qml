@@ -17,13 +17,13 @@ Item {
     readonly property int columns: ControlCenterLayoutService.columns
     readonly property real gap: ControlCenterLayoutService.cellSpacing
     readonly property real cellW: (width - (columns - 1) * gap) / columns
-    readonly property real cellH: 68
+    readonly property real cellH: ShellState.controlCenterTileHeight
     readonly property real stepX: cellW + gap
     readonly property real stepY: cellH + gap
     // In edit mode one spare row is shown so a tile can be dragged below the last one
     readonly property int gridRows: ControlCenterLayoutService.rowCount() + (editMode ? 1 : 0)
 
-    implicitWidth: 548
+    implicitWidth: ShellState.controlCenterWidth - 32
     implicitHeight: gridRows * cellH + Math.max(0, gridRows - 1) * gap
 
     // ---- Drag state (filled in by whichever tile is being dragged) ----
@@ -166,76 +166,38 @@ Item {
             width: colSpan * cellW + (colSpan - 1) * ControlCenterLayoutService.cellSpacing
             height: rowSpan * cellH + (rowSpan - 1) * ControlCenterLayoutService.cellSpacing
 
-            SpringAnimation {
-                id: xSpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: xEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
-            }
+            // Moves and resizes use one ease, the curve the island shrinks with. No spring.
             Behavior on x {
                 enabled: !dragArea.drag.active
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? xSpringAnim : xEaseAnim
-            }
-
-            SpringAnimation {
-                id: ySpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: yEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
             Behavior on y {
                 enabled: !dragArea.drag.active
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? ySpringAnim : yEaseAnim
-            }
-
-            SpringAnimation {
-                id: widthSpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: widthEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
             Behavior on width {
                 enabled: !tileWrapper.resizing
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? widthSpringAnim : widthEaseAnim
-            }
-
-            SpringAnimation {
-                id: heightSpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: heightEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
             Behavior on height {
                 enabled: !tileWrapper.resizing
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? heightSpringAnim : heightEaseAnim
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
 
             Loader {

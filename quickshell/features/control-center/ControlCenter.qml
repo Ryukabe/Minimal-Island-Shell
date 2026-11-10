@@ -1,3 +1,4 @@
+// features/control-center/ControlCenter.qml — the Control Center page: the tile grid and its sub-panels.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -11,7 +12,8 @@ Item {
     property string activeSubview: ""
     property bool _subviewFirstLoad: true
 
-    implicitWidth: pageLoader.item ? pageLoader.item.implicitWidth : ShellState.controlCenterWidth
+    // The width is the same for the grid and every sub-panel; the height follows what is shown.
+    implicitWidth: ShellState.controlCenterWidth
     implicitHeight: pageLoader.item ? pageLoader.item.implicitHeight : ShellState.controlCenterHeight
 
     focus: true
@@ -54,10 +56,10 @@ Item {
             }
         }
 
+        // Switching between the grid and a sub-panel: fade in and grow a little, with the island's curves.
         onItemChanged: {
             if (item) {
-                contentAnimSpring.stop()
-                contentAnimEase.stop()
+                contentAnim.stop()
                 if (root._subviewFirstLoad) {
                     item.opacity = 1
                     item.scale = 1.0
@@ -65,17 +67,13 @@ Item {
                 } else {
                     item.opacity = 0
                     item.scale = 0.95
-                    if (ShellState.motionSpringEnabled && !ShellState.motionReduced) {
-                        contentAnimSpring.start()
-                    } else {
-                        contentAnimEase.start()
-                    }
+                    contentAnim.start()
                 }
             }
         }
 
         ParallelAnimation {
-            id: contentAnimEase
+            id: contentAnim
             NumberAnimation {
                 target: pageLoader.item
                 property: "opacity"
@@ -90,29 +88,8 @@ Item {
                 from: 0.95
                 to: 1.0
                 duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
-            }
-        }
-
-        ParallelAnimation {
-            id: contentAnimSpring
-            NumberAnimation {
-                target: pageLoader.item
-                property: "opacity"
-                from: 0
-                to: 1
-                duration: ShellState.motionDuration(Motion.fadeMs)
-                easing.type: Easing.OutCubic
-            }
-            SpringAnimation {
-                target: pageLoader.item
-                property: "scale"
-                to: 1.0
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
+                easing.type: Easing.OutBack
+                easing.overshoot: ShellState.motionIslandOvershoot() * 0.8
             }
         }
     }

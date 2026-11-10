@@ -1,4 +1,4 @@
-// pages/launcher/NotesSnippetsSettings.qml — Launcher > Notes & snippets.
+// features/launcher/NotesSnippetsSettings.qml — Launcher > Notes & snippets: where they are saved.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -68,18 +68,6 @@ PageScroll {
             label: "Snippets location"
             buttonText: "Open"
             onClicked: LauncherData.openSnippetsFolder()
-            showDivider: false
-        }
-    }
-
-    SectionLabel { text: "Aliases, pinned apps and search engines" }
-
-    GroupCard {
-        ButtonRow {
-            label: "launcher-data.json"
-            description: "Edited by hand"
-            buttonText: "Open file"
-            onClicked: LauncherData.openFile()
             showDivider: false
         }
     }

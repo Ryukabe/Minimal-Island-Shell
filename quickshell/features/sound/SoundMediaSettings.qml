@@ -1,25 +1,53 @@
-// pages/soundmedia/SoundMediaSettings.qml — Sound & Media.
-// Output volume and the visualizer toggle are live. Volume step, maximum volume, lyrics source and
-// preferred player are saved on ShellState; VolumeService and the media module read them from there.
-// Position update rate is a greyed placeholder until the media module reads it.
+// features/sound/SoundMediaSettings.qml — Sound & Media.
+// Volume and its limits, the output device, the island visualizer, lyrics and the preferred player.
 import QtQuick
 import "../settings/components"
+import "../settings/core"
+import "../bar"
 import "."
 import "../../core/shell"
 
 PageScroll {
     id: root
 
+    // Every ShellState key in the Sound & Media menu (used by the Reset row at the bottom).
+    readonly property var resetKeys: ["volumeStep", "volumeMax", "volumeShowPopup", "lyricsBackend", "defaultPlayer"]
+
+    // The visualizer is on the island exactly when it is in the clock layout (Bar > Layout).
+    readonly property bool visualizerOn: ClockLayoutService.indexForId("visualizer") >= 0
+
+    function _openOutputPicker() {
+        SettingsPicker.open({
+            title: "Output device",
+            searchHint: "Search devices...",
+            items: VolumeService.outputSinks.map(n => ({ value: String(n.id), label: VolumeService.sinkLabel(n) })),
+            selectedValue: VolumeService.sink ? String(VolumeService.sink.id) : "",
+            initialQuery: "",
+            onPick: function (id) {
+                const node = VolumeService.outputSinks.find(n => String(n.id) === id)
+                if (node) VolumeService.setDefaultSink(node)
+            }
+        })
+    }
+
     SectionLabel { text: "Output" }
 
     GroupCard {
         SliderRow {
             label: "Output volume"
-            from: 0; to: 100; stepSize: 1
+            from: 0; to: ShellState.volumeMax; stepSize: 1
             value: VolumeService.percent
             unit: " %"
             onMoved: (val) => VolumeService.setPercent(val)
+        }
+
+        ButtonRow {
+            label: "Output device"
+            description: VolumeService.sink ? VolumeService.sinkLabel(VolumeService.sink) : "No output found"
+            buttonText: "Choose"
+            enabled: VolumeService.outputSinks.length > 0
             showDivider: false
+            onClicked: root._openOutputPicker()
         }
     }
 
@@ -37,11 +65,18 @@ PageScroll {
 
         SliderRow {
             label: "Maximum volume"
-            description: "Upper limit for output volume"
+            description: "Upper limit for output volume. Above 100 % can sound distorted"
             from: 50; to: 150; stepSize: 5
             value: ShellState.volumeMax
             unit: " %"
             onMoved: (val) => ShellState.volumeMax = val
+        }
+
+        ToggleRow {
+            label: "Volume popup"
+            description: "Show the level in the island when you change the volume with keys or scrolling"
+            checked: ShellState.volumeShowPopup
+            onToggled: (val) => ShellState.volumeShowPopup = val
             showDivider: false
         }
     }
@@ -51,18 +86,12 @@ PageScroll {
     GroupCard {
         ToggleRow {
             label: "Audio visualizer"
-            description: "Show the music visualizer beside the clock in the island"
-            checked: ShellState.clockShowVisualizer
-            onToggled: (val) => ShellState.clockShowVisualizer = val
-        }
-
-        SliderRow {
-            label: "Media position"
-            description: "How often the progress bar moves"
-            from: 100; to: 2000; stepSize: 100
-            value: 500
-            unit: " ms"
-            placeholder: true
+            description: "Show the music visualizer beside the clock in the island. Bar > Layout shows the same switch"
+            checked: root.visualizerOn
+            onToggled: (val) => {
+                if (val) ClockLayoutService.addItemAt("visualizer", ClockLayoutService.layoutModel.count)
+                else ClockLayoutService.removeItem("visualizer")
+            }
         }
 
         DropdownRow {
@@ -78,6 +107,15 @@ PageScroll {
             selectedValue: ShellState.defaultPlayer
             onOptionSelected: (value) => ShellState.defaultPlayer = value
             showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Reset" }
+
+    GroupCard {
+        ResetRow {
+            menuName: "Sound & Media"
+            keys: root.resetKeys
         }
     }
 }

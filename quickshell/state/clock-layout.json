@@ -4,9 +4,9 @@
     "workspaces",
     "time",
     "date",
-    "visualizer",
     "recording",
     "privacy",
-    "timer"
+    "timer",
+    "visualizer"
   ]
 }

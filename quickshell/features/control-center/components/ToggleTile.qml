@@ -99,6 +99,7 @@ Rectangle {
 
         Text {
             text: tile.displayName
+            visible: ShellState.controlCenterShowNames
             font.family: Fonts.text
             font.pixelSize: Dimens.fontSizeXSm
             color: Colors.fgMuted
@@ -145,7 +146,7 @@ Rectangle {
 
             Text {
                 text: tile.subtitle
-                visible: text !== ""
+                visible: text !== "" && ShellState.controlCenterShowStatus
                 font.family: Fonts.text
                 font.pixelSize: Dimens.fontSizeXSm
                 color: tile.active ? Colors.accent : Colors.fgMuted
@@ -170,6 +171,7 @@ Rectangle {
         width: 8
         height: 8
         radius: ShellState.islandCornerRadius
+        visible: ShellState.controlCenterShowDot
         color: tile.active ? Colors.accent : Colors.fgMuted
         anchors.top: parent.top
         anchors.right: parent.right

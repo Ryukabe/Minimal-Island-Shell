@@ -7,7 +7,9 @@ import "../../core/shell"
 
 Singleton {
     id: root
-    readonly property int step: 5
+    // Both come from Settings > Sound & Media.
+    readonly property int step: ShellState.volumeStep
+    readonly property int maxPercent: ShellState.volumeMax
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property int percent: sink ? Math.round(sink.audio.volume * 100) : 0
     readonly property bool muted: sink ? sink.audio.muted : false
@@ -31,10 +33,22 @@ Singleton {
         objects: root.appStreams
     }
 
+    // Lowering the maximum below the current volume brings the volume down with it.
+    Connections {
+        target: ShellState
+        function onVolumeMaxChanged() {
+            if (root.percent > ShellState.volumeMax) root._setVolume(ShellState.volumeMax)
+        }
+    }
+
     function _setVolume(pct) {
         if (!sink) return
-        const clamped = Math.max(0, Math.min(100, pct))
+        const clamped = Math.max(0, Math.min(root.maxPercent, pct))
         sink.audio.volume = clamped / 100
+    }
+
+    function _flash() {
+        if (ShellState.volumeShowPopup) ShellState.flashPage("volume")
     }
 
     function increase() {
@@ -43,7 +57,7 @@ Singleton {
         } else {
             _setVolume(root.percent + root.step)
         }
-        ShellState.flashPage("volume")
+        root._flash()
     }
 
     function decrease() {
@@ -52,22 +66,22 @@ Singleton {
         } else {
             _setVolume(root.percent - root.step)
         }
-        ShellState.flashPage("volume")
+        root._flash()
     }
 
     function toggleMute() {
         if (!sink) return
         sink.audio.muted = !sink.audio.muted
-        ShellState.flashPage("volume")
+        root._flash()
     }
 
     function setPercent(pct) {
         _setVolume(pct)
-        // deliberately no flashPage here — called from slider drags,
+        // deliberately no flash here — called from slider drags,
         // which should stay on the control page
     }
 
-    // ---- Per-app helpers (no flashPage: driven from the subview) ----
+    // ---- Per-app helpers (no flash: driven from the subview) ----
     function appName(node) {
         if (!node) return ""
         const p = node.properties

@@ -4,6 +4,8 @@ singleton AppLauncherService 1.0 AppLauncherService.qml
 singleton CalculatorService 1.0 CalculatorService.qml
 LauncherSettings 1.0 LauncherSettings.qml
 LauncherAdvancedSettings 1.0 LauncherAdvancedSettings.qml
+AliasesPinnedSettings 1.0 AliasesPinnedSettings.qml
+SearchEnginesSettings 1.0 SearchEnginesSettings.qml
 singleton LauncherData 1.0 LauncherData.qml
 singleton LauncherSearch 1.0 LauncherSearch.qml
 singleton LauncherState 1.0 LauncherState.qml

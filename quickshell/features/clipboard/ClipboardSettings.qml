@@ -1,4 +1,4 @@
-// pages/launcher/ClipboardSettings.qml — Launcher > Clipboard.
+// features/clipboard/ClipboardSettings.qml — Launcher > Clipboard.
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -38,7 +38,8 @@ PageScroll {
     GroupCard {
         SliderRow {
             label: "Width"
-            from: 300; to: 800; stepSize: 10
+            description: "How wide the clipboard is when it opens"
+            from: 300; to: 1000; stepSize: 10
             value: ShellState.clipboardWidth
             unit: " px"
             onMoved: (val) => ShellState.clipboardWidth = val

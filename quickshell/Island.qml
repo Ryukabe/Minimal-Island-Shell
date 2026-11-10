@@ -66,9 +66,11 @@ PanelWindow {
         ShellState.activePage === "timer"
     ) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    anchors { top: true }
-    implicitHeight: 600
-    implicitWidth: 1200
+    // The window covers the whole screen, so the island has all of it to play with (bigger panels, and a
+    // full-width Bar style later). It is anchored to the left, right and top edges, and its height is the
+    // screen's. Only the island, the click catcher and the hover zone take input (see the mask below).
+    anchors { top: true; left: true; right: true }
+    implicitHeight: window.screen ? window.screen.height : 780
     color: "transparent"
 
     exclusionMode: ExclusionMode.Normal
@@ -417,11 +419,13 @@ PanelWindow {
         readonly property int compactWidth: ShellState.islandCompactWidth
 
         // Pages that size themselves from their own content, so the minimum expanded size does not apply:
-        // the Detailed and Interactive notification popups, and the hover panel.
+        // the Detailed and Interactive notification popups, the hover panel, the launcher and the clipboard.
         readonly property bool sizesItself: ShellState.activePage === "hover"
             || ShellState.activePage === "launcher"
+            || ShellState.activePage === "clipboard"
+            || ShellState.activePage === "control"
             || (ShellState.activePage === "notification" && ShellState.notificationPopupStyle !== "Compact")
-
+    
         // ---------- 7a. Size ----------
         // The size the current page wants.
         property int targetWidth: {

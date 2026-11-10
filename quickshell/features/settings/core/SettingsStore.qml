@@ -100,14 +100,41 @@ Item {
                 root._applyToShellState(root._defaults())
             }
             root._loaded = true
+            root._migrate()
+            root.settingsLoaded()
         }
 
         // First run: no file yet. Keep ShellState's defaults and start saving.
         onLoadFailed: (error) => {
             root._applyToShellState(root._defaults())
             root._loaded = true
+            root._migrate()
+            root.settingsLoaded()
         }
     }
+
+    // One-time upgrades of saved values. settingsVersion remembers how far this file got, so each step runs once.
+    // The launcher's width is migrated in LauncherState (it also had a preset), so it is not listed here.
+    function _migrate() {
+        let v = ShellState.settingsVersion
+        const floor = ShellState.islandMinExpandedWidth
+
+        function keep(key) {
+            ShellState[key] = Math.round(Math.max(ShellState[key], floor) / 10) * 10
+        }
+
+        if (v < 1) {
+            keep("clipboardWidth")
+            v = 1
+        }
+
+        if (v < 2) {
+            keep("controlCenterWidth")
+            v = 2
+        }
+
+        ShellState.settingsVersion = v
+    }  
 
     Timer {
         id: saveTimer

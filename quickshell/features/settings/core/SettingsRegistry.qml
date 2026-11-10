@@ -89,17 +89,23 @@ QtObject {
                     source: "../launcher/LauncherSettings.qml",
                     views: [
                         { id: "searchtools", title: "Search tools", subtitle: "Calculator, web, files and quick pickers", icon: "bolt",
-                          tags: "calculator units web search commands files system emoji snippets notes trigger prefix",
+                          tags: "calculator units web search commands files system emoji snippets notes",
                           source: "../launcher/SearchToolsSettings.qml" },
+                        { id: "aliasespinned", title: "Aliases & pinned", subtitle: "Short names for apps and apps kept on top", icon: "push_pin",
+                          tags: "alias aliases shortcut word pinned pin apps first favourite empty search",
+                          source: "../launcher/AliasesPinnedSettings.qml" },
+                        { id: "searchengines", title: "Search engines", subtitle: "Keywords for web search", icon: "travel_explore",
+                          tags: "search engines web keyword google duckduckgo youtube github wikipedia default address url",
+                          source: "../launcher/SearchEnginesSettings.qml" },
                         { id: "clipboard", title: "Clipboard", subtitle: "History and panel size", icon: "content_paste",
                           tags: "clipboard history cliphist entries width rows",
                           source: "../clipboard/ClipboardSettings.qml" },
                         { id: "notessnippets", title: "Notes & snippets", subtitle: "Where they are saved", icon: "edit_note",
-                          tags: "quick notes snippets folder file json aliases pinned search engines storage",
+                          tags: "quick notes snippets folder file storage",
                           source: "../launcher/NotesSnippetsSettings.qml" },
                         { id: "advanced", title: "Advanced", subtitle: "Result limits, icon theme and trigger marks", icon: "build",
                           tags: "maximum results recent apps remember icon theme trigger mark emoji snippets notes character advanced",
-                          source: "../launcher/LauncherAdvancedSettings.qml" }  
+                          source: "../launcher/LauncherAdvancedSettings.qml" }
                     ]
                 },
                 { id: "controlcenter", title: "Control Center", subtitle: "Tiles and layout", icon: "widgets",

@@ -21,7 +21,7 @@ Singleton {
         maps: { name: "Google Maps",    url: "https://www.google.com/maps/search/%s" }
     })
 
-    // ---- hand-edited in launcher-data.json ----
+    // ---- editable from Settings > Launcher > Aliases & pinned and Search engines ----
     property var aliases: ({})
     property var pinned: []
     property var engines: defaultEngines
@@ -40,6 +40,10 @@ Singleton {
     onNotesFolderChanged: scheduleSave()
     onNotesModeChanged: scheduleSave()
     onSnippetsFolderChanged: scheduleSave()
+    onAliasesChanged: scheduleSave()
+    onPinnedChanged: scheduleSave()
+    onEnginesChanged: scheduleSave()
+    onDefaultEngineChanged: scheduleSave()
 
     FileView {
         id: file
@@ -193,6 +197,71 @@ Singleton {
         if (v.length === 0) return false
         snippetsFolder = v
         return true
+    }
+
+    // ---- aliases, pinned apps and search engines (Settings > Launcher) ----
+    function _cleanKey(raw) { return (raw || "").trim().toLowerCase() }
+
+    function setAlias(rawKey, target) {
+        var k = _cleanKey(rawKey)
+        if (!/^[a-z0-9._-]{1,16}$/.test(k) || !target) return false
+        var copy = {}
+        for (var a in aliases) copy[a] = aliases[a]
+        copy[k] = target
+        aliases = copy
+        return true
+    }
+
+    function removeAlias(key) {
+        var copy = {}
+        for (var a in aliases) if (a !== key) copy[a] = aliases[a]
+        aliases = copy
+    }
+
+    function addPinned(name) {
+        var n = (name || "").trim()
+        if (n === "" || pinned.some(p => p.toLowerCase() === n.toLowerCase())) return false
+        pinned = pinned.concat([n])
+        return true
+    }
+
+    function removePinned(name) {
+        pinned = pinned.filter(p => p !== name)
+    }
+
+    // Returns "" when the engine was added, or a sentence saying what is wrong.
+    function addEngine(rawKey, rawName, rawUrl) {
+        var k = _cleanKey(rawKey)
+        var name = (rawName || "").trim()
+        var url = (rawUrl || "").trim()
+        if (!/^[a-z]{1,12}$/.test(k)) return "The keyword is 1 to 12 letters, nothing else"
+        if (Object.prototype.hasOwnProperty.call(engines, k)) return "That keyword is already used"
+        if (!/^https?:\/\//i.test(url)) return "The address must start with http:// or https://"
+        if (url.indexOf("%s") < 0) return "The address needs %s where the search words go"
+        var copy = {}
+        for (var e in engines) copy[e] = engines[e]
+        copy[k] = { name: name !== "" ? name : k, url: url }
+        engines = copy
+        return ""
+    }
+
+    function removeEngine(key) {
+        var keys = Object.keys(engines)
+        if (keys.length <= 1 || keys.indexOf(key) < 0) return false
+        var copy = {}
+        for (var e in engines) if (e !== key) copy[e] = engines[e]
+        engines = copy
+        if (defaultEngine === key) defaultEngine = Object.keys(copy)[0]
+        return true
+    }
+
+    function setDefaultEngine(key) {
+        if (Object.prototype.hasOwnProperty.call(engines, key)) defaultEngine = key
+    }
+
+    function resetEngines() {
+        engines = JSON.parse(JSON.stringify(defaultEngines))
+        defaultEngine = "g"
     }
 
     function _dirOf(path) {

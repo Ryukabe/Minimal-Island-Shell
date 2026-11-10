@@ -121,6 +121,36 @@ PageScroll {
         }
     }
 
+    SectionLabel { text: "Icons" }
+
+    GroupCard {
+        PickerRow {
+            label: "Icon theme"
+            description: "Icon set used for apps in the shell"
+            pickerTitle: "Icon Theme"
+            searchHint: "Search icon themes..."
+            hint: "System default"
+            items: IconThemeService.pickerItems
+            value: ShellState.appIconTheme
+            strict: true
+            showDivider: false
+            onCommitted: (v) => ShellState.appIconTheme = v
+        }
+    }
+
+    SectionLabel { text: "Spacing" }
+
+    GroupCard {
+        SegmentRow {
+            label: "Interface spacing"
+            description: "How much room there is around and between things in the shell"
+            options: ["Compact", "Default", "Roomy"]
+            selectedValue: ShellState.uiDensity
+            onOptionSelected: (name) => ShellState.uiDensity = name
+            showDivider: false
+        }
+    }    
+
     SectionLabel { text: "More appearance settings" }
 
     ViewList { excludeIds: ["theme"] }
