@@ -1,4 +1,4 @@
-// features/launcher/AppLauncher.qml — the launcher page. The island animates this page's size; inside it,
+\// features/launcher/AppLauncher.qml — the launcher page. The island animates this page's size; inside it,
 // everything uses the island's curves: OutBack for things that appear, OutCubic for small moves and fades.
 pragma ComponentBehavior: Bound
 

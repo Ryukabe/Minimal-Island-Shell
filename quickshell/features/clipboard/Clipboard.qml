@@ -1,4 +1,5 @@
-// features/clipboard/Clipboard.qml
+// features/clipboard/Clipboard.qml — the clipboard history page. The island animates this page's size; inside it,
+// everything uses the island's curves: OutBack for things that appear, OutCubic for small moves and fades.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -6,6 +7,7 @@ import Quickshell
 import "."
 import "../../core/shell"
 import "../../core/styles"
+import "../launcher"
 
 Item {
     id: root
@@ -21,6 +23,13 @@ Item {
     property var historyItems: ClipboardService.filteredHistory
     property int selectedIndex: 0
     property real now: Date.now()
+
+    // True for a moment after the panel opens: rows then wait for the island's content delay and stagger in.
+    property bool opening: true
+    // True for a moment after typing in the search box: rows are rebuilt and only fade.
+    property bool typing: false
+    // Rows animate in only for those two. A pin, delete or new copy rebuilds the list without replaying it.
+    readonly property bool entering: root.opening || root.typing
 
     implicitWidth: maxWidth
     implicitHeight: Math.min(
@@ -39,6 +48,11 @@ Item {
         var d = Math.floor(h / 24)
         if (d < 7) return d + "d ago"
         return Qt.formatDate(new Date(ms), "d MMM")
+    }
+
+    // Nothing while typing, the island's content delay plus a short stagger when the panel opens.
+    function enterDelay(index) {
+        return root.opening ? Motion.contentDelayMs + Math.min(index, 6) * 22 : 0
     }
 
     function selectId(id) {
@@ -65,6 +79,15 @@ Item {
         selectedIndex = Math.max(0, Math.min(selectedIndex, n - 1))
     }
 
+    // Delete the selected row: it slides out first, then the item is deleted.
+    function removeSelected() {
+        var list = ClipboardService.filteredHistory
+        if (list.length === 0) return
+        var row = clipList.itemAtIndex(root.selectedIndex)
+        if (row) row.startRemove()
+        else root.deleteItem(list[root.selectedIndex])
+    }
+
     function pasteItem(item) {
         if (!item) return
         ClipboardService.selectAndPaste(item.id)
@@ -76,6 +99,20 @@ Item {
         interval: 50
         repeat: false
         onTriggered: searchInput.forceActiveFocus()
+    }
+
+    Timer {
+        id: openTimer
+        interval: 700
+        repeat: false
+        onTriggered: root.opening = false
+    }
+
+    Timer {
+        id: typingTimer
+        interval: 400
+        repeat: false
+        onTriggered: root.typing = false
     }
 
     // keeps "5m ago" labels fresh while the panel is open
@@ -93,6 +130,8 @@ Item {
                 searchInput.text = ClipboardService.searchQuery
                 root.selectedIndex = 0
                 root.now = Date.now()
+                root.opening = true
+                openTimer.restart()
                 focusTimer.restart()
             }
         }
@@ -100,6 +139,7 @@ Item {
 
     Component.onCompleted: {
         focusTimer.restart()
+        openTimer.restart()
     }
 
     ColumnLayout {
@@ -121,11 +161,43 @@ Item {
                 spacing: 8
 
                 Text {
-                    text: "content_paste"
+                    id: headerGlyph
+                    text: searchInput.text.length > 0 ? "search" : "content_paste"
                     font.family: Fonts.icon
                     font.pixelSize: Dimens.fontSizeMd
                     font.variableAxes: Fonts.iconAxes
-                    color: Colors.fgMuted
+                    color: searchInput.text.length > 0 ? Colors.accent : Colors.fgMuted
+
+                    property bool ready: false
+                    Component.onCompleted: headerGlyph.ready = true
+
+                    Behavior on color {
+                        ColorAnimation { duration: ShellState.motionDuration(Motion.fadeMs) }
+                    }
+
+                    // The icon pops in when it changes, with the island's OutBack curve.
+                    onTextChanged: if (headerGlyph.ready && !ShellState.motionReduced) glyphPop.restart()
+
+                    ParallelAnimation {
+                        id: glyphPop
+                        NumberAnimation {
+                            target: headerGlyph
+                            property: "scale"
+                            from: 0.6
+                            to: 1.0
+                            duration: ShellState.motionDuration(Motion.glideMs * 0.6)
+                            easing.type: Easing.OutBack
+                            easing.overshoot: ShellState.motionIslandOvershoot() * 1.5
+                        }
+                        NumberAnimation {
+                            target: headerGlyph
+                            property: "opacity"
+                            from: 0.3
+                            to: 1.0
+                            duration: ShellState.motionDuration(Motion.fadeMs)
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
 
                 TextInput {
@@ -147,6 +219,8 @@ Item {
                     onTextChanged: {
                         ClipboardService.searchQuery = text
                         root.selectedIndex = 0
+                        root.typing = true
+                        typingTimer.restart()
                     }
 
                     Keys.onPressed: (event) => {
@@ -171,7 +245,7 @@ Item {
                             if (list.length > 0) root.pinItem(list[root.selectedIndex])
                             event.accepted = true
                         } else if (ctrl && event.key === Qt.Key_D) {
-                            if (list.length > 0) root.deleteItem(list[root.selectedIndex])
+                            root.removeSelected()
                             event.accepted = true
                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                             if (list.length > 0) root.pasteItem(list[root.selectedIndex])
@@ -180,13 +254,21 @@ Item {
                     }
                 }
 
-                // Clear History Button (keeps pinned items)
+                // Clear History Button (keeps pinned items). It fades in and out.
                 Rectangle {
                     width: 24
                     height: 24
                     radius: ShellState.islandCornerRadius
                     color: "transparent"
-                    visible: ClipboardService.history.length > 0
+                    opacity: ClipboardService.history.length > 0 ? 1 : 0
+                    visible: opacity > 0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: ShellState.motionDuration(Motion.fadeMs)
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
                     Text {
                         anchors.centerIn: parent
@@ -218,6 +300,39 @@ Item {
             // build every delegate up front (max ~100) so contentHeight, and so the panel height, is exact
             cacheBuffer: 4000
 
+            // One highlight that glides to the selected row, drawn behind the rows. It keeps its last place
+            // while the list is rebuilt, so a pin or a new copy does not make it slide in from the top.
+            highlightFollowsCurrentItem: false
+            highlight: Rectangle {
+                id: hl
+                property real lastY: 0
+                property real lastH: 0
+                readonly property real wantY: clipList.currentItem ? clipList.currentItem.y : hl.lastY
+                readonly property real wantH: clipList.currentItem ? clipList.currentItem.height : hl.lastH
+                onWantYChanged: hl.lastY = hl.wantY
+                onWantHChanged: hl.lastH = hl.wantH
+
+                visible: clipList.count > 0
+                radius: ShellState.islandCornerRadius
+                color: Colors.subBgMica
+                width: clipList.width
+                y: hl.wantY
+                height: hl.wantH
+
+                Behavior on y {
+                    NumberAnimation {
+                        duration: ShellState.motionDuration(Motion.hoverMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
+                Behavior on height {
+                    NumberAnimation {
+                        duration: ShellState.motionDuration(Motion.hoverMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
+            }
+
             delegate: Rectangle {
                 id: itemDelegate
                 required property var modelData
@@ -228,7 +343,48 @@ Item {
                 width: clipList.width
                 height: rowContent.implicitHeight + 2 * root.rowPadding
                 radius: ShellState.islandCornerRadius
-                color: active ? Colors.subBgMica : "transparent"
+                color: "transparent"
+
+                // Entrance: fade and rise a little, only while the panel opens or you type.
+                readonly property bool fadeEnabled: LauncherState.animateResults && !ShellState.motionReduced
+                property real enter: (itemDelegate.fadeEnabled && root.entering) ? 0 : 1
+                // Delete: slide out to the right and fade, then the item is deleted.
+                property real leave: 0
+                opacity: itemDelegate.enter * (1 - itemDelegate.leave)
+                transform: Translate {
+                    x: itemDelegate.leave * 24
+                    y: (1 - itemDelegate.enter) * 5
+                }
+
+                SequentialAnimation {
+                    id: enterAnim
+                    PauseAnimation { duration: ShellState.motionDuration(root.enterDelay(itemDelegate.index)) }
+                    NumberAnimation {
+                        target: itemDelegate
+                        property: "enter"
+                        to: 1
+                        duration: ShellState.motionDuration(Motion.fadeMs)
+                        easing.type: Easing.OutCubic
+                    }
+                }
+                Component.onCompleted: if (itemDelegate.enter < 1) enterAnim.start()
+
+                SequentialAnimation {
+                    id: removeAnim
+                    NumberAnimation {
+                        target: itemDelegate
+                        property: "leave"
+                        to: 1
+                        duration: ShellState.motionDuration(Motion.fadeMs)
+                        easing.type: Easing.OutCubic
+                    }
+                    ScriptAction { script: root.deleteItem(itemDelegate.modelData) }
+                }
+
+                function startRemove() {
+                    if (itemDelegate.fadeEnabled) removeAnim.start()
+                    else root.deleteItem(itemDelegate.modelData)
+                }
 
                 // declared first so the action buttons below sit on top of it
                 MouseArea {
@@ -276,6 +432,15 @@ Item {
                             clip: true
                             sourceSize.width: root.thumbSize * 2
                             sourceSize.height: root.thumbSize * 2
+
+                            // The thumbnail fades in when it has loaded.
+                            opacity: thumb.status === Image.Ready ? 1 : 0
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: ShellState.motionDuration(Motion.fadeMs)
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
                         }
                     }
 
@@ -347,6 +512,13 @@ Item {
                                 opacity: (itemDelegate.active || itemDelegate.modelData.pinned) ? 1 : 0
                                 enabled: opacity > 0
 
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: ShellState.motionDuration(Motion.fadeMs * 0.6)
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
                                 Text {
                                     anchors.centerIn: parent
                                     text: "push_pin"
@@ -370,6 +542,13 @@ Item {
                                 opacity: itemDelegate.active ? 1 : 0
                                 enabled: opacity > 0
 
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: ShellState.motionDuration(Motion.fadeMs * 0.6)
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
                                 Text {
                                     anchors.centerIn: parent
                                     text: "delete"
@@ -382,7 +561,7 @@ Item {
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: root.deleteItem(itemDelegate.modelData)
+                                    onClicked: itemDelegate.startRemove()
                                 }
                             }
                         }
@@ -397,7 +576,15 @@ Item {
             color: Colors.fgMuted
             font.family: Fonts.text
             font.pixelSize: Dimens.fontSizeMd
-            visible: ClipboardService.filteredHistory.length === 0
+            opacity: ClipboardService.filteredHistory.length === 0 ? 1 : 0
+            visible: opacity > 0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.fadeMs)
+                    easing.type: Easing.OutCubic
+                }
+            }
         }
     }
 }

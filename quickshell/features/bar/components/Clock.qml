@@ -12,8 +12,14 @@ import "../../../core/styles"
 Item {
     id: root
 
-    implicitWidth: Math.max(140, layout.implicitWidth + 32)
-    implicitHeight: Math.max(36, layout.implicitHeight + 8)
+    // In Bar style the items sit in three zones from edge to edge (the bar gives this page its full
+    // width). In Island and Notch style they all sit in one centred row.
+    readonly property bool zoned: ShellState.islandStyle === "Bar"
+
+    implicitWidth: root.zoned ? 0 : Math.max(140, allZone.implicitWidth + 32)
+    implicitHeight: Math.max(36, (root.zoned
+        ? Math.max(leftZone.implicitHeight, centerZone.implicitHeight, rightZone.implicitHeight)
+        : allZone.implicitHeight) + 8)
 
     // Only ticks every second while the user has "Show Seconds" on.
     SystemClock {
@@ -93,25 +99,54 @@ Item {
         }
     }
 
-    RowLayout {
-        id: layout
+    // ---------------- rows ----------------
+    // Order and presence come from ClockLayoutService (Settings > Bar > Layout); the zone each item sits
+    // in comes from ShellState.clockItemZones. An item that is not in the layout is never created.
+
+    // Island and Notch style: one centred row with every item.
+    ClockZone {
+        id: allZone
+        zone: "all"
+        zoneActive: !root.zoned
+        visible: !root.zoned
+        itemShown: root.itemShown
+        componentFor: root.componentFor
         anchors.centerIn: parent
-        spacing: 14
+    }
 
-        // Order and presence come from ClockLayoutService (Settings > Bar & Island > Layout).
-        // An item that is not in that list is never created.
-        Repeater {
-            model: ClockLayoutService.layoutModel
+    // Bar style: three zones.
+    ClockZone {
+        id: leftZone
+        zone: "left"
+        zoneActive: root.zoned
+        visible: root.zoned
+        itemShown: root.itemShown
+        componentFor: root.componentFor
+        anchors.left: parent.left
+        anchors.leftMargin: 16
+        anchors.verticalCenter: parent.verticalCenter
+    }
 
-            delegate: Loader {
-                id: slot
-                required property string itemId
+    ClockZone {
+        id: centerZone
+        zone: "center"
+        zoneActive: root.zoned
+        visible: root.zoned
+        itemShown: root.itemShown
+        componentFor: root.componentFor
+        anchors.centerIn: parent
+    }
 
-                Layout.alignment: Qt.AlignVCenter
-                visible: root.itemShown(slot.itemId)
-                sourceComponent: root.componentFor(slot.itemId)
-            }
-        }
+    ClockZone {
+        id: rightZone
+        zone: "right"
+        zoneActive: root.zoned
+        visible: root.zoned
+        itemShown: root.itemShown
+        componentFor: root.componentFor
+        anchors.right: parent.right
+        anchors.rightMargin: 16
+        anchors.verticalCenter: parent.verticalCenter
     }
 
     // ---------------- item types ----------------
@@ -121,7 +156,7 @@ Item {
         Workspaces {}
     }
 
-    // Looks: Settings > Bar & Island > Music visualizer.
+    // Looks: Settings > Bar > Visualizer.
     Component {
         id: visualizerItem
 

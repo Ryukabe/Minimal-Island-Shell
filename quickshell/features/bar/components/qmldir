@@ -15,3 +15,5 @@ IslandShape 1.0 IslandShape.qml
 FlipHalf 1.0 FlipHalf.qml
 FlipDigit 1.0 FlipDigit.qml
 ClockTimeText 1.0 ClockTimeText.qml
+PanelCard 1.0 PanelCard.qml
+ClockZone 1.0 ClockZone.qml

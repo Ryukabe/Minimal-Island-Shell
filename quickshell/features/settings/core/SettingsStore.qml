@@ -26,7 +26,7 @@ Item {
     // button reset just its own keys instead of nuking Motion/Clock/Typography too.
     readonly property var barKeys: [
         "islandTopMargin", "islandCornerRadius", "islandBorderWidth",
-        "islandClickOutsideDismiss", "islandNotchMode", "islandNotchFlare",
+        "islandClickOutsideDismiss", "islandStyle", "islandNotchFlare",
         "islandHoverScale", "radiusUniversal", "customRadiusCard",
         "customRadiusControl", "customRadiusChip", "customRadiusWindow",
         "islandCompactHeight", "islandCompactWidth",
@@ -42,6 +42,9 @@ Item {
     ]
 
     function _applyToShellState(obj) {
+        // One-time migration: the old on/off key islandNotchMode became the three-way islandStyle.
+        if (obj.islandStyle === undefined && obj.islandNotchMode === true)
+            obj = Object.assign({}, obj, { islandStyle: "Notch" })
         root._applying = true
         const defaults = root._defaults()
         for (let key in defaults) {

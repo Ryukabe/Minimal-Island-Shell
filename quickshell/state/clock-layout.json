@@ -3,10 +3,9 @@
   "items": [
     "workspaces",
     "time",
-    "date",
+    "visualizer",
     "recording",
     "privacy",
-    "timer",
-    "visualizer"
+    "timer"
   ]
 }

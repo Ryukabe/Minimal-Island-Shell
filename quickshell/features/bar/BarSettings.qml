@@ -16,7 +16,7 @@ PageScroll {
     id: root
 
     // Single source of truth stays ShellState.islandNotchMode (bool); this is only its label.
-    readonly property string barStyle: ShellState.islandNotchMode ? "Notch" : "Island"
+    readonly property string barStyle: ShellState.islandStyle
     readonly property var unplaced: ClockLayoutService.unplacedTypes()
 
     // Every ShellState key in the Bar menu, sub-pages included (used by the Reset row at the bottom).
@@ -29,7 +29,7 @@ PageScroll {
         "islandClickOutsideDismiss", "islandScrollVolume", "islandScrollBrightness",
         "clockUse24Hour", "clockShowSeconds", "clockLeadingZero", "clockLowercaseAmPm", "clockDateStyle",
         "clockVisualizerBars", "clockVisualizerBarWidth", "clockVisualizerGap",
-        "clockVisualizerMaxHeight", "clockVisualizerSpeedPercent", "clockVisualizerColor",
+        "clockVisualizerMaxHeight", "clockVisualizerSpeedPercent", "clockVisualizerColor","clockItemZones",
         "workspaceShownCount", "workspaceActiveIndicator", "workspaceUseAccent", "workspaceActiveTrail",
         "workspaceOccupiedBackground", "workspaceBounce", "workspaceDotSize", "workspaceActiveWidth",
         "workspaceShowWindows", "workspaceWindowsOnSpecial", "workspaceMaxWindowIcons", "workspacePerMonitor",
@@ -95,16 +95,16 @@ PageScroll {
     GroupCard {
         SegmentRow {
             label: "Bar style"
-            description: root.barStyle === "Notch"
-                ? "Attached to the top edge like a display notch"
+            description: root.barStyle === "Notch" ? "Attached to the top edge like a display notch"
+                : root.barStyle === "Bar" ? "A full-width bar. Panels drop down below it"
                 : "A floating island with a gap above it"
-            options: ["Island", "Notch"]
+            options: ["Island", "Notch", "Bar"]
             selectedValue: root.barStyle
-            onOptionSelected: (name) => ShellState.islandNotchMode = (name === "Notch")
+            onOptionSelected: (name) => ShellState.islandStyle = name
         }
 
         Reveal {
-            shown: root.barStyle === "Island"
+            shown: root.barStyle !== "Notch"
 
             SliderRow {
                 label: "Border width"
@@ -155,7 +155,8 @@ PageScroll {
 
         SliderRow {
             label: "Collapsed width"
-            description: "How wide the island is when nothing is open"
+            description: "How wide the island is when nothing is open. Not used in Bar style, where the bar spans the screen"
+            enabled: root.barStyle !== "Bar"
             from: 80; to: 300; stepSize: 1
             value: ShellState.islandCompactWidth
             unit: " px"
@@ -461,6 +462,27 @@ PageScroll {
         GroupCard {
             InfoRow {
                 label: ClockLayoutService.typeDescriptions[strip.selectedId] || ""
+                showDivider: false
+            }
+        }
+    }
+
+    // Bar style: which zone the selected item sits in.
+    Reveal {
+        shown: root.barStyle === "Bar" && strip.selectedId !== ""
+
+        SectionLabel { text: "Zone" }
+
+        GroupCard {
+            SegmentRow {
+                label: ClockLayoutService.typeDisplayNames[strip.selectedId] || ""
+                description: "Where this item sits on the bar. Items in the same zone keep the order shown above"
+                options: ["Left", "Center", "Right"]
+                selectedValue: {
+                    const zone = ShellState.clockZoneOf(strip.selectedId)
+                    return zone.charAt(0).toUpperCase() + zone.slice(1)
+                }
+                onOptionSelected: (name) => ShellState.setClockZone(strip.selectedId, name.toLowerCase())
                 showDivider: false
             }
         }

@@ -5,8 +5,9 @@ local mainMod = require("modules.binds.mainmod")
 -- System reload script
 hl.bind(mainMod .. " + CTRL + ALT + RETURN", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/system_reload.sh"))
 
--- Hyprland reload
+-- Reload & Run
 hl.bind("SUPER + SHIFT + R",             hl.dsp.exec_cmd("hyprctl reload"))
+hl.bind("SUPER + K",                     hl.dsp.exec_cmd("$HOME/kuumo-shell/kuumo-shell.sh stop | $HOME/kuumo-shell/kuumo-shell.sh start"))
 
 -- Shell switching (toggle Quickshell / toggle AGS)
 hl.bind("SUPER + CTRL + ALT + Q",            hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/switch-shell.sh qs"))
@@ -84,3 +85,8 @@ hl.bind(mainMod .. " + SHIFT + Print",       hl.dsp.exec_cmd("hyprshot -m region
 
 -- Color picker
 hl.bind(mainMod .. " + P",                   hl.dsp.exec_cmd("hyprpicker -a -f hex"))
+
+--- Quickshell (Kuumo Shell) ---
+
+-- island
+hl.bind(mainMod .. " + ALT + E",              hl.dsp.exec_cmd("qs -p ~/kuumo-shell ipc call island toggle"))

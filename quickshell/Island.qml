@@ -620,6 +620,8 @@ PanelWindow {
             // While the island grows downwards, half of the extra height goes above the content, so it stays centred.
             anchors.topMargin: island.extraHeight / 2
             anchors.horizontalCenter: parent.horizontalCenter
+            // In Bar style the idle page fills the bar, so it can lay its zones out from edge to edge.
+            width: window.barStyle ? island.width : implicitWidth
             // The content grows with the island, by half as much, so the magnify reads as one effect.
             scale: 1 + island.magnifyProgress * (ShellState.islandMagnifyWidth / Math.max(1, island.animWidth)) * 0.5
             opacity: 1.0

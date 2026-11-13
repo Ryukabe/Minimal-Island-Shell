@@ -17,7 +17,7 @@ QtObject {
         islandCornerRadius: 12,
         islandBorderWidth: 0,
         islandClickOutsideDismiss: true,
-        islandNotchMode: false,
+        islandStyle: "Island",
         islandNotchFlare: 14,
         //islandHoverScale: 1.02,
         // island magnify on hover
@@ -119,6 +119,16 @@ QtObject {
         clockAnimation: "Flip",
         clockFlipMs: 420,
         clockFlipCards: true,
+        // Bar style: which zone ("left" | "center" | "right") each clock item sits in. Unlisted items sit in the center.
+        clockItemZones: ({
+            workspaces: "left",
+            date: "center",
+            time: "center",
+            visualizer: "right",
+            timer: "right",
+            privacy: "right",
+            recording: "right"
+        }),
         timerToastShowRecordingIndicator: true,
         // workspaces
         workspaceShownCount: 5,
@@ -383,8 +393,12 @@ QtObject {
     property real islandCornerRadius: root.defaults.islandCornerRadius
     property real islandBorderWidth: root.defaults.islandBorderWidth
     property bool islandClickOutsideDismiss: root.defaults.islandClickOutsideDismiss
-    property bool islandNotchMode: root.defaults.islandNotchMode
     property real islandNotchFlare: root.defaults.islandNotchFlare
+
+    property string islandStyle: root.defaults.islandStyle   // "Island" | "Notch" | "Bar"
+    // Kept so code that only reads it keeps working. Anything that changes the style sets islandStyle.
+    readonly property bool islandNotchMode: islandStyle === "Notch"
+    
     //property real islandHoverScale: root.defaults.islandHoverScale
 
     // Magnify on hover: the island grows wider and a bit taller (downwards) and moves down a little.
@@ -495,6 +509,7 @@ QtObject {
     property string clockAnimation: root.defaults.clockAnimation   // "None" | "Flip"
     property int clockFlipMs: root.defaults.clockFlipMs
     property bool clockFlipCards: root.defaults.clockFlipCards
+    property var clockItemZones: root.defaults.clockItemZones   // always reassign (never mutate) so change signals fire
 
     // 12-hour mode always includes an AM/PM token, which is what makes h/hh
     // render as 1-12 instead of 0-23.
@@ -588,6 +603,17 @@ QtObject {
     // 40 % (the default) gives 1.2, about 5 % past the target.
     function motionIslandOvershoot() {
         return root.motionReduced ? 0 : root.motionIslandBouncePercent * 0.03
+    }
+    
+    // ---- Clock zones (Bar style) ----
+    function clockZoneOf(type) {
+        return root.clockItemZones[type] || "center"
+    }
+
+    function setClockZone(type, zone) {
+        const next = Object.assign({}, root.clockItemZones)
+        next[type] = zone
+        root.clockItemZones = next
     }
 
     // Generalized spring-stiffness mapping: shorter user-set duration (ms)

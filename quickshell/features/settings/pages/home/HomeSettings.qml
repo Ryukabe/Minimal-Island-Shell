@@ -12,7 +12,7 @@ import "../../../../core/shell"
 PageScroll {
     id: root
 
-    readonly property string barStyle: ShellState.islandNotchMode ? "Notch" : "Island"
+    readonly property string barStyle: ShellState.islandStyle
 
     readonly property var quickIds: ["appearance", "network", "display", "soundmedia", "keybinds", "about"]
     readonly property var quickMenus: root.quickIds
@@ -24,12 +24,12 @@ PageScroll {
     GroupCard {
         SegmentRow {
             label: "Bar style"
-            description: root.barStyle === "Notch"
-                ? "Attached to the top edge like a display notch"
+            description: root.barStyle === "Notch" ? "Attached to the top edge like a display notch"
+                : root.barStyle === "Bar" ? "A full-width bar. Panels drop down below it"
                 : "A floating island with a gap above it"
-            options: ["Island", "Notch"]
+            options: ["Island", "Notch", "Bar"]
             selectedValue: root.barStyle
-            onOptionSelected: (name) => ShellState.islandNotchMode = (name === "Notch")
+            onOptionSelected: (name) => ShellState.islandStyle = name
         }
 
         ToggleRow {
